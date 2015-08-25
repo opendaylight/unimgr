@@ -1,0 +1,35 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <reference id="vcpeConsoleProvider" availability="mandatory"
+        activation="eager" interface="org.opendaylight.vcpe.api.IVcpeConsoleProvider">
+    </reference>
+
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+        <command>
+            <action class="org.opendaylight.vcpe.cli.UniAddShellCommand">
+                <argument ref="vcpeConsoleProvider" />
+            </action>
+        </command>
+        <command>
+            <action class="org.opendaylight.vcpe.cli.UniRemoveShellCommand">
+                 <argument ref="vcpeConsoleProvider" />
+            </action>
+        </command>
+        <command>
+            <action class="org.opendaylight.vcpe.cli.UniListShellCommand">
+                 <argument ref="vcpeConsoleProvider" />
+            </action>
+        </command>
+        <command>
+            <action class="org.opendaylight.vcpe.cli.UniShowShellCommand" >
+                <argument ref="vcpeConsoleProvider" />
+            </action>
+        </command>
+        <command>
+            <action class="org.opendaylight.vcpe.cli.EvcRemoveShellCommand">
+                 <argument ref="vcpeConsoleProvider" />
+            </action>
+        </command>
+    </command-bundle>
+
+</blueprint>
