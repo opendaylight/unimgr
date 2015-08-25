@@ -1,0 +1,248 @@
+= Cable Labs VCPE
+
+== Information
+This document is geared towards documenting the VCPE project.
+
+== Content
+- Deployment Guide: How to install ODL with the plug-in
+- API Endpoint
+
+== Deployment guide
+=== Prerequisites:
+- Maven >= 3.1.1
+- Java JDK 1.7
+
+=== Steps:
+1. git clone https://git.opendaylight.org/gerrit/odlparent
+2. cd odlparent
+3. git checkout stable/lithium
+4. mvn clean install
+5. cd ..
+6. git clone https://git.opendaylight.org/gerrit/yangtools
+7. cd yangtools
+8. git checkout stable/lithium
+9. mvn clean install
+10. cd ..
+11. git clone git clone https://git.opendaylight.org/gerrit/controller
+12. git checkout stable/lithium
+13. cd controller
+14. mvn clean install
+15. cd ..
+16. git clone cable-labs-vcpe
+17. cd cable-labs-vcpe
+18. mvn clean install -DskipTests
+19. cd karaf/target
+20. tar xf vcpe-karaf-0.0.1-SNAPSHOT.tar.gz **or** unzip vcpe-karaf-0.0.1-SNAPSHOT.zip (windows)
+21. ./vcpe-karaf-0.0.1-SNAPSHOT/bin/karaf
+22. That should bring up the controller CLI, let it load for 1 minute, then the Postman collection can be used to create the UNIs/EVC 
+
+=== Usage
+Couple of points to keep in mind:
+
+- When creating a UNI, it is important to specify if the OpenVSwitch instance is running in TCP or PTCP mode.
+- The uni:id *must* always be unique for UNIs and EVCs. It was designed to be flexible and can be a UUID or something human readable, as long as it's unique.
+- The uni mac-address is the address of the OVS instance.
+- The mac address is the physical port of the OVS instance.
+- In these examples, the OVS instance is running in PTCP mode so we do not have to specify the UUID of the OVSDB node. However, when it is in TCP mode, it *must* be specified, like so:
+
+----
+{
+    "uni": {
+      "uni:id": "822f7eec-2b35-11e5-b345-feff819cdc9f",
+        "speed": {
+            "speed-1G": 1
+        },
+        "uni:ovsdb-node-id": "7978e1d5-31f9-4853-b6f9-2ea8eb3170a4",
+        "uni:mac-layer": "IEEE 802.3-2005",
+        "uni:physical-medium": "UNI TypeFull Duplex 2 Physical Interface",
+        "uni:mtu-size": 0,
+        "uni:type": "",
+        "uni:mac-address": "08:00:27:35:64:90",
+        "uni:ip-address": "192.168.1.30",
+        "uni:mode": "Full Duplex"
+    }
+}
+----
+
+==== Create UNI 1
+Using the Postman collection, create the first UNI:
+PUT
+----
+http://localhost:8080/restconf/config/cl-vcpe-mef:unis/uni/822f7eec-2b35-11e5-b345-feff819cdc9f/
+----
+Payload
+----
+{
+    "uni": {
+      "uni:id": "822f7eec-2b35-11e5-b345-feff819cdc9f",
+        "speed": {
+            "speed-1G": 1
+        },
+        "uni:mac-layer": "IEEE 802.3-2005",
+        "uni:physical-medium": "UNI TypeFull Duplex 2 Physical Interface",
+        "uni:mtu-size": 0,
+        "uni:type": "",
+        "uni:mac-address": "08:00:27:35:64:90",
+        "uni:ip-address": "192.168.1.30",
+        "uni:mode": "Full Duplex"
+    }
+}
+----
+==== Create UNI 2
+Using the Postman collection, create the second UNI:
+PUT
+----
+http://localhost:8080/restconf/config/cl-vcpe-mef:unis/uni/111f7eec-2c35-11e5-b345-feff819cdc9f/
+----
+Payload
+----
+{
+    "uni": {
+      "uni:id": "111f7eec-2c35-11e5-b345-feff819cdc9f",
+        "speed": {
+            "speed-1G": 1
+        },
+        "uni:mac-layer": "IEEE 802.3-2005",
+        "uni:physical-medium": "UNI TypeFull Duplex 2 Physical Interface",
+        "uni:mtu-size": 0,
+        "uni:type": "",
+        "uni:mac-address": "08:00:27:35:64:90",
+        "uni:ip-address": "192.168.1.30",
+        "uni:mode": "Full Duplex"
+    }
+}
+----
+==== Create EVC
+Using the Postman collection, create the first EVC:
+PUT
+----
+http://localhost:8181/restconf/config/cl-vcpe-mef:evcs/evc/822f8284-2b35-11e5-b345-feff819cdc9f
+----
+Payload
+----
+{
+    "evc": {
+      "evc:id": "822f8284-2b35-11e5-b345-feff819cdc9f",
+      "evc:uni-dest": [
+            {
+                "order": 0,
+                "uni": "822f7eec-2b35-11e5-b345-feff819cdc9f"
+            }
+        ],
+      "evc:uni-source": [
+            {
+                "order": 0,
+                "uni": "111f7eec-2c35-11e5-b345-feff819cdc9f"
+            }
+        ],
+      "evc:cos-id": "string",
+      "evc:ingress-bw": {
+            "speed-1G": {}
+        },
+      "evc:egress-bw": {
+            "speed-1G": {}
+        }
+    }
+}
+----
+== APIs
+This section contains a table with the VCPE APIs. For the current demo, **only the GET UNI / EVC and PUT UNI / EVC are currently implemented**.
+
+Note: The UNI and EVC UUID can be anything since we modelled it to be used in a flexible manner. It *must* always be unique
+
+.Api
+[width="100%",frame="topbot",options="header"]
+|======================
+| Store Type |Endpoint | Type | Payload | Return Code | Sample Return | Description
+| Config | 'http://localhost:8181/restconf/config/cl-vcpe-mef:unis/' | GET | N/A | 200 | {
+    "unis": {
+        "uni": [
+            {
+                "id": "822f7eec-2b35-11e5-b345-feff819cdc9f",
+                "type": "",
+                "speed": {
+                    "speed-1G": [
+                        null
+                    ]
+                },
+                "ip-address": "192.168.1.30",
+                "physical-medium": "UNI TypeFull Duplex 2 Physical Interface",
+                "mode": "Full Duplex",
+                "mac-address": "08:00:27:35:64:90",
+                "mtu-size": 0,
+                "mac-layer": "IEEE 802.3-2005"
+            }
+        ]
+    }
+} | Get a list of Unis.
+| Config | 'http://localhost:8181/restconf/config/cl-vcpe-mef:unis/uni/\{UUID\}/' | PUT | {
+    "uni": {
+      "uni:id": "{UUID}",
+        "speed": {
+            "speed-1G": 1
+        },
+        "uni:mac-layer": "IEEE 802.3-2005",
+        "uni:physical-medium": "UNI TypeFull Duplex 2 Physical Interface",
+        "uni:mtu-size": 0,
+        "uni:type": "",
+        "uni:mac-address": "68:5b:35:bb:f8:3e",
+        "uni:ip-address": "192.168.0.22",
+        "uni:mode": "Full Duplex"
+    }
+} | 200 | N/A | Submit a new UNI
+| Config | 'http://localhost:8181/restconf/config/cl-vcpe-mef:unis/uni/\{UUID\}' | GET | N/A | 200 | {
+    "uni": [
+        {
+            "id": "822f7eec-2b35-11e5-b345-feff819cdc9f",
+            "type": "",
+            "speed": {
+                "speed-1G": [
+                    null
+                ]
+            },
+            "ip-address": "192.168.1.30",
+            "physical-medium": "UNI TypeFull Duplex 2 Physical Interface",
+            "mode": "Full Duplex",
+            "mac-address": "08:00:27:35:64:90",
+            "mtu-size": 0,
+            "mac-layer": "IEEE 802.3-2005"
+        }
+    ]
+} | Get a specific UNI by its UUID.
+| Config | 'http://localhost:8181/restconf/config/cl-vcpe-mef:unis/uni/\{UUID\}' | DELETE | N/A | 200 | N/A | Delete a specific UNI by its UUID.
+| Config | 'http://localhost:8181/restconf/config/cl-vcpe-mef:unis/uni/\{UUID\}/speed/' | GET | N/A | 200 | {
+    "speed": {
+        "speed-1G": [
+            null
+        ]
+    }
+} | Get a specific UNI speed by its UUID.
+| Config | 'http://localhost:8181/restconf/config/cl-vcpe-mef:unis/uni/\{UUID\}/speed/' | PUT | {
+    "speed": {
+        "speed-10G": [
+            1
+        ]
+    }
+} | 200 | N/A | Configure speed for a specific UNI by its UUID. The speed can also be specified in the creation of the UUID.
+| Config | 'http://localhost:8181/restconf/config/cl-vcpe-mef:single-operator-evc/' | GET | N/A | 200 |  | Get the single-operator EVC.
+| Config | 'http://localhost:8181/restconf/config/cl-vcpe-mef:evcs/evc/\{UUID\}' | DELETE | N/A | 200 |  | Delete an EVC by its UUID.
+| Config | 'http://localhost:8181/restconf/config/cl-vcpe-mef:evcs/evc/\{UUID\}/egress-bw/' | PUT | {
+    "egress-bw": {
+        "speed-1G": [
+            null
+        ]
+    }
+} | 200 |  | Add egress-bw to an EVC
+| Config | 'http://localhost:8181/restconf/config/cl-vcpe-mef:evcs/evc/\{UUID\}/egress-bw/' | GET | N/A | 200 |  | Get the agress-bw field from an EVC via its UUID.
+| Config | 'http://localhost:8181/restconf/config/cl-vcpe-mef:evcs/evc/\{UUID\}/egress-bw/' | DELETE | N/A | 200 |  | Delete egress-bw from EVC using the EVC UUID.
+| Config | 'http://localhost:8181/restconf/config/cl-vcpe-mef:evcs/evc/\{UUID\}/ingress-bw/' | PUT | {
+    "ingress-bw": {
+        "speed-1G": [
+            null
+        ]
+    }
+} | 200 |  | Set the ingress-bw of a specific EVC by its UUID.
+| Config | 'http://localhost:8181/restconf/config/cl-vcpe-mef:evcs/evc/\{UUID\}/ingress-bw/' | GET | N/A | 200 |  | Get a specific ingress-bw by the EVC UUID.
+| Config |'http://localhost:8181/restconf/config/cl-vcpe-mef:evcs/evc/\{UUID\}/ingress-bw/' | DELETE | N/A | 200 |  | Delete the ingress-bw from the EVC by specifying the EVC UUID.
+| Operational | 'http://localhost:8181/restconf/operational/cl-vcpe-mef:unis/' | GET | N/A | 200 |  | Get a list of UNIs within the Operational store.
+|======================
