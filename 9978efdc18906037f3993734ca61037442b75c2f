@@ -1,0 +1,471 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_046fb0c6",
+        "filename": "api/.gitignore",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "i believe this .gitignore can be removed",
+      "range": {
+        "startLine": 1,
+        "startChar": 7,
+        "endLine": 1,
+        "endChar": 8
+      },
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_24742c98",
+        "filename": "api/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "trailing space",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 2
+      },
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_8462e0d6",
+        "filename": "cli/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "remove trailing space",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 1
+      },
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_a45fdc0d",
+        "filename": "cli/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "likewise",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 2
+      },
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_449cc8c0",
+        "filename": "cli/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "likewise",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_4475a896",
+        "filename": "cli/src/main/java/org/opendaylight/vcpe/cli/EvcRemoveShellCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "this class is missing copyright",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_64a1c4f7",
+        "filename": "impl/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "remove trailing space",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_04a6d010",
+        "filename": "impl/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "likewise",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_c4af78e2",
+        "filename": "impl/src/main/config/maven-metadata-local.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "please remove this file and add it to .gitignore",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 38
+      },
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_e4acf4ef",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/command/AbstractCreateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "Copyright",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_84b98030",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/command/AbstractDeleteCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_44836856",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/command/AbstractUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_6488e471",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/command/Command.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_047d706e",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/command/EvcCreateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_2482ec4f",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/command/EvcDeleteCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_c4969894",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/command/EvcUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_e49394a1",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/command/TransactionInvoker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_8490a096",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/command/UniCreateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_a48d9c7d",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/command/UniDeleteCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_64ef841f",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/command/UniUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_24f98ce9",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/impl/EvcDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "what about this code?",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 108,
+        "endChar": 11
+      },
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_c4dd3872",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/impl/UniDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "likewise, do we need this?",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 168,
+        "endChar": 5
+      },
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_e4dab477",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/impl/VcpeConstants.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_44d12856",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/impl/VcpeDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_64d6a451",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/impl/VcpeUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T16:55:07Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "9978efdc18906037f3993734ca61037442b75c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
