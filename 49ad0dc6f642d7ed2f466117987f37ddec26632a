@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_c420d84b",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/command/EvcDeleteCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T17:28:25Z",
+      "side": 1,
+      "message": "do we still need that?",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 96
+      },
+      "revId": "49ad0dc6f642d7ed2f466117987f37ddec26632a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_e41dd410",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/impl/EvcDataChangeListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T17:28:25Z",
+      "side": 1,
+      "message": "can this be removed?",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 108,
+        "endChar": 11
+      },
+      "revId": "49ad0dc6f642d7ed2f466117987f37ddec26632a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_841ae015",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/impl/UniDataChangeListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T17:28:25Z",
+      "side": 1,
+      "message": "can this be removed?",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 142,
+        "endChar": 11
+      },
+      "revId": "49ad0dc6f642d7ed2f466117987f37ddec26632a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_a417dcec",
+        "filename": "impl/src/main/java/org/opendaylight/vcpe/impl/UniDataChangeListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T17:28:25Z",
+      "side": 1,
+      "message": "can this be removed?",
+      "range": {
+        "startLine": 147,
+        "startChar": 0,
+        "endLine": 167,
+        "endChar": 11
+      },
+      "revId": "49ad0dc6f642d7ed2f466117987f37ddec26632a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_24e3cc08",
+        "filename": "it/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-25T17:28:25Z",
+      "side": 1,
+      "message": "remove trailing space",
+      "range": {
+        "startLine": 70,
+        "startChar": 23,
+        "endLine": 70,
+        "endChar": 24
+      },
+      "revId": "49ad0dc6f642d7ed2f466117987f37ddec26632a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
