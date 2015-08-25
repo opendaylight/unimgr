@@ -54,9 +54,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </build>
 
   <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/vcpe.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/vcpe.git</developerConnection>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/unimgr.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/unimgr.git</developerConnection>
     <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/vcpe:Main</url>
+    <url>https://wiki.opendaylight.org/view/unimgr:Main</url>
   </scm>
 </project>
