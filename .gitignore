@@ -1,6 +1,30 @@
-# Maven
-target/
-
-# OpenDaylight
-yang-gen-sal/
-yang-gen-config/
+*.class
+**/target
+bin/
+dist
+**/logs
+products
+repository
+workspace
+*~
+target
+target-ide
+.classpath
+.project
+.settings
+MANIFEST.MF
+*.ipr
+*.iml
+*.iws
+.idea
+xtend-gen
+yang-gen-config
+yang-gen-sal
+classes
+out/
+.externalToolBuilders
+maven-eclipse.xml
+.DS_STORE
+.metadata
+.checkstyle
+*.html
