@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+Copyright (c) 2015 CableLabs
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<features name="odl-vcpe-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+  <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/features-restconf/${mdsal.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.ovsdb/southbound-features/${ovsdb.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.dlux/features-dlux/${dlux.version}/xml/features</repository>
+
+  <feature name='odl-vcpe-api' version='${project.version}' description='OpenDaylight :: VCPE :: api'>
+    <feature version='${yangtools.version}'>odl-yangtools-models</feature>
+    <bundle>mvn:org.opendaylight.vcpe/vcpe-api/${project.version}</bundle>
+  </feature>
+
+  <feature name='odl-vcpe' version='${project.version}' description='OpenDaylight :: VCPE'>
+    <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version='${ovsdb.version}'>odl-ovsdb-southbound-impl</feature>
+    <feature version='${project.version}'>odl-vcpe-api</feature>
+    <bundle>mvn:org.opendaylight.vcpe/vcpe-impl/${project.version}</bundle>
+    <configfile finalname="${configfile.directory}/vcpe.xml">mvn:org.opendaylight.vcpe/vcpe-impl/${project.version}/xml/config</configfile>
+  </feature>
+
+  <feature name='odl-vcpe-console' version='${project.version}' description='OpenDaylight :: VCPE :: CLI'>
+      <feature version="${project.version}">odl-vcpe</feature>
+      <bundle>mvn:org.opendaylight.vcpe/vcpe-cli/${project.version}</bundle>
+  </feature>
+
+  <feature name='odl-vcpe-rest' version='${project.version}' description='OpenDaylight :: VCPE :: REST'>
+    <feature version="${project.version}">odl-vcpe</feature>
+    <feature version="${mdsal.version}">odl-restconf</feature>
+  </feature>
+
+  <feature name='odl-vcpe-ui' version='${project.version}' description='OpenDaylight :: VCPE :: UI'>
+    <feature version="${project.version}">odl-vcpe-rest</feature>
+    <feature version="${project.version}">odl-vcpe-console</feature>
+    <feature version="${mdsal.version}">odl-mdsal-apidocs</feature>
+    <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
+    <feature version="${dlux.version}">odl-dlux-all</feature>
+  </feature>
+
+</features>
