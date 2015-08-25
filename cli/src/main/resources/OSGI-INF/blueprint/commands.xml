@@ -1,33 +1,33 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <reference id="vcpeConsoleProvider" availability="mandatory"
-        activation="eager" interface="org.opendaylight.vcpe.api.IVcpeConsoleProvider">
+    <reference id="unimgrConsoleProvider" availability="mandatory"
+        activation="eager" interface="org.opendaylight.unimgr.api.IUnimgrConsoleProvider">
     </reference>
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command>
-            <action class="org.opendaylight.vcpe.cli.UniAddShellCommand">
-                <argument ref="vcpeConsoleProvider" />
+            <action class="org.opendaylight.unimgr.cli.UniAddShellCommand">
+                <argument ref="unimgrConsoleProvider" />
             </action>
         </command>
         <command>
-            <action class="org.opendaylight.vcpe.cli.UniRemoveShellCommand">
-                 <argument ref="vcpeConsoleProvider" />
+            <action class="org.opendaylight.unimgr.cli.UniRemoveShellCommand">
+                 <argument ref="unimgrConsoleProvider" />
             </action>
         </command>
         <command>
-            <action class="org.opendaylight.vcpe.cli.UniListShellCommand">
-                 <argument ref="vcpeConsoleProvider" />
+            <action class="org.opendaylight.unimgr.cli.UniListShellCommand">
+                 <argument ref="unimgrConsoleProvider" />
             </action>
         </command>
         <command>
-            <action class="org.opendaylight.vcpe.cli.UniShowShellCommand" >
-                <argument ref="vcpeConsoleProvider" />
+            <action class="org.opendaylight.unimgr.cli.UniShowShellCommand" >
+                <argument ref="unimgrConsoleProvider" />
             </action>
         </command>
         <command>
-            <action class="org.opendaylight.vcpe.cli.EvcRemoveShellCommand">
-                 <argument ref="vcpeConsoleProvider" />
+            <action class="org.opendaylight.unimgr.cli.EvcRemoveShellCommand">
+                 <argument ref="unimgrConsoleProvider" />
             </action>
         </command>
     </command-bundle>

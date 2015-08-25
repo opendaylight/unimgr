@@ -1,0 +1,42 @@
+/*
+ * Copyright (c) 2015 Cable Television Laboratories, Inc. All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
+ */
+module unimgr-impl {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:unimgr:impl";
+    prefix "unimgr-impl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding { prefix md-sal-binding; revision-date 2013-10-28;}
+
+    description
+        "Service definition for unimgr project";
+
+    revision "2015-06-22" {
+        description
+            "Initial revision";
+    }
+
+    identity unimgr {
+        base config:module-type;
+        config:java-name-prefix Vcpe;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case unimgr {
+            when "/config:modules/config:module/config:type = 'unimgr'";
+            container broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity md-sal-binding:binding-broker-osgi-registry;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -15,8 +15,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.opendaylight.vcpe</groupId>
-  <artifactId>vcpe-api</artifactId>
+  <groupId>org.opendaylight.unimgr</groupId>
+  <artifactId>unimgr-api</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 

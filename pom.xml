@@ -15,10 +15,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <relativePath/>
   </parent>
 
-  <groupId>org.opendaylight.vcpe</groupId>
-  <artifactId>vcpe-aggregator</artifactId>
+  <groupId>org.opendaylight.unimgr</groupId>
+  <artifactId>unimgr-aggregator</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>vcpe</name>
+  <name>unimgr</name>
   <packaging>pom</packaging>
   <modelVersion>4.0.0</modelVersion>
   <prerequisites>
