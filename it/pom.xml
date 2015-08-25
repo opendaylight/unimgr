@@ -17,14 +17,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.vcpe</groupId>
-  <artifactId>vcpe-it</artifactId>
+  <artifactId>unimgr-it</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>vcpe-artifacts</artifactId>
+        <artifactId>unimgr-artifacts</artifactId>
         <version>${project.version}</version>
         <type>pom</type>
         <scope>import</scope>
@@ -56,7 +56,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>vcpe-features</artifactId>
+      <artifactId>unimgr-features</artifactId>
       <classifier>features</classifier>
       <type>xml</type>
     </dependency>

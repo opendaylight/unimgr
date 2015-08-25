@@ -16,7 +16,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </parent>
 
   <groupId>org.opendaylight.vcpe</groupId>
-  <artifactId>vcpe-aggregator</artifactId>
+  <artifactId>unimgr-aggregator</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>vcpe</name>
   <packaging>pom</packaging>

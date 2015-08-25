@@ -17,13 +17,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.vcpe</groupId>
-  <artifactId>vcpe-cli</artifactId>
+  <artifactId>unimgr-cli</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>vcpe-impl</artifactId>
+      <artifactId>unimgr-impl</artifactId>
       <version>${project.version}</version>
     </dependency>
 
