@@ -12,7 +12,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
-  <repository>mvn:org.opendaylight.controller/features-restconf/${mdsal.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.netconf/features-restconf/${restconf.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.ovsdb/southbound-features/${ovsdb.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.dlux/features-dlux/${dlux.version}/xml/features</repository>
 
@@ -36,13 +36,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <feature name='odl-unimgr-rest' version='${project.version}' description='OpenDaylight :: VCPE :: REST'>
     <feature version="${project.version}">odl-unimgr</feature>
-    <feature version="${mdsal.version}">odl-restconf</feature>
+    <feature version="${restconf.version}">odl-restconf</feature>
   </feature>
 
   <feature name='odl-unimgr-ui' version='${project.version}' description='OpenDaylight :: VCPE :: UI'>
     <feature version="${project.version}">odl-unimgr-rest</feature>
     <feature version="${project.version}">odl-unimgr-console</feature>
-    <feature version="${mdsal.version}">odl-mdsal-apidocs</feature>
+    <feature version="${restconf.version}">odl-mdsal-apidocs</feature>
     <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
     <feature version="${dlux.version}">odl-dlux-all</feature>
   </feature>
