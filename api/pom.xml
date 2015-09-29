@@ -39,10 +39,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal.model</groupId>
-      <artifactId>ietf-inet-types</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>ietf-topology</artifactId>
     </dependency>
   </dependencies>
