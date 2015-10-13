@@ -2,12 +2,12 @@ package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.
 
 import org.opendaylight.unimgr.impl.UnimgrProvider;
 
-public class UnimgrModule extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.impl.rev150622.AbstractUnimgrModule {
+public class UnimgrModule extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.impl.rev151012.AbstractUnimgrModule {
     public UnimgrModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public UnimgrModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.impl.rev150622.UnimgrModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public UnimgrModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.impl.rev151012.UnimgrModule oldModule, java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
