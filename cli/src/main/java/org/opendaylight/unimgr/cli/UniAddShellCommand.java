@@ -14,14 +14,13 @@ import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.service.speed.speed.Speed100MBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.service.speed.speed.Speed10GBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.service.speed.speed.Speed10MBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.service.speed.speed.Speed1GBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.uni.Speed;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.unis.Uni;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.unis.UniBuilder;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed100MBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed10GBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed10MBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed1GBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.uni.Speed;
 
 @Command(name = "add",
          scope = "uni",
@@ -96,7 +95,6 @@ public class UniAddShellCommand extends OsgiCommandSupport {
 
         Object speedObject = null;
         if (speed.equals("10M")) {
-            System.out.println("there");
             speedObject = new Speed10MBuilder().build();
         }
         if (speed.equals("100M")) {
@@ -114,7 +112,7 @@ public class UniAddShellCommand extends OsgiCommandSupport {
 
     @Override
     protected Object doExecute() throws Exception {
-        Uni uni = new UniBuilder()
+        Uni uni = new UniAugmentationBuilder()
                         .setMacAddress(new MacAddress(macAddress))
                         .setMacLayer(macLayer)
                         .setMode(mode)
@@ -122,11 +120,10 @@ public class UniAddShellCommand extends OsgiCommandSupport {
                         .setPhysicalMedium(physicalMedium)
                         .setSpeed((Speed) getSpeed())
                         .setType(type)
-                        .setId(new NodeId(uniId))
                         .build();
 
         if (provider.addUni(uni)) {
-            return String.format("Uni created (id: %s)", uni.getId());
+            return String.format("Uni created {}", uni.getIpAddress().getIpv4Address());
         } else {
             return new String("Error creating new uni");
         }

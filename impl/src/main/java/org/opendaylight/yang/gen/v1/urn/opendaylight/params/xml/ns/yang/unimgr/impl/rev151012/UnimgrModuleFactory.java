@@ -7,7 +7,7 @@
 *
 * Do not modify this file unless it is present under src/main directory
 */
-package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.impl.rev150622;
-public class UnimgrModuleFactory extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.impl.rev150622.AbstractVcpeModuleFactory {
+package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.impl.rev151012;
+public class UnimgrModuleFactory extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.impl.rev151012.AbstractUnimgrModuleFactory{
 
 }
