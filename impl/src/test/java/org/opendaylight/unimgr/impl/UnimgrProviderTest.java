@@ -21,8 +21,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest({FrameworkUtil.class})
 public class UnimgrProviderTest {
 
-    @Mock private UniDataChangeListener unimgrDataChangeListener;
-    @Mock private EvcDataChangeListener evcDataChangeListener;
     @Mock private UnimgrDataChangeListener listener;
     @Mock private TransactionInvoker invoker;
     @Mock private DataBroker dataBroker;

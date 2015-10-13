@@ -7,18 +7,24 @@
  */
 package org.opendaylight.unimgr.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.Evcs;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.Unis;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.evcs.Evc;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.evcs.EvcKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.unis.Uni;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.unis.UniKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.LinkId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.LinkKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -30,58 +36,6 @@ import org.slf4j.LoggerFactory;
 public class UnimgrMapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(UnimgrMapper.class);
-
-    public static InstanceIdentifier<Unis> getUnisIid() {
-        return InstanceIdentifier.builder(Unis.class)
-                .build();
-    }
-
-    public static InstanceIdentifier<Uni> getUniIid() {
-        return InstanceIdentifier.builder(Unis.class)
-                .child(Uni.class)
-                .build();
-    }
-
-    public static InstanceIdentifier<Uni> getUniIid(String id) {
-        return InstanceIdentifier.builder(Unis.class)
-                .child(Uni.class, new UniKey(new NodeId(id)))
-                .build();
-    }
-
-    public static InstanceIdentifier<Uni> getUniIid(UniKey uniKey) {
-        return InstanceIdentifier.builder(Unis.class)
-                .child(Uni.class, uniKey)
-                .build();
-    }
-
-    public static InstanceIdentifier<Uni> getUniIid(NodeId uniNodeId) {
-        return InstanceIdentifier.builder(Unis.class)
-                .child(Uni.class, new UniKey(uniNodeId))
-                .build();
-    }
-
-    public static InstanceIdentifier<Uni> getUniIid(Uni uni) {
-        return InstanceIdentifier.builder(Unis.class)
-                .child(Uni.class, uni.getKey())
-                .build();
-    }
-
-    public static InstanceIdentifier<Evcs> getEvcsIid() {
-        return InstanceIdentifier.builder(Evcs.class)
-                .build();
-    }
-
-    public static InstanceIdentifier<Evc> getEvcIid() {
-        return InstanceIdentifier.builder(Evcs.class)
-                .child(Evc.class)
-                .build();
-    }
-
-    public static InstanceIdentifier<Evc> getEvcIid(String id) {
-        return InstanceIdentifier.builder(Evcs.class)
-                .child(Evc.class, new EvcKey(new NodeId(id)))
-                .build();
-    }
 
     public static InstanceIdentifier<Node> getOvsdbNodeIID(NodeId nodeId) {
         InstanceIdentifier<Node> nodePath = InstanceIdentifier
@@ -112,7 +66,7 @@ public class UnimgrMapper {
         return nodePath;
     }
 
-    public static NodeId createNodeId(IpAddress ipAddress) {
+    public static NodeId createOvsdbNodeId(IpAddress ipAddress) {
         String nodeId = UnimgrConstants.OVSDB_PREFIX
                 + ipAddress.getIpv4Address().getValue().toString()
                 + ":"
@@ -139,5 +93,83 @@ public class UnimgrMapper {
 
         LOG.debug("Termination point InstanceIdentifier generated : {}",terminationPointPath);
         return terminationPointPath;
+    }
+
+    public static InstanceIdentifier<Node> createUniIid() {
+        InstanceIdentifier<Node> iid = InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(UnimgrConstants.UNI_TOPOLOGY_ID))
+                .child(Node.class);
+        return iid;
+    }
+
+    public static InstanceIdentifier<Node> createEvcIid() {
+        InstanceIdentifier<Node> iid = InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(UnimgrConstants.EVC_TOPOLOGY_ID))
+                .child(Node.class);
+        return iid;
+    }
+
+    public static InstanceIdentifier<Topology> createTopologyIid() {
+        InstanceIdentifier<Topology> iid = InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(UnimgrConstants.UNI_TOPOLOGY_ID));
+        return iid;
+    }
+
+    public static List<Node> getOvsdbNodes(DataBroker dataBroker, IpAddress ipAddress) {
+        List<Node> ovsdbNodes = new ArrayList<>();
+        InstanceIdentifier<Topology> topologyInstanceIdentifier = createTopologyIid();
+        Topology topology = UnimgrUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, topologyInstanceIdentifier);
+        if (topology != null && topology.getNode() != null) {
+            for (Node node : topology.getNode()) {
+                OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
+                if (ovsdbNodeAugmentation != null) {
+                    ovsdbNodes.add(node);
+                }
+            }
+        }
+        return ovsdbNodes;
+    }
+
+    public static List<Node> getUniNodes(DataBroker dataBroker, IpAddress ipAddress) {
+        List<Node> uniNodes = new ArrayList<>();
+        InstanceIdentifier<Topology> topologyInstanceIdentifier = createTopologyIid();
+        Topology topology = UnimgrUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, topologyInstanceIdentifier);
+        if (topology != null && topology.getNode() != null) {
+            for (Node node : topology.getNode()) {
+                UniAugmentation uniAugmentation = node.getAugmentation(UniAugmentation.class);
+                if (uniAugmentation != null) {
+                    uniNodes.add(node);
+                }
+            }
+        }
+        return uniNodes;
+    }
+
+    public static List<Link> getEvcLinks(DataBroker dataBroker, IpAddress ipAddress) {
+        List<Link> evcLinks = new ArrayList<>();
+        InstanceIdentifier<Topology> topologyInstanceIdentifier = createTopologyIid();
+        Topology topology = UnimgrUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, topologyInstanceIdentifier);
+        if (topology != null && topology.getNode() != null) {
+            for (Link link : topology.getLink()) {
+                EvcAugmentation evcAugmentation = link.getAugmentation(EvcAugmentation.class);
+                if (evcAugmentation != null) {
+                    evcLinks.add(link);
+                }
+            }
+        }
+        return evcLinks;
+    }
+
+    public static InstanceIdentifier<Link> getEvcLinkIID(LinkId id) {
+        InstanceIdentifier<Link> linkPath = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(UnimgrConstants.EVC_TOPOLOGY_ID))
+                .child(Link.class,new LinkKey(id));
+        return linkPath;
+    }
+
+    public static OvsdbNodeRef createOvsdbNodeRef(IpAddress ipAddress) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
