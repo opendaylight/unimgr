@@ -44,10 +44,10 @@ public class UnimgrDataChangeListener  implements IUnimgrDataChangeListener {
         this.invoker = invoker;
         listeners = new HashMap<String, ListenerRegistration<DataChangeListener>>();
         ListenerRegistration<DataChangeListener> uniListener = dataBroker.registerDataChangeListener(
-                LogicalDatastoreType.CONFIGURATION, UnimgrMapper.getUnisIid()
+                LogicalDatastoreType.CONFIGURATION, UnimgrMapper.createUniIid()
                 , this, DataChangeScope.SUBTREE);
         ListenerRegistration<DataChangeListener> evcListener = dataBroker.registerDataChangeListener(
-                LogicalDatastoreType.CONFIGURATION, UnimgrMapper.getEvcIid()
+                LogicalDatastoreType.CONFIGURATION, UnimgrMapper.createEvcIid()
                 , this, DataChangeScope.SUBTREE);
         ListenerRegistration<DataChangeListener> ovsdbListener = dataBroker.registerDataChangeListener(
                 LogicalDatastoreType.OPERATIONAL, UnimgrMapper.getOvsdbTopologyIdentifier()

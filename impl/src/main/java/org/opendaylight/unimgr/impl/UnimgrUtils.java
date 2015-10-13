@@ -25,7 +25,6 @@ import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.CheckedFuture;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -56,8 +55,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.Unis;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.unis.Uni;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
@@ -89,65 +87,28 @@ public class UnimgrUtils {
         }
     }
 
-    public static final Optional<Uni> readUniNode(DataBroker dataBroker,
-            InstanceIdentifier<Uni> nodeIid) {
-        ReadTransaction read = dataBroker.newReadOnlyTransaction();
-        CheckedFuture<Optional<Uni>, ReadFailedException> nodeFuture = read
-                .read(LogicalDatastoreType.OPERATIONAL, nodeIid);
-        Optional<Uni> nodeOptional;
-        try {
-            nodeOptional = nodeFuture.get();
-            return nodeOptional;
-        } catch (InterruptedException e) {
-            return Optional.absent();
-        } catch (ExecutionException e) {
-            return Optional.absent();
-        }
-    }
-
-    // This might not scale up.
-    public static final Unis readUnisFromStore(DataBroker dataBroker,
-            LogicalDatastoreType storetype) {
-        ReadOnlyTransaction read = dataBroker.newReadOnlyTransaction();
-        Optional<Unis> dataObject = null;
-        try {
-            dataObject = read.read(storetype,
-                    UnimgrMapper.getUnisIid()).get();
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Error retrieving the UNIs from the Configuration tree.");
-        }
-        if ((dataObject != null) && (dataObject.get() != null)) {
-            read.close();
-            return dataObject.get();
-        } else {
-            read.close();
-            return null;
-        }
-    }
-
     public static void copyUniToDataStore(DataBroker dataBroker, Uni uni,
             LogicalDatastoreType dataStoreType) {
-        WriteTransaction write = dataBroker.newWriteOnlyTransaction();
-        write.put(dataStoreType, UnimgrMapper.getUniIid(uni), uni);
-        write.submit();
+        //WriteTransaction write = dataBroker.newWriteOnlyTransaction();
+        // TODO
+        //write.put(dataStoreType, UnimgrMapper.getUniAugmentationIidByMac(uni.getMacAddress()), uni);
+        //write.submit();
     }
 
-    public static OvsdbBridgeAugmentation createOvsdbBridgeAugmentation(Uni uni) {
-        NodeId ovsdbNodeId = uni.getOvsdbNodeId();
-        InstanceIdentifier<Node> ovsdbNodeIid;
-        if (ovsdbNodeId == null || ovsdbNodeId.getValue().isEmpty()) {
-            ovsdbNodeIid = UnimgrMapper.getOvsdbNodeIID(uni.getIpAddress());
+    @SuppressWarnings("unchecked")
+    public static OvsdbBridgeAugmentation createOvsdbBridgeAugmentation(Uni uni) throws Exception {
+        OvsdbNodeRef ovsdbNodeRef = uni.getOvsdbNodeRef();
+        if (ovsdbNodeRef != null && ovsdbNodeRef.getValue() != null) {
+            UUID bridgeUuid = UUID.randomUUID();
+            OvsdbBridgeAugmentation ovsdbBridge = new OvsdbBridgeAugmentationBuilder()
+                        .setBridgeName(new OvsdbBridgeName(UnimgrConstants.DEFAULT_BRIDGE_NAME))
+                        .setManagedBy(ovsdbNodeRef)
+                        .setBridgeUuid(new Uuid(bridgeUuid.toString()))
+                        .build();
+            return ovsdbBridge;
         } else {
-            ovsdbNodeIid = UnimgrMapper.getOvsdbNodeIID(ovsdbNodeId);
+            throw new Exception("Ovsdb Node Reference does not exist !");
         }
-        OvsdbNodeRef ovsdbNodeRef = new OvsdbNodeRef(ovsdbNodeIid);
-        UUID bridgeUuid = UUID.randomUUID();
-        OvsdbBridgeAugmentation ovsdbBridge = new OvsdbBridgeAugmentationBuilder()
-                    .setBridgeName(new OvsdbBridgeName(UnimgrConstants.DEFAULT_BRIDGE_NAME))
-                    .setManagedBy(ovsdbNodeRef)
-                    .setBridgeUuid(new Uuid(bridgeUuid.toString()))
-                    .build();
-        return ovsdbBridge;
     }
 
     public static OvsdbNodeAugmentation createOvsdbNodeAugmentation(Uni uni) {

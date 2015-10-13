@@ -14,16 +14,15 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
 import org.opendaylight.unimgr.impl.UnimgrUtils;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.evcs.Evc;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.unis.Uni;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 public class EvcCreateCommand extends AbstractCreateCommand {
 
@@ -39,9 +38,9 @@ public class EvcCreateCommand extends AbstractCreateCommand {
     public void execute() {
         for (Entry<InstanceIdentifier<?>, DataObject> created : changes
                 .entrySet()) {
-            if (created.getValue() != null && created.getValue() instanceof Evc) {
-                Evc evc = (Evc) created.getValue();
-                LOG.info("New EVC created with id {}.", evc.getId());
+            if (created.getValue() != null && created.getValue() instanceof EvcAugmentation) {
+                EvcAugmentation evc = (EvcAugmentation) created.getValue();
+                LOG.info("New EVC created with id {}.", evc.getEvcId());
                 if (evc.getUniDest() == null || evc.getUniDest().isEmpty()) {
                     LOG.error("Destination UNI cannot be null.");
                     break;
@@ -51,16 +50,16 @@ public class EvcCreateCommand extends AbstractCreateCommand {
                     break;
                 }
                 // Get the destination UNI
-                NodeId destUniNodeID = evc.getUniDest().get(0).getUni();
-                InstanceIdentifier<Uni> destinationNodeIid = UnimgrMapper.getUniIid(destUniNodeID);
-                Optional<Uni> optionalDestination = UnimgrUtils.readUniNode(dataBroker, destinationNodeIid);
-                Uni destinationUni = optionalDestination.get();
+                InstanceIdentifier<Node> destinationNodeIid = (InstanceIdentifier<Node>) evc.getUniDest().iterator()
+                        .next().getUni();
+                Uni destinationUni = UnimgrUtils.readNode(dataBroker, destinationNodeIid).get()
+                        .getAugmentation(UniAugmentation.class);
                 NodeId ovsdbDestinationNodeId = UnimgrMapper.createNodeId(destinationUni.getIpAddress());
                 // Get the source UNI
-                NodeId sourceUniNodeID = evc.getUniSource().get(0).getUni();
-                InstanceIdentifier<Uni> sourceNodeIid = UnimgrMapper.getUniIid(sourceUniNodeID);
-                Optional<Uni> optionalSource = UnimgrUtils.readUniNode(dataBroker, sourceNodeIid);
-                Uni sourceUni = optionalSource.get();
+                InstanceIdentifier<Node> sourceIid = (InstanceIdentifier<Node>) evc.getUniSource().iterator().next()
+                        .getUni();
+                Uni sourceUni = UnimgrUtils.readNode(dataBroker, sourceIid).get()
+                        .getAugmentation(UniAugmentation.class);
                 NodeId ovsdbSourceNodeId = UnimgrMapper.createNodeId(sourceUni.getIpAddress());
 
                 // Set source

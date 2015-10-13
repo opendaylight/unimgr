@@ -8,12 +8,8 @@
 package org.opendaylight.unimgr.impl;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.Evcs;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.Unis;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.evcs.Evc;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.evcs.EvcKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.unis.Uni;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.unis.UniKey;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
@@ -30,58 +26,6 @@ import org.slf4j.LoggerFactory;
 public class UnimgrMapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(UnimgrMapper.class);
-
-    public static InstanceIdentifier<Unis> getUnisIid() {
-        return InstanceIdentifier.builder(Unis.class)
-                .build();
-    }
-
-    public static InstanceIdentifier<Uni> getUniIid() {
-        return InstanceIdentifier.builder(Unis.class)
-                .child(Uni.class)
-                .build();
-    }
-
-    public static InstanceIdentifier<Uni> getUniIid(String id) {
-        return InstanceIdentifier.builder(Unis.class)
-                .child(Uni.class, new UniKey(new NodeId(id)))
-                .build();
-    }
-
-    public static InstanceIdentifier<Uni> getUniIid(UniKey uniKey) {
-        return InstanceIdentifier.builder(Unis.class)
-                .child(Uni.class, uniKey)
-                .build();
-    }
-
-    public static InstanceIdentifier<Uni> getUniIid(NodeId uniNodeId) {
-        return InstanceIdentifier.builder(Unis.class)
-                .child(Uni.class, new UniKey(uniNodeId))
-                .build();
-    }
-
-    public static InstanceIdentifier<Uni> getUniIid(Uni uni) {
-        return InstanceIdentifier.builder(Unis.class)
-                .child(Uni.class, uni.getKey())
-                .build();
-    }
-
-    public static InstanceIdentifier<Evcs> getEvcsIid() {
-        return InstanceIdentifier.builder(Evcs.class)
-                .build();
-    }
-
-    public static InstanceIdentifier<Evc> getEvcIid() {
-        return InstanceIdentifier.builder(Evcs.class)
-                .child(Evc.class)
-                .build();
-    }
-
-    public static InstanceIdentifier<Evc> getEvcIid(String id) {
-        return InstanceIdentifier.builder(Evcs.class)
-                .child(Evc.class, new EvcKey(new NodeId(id)))
-                .build();
-    }
 
     public static InstanceIdentifier<Node> getOvsdbNodeIID(NodeId nodeId) {
         InstanceIdentifier<Node> nodePath = InstanceIdentifier
@@ -139,5 +83,32 @@ public class UnimgrMapper {
 
         LOG.debug("Termination point InstanceIdentifier generated : {}",terminationPointPath);
         return terminationPointPath;
+    }
+
+    public static InstanceIdentifier<Node> createUniIid() {
+        InstanceIdentifier<Node> iid = InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(UnimgrConstants.UNI_TOPOLOGY_ID))
+                .child(Node.class);
+        return iid;
+    }
+
+    public static InstanceIdentifier<Node> createEvcIid() {
+        InstanceIdentifier<Node> iid = InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(UnimgrConstants.EVC_TOPOLOGY_ID))
+                .child(Node.class);
+        return iid;
+    }
+
+    public static InstanceIdentifier<Node> getUniAugmentationIidByMac(MacAddress mac) {
+        // TODO This should return the uni node
+        InstanceIdentifier<Node> iid = InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(UnimgrConstants.UNI_TOPOLOGY_ID))
+                .child(Node.class);
+        return iid;
+    }
+
+    public static OvsdbNodeRef createOvsdbNodeRef(IpAddress ipAddress) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
