@@ -16,14 +16,14 @@ module unimgr-impl {
     description
         "Service definition for unimgr project";
 
-    revision "2015-06-22" {
+    revision "2015-10-12" {
         description
-            "Initial revision";
+            "Updated revision.";
     }
 
     identity unimgr {
         base config:module-type;
-        config:java-name-prefix Vcpe;
+        config:java-name-prefix Unimgr;
     }
 
     augment "/config:modules/config:module/config:configuration" {

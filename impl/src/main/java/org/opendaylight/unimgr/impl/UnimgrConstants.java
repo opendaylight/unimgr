@@ -40,6 +40,10 @@ public class UnimgrConstants {
 
     public static final TopologyId OVSDB_TOPOLOGY_ID = new TopologyId(new Uri("ovsdb:1"));
 
+    public static final TopologyId UNI_TOPOLOGY_ID = new TopologyId(new Uri("unimgr:uni"));
+
+    public static final TopologyId EVC_TOPOLOGY_ID = new TopologyId(new Uri("unimgr:evc"));
+
     public static final String OVSDB_PREFIX = "ovsdb://";
 
     public static final Integer OVSDB_PORT = new Integer(6640);
