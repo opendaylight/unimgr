@@ -11,7 +11,7 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.unis.Uni;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
 
 @Command(name = "show", scope = "uni", description = "Shows detailed information about an uni.")
 public class UniShowShellCommand extends OsgiCommandSupport {
@@ -31,7 +31,7 @@ public class UniShowShellCommand extends OsgiCommandSupport {
         Uni uni = provider.getUni(id);
 
         if (uni != null) {
-            sb.append(String.format("Uni Id: <%s>\n", uni.getId()));
+            //sb.append(String.format("Uni Id: <%s>\n", uni.getUniId()));
             sb.append(String.format("Physical medium: <%s>\n", uni.getPhysicalMedium()));
             sb.append(String.format("Mac address: <%s>\n", uni.getMacAddress()));
             sb.append(String.format("Speed: " + uni.getSpeed() + "\n"));

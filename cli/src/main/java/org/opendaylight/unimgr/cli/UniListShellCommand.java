@@ -14,7 +14,7 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev150622.unis.Uni;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
 
 @Command(name = "list", scope = "uni", description = "Lists all uni in the controller.")
 public class UniListShellCommand extends OsgiCommandSupport {
@@ -41,7 +41,8 @@ public class UniListShellCommand extends OsgiCommandSupport {
             StringBuilder sb = new StringBuilder();
             Integer counter = 1;
             for (Uni uni : listUnis) {
-                sb.append(String.format("#%d - id: %s\n", counter, uni.getId()));
+                // TODO
+                sb.append(String.format("#%d - id: %s\n", counter, uni.getIpAddress().getIpv4Address()));
                 counter++;
             }
             return sb.toString();

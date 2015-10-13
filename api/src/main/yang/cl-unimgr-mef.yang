@@ -22,12 +22,19 @@ module cl-unimgr-mef {
     namespace "urn:opendaylight:params:xml:ns:yang:unimgr";
     prefix "unimgr";
 
-    import ietf-yang-types { prefix yang; revision-date 2013-07-15; }
-    import ietf-inet-types { prefix inet; revision-date 2010-09-24; }
-    import network-topology { prefix topo; revision-date 2013-10-21; }
+    import ietf-yang-types { prefix "yang"; revision-date 2013-07-15; }
+    import ietf-inet-types { prefix "inet"; revision-date 2010-09-24; }
+    import network-topology { prefix "topo"; revision-date 2013-10-21; }
+    import yang-ext { prefix "ext"; }
+    import ovsdb { prefix "ovsdb"; revision-date 2015-01-05;}
 
-    revision "2015-06-22" {
-        description "Initial revision of unimgr model";
+    revision "2015-10-12" {
+        description "Updated revision of the unimgr model.";
+    }
+
+    typedef ovsdb-node-ref {
+        description "A reference to an ovsdb node";
+        type ovsdb:ovsdb-node-ref;
     }
 
     grouping service-speed {
@@ -57,15 +64,9 @@ module cl-unimgr-mef {
 
     // represent simplification of MEF Per Uni Attributes
     grouping uni {
-        leaf id {
-            type topo:node-id;
-            mandatory true;
-            description "Uniquely identifies the uni";
-        }
-        leaf ovsdb-node-id {
-            type topo:node-id;
-            mandatory false;
-            description "Uniquely identifies the uni and ovsdb";
+        leaf ovsdb-node-ref {
+            type ovsdb-node-ref;
+            description "A reference to the ovsdb node.";
         }
         leaf physical-medium {
             type string;
@@ -99,18 +100,13 @@ module cl-unimgr-mef {
 
     // Represents simplification of MEF EVC Per Uni Atrributes
     grouping evc {
-        leaf id {
-            type topo:node-id;
-            mandatory true;
-            description "Uniquely identifies the evc";
-        }
         list uni-source {
             key "order";
             leaf order {
                 type uint8;
             }
             leaf uni {
-                type topo:node-id;
+                type instance-identifier;
             }
         }
         list uni-dest {
@@ -119,7 +115,7 @@ module cl-unimgr-mef {
                 type uint8;
             }
             leaf uni {
-                type topo:node-id;
+                type instance-identifier;
             }
         }
         leaf cos-id {
@@ -133,17 +129,16 @@ module cl-unimgr-mef {
         }
     }
 
-    container unis {
-        list uni {
-            key "id";
-            uses uni;
-        }
+    augment "/topo:network-topology/topo:topology/topo:node" {
+        description "Augmentation for UNI nodes under topology";
+        ext:augment-identifier "uni-augmentation";
+        uses uni;
     }
 
-    container evcs {
-        list evc {
-            key "id";
-            uses evc;
-        }
+    augment "/topo:network-topology/topo:topology/topo:link" {
+        description "Augmentation for EVC Link under topology";
+        ext:augment-identifier "evc-augmentation";
+        uses evc;
     }
+
 }
