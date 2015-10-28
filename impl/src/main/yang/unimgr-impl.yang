@@ -23,7 +23,7 @@ module unimgr-impl {
 
     identity unimgr {
         base config:module-type;
-        config:java-name-prefix Vcpe;
+        config:java-name-prefix Unimgr;
     }
 
     augment "/config:modules/config:module/config:configuration" {
