@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dad5f5cf_a4360f02",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/api/IUnimgrConsoleProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-10-30T16:32:34Z",
+      "side": 1,
+      "message": "If I understand correctly, removing public will make the access visible only via package.",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 4
+      },
+      "revId": "2fff2ec909d64268137e4f43fe38239a0aec4c93",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_84318b0d",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/api/IUnimgrDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-10-30T16:32:34Z",
+      "side": 1,
+      "message": "If I understand correctly, removing public will make this only visible via the package.",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 4
+      },
+      "revId": "2fff2ec909d64268137e4f43fe38239a0aec4c93",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
