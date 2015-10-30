@@ -17,9 +17,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 public interface IUnimgrDataChangeListener extends DataChangeListener,
         AutoCloseable {
 
-    public void create(Map<InstanceIdentifier<?>, DataObject> changes);
+    void create(Map<InstanceIdentifier<?>, DataObject> changes);
 
-    public void update(Map<InstanceIdentifier<?>, DataObject> changes);
+    void update(Map<InstanceIdentifier<?>, DataObject> changes);
 
-    public void delete(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes);
+    void delete(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes);
 }
