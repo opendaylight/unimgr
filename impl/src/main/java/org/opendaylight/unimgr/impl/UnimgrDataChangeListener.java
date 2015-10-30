@@ -8,15 +8,16 @@
 package org.opendaylight.unimgr.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.unimgr.api.IUnimgrDataChangeListener;
 import org.opendaylight.unimgr.command.Command;
 import org.opendaylight.unimgr.command.EvcCreateCommand;
@@ -35,26 +36,23 @@ import org.slf4j.LoggerFactory;
 public class UnimgrDataChangeListener  implements IUnimgrDataChangeListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(UnimgrDataChangeListener.class);
-    private Map<String, ListenerRegistration<DataChangeListener>> listeners;
+    private Set<ListenerRegistration<DataChangeListener>> listeners;
     private DataBroker dataBroker;
     private TransactionInvoker invoker;
 
     public UnimgrDataChangeListener(DataBroker dataBroker, TransactionInvoker invoker) {
         this.dataBroker = dataBroker;
         this.invoker = invoker;
-        listeners = new HashMap<String, ListenerRegistration<DataChangeListener>>();
-        ListenerRegistration<DataChangeListener> uniListener = dataBroker.registerDataChangeListener(
+        listeners = new HashSet<ListenerRegistration<DataChangeListener>>();
+        listeners.add(dataBroker.registerDataChangeListener(
                 LogicalDatastoreType.CONFIGURATION, UnimgrMapper.createUniIid()
-                , this, DataChangeScope.SUBTREE);
-        ListenerRegistration<DataChangeListener> evcListener = dataBroker.registerDataChangeListener(
+                , this, DataChangeScope.SUBTREE));
+        listeners.add(dataBroker.registerDataChangeListener(
                 LogicalDatastoreType.CONFIGURATION, UnimgrMapper.createEvcIid()
-                , this, DataChangeScope.SUBTREE);
-        ListenerRegistration<DataChangeListener> ovsdbListener = dataBroker.registerDataChangeListener(
+                , this, DataChangeScope.SUBTREE));
+        listeners.add(dataBroker.registerDataChangeListener(
                 LogicalDatastoreType.OPERATIONAL, UnimgrMapper.getOvsdbTopologyIdentifier()
-                , this, DataChangeScope.SUBTREE);
-        listeners.put("uni", uniListener);
-        listeners.put("evc", evcListener);
-        listeners.put("ovsdb", ovsdbListener);
+                , this, DataChangeScope.SUBTREE));
     }
 
     @Override
@@ -102,10 +100,9 @@ public class UnimgrDataChangeListener  implements IUnimgrDataChangeListener {
     @Override
     public void close() throws Exception {
         LOG.info("UnimgrDataChangeListener stopped.");
-        for (Map.Entry<String, ListenerRegistration<DataChangeListener>> entry : listeners.entrySet()) {
-            ListenerRegistration<DataChangeListener> value = entry.getValue();
-            if (value != null) {
-                value.close();
+        for (ListenerRegistration<DataChangeListener> listener : listeners) {
+            if (listener != null) {
+                listener.close();
             }
         }
     }
