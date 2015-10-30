@@ -26,6 +26,7 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
@@ -190,7 +191,7 @@ public class UnimgrUtils {
     public static List<ProtocolEntry> createMdsalProtocols() {
         List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
         ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
-                UnimgrConstants.OVSDB_PROTOCOL_MAP.inverse();
+                SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
         protocolList.add(new ProtocolEntryBuilder().
                 setProtocol((Class<? extends OvsdbBridgeProtocolBase>) mapper.get("OpenFlow13")).build());
         return protocolList;
@@ -392,7 +393,7 @@ public class UnimgrUtils {
                 new OvsdbTerminationPointAugmentationBuilder();
         tpAugmentationBuilder.setName(portName);
         if (type != null) {
-            tpAugmentationBuilder.setInterfaceType(UnimgrConstants.OVSDB_INTERFACE_TYPE_MAP.get(type));
+            tpAugmentationBuilder.setInterfaceType(SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.get(type));
         }
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
@@ -418,7 +419,7 @@ public class UnimgrUtils {
                                         .build();
         options.add(destinationIp);
         tpAugmentationBuilder.setOptions(options);
-        tpAugmentationBuilder.setInterfaceType(UnimgrConstants.OVSDB_INTERFACE_TYPE_MAP.get("gre"));
+        tpAugmentationBuilder.setInterfaceType(SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.get("gre"));
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
         tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
