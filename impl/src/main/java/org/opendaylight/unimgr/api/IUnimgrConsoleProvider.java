@@ -14,17 +14,17 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.r
 
 public interface IUnimgrConsoleProvider extends AutoCloseable {
 
-    public boolean addUni(Uni uni);
+    boolean addUni(Uni uni);
 
-    public boolean removeUni(String uuid);
+    boolean removeUni(String uuid);
 
-    public List<Uni> listUnis(boolean isConfigurationDatastore);
+    List<Uni> listUnis(boolean isConfigurationDatastore);
 
-    public Uni getUni(String uuid);
+    Uni getUni(String uuid);
 
-    public boolean removeEvc(String uuid);
+    boolean removeEvc(String uuid);
 
-    public boolean addEvc(Evc evc);
+    boolean addEvc(Evc evc);
 
-    public Evc getEvc(String uuid);
+    Evc getEvc(String uuid);
 }
