@@ -63,31 +63,4 @@ public class UnimgrConstants {
     public static final String DEFAULT_TUNNEL_IFACE = "eth1";
 
     public static final String DEFAULT_GRE_NAME = "gre";
-
-    public static final ImmutableBiMap<String, Class<? extends InterfaceTypeBase>> OVSDB_INTERFACE_TYPE_MAP
-        = new ImmutableBiMap.Builder<String, Class<? extends InterfaceTypeBase>>()
-            .put("internal", InterfaceTypeInternal.class)
-            .put("vxlan", InterfaceTypeVxlan.class)
-            .put("patch", InterfaceTypePatch.class)
-            .put("system", InterfaceTypeSystem.class)
-            .put("tap", InterfaceTypeTap.class)
-            .put("geneve", InterfaceTypeGeneve.class)
-            .put("gre", InterfaceTypeGre.class)
-            .put("ipsec_gre", InterfaceTypeIpsecGre.class)
-            .put("gre64", InterfaceTypeGre64.class)
-            .put("ipsec_gre64", InterfaceTypeIpsecGre64.class)
-            .put("lisp", InterfaceTypeLisp.class)
-            .put("dpdk", InterfaceTypeDpdk.class)
-            .put("dpdkr", InterfaceTypeDpdkr.class)
-            .put("dpdkvhost", InterfaceTypeDpdkvhost.class)
-            .put("dpdkvhostuser", InterfaceTypeDpdkvhostuser.class).build();
-
-    public static final ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>, String> OVSDB_PROTOCOL_MAP
-        = new ImmutableBiMap.Builder<Class<? extends OvsdbBridgeProtocolBase>, String>()
-            .put(OvsdbBridgeProtocolOpenflow10.class, "OpenFlow10")
-            .put(OvsdbBridgeProtocolOpenflow11.class, "OpenFlow11")
-            .put(OvsdbBridgeProtocolOpenflow12.class, "OpenFlow12")
-            .put(OvsdbBridgeProtocolOpenflow13.class, "OpenFlow13")
-            .put(OvsdbBridgeProtocolOpenflow14.class, "OpenFlow14")
-            .put(OvsdbBridgeProtocolOpenflow15.class, "OpenFlow15").build();
 }
