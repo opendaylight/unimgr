@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bada0100_65602c36",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/UnimgrUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-11-03T17:10:29Z",
+      "side": 1,
+      "message": "I think you can use readNode here instead of adding a function to read a uni",
+      "revId": "54fc926288859549d4c840b9aba9e0c4c74012e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
