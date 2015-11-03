@@ -16,6 +16,24 @@
       "revId": "54fc926288859549d4c840b9aba9e0c4c74012e4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_e5dadce8",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/UnimgrUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2015-11-03T17:13:59Z",
+      "side": 1,
+      "message": "but I need to return the uni type to get the ovsdbRefnode",
+      "parentUuid": "bada0100_65602c36",
+      "revId": "54fc926288859549d4c840b9aba9e0c4c74012e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
