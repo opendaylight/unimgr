@@ -32,11 +32,6 @@ module cl-unimgr-mef {
         description "Updated revision of the unimgr model.";
     }
 
-    typedef ovsdb-node-ref {
-        description "A reference to an ovsdb node";
-        type ovsdb:ovsdb-node-ref;
-    }
-
     grouping service-speed {
         choice speed {
             case speed-10M {
@@ -65,7 +60,7 @@ module cl-unimgr-mef {
     // represent simplification of MEF Per Uni Attributes
     grouping uni {
         leaf ovsdb-node-ref {
-            type ovsdb-node-ref;
+            type ovsdb:ovsdb-node-ref;
             description "A reference to the ovsdb node.";
         }
         leaf physical-medium {

@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
@@ -368,6 +367,7 @@ public class UnimgrUtils {
                                                    NodeId ovsdbNodeId) {
         InstanceIdentifier<Node> nodeIid = UnimgrMapper.getOvsdbNodeIID(ovsdbNodeId);
         Optional<Node> node = readNode(dataBroker,
+                                       LogicalDatastoreType.OPERATIONAL,
                                        nodeIid);
         if (node.isPresent()) {
             Node ovsdbNode = node.get();
@@ -431,9 +431,9 @@ public class UnimgrUtils {
     public static List<Node> getUniNodes(DataBroker dataBroker) {
         List<Node> uniNodes = new ArrayList<>();
         InstanceIdentifier<Topology> topologyInstanceIdentifier = UnimgrMapper.createTopologyIid();
-        Topology topology = UnimgrUtils.read(dataBroker,
-                                             LogicalDatastoreType.OPERATIONAL,
-                                             topologyInstanceIdentifier);
+        Topology topology = read(dataBroker,
+                                 LogicalDatastoreType.CONFIGURATION,
+                                 topologyInstanceIdentifier);
         if (topology != null && topology.getNode() != null) {
             for (Node node : topology.getNode()) {
                 UniAugmentation uniAugmentation = node.getAugmentation(UniAugmentation.class);
@@ -469,20 +469,33 @@ public class UnimgrUtils {
     }
 
     public static final Optional<Node> readNode(DataBroker dataBroker,
-            InstanceIdentifier<?> genericNode) {
+                                                InstanceIdentifier<?> genericNode) {
+        ReadTransaction read = dataBroker.newReadOnlyTransaction();
+        InstanceIdentifier<Node> nodeIid = genericNode.firstIdentifierOf(Node.class);
+        CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture =
+                                                              read.read(LogicalDatastoreType.OPERATIONAL,
+                                                                        nodeIid);
+        try {
+            return nodeFuture.checkedGet();
+        } catch (ReadFailedException e) {
+            LOG.info("Unable to read node with Iid {}", nodeIid);
+        }
+        return Optional.absent();
+    }
+
+    public static final Optional<Node> readNode(DataBroker dataBroker,
+                                                LogicalDatastoreType store,
+                                                InstanceIdentifier<?> genericNode) {
         ReadTransaction read = dataBroker.newReadOnlyTransaction();
         InstanceIdentifier<Node> nodeIid = genericNode.firstIdentifierOf(Node.class);
         CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture = read
-                .read(LogicalDatastoreType.OPERATIONAL, nodeIid);
-        Optional<Node> nodeOptional;
+                .read(store, nodeIid);
         try {
-            nodeOptional = nodeFuture.get();
-            return nodeOptional;
-        } catch (InterruptedException e) {
-            return Optional.absent();
-        } catch (ExecutionException e) {
-            return Optional.absent();
+            return nodeFuture.checkedGet();
+        } catch (ReadFailedException e) {
+            LOG.info("Unable to read node with Iid {}", nodeIid);
         }
+        return Optional.absent();
     }
 
     public static void updateUniNode(LogicalDatastoreType dataStore,
@@ -490,16 +503,23 @@ public class UnimgrUtils {
                                      UniAugmentation uni,
                                      Node ovsdbNode,
                                      DataBroker dataBroker) {
-        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        InstanceIdentifier<Node> ovsdbNodeIid = UnimgrMapper.getOvsdbNodeIID(ovsdbNode.getNodeId());
+        OvsdbNodeRef ovsdbNodeRef = new OvsdbNodeRef(ovsdbNodeIid);
         UniAugmentationBuilder updatedUniBuilder = new UniAugmentationBuilder(uni);
-        Optional<Node> optionalNode = UnimgrUtils.readNode(dataBroker, uniKey);
+        if (ovsdbNodeRef != null) {
+            updatedUniBuilder.setOvsdbNodeRef(ovsdbNodeRef);
+        }
+        Optional<Node> optionalNode = readNode(dataBroker, LogicalDatastoreType.CONFIGURATION, uniKey);
         if (optionalNode.isPresent()) {
             Node node = optionalNode.get();
+            WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+            LOG.info("Updating Uni Node {} {} {}", uniKey, ovsdbNodeIid, dataStore);
             NodeBuilder nodeBuilder = new NodeBuilder();
             nodeBuilder.setKey(node.getKey());
             nodeBuilder.setNodeId(node.getNodeId());
             nodeBuilder.addAugmentation(UniAugmentation.class, updatedUniBuilder.build());
             transaction.put(dataStore, uniKey.firstIdentifierOf(Node.class), nodeBuilder.build());
+            transaction.submit();
         }
     }
 }
