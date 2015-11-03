@@ -7,6 +7,7 @@
  */
 package org.opendaylight.unimgr.command;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -15,10 +16,19 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.unimgr.impl.UnimgrUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Evc;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniDest;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSource;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
 
 public class EvcDeleteCommand extends AbstractDeleteCommand {
 
@@ -45,11 +55,31 @@ public class EvcDeleteCommand extends AbstractDeleteCommand {
                     for (Entry<InstanceIdentifier<Evc>, Evc> evc: originalEvcs.entrySet()) {
                         if (evc.getKey().equals(type)) {
                             Evc data = evc.getValue();
-                            LOG.info("Removed EVC {}", data.getUniSource());
+                            List<UniSource> uniSourceLst = data.getUniSource();
+                            for (UniSource uniSource : uniSourceLst) {
+                                InstanceIdentifier<?> iidUni = uniSource.getUni();
+                                Node ovsdbNd = getUniOvsdbNode(iidUni);
+                                
+                            }
+                            //LOG.info("Removed EVC {}", data.getUniSource());
+                            List<UniDest> uniDestLst = data.getUniDest();
+                            for (UniDest uniDest : uniDestLst) {
+                                InstanceIdentifier<?> iidUni = uniDest.getUni();
+                                Node ovsdbNd = getUniOvsdbNode(iidUni);
+                            }
+                            //LOG.info("Removed EVC {}", data.getUniDest());
                         }
                     }
                 }
             }
         }
+    }
+
+    private Node getUniOvsdbNode(InstanceIdentifier<?> iidUni) {
+        Optional<Node> nodeOpt = UnimgrUtils.readNode(dataBroker, iidUni);
+        if (nodeOpt.isPresent()) {
+            return  nodeOpt.get();
+        }
+        return null;
     }
 }
