@@ -135,11 +135,11 @@ public class UnimgrUtils {
 
     public static OvsdbNodeAugmentation createOvsdbNodeAugmentation(Uni uni) {
         ConnectionInfo connectionInfos = new ConnectionInfoBuilder()
-                .setRemoteIp(uni.getIpAddress())
-                .setRemotePort(new PortNumber(UnimgrConstants.OVSDB_PORT))
-                .build();
+                                                .setRemoteIp(uni.getIpAddress())
+                                                .setRemotePort(new PortNumber(UnimgrConstants.OVSDB_PORT))
+                                                .build();
         OvsdbNodeAugmentation ovsdbNode = new OvsdbNodeAugmentationBuilder()
-                .setConnectionInfo(connectionInfos).build();
+                                                .setConnectionInfo(connectionInfos).build();
         return ovsdbNode;
     }
 
@@ -220,18 +220,27 @@ public class UnimgrUtils {
     }
 
     public static Node createOvsdbNode(DataBroker dataBroker, UniAugmentation uni) {
-        List<Node> ovsdbNodes = getOvsdbNodes(dataBroker);
-        if (!ovsdbNodes.isEmpty()) {
-            for (Node ovsdbNode: ovsdbNodes) {
-                OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode
-                        .getAugmentation(OvsdbNodeAugmentation.class);
-                if (ovsdbNodeAugmentation.getConnectionInfo()
-                                         .getRemoteIp().getIpv4Address()
-                                         .equals(uni.getIpAddress().getIpv4Address())) {
-                    LOG.info("Found ovsdb node");
-                    return ovsdbNode;
-                }
-            }
+        NodeId ovsdbNodeId = new NodeId(createOvsdbNodeId(uni.getIpAddress()));
+        try {
+            InstanceIdentifier<Node> ovsdbNodeIid = UnimgrMapper.getOvsdbNodeIID(ovsdbNodeId);
+            NodeKey ovsdbNodeKey = new NodeKey(ovsdbNodeId);
+            Node nodeData = new NodeBuilder()
+                                    .setNodeId(ovsdbNodeId)
+                                    .setKey(ovsdbNodeKey)
+                                    .addAugmentation(OvsdbNodeAugmentation.class, UnimgrUtils.createOvsdbNodeAugmentation(uni))
+                                    .build();
+            // Submit the node to the datastore
+            WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+            transaction.put(LogicalDatastoreType.CONFIGURATION,
+                            ovsdbNodeIid,
+                            nodeData);
+            transaction.submit();
+            LOG.info("Created and submitted a new OVSDB node {}",
+                    nodeData.getNodeId());
+            return nodeData;
+        } catch (Exception e) {
+            LOG.error("Exception while creating OvsdbNodeAugmentation, "
+                    + "Uni is null. Node Id: {}", ovsdbNodeId);
         }
         return null;
     }
@@ -358,7 +367,7 @@ public class UnimgrUtils {
     public static void createBridgeNode(DataBroker dataBroker, Node ovsdbNode, UniAugmentation uni, String bridgeName) {
         LOG.info("Creating a bridge on node {}", ovsdbNode.getNodeId());
         InstanceIdentifier<Node> ovsdbNodeIid = UnimgrMapper
-                .getOvsdbNodeIID(uni.getIpAddress());
+                                                    .getOvsdbNodeIID(uni.getIpAddress());
         ConnectionInfo connectionInfo = UnimgrUtils.getConnectionInfo(dataBroker, ovsdbNode.getNodeId());
         if (connectionInfo != null) {
             NodeBuilder bridgeNodeBuilder = new NodeBuilder();

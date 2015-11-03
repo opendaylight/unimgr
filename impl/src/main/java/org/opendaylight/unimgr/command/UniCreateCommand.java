@@ -58,8 +58,8 @@ public class UniCreateCommand extends AbstractCreateCommand {
                  * Passive mode (PTCP): the UUID is in format ovsdb://IP:6640
                  *
                  */
-                OvsdbNodeRef ovsdbNodeRef = uni.getOvsdbNodeRef();
-                if (ovsdbNodeRef != null || ovsdbNodeRef.getValue() != null) {
+                if (uni.getOvsdbNodeRef() != null) {
+                    OvsdbNodeRef ovsdbNodeRef = uni.getOvsdbNodeRef();
                     Optional<Node> optionalNode = UnimgrUtils.readNode(dataBroker, ovsdbNodeRef.getValue());
                     if (optionalNode.isPresent()) {
                         Node ovsdbNode = optionalNode.get();
@@ -98,8 +98,9 @@ public class UniCreateCommand extends AbstractCreateCommand {
                 } else {
                     // We assume the ovs is in passive mode
                     // Check if the ovsdb node exist
-                    Node ovsdbNode = UnimgrUtils.findOvsdbNode(dataBroker, uni);
-                    if (ovsdbNode != null) {
+                    Node ovsdbNode;
+                    if (UnimgrUtils.findOvsdbNode(dataBroker, uni) != null) {
+                        ovsdbNode = UnimgrUtils.findOvsdbNode(dataBroker, uni);
                         LOG.info("Retrieved the OVSDB node");
                         UnimgrUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION,
                                                   uniKey,
@@ -112,17 +113,19 @@ public class UniCreateCommand extends AbstractCreateCommand {
                                                      UnimgrConstants.DEFAULT_BRIDGE_NAME);
                     } else {
                         ovsdbNode = UnimgrUtils.createOvsdbNode(dataBroker, uni);
-                        LOG.info("Could not retrieve the OVSDB node,"
-                               + "created a new one: {}", ovsdbNode.getNodeId());
-                        UnimgrUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION,
-                                                  uniKey,
-                                                  uni,
-                                                  ovsdbNode,
-                                                  dataBroker);
-                        UnimgrUtils.createBridgeNode(dataBroker,
-                                                     ovsdbNode,
-                                                     uni,
-                                                     UnimgrConstants.DEFAULT_BRIDGE_NAME);
+                        if (ovsdbNode != null) {
+                            LOG.info("Could not retrieve the OVSDB node,"
+                                    + "created a new one: {}", ovsdbNode.getNodeId());
+                             UnimgrUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION,
+                                                       uniKey,
+                                                       uni,
+                                                       ovsdbNode,
+                                                       dataBroker);
+                             UnimgrUtils.createBridgeNode(dataBroker,
+                                                          ovsdbNode,
+                                                          uni,
+                                                          UnimgrConstants.DEFAULT_BRIDGE_NAME);
+                        }
                     }
                 }
             }
