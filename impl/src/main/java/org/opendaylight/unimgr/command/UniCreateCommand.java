@@ -61,14 +61,14 @@ public class UniCreateCommand extends AbstractCreateCommand {
                 if (uni.getOvsdbNodeRef() != null) {
                     OvsdbNodeRef ovsdbNodeRef = uni.getOvsdbNodeRef();
                     Optional<Node> optionalNode = UnimgrUtils.readNode(dataBroker,
-                                                                       ovsdbNodeRef
-                                                                       .getValue());
+                                                                       LogicalDatastoreType.OPERATIONAL,
+                                                                       ovsdbNodeRef.getValue());
                     if (optionalNode.isPresent()) {
                         Node ovsdbNode = optionalNode.get();
-                        UnimgrUtils.createBridgeNode(dataBroker,
-                                                     ovsdbNode,
-                                                     uni,
-                                                     UnimgrConstants.DEFAULT_BRIDGE_NAME);
+//                        UnimgrUtils.createBridgeNode(dataBroker,
+//                                                     ovsdbNode,
+//                                                     uni,
+//                                                     UnimgrConstants.DEFAULT_BRIDGE_NAME);
                     } else {
                         LOG.info("Invalid OVSDB node instance identifier specified, "
                                + "attempting to retrieve the node.");
@@ -81,9 +81,10 @@ public class UniCreateCommand extends AbstractCreateCommand {
                                                       uni,
                                                       ovsdbNode,
                                                       dataBroker);
-                            UnimgrUtils.createBridgeNode(dataBroker,
-                                    ovsdbNode, uni,
-                                    UnimgrConstants.DEFAULT_BRIDGE_NAME);
+//                            UnimgrUtils.createBridgeNode(dataBroker,
+//                                                         ovsdbNode,
+//                                                         uni,
+//                                                         UnimgrConstants.DEFAULT_BRIDGE_NAME);
                         } else {
                             ovsdbNode = UnimgrUtils.createOvsdbNode(dataBroker,
                                                                     uni);
@@ -94,10 +95,10 @@ public class UniCreateCommand extends AbstractCreateCommand {
                                                       uni,
                                                       ovsdbNode,
                                                       dataBroker);
-                            UnimgrUtils.createBridgeNode(dataBroker,
-                                                         ovsdbNode,
-                                                         uni,
-                                                         UnimgrConstants.DEFAULT_BRIDGE_NAME);
+//                            UnimgrUtils.createBridgeNode(dataBroker,
+//                                                         ovsdbNode,
+//                                                         uni,
+//                                                         UnimgrConstants.DEFAULT_BRIDGE_NAME);
                         }
                     }
                 } else {
@@ -112,10 +113,10 @@ public class UniCreateCommand extends AbstractCreateCommand {
                                                   uni,
                                                   ovsdbNode,
                                                   dataBroker);
-                        UnimgrUtils.createBridgeNode(dataBroker,
-                                                     ovsdbNode,
-                                                     uni,
-                                                     UnimgrConstants.DEFAULT_BRIDGE_NAME);
+//                        UnimgrUtils.createBridgeNode(dataBroker,
+//                                                     ovsdbNode,
+//                                                     uni,
+//                                                     UnimgrConstants.DEFAULT_BRIDGE_NAME);
                     } else {
                         ovsdbNode = UnimgrUtils.createOvsdbNode(dataBroker,
                                                                 uni);
@@ -127,17 +128,17 @@ public class UniCreateCommand extends AbstractCreateCommand {
                                                        uni,
                                                        ovsdbNode,
                                                        dataBroker);
-                             UnimgrUtils.createBridgeNode(dataBroker,
-                                                          ovsdbNode,
-                                                          uni,
-                                                          UnimgrConstants.DEFAULT_BRIDGE_NAME);
+//                             UnimgrUtils.createBridgeNode(dataBroker,
+//                                                          ovsdbNode,
+//                                                          uni,
+//                                                          UnimgrConstants.DEFAULT_BRIDGE_NAME);
                         }
                     }
                 }
             }
             if (created.getValue() != null && created.getValue() instanceof OvsdbNodeAugmentation) {
                 OvsdbNodeAugmentation ovsdbNodeAugmentation = (OvsdbNodeAugmentation) created
-                        .getValue();
+                                                                                          .getValue();
                 InstanceIdentifier<Node> ovsdbIid = created.getKey().firstIdentifierOf(Node.class);
                 if (ovsdbNodeAugmentation != null) {
                     LOG.info("Received an OVSDB node create {}",
@@ -162,6 +163,7 @@ public class UniCreateCommand extends AbstractCreateCommand {
                                                                  uniAugmentation,
                                                                  UnimgrConstants.DEFAULT_BRIDGE_NAME);
                                     Optional<Node> optionalOvsdbNode = UnimgrUtils.readNode(dataBroker,
+                                                                                            LogicalDatastoreType.OPERATIONAL,
                                                                                             ovsdbIid);
                                     if (optionalOvsdbNode.isPresent()) {
                                         Node ovsdbNode = optionalOvsdbNode.get();
@@ -176,17 +178,17 @@ public class UniCreateCommand extends AbstractCreateCommand {
                                 }
                                 // The OVS instance is in ptcp mode.
                             } else if (ovsdbNodeAugmentation
-                                        .getConnectionInfo()
-                                        .getRemoteIp()
-                                        .equals(uniAugmentation.getIpAddress())) {
-                                InstanceIdentifier<Node> ovsdbNodeIid = uniAugmentation.getOvsdbNodeRef().getValue()
-                                        .firstIdentifierOf(Node.class);
+                                          .getConnectionInfo()
+                                          .getRemoteIp()
+                                          .equals(uniAugmentation.getIpAddress())) {
+                                InstanceIdentifier<Node> ovsdbNodeIid = (InstanceIdentifier<Node>) created.getKey();
                                 Optional<Node> ovsdbNode = UnimgrUtils.readNode(dataBroker,
+                                                                                LogicalDatastoreType.OPERATIONAL,
                                                                                 ovsdbNodeIid);
                                 if (ovsdbNode.isPresent()) {
                                     InstanceIdentifier<Node> uniIid = UnimgrMapper.createUniIid(dataBroker,
                                                                                                 uniAugmentation
-                                                                                                .getIpAddress());
+                                                                                                    .getIpAddress());
                                     UnimgrUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL,
                                                               uniIid,
                                                               uniAugmentation,
