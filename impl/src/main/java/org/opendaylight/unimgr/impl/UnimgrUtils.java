@@ -117,13 +117,13 @@ public class UnimgrUtils {
                                         UniAugmentation uni,
                                         String bridgeName) {
         LOG.info("Creating a bridge on node {}", ovsdbNode.getNodeId());
-        InstanceIdentifier<Node> ovsdbNodeIid = UnimgrMapper.getOvsdbNodeIID(uni.getIpAddress());
-        ConnectionInfo connectionInfo = getConnectionInfo(dataBroker, ovsdbNode.getNodeId());
-        if (connectionInfo != null) {
+        InstanceIdentifier<Node> ovsdbNodeIid = (InstanceIdentifier<Node>) uni.getOvsdbNodeRef().getValue();
+        if (ovsdbNodeIid != null) {
             NodeBuilder bridgeNodeBuilder = new NodeBuilder();
             InstanceIdentifier<Node> bridgeIid = UnimgrMapper.getOvsdbBridgeNodeIID(ovsdbNode.getNodeId(), bridgeName);
-            NodeId bridgeNodeId = new NodeId(
-                    ovsdbNode.getNodeId() + UnimgrConstants.DEFAULT_BRIDGE_NODE_ID_SUFFIX + bridgeName);
+            NodeId bridgeNodeId = new NodeId(ovsdbNode.getNodeId()
+                                           + UnimgrConstants.DEFAULT_BRIDGE_NODE_ID_SUFFIX
+                                           + bridgeName);
             bridgeNodeBuilder.setNodeId(bridgeNodeId);
             OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
             ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
@@ -135,8 +135,9 @@ public class UnimgrUtils {
             transaction.put(LogicalDatastoreType.CONFIGURATION, bridgeIid, bridgeNodeBuilder.build());
             transaction.submit();
         } else {
-            LOG.error("The OVSDB node is not connected {}", ovsdbNode.getNodeId());
+            LOG.info("OvsdbNodeRef is null");
         }
+
     }
 
     public static List<ControllerEntry> createControllerEntries(String targetString) {
@@ -513,7 +514,6 @@ public class UnimgrUtils {
         if (optionalNode.isPresent()) {
             Node node = optionalNode.get();
             WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-            LOG.info("Updating Uni Node {} {} {}", uniKey, ovsdbNodeIid, dataStore);
             NodeBuilder nodeBuilder = new NodeBuilder();
             nodeBuilder.setKey(node.getKey());
             nodeBuilder.setNodeId(node.getNodeId());
