@@ -95,6 +95,21 @@ public class UnimgrUtils {
         }
     }
 
+    public static final Optional<Uni> readUni(DataBroker dataBroker, InstanceIdentifier<?> genericUNI) {
+        ReadTransaction read = dataBroker.newReadOnlyTransaction();
+        InstanceIdentifier<Uni> iidUni = genericUNI.firstIdentifierOf(Uni.class);
+        CheckedFuture<Optional<Uni>, ReadFailedException> uniFuture = read.read(LogicalDatastoreType.OPERATIONAL, iidUni);
+        Optional<Uni> uniOptional;
+        try {
+            uniOptional = uniFuture.get();
+            return uniOptional;
+        } catch (InterruptedException e) {
+            return Optional.absent();
+        } catch (ExecutionException e) {
+            return Optional.absent();
+        }
+    }
+
     public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> D read(
             DataBroker dataBroker,
             final LogicalDatastoreType store,
