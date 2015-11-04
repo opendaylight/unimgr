@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bada0100_30e7bde6",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/command/EvcCreateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-11-04T19:39:44Z",
+      "side": 1,
+      "message": "you meant destinationUniIid here?",
+      "range": {
+        "startLine": 75,
+        "startChar": 77,
+        "endLine": 75,
+        "endChar": 89
+      },
+      "revId": "102dfe0f1e627b2dbe2d09ec51e2de7ba978e1db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_50ecc1c7",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/command/EvcCreateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-11-04T19:39:44Z",
+      "side": 1,
+      "message": "likewise",
+      "range": {
+        "startLine": 98,
+        "startChar": 76,
+        "endLine": 98,
+        "endChar": 91
+      },
+      "revId": "102dfe0f1e627b2dbe2d09ec51e2de7ba978e1db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
