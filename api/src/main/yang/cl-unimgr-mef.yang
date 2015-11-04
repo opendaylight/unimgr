@@ -103,6 +103,9 @@ module cl-unimgr-mef {
             leaf uni {
                 type instance-identifier;
             }
+            leaf ip-address {
+                type inet:ip-address;
+            }
         }
         list uni-dest {
             key "order";
@@ -111,6 +114,9 @@ module cl-unimgr-mef {
             }
             leaf uni {
                 type instance-identifier;
+            }
+            leaf ip-address {
+                type inet:ip-address;
             }
         }
         leaf cos-id {
