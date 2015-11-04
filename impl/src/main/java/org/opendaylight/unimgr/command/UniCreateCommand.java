@@ -63,14 +63,14 @@ public class UniCreateCommand extends AbstractCreateCommand {
                     Optional<Node> optionalNode = UnimgrUtils.readNode(dataBroker,
                                                                        LogicalDatastoreType.OPERATIONAL,
                                                                        ovsdbNodeRef.getValue());
-                    if (optionalNode.isPresent()) {
-                        Node ovsdbNode = optionalNode.get();
-                    } else {
+                    if (!optionalNode.isPresent()) {
                         LOG.info("Invalid OVSDB node instance identifier specified, "
                                + "attempting to retrieve the node.");
-                        Node ovsdbNode = UnimgrUtils.findOvsdbNode(dataBroker,
-                                                                   uni);
-                        if (ovsdbNode != null) {
+                        Optional<Node> optionalOvsdbNode = UnimgrUtils.findOvsdbNode(dataBroker,
+                                                                                     uni);
+                        Node ovsdbNode;
+                        if (optionalOvsdbNode.isPresent()) {
+                            ovsdbNode = optionalOvsdbNode.get();
                             LOG.info("Retrieved the OVSDB node {}", ovsdbNode.getNodeId());
                             UnimgrUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION,
                                                       uniKey,
@@ -92,9 +92,11 @@ public class UniCreateCommand extends AbstractCreateCommand {
                 } else {
                     // We assume the ovs is in passive mode
                     // Check if the ovsdb node exist
+                    Optional<Node> optionalOvsdbNode = UnimgrUtils.findOvsdbNode(dataBroker,
+                                                                                 uni);
                     Node ovsdbNode;
-                    if (UnimgrUtils.findOvsdbNode(dataBroker, uni) != null) {
-                        ovsdbNode = UnimgrUtils.findOvsdbNode(dataBroker, uni);
+                    if (optionalOvsdbNode.isPresent()) {
+                        ovsdbNode = optionalOvsdbNode.get();
                         LOG.info("Retrieved the OVSDB node");
                         UnimgrUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION,
                                                   uniKey,
