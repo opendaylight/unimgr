@@ -345,9 +345,10 @@ public class UnimgrUtils {
         return result;
     }
 
-    public static Node findOvsdbNode(DataBroker dataBroker,
-                                     UniAugmentation uni) {
+    public static Optional<Node> findOvsdbNode(DataBroker dataBroker,
+                                               UniAugmentation uni) {
         List<Node> ovsdbNodes = getOvsdbNodes(dataBroker);
+        Optional<Node> optionalOvsdb;
         if (!ovsdbNodes.isEmpty()) {
             for (Node ovsdbNode : ovsdbNodes) {
                 OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode
@@ -357,11 +358,27 @@ public class UnimgrUtils {
                                          .getIpv4Address()
                         .equals(uni.getIpAddress().getIpv4Address())) {
                     LOG.info("Found ovsdb node");
-                    return ovsdbNode;
+                    optionalOvsdb = Optional.of(ovsdbNode);
+                    return optionalOvsdb;
                 }
             }
         }
-        return null;
+        return Optional.absent();
+    }
+
+    public static Optional<Node> findUniNode(DataBroker dataBroker,
+                                             IpAddress ipAddress) {
+        List<Node> uniNodes = getUniNodes(dataBroker);
+        if (!uniNodes.isEmpty()) {
+            for (Node uniNode : uniNodes) {
+                UniAugmentation uniAugmentation = uniNode.getAugmentation(UniAugmentation.class);
+                if (uniAugmentation.getIpAddress().equals(ipAddress)) {
+                    LOG.info("Found Uni node");
+                    return Optional.of(uniNode);
+                }
+            }
+        }
+        return Optional.absent();
     }
 
     public static ConnectionInfo getConnectionInfo(DataBroker dataBroker,
