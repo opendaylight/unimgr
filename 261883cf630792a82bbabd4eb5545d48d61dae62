@@ -46,6 +46,30 @@
       "revId": "261883cf630792a82bbabd4eb5545d48d61dae62",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_6dd33239",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/command/EvcDeleteCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-11-04T13:39:32Z",
+      "side": 1,
+      "message": "Right, I haven\u0027t seen that you had two different types: UniDest and UniSource.\nNVM",
+      "parentUuid": "bada0100_ad027ab2",
+      "range": {
+        "startLine": 80,
+        "startChar": 0,
+        "endLine": 87,
+        "endChar": 29
+      },
+      "revId": "261883cf630792a82bbabd4eb5545d48d61dae62",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
