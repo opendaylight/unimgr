@@ -130,56 +130,48 @@ public class UniCreateCommand extends AbstractCreateCommand {
                                                  .getValue());
                     List<Node> uniNodes = UnimgrUtils.getUniNodes(dataBroker);
                     if (uniNodes != null && !uniNodes.isEmpty()) {
-                        for (Node node: uniNodes) {
-                            UniAugmentation uniAugmentation = node.getAugmentation(UniAugmentation.class);
+                        for (Node uniNode: uniNodes) {
+                            UniAugmentation uniAugmentation = uniNode.getAugmentation(UniAugmentation.class);
                             if (uniAugmentation.getOvsdbNodeRef() != null
                                     && uniAugmentation.getOvsdbNodeRef().getValue() != null) {
-                                // The OVS instance is in tcp mode.
                                 InstanceIdentifier<Node> ovsdbNodeRefIid = uniAugmentation
                                                                             .getOvsdbNodeRef()
                                                                             .getValue()
                                                                             .firstIdentifierOf(Node.class);
                                 if (ovsdbNodeRefIid.equals(ovsdbIid)) {
-                                    UnimgrUtils.createBridgeNode(dataBroker,
-                                                                 node,
-                                                                 uniAugmentation,
-                                                                 UnimgrConstants.DEFAULT_BRIDGE_NAME);
                                     Optional<Node> optionalOvsdbNode = UnimgrUtils.readNode(dataBroker,
                                                                                             LogicalDatastoreType.OPERATIONAL,
                                                                                             ovsdbIid);
                                     if (optionalOvsdbNode.isPresent()) {
-                                        Node ovsdbNode = optionalOvsdbNode.get();
-                                        InstanceIdentifier<Node> uniIid = UnimgrMapper.createUniIid(dataBroker,
-                                                uniAugmentation.getIpAddress());
+                                        InstanceIdentifier<Node> uniIid =
+                                                                    UnimgrMapper.createUniIid(dataBroker,
+                                                                                              uniAugmentation.getIpAddress());
+                                        UnimgrUtils.createBridgeNode(dataBroker,
+                                                                     ovsdbIid,
+                                                                     uniAugmentation,
+                                                                     UnimgrConstants.DEFAULT_BRIDGE_NAME);
                                         UnimgrUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL,
                                                                   uniIid,
                                                                   uniAugmentation,
-                                                                  ovsdbNode,
+                                                                  ovsdbIid,
                                                                   dataBroker);
                                     }
                                 }
-                                // The OVS instance is in ptcp mode.
                             } else if (ovsdbNodeAugmentation
                                           .getConnectionInfo()
                                           .getRemoteIp()
                                           .equals(uniAugmentation.getIpAddress())) {
-                                @SuppressWarnings("unchecked")
-                                InstanceIdentifier<Node> ovsdbNodeIid = (InstanceIdentifier<Node>) created.getKey();
-                                Optional<Node> ovsdbNode = UnimgrUtils.readNode(dataBroker,
-                                                                                LogicalDatastoreType.OPERATIONAL,
-                                                                                ovsdbNodeIid);
-                                if (ovsdbNode.isPresent()) {
-                                    InstanceIdentifier<Node> uniIid = UnimgrMapper.createUniIid(dataBroker,
-                                                                                                uniAugmentation
-                                                                                                    .getIpAddress());
-                                    UnimgrUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL,
-                                                              uniIid,
-                                                              uniAugmentation,
-                                                              ovsdbNode.get(),
-                                                              dataBroker);
-                                } else {
-                                    LOG.error("Unable to read node with IID {}", ovsdbNodeIid);
-                                }
+                                InstanceIdentifier<Node> uniIid = UnimgrMapper.createUniIid(dataBroker,
+                                                                                            uniAugmentation.getIpAddress());
+                                UnimgrUtils.createBridgeNode(dataBroker,
+                                                             ovsdbIid,
+                                                             uniAugmentation,
+                                                             UnimgrConstants.DEFAULT_BRIDGE_NAME);
+                                UnimgrUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL,
+                                                          uniIid,
+                                                          uniAugmentation,
+                                                          ovsdbIid,
+                                                          dataBroker);
                             }
                         }
                     } else {
