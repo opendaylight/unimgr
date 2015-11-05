@@ -50,19 +50,28 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
     public void onSessionInitiated(ProviderContext session) {
         LOG.info("UnimgrProvider Session Initiated");
 
+        // Retrieve the data broker to create transactions
         dataBroker =  session.getSALService(DataBroker.class);
         invoker = new  TransactionInvoker();
 
+        // Register the unimgr OSGi CLI
         BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-        unimgrConsoleRegistration = context.registerService(IUnimgrConsoleProvider.class, this, null);
+        unimgrConsoleRegistration = context.registerService(IUnimgrConsoleProvider.class,
+                                                            this,
+                                                            null);
 
+        // Register the uni data change listener
         listener = new UnimgrDataChangeListener(dataBroker, invoker);
 
         // Initialize operational and default config data in MD-SAL data store
-        initDatastore(LogicalDatastoreType.CONFIGURATION, UnimgrConstants.UNI_TOPOLOGY_ID);
-        initDatastore(LogicalDatastoreType.OPERATIONAL, UnimgrConstants.UNI_TOPOLOGY_ID);
-        initDatastore(LogicalDatastoreType.CONFIGURATION, UnimgrConstants.EVC_TOPOLOGY_ID);
-        initDatastore(LogicalDatastoreType.OPERATIONAL, UnimgrConstants.EVC_TOPOLOGY_ID);
+        initDatastore(LogicalDatastoreType.CONFIGURATION,
+                      UnimgrConstants.UNI_TOPOLOGY_ID);
+        initDatastore(LogicalDatastoreType.OPERATIONAL,
+                      UnimgrConstants.UNI_TOPOLOGY_ID);
+        initDatastore(LogicalDatastoreType.CONFIGURATION,
+                      UnimgrConstants.EVC_TOPOLOGY_ID);
+        initDatastore(LogicalDatastoreType.OPERATIONAL,
+                      UnimgrConstants.EVC_TOPOLOGY_ID);
     }
 
     @Override
@@ -72,13 +81,16 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
         listener.close();
     }
 
-    protected void initDatastore(final LogicalDatastoreType type, TopologyId topoId) {
+    protected void initDatastore(final LogicalDatastoreType type,
+                                 TopologyId topoId) {
         InstanceIdentifier<Topology> path = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(topoId));
+                                                .create(NetworkTopology.class)
+                                                .child(Topology.class,
+                                                        new TopologyKey(topoId));
         initializeTopology(type);
         ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
-        CheckedFuture<Optional<Topology>, ReadFailedException> unimgrTp = transaction.read(type, path);
+        CheckedFuture<Optional<Topology>, ReadFailedException> unimgrTp = transaction.read(type,
+                                                                                           path);
         try {
             if (!unimgrTp.get().isPresent()) {
                 TopologyBuilder tpb = new TopologyBuilder();
@@ -112,7 +124,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
 
     @Override
     public boolean addUni(Uni uni) {
-        //TODO Uncomment
+        //TODO This code was left commented as an example
         if (uni.getIpAddress() == null || uni.getMacAddress() == null) {
             return false;
         }

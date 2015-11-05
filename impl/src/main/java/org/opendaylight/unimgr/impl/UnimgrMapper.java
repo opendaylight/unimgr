@@ -34,18 +34,23 @@ public class UnimgrMapper {
 
     public static InstanceIdentifier<Node> getOvsdbNodeIID(NodeId nodeId) {
         InstanceIdentifier<Node> nodePath = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class,new NodeKey(nodeId));
+                                                .create(NetworkTopology.class)
+                                                .child(Topology.class,
+                                                        new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
+                                                .child(Node.class,
+                                                        new NodeKey(nodeId));
         return nodePath;
     }
 
-    public static InstanceIdentifier<Node> getOvsdbBridgeNodeIID(NodeId ovsdbNode, String bridgeName) {
+    public static InstanceIdentifier<Node> getOvsdbBridgeNodeIID(NodeId ovsdbNode,
+                                                                 String bridgeName) {
         NodeId bridgeNodeId = new NodeId(ovsdbNode + UnimgrConstants.DEFAULT_BRIDGE_NODE_ID_SUFFIX + bridgeName);
         InstanceIdentifier<Node> nodePath = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class,new NodeKey(bridgeNodeId));
+                                                .create(NetworkTopology.class)
+                                                .child(Topology.class,
+                                                        new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
+                                                .child(Node.class,
+                                                        new NodeKey(bridgeNodeId));
         return nodePath;
     }
 
@@ -55,28 +60,34 @@ public class UnimgrMapper {
                 + ":"
                 + UnimgrConstants.OVSDB_PORT;
         InstanceIdentifier<Node> nodePath = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class,new NodeKey(new NodeId(nodeId)));
+                                                .create(NetworkTopology.class)
+                                                .child(Topology.class,
+                                                        new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
+                                                .child(Node.class,
+                                                        new NodeKey(new NodeId(nodeId)));
         return nodePath;
     }
 
     public static InstanceIdentifier<Node> getOvsdbTopologyIdentifier() {
         InstanceIdentifier<Node> path = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class,
-                        new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class);
+                                            .create(NetworkTopology.class)
+                                            .child(Topology.class,
+                                                    new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
+                                            .child(Node.class);
         return path;
     }
 
     public static InstanceIdentifier<TerminationPoint> createTerminationPointInstanceIdentifier(
-            Node bridgeNode, String portName) {
-        InstanceIdentifier<TerminationPoint> terminationPointPath = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class,bridgeNode.getKey())
-                .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
+                                                           Node bridgeNode,
+                                                           String portName) {
+        InstanceIdentifier<TerminationPoint> terminationPointPath =
+                                                 InstanceIdentifier
+                                                     .create(NetworkTopology.class)
+                                                     .child(Topology.class,
+                                                             new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
+                                                     .child(Node.class,bridgeNode.getKey())
+                                                     .child(TerminationPoint.class,
+                                                             new TerminationPointKey(new TpId(portName)));
 
         LOG.debug("Termination point InstanceIdentifier generated : {}",terminationPointPath);
         return terminationPointPath;
@@ -89,15 +100,18 @@ public class UnimgrMapper {
         return iid;
     }
 
-    public static InstanceIdentifier<Node> createUniIid(DataBroker dataBroker, IpAddress ip) {
+    public static InstanceIdentifier<Node> createUniIid(DataBroker dataBroker,
+                                                        IpAddress ip) {
         List<Node> uniNodes = UnimgrUtils.getUniNodes(dataBroker);
         for (Node node: uniNodes) {
             UniAugmentation uniAugmentation = node.getAugmentation(UniAugmentation.class);
             if (uniAugmentation.getIpAddress().equals(ip)) {
                 InstanceIdentifier<Node> uniNode = InstanceIdentifier
-                        .create(NetworkTopology.class)
-                        .child(Topology.class, new TopologyKey(UnimgrConstants.UNI_TOPOLOGY_ID))
-                        .child(Node.class, new NodeKey(node.getKey()));
+                                                       .create(NetworkTopology.class)
+                                                       .child(Topology.class,
+                                                               new TopologyKey(UnimgrConstants.UNI_TOPOLOGY_ID))
+                                                       .child(Node.class,
+                                                               new NodeKey(node.getKey()));
                 return uniNode;
             }
         }
@@ -105,23 +119,28 @@ public class UnimgrMapper {
     }
 
     public static InstanceIdentifier<Node> createEvcIid() {
-        InstanceIdentifier<Node> iid = InstanceIdentifier.create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(UnimgrConstants.EVC_TOPOLOGY_ID))
-                .child(Node.class);
+        InstanceIdentifier<Node> iid = InstanceIdentifier
+                                           .create(NetworkTopology.class)
+                                           .child(Topology.class,
+                                                   new TopologyKey(UnimgrConstants.EVC_TOPOLOGY_ID))
+                                           .child(Node.class);
         return iid;
     }
 
     public static InstanceIdentifier<Topology> createTopologyIid() {
-        InstanceIdentifier<Topology> iid = InstanceIdentifier.create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(UnimgrConstants.UNI_TOPOLOGY_ID));
+        InstanceIdentifier<Topology> iid = InstanceIdentifier
+                                               .create(NetworkTopology.class)
+                                               .child(Topology.class,
+                                                       new TopologyKey(UnimgrConstants.UNI_TOPOLOGY_ID));
         return iid;
     }
 
     public static InstanceIdentifier<Link> getEvcLinkIID(LinkId id) {
         InstanceIdentifier<Link> linkPath = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(UnimgrConstants.EVC_TOPOLOGY_ID))
-                .child(Link.class,new LinkKey(id));
+                                                .create(NetworkTopology.class)
+                                                .child(Topology.class,
+                                                        new TopologyKey(UnimgrConstants.EVC_TOPOLOGY_ID))
+                                                .child(Link.class,new LinkKey(id));
         return linkPath;
     }
 }

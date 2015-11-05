@@ -35,6 +35,7 @@ public class EvcCreateCommand extends AbstractCreateCommand {
         super.changes = changes;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void execute() {
         for (Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {

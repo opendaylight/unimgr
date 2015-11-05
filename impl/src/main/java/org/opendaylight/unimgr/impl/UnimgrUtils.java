@@ -112,6 +112,7 @@ public class UnimgrUtils {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static void createBridgeNode(DataBroker dataBroker,
                                         Node ovsdbNode,
                                         UniAugmentation uni,

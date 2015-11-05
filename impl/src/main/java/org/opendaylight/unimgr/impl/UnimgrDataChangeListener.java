@@ -44,27 +44,31 @@ public class UnimgrDataChangeListener  implements IUnimgrDataChangeListener {
         this.dataBroker = dataBroker;
         this.invoker = invoker;
         listeners = new HashSet<ListenerRegistration<DataChangeListener>>();
-        listeners.add(dataBroker.registerDataChangeListener(
-                LogicalDatastoreType.CONFIGURATION, UnimgrMapper.createUniIid()
-                , this, DataChangeScope.SUBTREE));
-        listeners.add(dataBroker.registerDataChangeListener(
-                LogicalDatastoreType.CONFIGURATION, UnimgrMapper.createEvcIid()
-                , this, DataChangeScope.SUBTREE));
-        listeners.add(dataBroker.registerDataChangeListener(
-                LogicalDatastoreType.OPERATIONAL, UnimgrMapper.getOvsdbTopologyIdentifier()
-                , this, DataChangeScope.SUBTREE));
+        listeners.add(dataBroker.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
+                                                            UnimgrMapper.createUniIid(),
+                                                            this,
+                                                            DataChangeScope.SUBTREE));
+        listeners.add(dataBroker.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
+                                                            UnimgrMapper.createEvcIid(),
+                                                            this,
+                                                            DataChangeScope.SUBTREE));
+        listeners.add(dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL,
+                                                            UnimgrMapper.getOvsdbTopologyIdentifier(),
+                                                            this,
+                                                            DataChangeScope.SUBTREE));
     }
 
     @Override
-    public void onDataChanged(
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+    public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>,
+                              DataObject> change) {
         create(change.getCreatedData());
         update(change.getUpdatedData());
         delete(change);
     }
 
     @Override
-    public void create(Map<InstanceIdentifier<?>, DataObject> changes) {
+    public void create(Map<InstanceIdentifier<?>,
+                       DataObject> changes) {
         if (changes != null) {
             List<Command> commands = new ArrayList<Command>();
             commands.add(new UniCreateCommand(dataBroker, changes));
@@ -75,7 +79,8 @@ public class UnimgrDataChangeListener  implements IUnimgrDataChangeListener {
     }
 
     @Override
-    public void update(Map<InstanceIdentifier<?>, DataObject> changes) {
+    public void update(Map<InstanceIdentifier<?>,
+                       DataObject> changes) {
         if (changes != null) {
             List<Command> commands = new ArrayList<Command>();
             commands.add(new UniUpdateCommand(dataBroker, changes));
@@ -86,8 +91,8 @@ public class UnimgrDataChangeListener  implements IUnimgrDataChangeListener {
     }
 
     @Override
-    public void delete(
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+    public void delete(AsyncDataChangeEvent<InstanceIdentifier<?>,
+                       DataObject> changes) {
         if (changes != null) {
             List<Command> commands = new ArrayList<Command>();
             commands.add(new UniDeleteCommand(dataBroker, changes));

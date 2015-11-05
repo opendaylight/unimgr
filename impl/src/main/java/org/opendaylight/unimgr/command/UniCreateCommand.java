@@ -163,6 +163,7 @@ public class UniCreateCommand extends AbstractCreateCommand {
                                           .getConnectionInfo()
                                           .getRemoteIp()
                                           .equals(uniAugmentation.getIpAddress())) {
+                                @SuppressWarnings("unchecked")
                                 InstanceIdentifier<Node> ovsdbNodeIid = (InstanceIdentifier<Node>) created.getKey();
                                 Optional<Node> ovsdbNode = UnimgrUtils.readNode(dataBroker,
                                                                                 LogicalDatastoreType.OPERATIONAL,
