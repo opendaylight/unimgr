@@ -30,7 +30,7 @@ public class EvcCreateCommand extends AbstractCreateCommand {
     private static final Logger LOG = LoggerFactory.getLogger(EvcCreateCommand.class);
 
     public EvcCreateCommand(DataBroker dataBroker,
-            Map<InstanceIdentifier<?>, DataObject> changes) {
+                            Map<InstanceIdentifier<?>, DataObject> changes) {
         super.dataBroker = dataBroker;
         super.changes = changes;
     }
@@ -58,10 +58,10 @@ public class EvcCreateCommand extends AbstractCreateCommand {
                 if (evc.getUniSource().iterator().next().getUni() != null) {
                     sourceUniIid = (InstanceIdentifier<Node>) evc.getUniSource().iterator().next().getUni();
                 } else {
-                    sourceUniIid = UnimgrMapper.createUniIid(dataBroker, evc.getUniSource().iterator().next().getIpAddress());
+                    sourceUniIid = UnimgrMapper.getUniIid(dataBroker, evc.getUniSource().iterator().next().getIpAddress());
                 }
                 if (evc.getUniDest().iterator().next().getUni() != null) {
-                    destinationUniIid = UnimgrMapper.createUniIid(dataBroker, evc.getUniDest().iterator().next().getIpAddress());;
+                    destinationUniIid = UnimgrMapper.getUniIid(dataBroker, evc.getUniDest().iterator().next().getIpAddress());;
                 } else {
                     destinationUniIid = (InstanceIdentifier<Node>) evc.getUniDest().iterator().next().getUni();
                 }
@@ -85,13 +85,13 @@ public class EvcCreateCommand extends AbstractCreateCommand {
                 }
                 // Set source and destination
                 InstanceIdentifier<Node> sourceBridgeIid =
-                        UnimgrMapper.getOvsdbBridgeNodeIID(uniSource.getNodeId(),
+                        UnimgrMapper.getOvsdbBridgeNodeIid(uniSource.getNodeId(),
                                                            UnimgrConstants.DEFAULT_BRIDGE_NAME);
                 Optional<Node> optionalSourceBr = UnimgrUtils.readNode(dataBroker,
                                                                        LogicalDatastoreType.CONFIGURATION,
                                                                        sourceBridgeIid);
                 InstanceIdentifier<Node> destinationBridgeIid =
-                        UnimgrMapper.getOvsdbBridgeNodeIID(uniSource.getNodeId(),
+                        UnimgrMapper.getOvsdbBridgeNodeIid(uniSource.getNodeId(),
                                                            UnimgrConstants.DEFAULT_BRIDGE_NAME);
                 Optional<Node> optionalDestinationBr = UnimgrUtils.readNode(dataBroker,
                                                                             LogicalDatastoreType.CONFIGURATION,

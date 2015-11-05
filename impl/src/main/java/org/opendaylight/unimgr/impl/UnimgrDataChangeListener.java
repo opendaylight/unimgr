@@ -45,15 +45,15 @@ public class UnimgrDataChangeListener  implements IUnimgrDataChangeListener {
         this.invoker = invoker;
         listeners = new HashSet<ListenerRegistration<DataChangeListener>>();
         listeners.add(dataBroker.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
-                                                            UnimgrMapper.createUniIid(),
+                                                            UnimgrMapper.getUniTopologyIid(),
                                                             this,
                                                             DataChangeScope.SUBTREE));
         listeners.add(dataBroker.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
-                                                            UnimgrMapper.createEvcIid(),
+                                                            UnimgrMapper.getEvcTopologyIid(),
                                                             this,
                                                             DataChangeScope.SUBTREE));
         listeners.add(dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL,
-                                                            UnimgrMapper.getOvsdbTopologyIdentifier(),
+                                                            UnimgrMapper.getOvsdbTopologyIid(),
                                                             this,
                                                             DataChangeScope.SUBTREE));
     }
