@@ -52,7 +52,7 @@ public class UniDeleteCommand extends AbstractDeleteCommand {
                     Optional<Node> optNode = UnimgrUtils.readNode(dataBroker, LogicalDatastoreType.CONFIGURATION, iidNode);
                     if (optNode.isPresent()) {
                         Node ovsdbNode = optNode.get();
-                        InstanceIdentifier<Node> iidBridgeNode = UnimgrMapper.getOvsdbBridgeNodeIID(ovsdbNode.getNodeId(), UnimgrConstants.DEFAULT_BRIDGE_NAME);
+                        InstanceIdentifier<Node> iidBridgeNode = UnimgrMapper.getOvsdbBridgeNodeIid(ovsdbNode.getNodeId(), UnimgrConstants.DEFAULT_BRIDGE_NAME);
                         deleteNode(iidBridgeNode);
                         LOG.info("Received a request to remove a UNI BridgeNode ", iidBridgeNode);
                     }
@@ -68,7 +68,7 @@ public class UniDeleteCommand extends AbstractDeleteCommand {
                 Optional<Node> optNode = UnimgrUtils.readNode(dataBroker, LogicalDatastoreType.CONFIGURATION, iidNode);
                 if (optNode.isPresent()) {
                     Node ovsdbNode = optNode.get();
-                    InstanceIdentifier<Node> iidBridgeNode = UnimgrMapper.getOvsdbBridgeNodeIID(ovsdbNode.getNodeId(), UnimgrConstants.DEFAULT_BRIDGE_NAME);
+                    InstanceIdentifier<Node> iidBridgeNode = UnimgrMapper.getOvsdbBridgeNodeIid(ovsdbNode.getNodeId(), UnimgrConstants.DEFAULT_BRIDGE_NAME);
                     deleteNode(iidBridgeNode);
                     LOG.info("Received a request to remove a BridgeNode ", iidBridgeNode);
                 }
