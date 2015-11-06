@@ -25,6 +25,7 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
@@ -340,6 +341,29 @@ public class UnimgrUtils {
                         tpIid,
                         tpBuilder.build());
         transaction.submit();
+    }
+
+    public static void deletePath(DataBroker dataBroker, LogicalDatastoreType dataStoreType, InstanceIdentifier<?> iid) {
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        transaction.delete(dataStoreType, iid);
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        try {
+            future.checkedGet();
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Failed to delete iidNode {} {}", e.getMessage(), iid);
+        }
+    }
+
+    public static void deletePath(DataBroker dataBroker, InstanceIdentifier<?> iid) {
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        transaction.delete(LogicalDatastoreType.CONFIGURATION, iid);
+        transaction.delete(LogicalDatastoreType.OPERATIONAL, iid);
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        try {
+            future.checkedGet();
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Failed to delete iidNode {} {}", e.getMessage(), iid);
+        }
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extract(

@@ -10,10 +10,8 @@ package org.opendaylight.unimgr.command;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
 import org.opendaylight.unimgr.impl.UnimgrUtils;
@@ -26,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 
 public class UniDeleteCommand extends AbstractDeleteCommand {
 
@@ -44,50 +41,25 @@ public class UniDeleteCommand extends AbstractDeleteCommand {
         Set<InstanceIdentifier<Node>> removedNodes = UnimgrUtils.extractRemoved(changes, Node.class);
         if (!removedUnis.isEmpty()) {
             for (InstanceIdentifier<UniAugmentation> removedUniIid: removedUnis) {
-                UniAugmentation uniAug = UnimgrUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, removedUniIid);
-                if(uniAug != null){
+                UniAugmentation uniAug = UnimgrUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, removedUniIid);
+                if(uniAug != null) {
                     LOG.info("Uni Augmentation present.");
                     OvsdbNodeRef ovsNdRef = uniAug.getOvsdbNodeRef();
                     InstanceIdentifier<Node> iidNode = (InstanceIdentifier<Node>) ovsNdRef.getValue();
-                    Optional<Node> optNode = UnimgrUtils.readNode(dataBroker, LogicalDatastoreType.CONFIGURATION, iidNode);
+                    Optional<Node> optNode = UnimgrUtils.readNode(dataBroker, LogicalDatastoreType.OPERATIONAL, iidNode);
                     if (optNode.isPresent()) {
                         Node ovsdbNode = optNode.get();
                         InstanceIdentifier<Node> iidBridgeNode = UnimgrMapper.getOvsdbBridgeNodeIid(ovsdbNode.getNodeId(), UnimgrConstants.DEFAULT_BRIDGE_NAME);
-                        deleteNode(iidBridgeNode);
+                        UnimgrUtils.deletePath(dataBroker, iidBridgeNode);
                         LOG.info("Received a request to remove a UNI BridgeNode ", iidBridgeNode);
                     }
-                    deleteNode(iidNode);
+                    UnimgrUtils.deletePath(dataBroker, iidNode);
                     LOG.info("Received a request to remove an UNI ", removedUniIid);
+                    UnimgrUtils.deletePath(dataBroker, LogicalDatastoreType.OPERATIONAL, removedUniIid);
                 }
+                else {LOG.info("Received Uni Augmentation is null", removedUniIid);}
             }
         }
         else {LOG.info("Removed UNIs is empty.");}
-
-        if(!removedNodes.isEmpty()) {
-            for(InstanceIdentifier<Node> iidNode : removedNodes) {
-                Optional<Node> optNode = UnimgrUtils.readNode(dataBroker, LogicalDatastoreType.CONFIGURATION, iidNode);
-                if (optNode.isPresent()) {
-                    Node ovsdbNode = optNode.get();
-                    InstanceIdentifier<Node> iidBridgeNode = UnimgrMapper.getOvsdbBridgeNodeIid(ovsdbNode.getNodeId(), UnimgrConstants.DEFAULT_BRIDGE_NAME);
-                    deleteNode(iidBridgeNode);
-                    LOG.info("Received a request to remove a BridgeNode ", iidBridgeNode);
-                }
-                deleteNode(iidNode);
-                LOG.info("Received a request to remove a Node ", iidNode);
-           }
-        }
-        else {LOG.info("Removed Nodes is empty.");}
-    }
-
-    private void deleteNode(InstanceIdentifier<Node> iidNode) {
-        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-        transaction.delete(LogicalDatastoreType.OPERATIONAL, iidNode);
-        transaction.delete(LogicalDatastoreType.CONFIGURATION, iidNode);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-        try {
-            future.checkedGet();
-        } catch (TransactionCommitFailedException e) {
-            LOG.warn("Failed to delete iidNode {} {}", e.getMessage(), iidNode);
-        }
     }
 }
