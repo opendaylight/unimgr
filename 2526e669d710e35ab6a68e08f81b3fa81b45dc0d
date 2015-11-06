@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5ac10518_cd1fc908",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/command/UniDeleteCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2015-11-06T19:34:59Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "5ac10518_6d31f5a1",
+      "range": {
+        "startLine": 99,
+        "startChar": 74,
+        "endLine": 99,
+        "endChar": 84
+      },
+      "revId": "2526e669d710e35ab6a68e08f81b3fa81b45dc0d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5ac10518_0d263169",
         "filename": "impl/src/main/java/org/opendaylight/unimgr/command/UniDeleteCommand.java",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-06T19:14:51Z",
       "side": 1,
       "message": "Please use UnimgrUtils to read the nodes",
+      "range": {
+        "startLine": 102,
+        "startChar": 87,
+        "endLine": 102,
+        "endChar": 91
+      },
+      "revId": "2526e669d710e35ab6a68e08f81b3fa81b45dc0d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5ac10518_6dd81554",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/command/UniDeleteCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2015-11-06T19:34:59Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "5ac10518_0d263169",
       "range": {
         "startLine": 102,
         "startChar": 87,
