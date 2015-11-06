@@ -12,7 +12,11 @@ import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+<<<<<<< HEAD
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+=======
 import org.opendaylight.unimgr.impl.UnimgrConstants;
+>>>>>>> a564892... fix uni delete
 import org.opendaylight.unimgr.impl.UnimgrMapper;
 import org.opendaylight.unimgr.impl.UnimgrUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
@@ -40,6 +44,21 @@ public class UniDeleteCommand extends AbstractDeleteCommand {
         Set<InstanceIdentifier<UniAugmentation>> removedUnis = UnimgrUtils.extractRemoved(changes, UniAugmentation.class);
         if (!removedUnis.isEmpty()) {
             for (InstanceIdentifier<UniAugmentation> removedUniIid: removedUnis) {
+<<<<<<< HEAD
+                UniAugmentation uniAug = UnimgrUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, removedUniIid);
+                if(uniAug != null){
+                    LOG.trace("Uni Augmentation present.");
+                    OvsdbNodeRef ovsdbNodeRef = uniAug.getOvsdbNodeRef();
+                    InstanceIdentifier<Node> ovsdbIid = ovsdbNodeRef.getValue().firstIdentifierOf(Node.class);
+                    Optional<Node> optNode = UnimgrUtils.readNode(dataBroker, LogicalDatastoreType.CONFIGURATION, ovsdbIid);
+                    if (optNode.isPresent()) {
+                        Node ovsdbNode = optNode.get();
+                        InstanceIdentifier<Node> iidBridgeNode = UnimgrMapper.getOvsdbBridgeNodeIid(ovsdbNode);
+                        deleteNode(iidBridgeNode);
+                        LOG.info("Received a request to remove a UNI BridgeNode ", iidBridgeNode);
+                    }
+                    deleteNode(ovsdbIid);
+=======
                 UniAugmentation uniAug = UnimgrUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, removedUniIid);
                 if(uniAug != null) {
                     LOG.info("Uni Augmentation present.");
@@ -53,6 +72,7 @@ public class UniDeleteCommand extends AbstractDeleteCommand {
                         LOG.info("Received a request to remove a UNI BridgeNode ", iidBridgeNode);
                     }
                     UnimgrUtils.deletePath(dataBroker, iidNode);
+>>>>>>> a564892... fix uni delete
                     LOG.info("Received a request to remove an UNI ", removedUniIid);
                     UnimgrUtils.deletePath(dataBroker, LogicalDatastoreType.OPERATIONAL, removedUniIid);
                 }
@@ -60,5 +80,35 @@ public class UniDeleteCommand extends AbstractDeleteCommand {
             }
         }
         else {LOG.info("Removed UNIs is empty.");}
+<<<<<<< HEAD
+
+        if(!removedNodes.isEmpty()) {
+            for(InstanceIdentifier<Node> iidNode : removedNodes) {
+                Optional<Node> optNode = UnimgrUtils.readNode(dataBroker, LogicalDatastoreType.CONFIGURATION, iidNode);
+                if (optNode.isPresent()) {
+                    Node ovsdbNode = optNode.get();
+                    InstanceIdentifier<Node> iidBridgeNode = UnimgrMapper.getOvsdbBridgeNodeIid(ovsdbNode);
+                    deleteNode(iidBridgeNode);
+                    LOG.info("Received a request to remove a BridgeNode ", iidBridgeNode);
+                }
+                deleteNode(iidNode);
+                LOG.info("Received a request to remove a Node ", iidNode);
+           }
+        }
+        else {LOG.info("Removed Nodes is empty.");}
+    }
+
+    private void deleteNode(InstanceIdentifier<Node> iidNode) {
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        transaction.delete(LogicalDatastoreType.OPERATIONAL, iidNode);
+        transaction.delete(LogicalDatastoreType.CONFIGURATION, iidNode);
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        try {
+            future.checkedGet();
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Failed to delete iidNode {} {}", e.getMessage(), iidNode);
+        }
+=======
+>>>>>>> a564892... fix uni delete
     }
 }
