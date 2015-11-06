@@ -352,6 +352,29 @@ public class UnimgrUtils {
         return transaction.submit();
     }
 
+    public static void deletePath(DataBroker dataBroker, LogicalDatastoreType dataStoreType, InstanceIdentifier<?> iid) {
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        transaction.delete(dataStoreType, iid);
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        try {
+            future.checkedGet();
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Failed to delete iidNode {} {}", e.getMessage(), iid);
+        }
+    }
+
+    public static void deletePath(DataBroker dataBroker, InstanceIdentifier<?> iid) {
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        transaction.delete(LogicalDatastoreType.OPERATIONAL, iid);
+        transaction.delete(LogicalDatastoreType.CONFIGURATION, iid);
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        try {
+            future.checkedGet();
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Failed to delete iidNode {} {}", e.getMessage(), iid);
+        }
+    }
+
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extract(
             Map<InstanceIdentifier<?>, DataObject> changes, Class<T> klazz) {
         Map<InstanceIdentifier<T>,T> result = new HashMap<InstanceIdentifier<T>,T>();
