@@ -81,7 +81,7 @@ public class UniCreateCommand extends AbstractCreateCommand {
                             ovsdbNode = UnimgrUtils.createOvsdbNode(dataBroker,
                                                                     uni);
                             LOG.info("Could not retrieve the OVSDB node,"
-                                   + "created a new one: {}", ovsdbNode.getNodeId());
+                                   + " created a new one: {}", ovsdbNode.getNodeId());
                             UnimgrUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION,
                                                       uniKey,
                                                       uni,
@@ -144,8 +144,9 @@ public class UniCreateCommand extends AbstractCreateCommand {
                                                                                             ovsdbIid);
                                     if (optionalOvsdbNode.isPresent()) {
                                         InstanceIdentifier<Node> uniIid =
-                                                                    UnimgrMapper.createUniIid(dataBroker,
-                                                                                              uniAugmentation.getIpAddress());
+                                                                    UnimgrMapper.getUniIid(dataBroker,
+                                                                                           uniAugmentation.getIpAddress(),
+                                                                                           LogicalDatastoreType.CONFIGURATION);
                                         UnimgrUtils.createBridgeNode(dataBroker,
                                                                      ovsdbIid,
                                                                      uniAugmentation,
@@ -161,8 +162,9 @@ public class UniCreateCommand extends AbstractCreateCommand {
                                           .getConnectionInfo()
                                           .getRemoteIp()
                                           .equals(uniAugmentation.getIpAddress())) {
-                                InstanceIdentifier<Node> uniIid = UnimgrMapper.createUniIid(dataBroker,
-                                                                                            uniAugmentation.getIpAddress());
+                                InstanceIdentifier<Node> uniIid = UnimgrMapper.getUniIid(dataBroker,
+                                                                                         uniAugmentation.getIpAddress(),
+                                                                                         LogicalDatastoreType.CONFIGURATION);
                                 UnimgrUtils.createBridgeNode(dataBroker,
                                                              ovsdbIid,
                                                              uniAugmentation,
