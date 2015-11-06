@@ -320,36 +320,27 @@ public class UnimgrUtils {
         transaction.submit();
     }
 
-    public static CheckedFuture<Void,
-                                TransactionCommitFailedException>
-                                deleteTerminationPoint(DataBroker dataBroker,
-                                                       TerminationPoint terminationPoint,
-                                                       Node ovsdbNode) {
-        InstanceIdentifier<TerminationPoint> terminationPointPath =
-                                                 InstanceIdentifier
-                                                     .create(NetworkTopology.class)
-                                                     .child(Topology.class,
-                                                             new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
-                                                     .child(Node.class,
-                                                            ovsdbNode.getKey())
-                                                     .child(TerminationPoint.class,
-                                                            terminationPoint.getKey());
-        final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-        transaction.delete(LogicalDatastoreType.CONFIGURATION, terminationPointPath);
-        transaction.delete(LogicalDatastoreType.OPERATIONAL, terminationPointPath);
-        transaction.submit();
+    public static void deletePath(DataBroker dataBroker, LogicalDatastoreType dataStoreType, InstanceIdentifier<?> iid) {
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        transaction.delete(dataStoreType, iid);
         CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-        return future;
+        try {
+            future.checkedGet();
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Failed to delete iidNode {} {}", e.getMessage(), iid);
+        }
     }
 
-    public static CheckedFuture<Void,
-                                TransactionCommitFailedException>
-                                deleteNode(DataBroker dataBroker,
-                                           InstanceIdentifier<?> genericNode,
-                                           LogicalDatastoreType store) {
+    public static void deletePath(DataBroker dataBroker, InstanceIdentifier<?> iid) {
         WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-        transaction.delete(store, genericNode);
-        return transaction.submit();
+        transaction.delete(LogicalDatastoreType.OPERATIONAL, iid);
+        transaction.delete(LogicalDatastoreType.CONFIGURATION, iid);
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        try {
+            future.checkedGet();
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Failed to delete iidNode {} {}", e.getMessage(), iid);
+        }
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extract(
