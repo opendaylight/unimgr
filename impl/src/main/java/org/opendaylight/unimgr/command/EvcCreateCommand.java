@@ -35,13 +35,12 @@ public class EvcCreateCommand extends AbstractCreateCommand {
         super.changes = changes;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void execute() {
         for (Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
             if (created.getValue() != null && created.getValue() instanceof EvcAugmentation) {
                 EvcAugmentation evc = (EvcAugmentation) created.getValue();
-                LOG.info("New EVC created, source IP: {} destination IP {}.",
+                LOG.trace("New EVC created, source IP: {} destination IP {}.",
                         evc.getUniSource().iterator().next().getIpAddress().getIpv4Address(),
                         evc.getUniDest().iterator().next().getIpAddress().getIpv4Address());
                 // For now, we assume that there is 1 uni per source/destination
@@ -56,17 +55,19 @@ public class EvcCreateCommand extends AbstractCreateCommand {
                 InstanceIdentifier<Node> sourceUniIid;
                 InstanceIdentifier<Node> destinationUniIid;
                 if (evc.getUniSource().iterator().next().getUni() != null) {
-                    sourceUniIid = (InstanceIdentifier<Node>) evc.getUniSource().iterator().next().getUni();
+                    sourceUniIid = evc.getUniSource().iterator().next().getUni().firstIdentifierOf(Node.class);
                 } else {
-                    sourceUniIid = UnimgrMapper.getUniIid(dataBroker, evc.getUniSource().iterator().next().getIpAddress());
+                    sourceUniIid = UnimgrMapper.getUniIid(dataBroker,
+                                                          evc.getUniSource().iterator().next().getIpAddress(),
+                                                          LogicalDatastoreType.OPERATIONAL);
                 }
                 if (evc.getUniDest().iterator().next().getUni() != null) {
-                    destinationUniIid = UnimgrMapper.getUniIid(dataBroker, evc.getUniDest().iterator().next().getIpAddress());;
+                    destinationUniIid = evc.getUniDest().iterator().next().getUni().firstIdentifierOf(Node.class);
                 } else {
-                    destinationUniIid = (InstanceIdentifier<Node>) evc.getUniDest().iterator().next().getUni();
+                    destinationUniIid = UnimgrMapper.getUniIid(dataBroker,
+                                                               evc.getUniDest().iterator().next().getIpAddress(),
+                                                               LogicalDatastoreType.OPERATIONAL);
                 }
-                // The user has specified the instance identifier of the
-                // uni source and uni destination
                 Optional<Node> optionalUniSource = UnimgrUtils.readNode(dataBroker,
                                                                         LogicalDatastoreType.CONFIGURATION,
                                                                         sourceUniIid);
@@ -76,56 +77,73 @@ public class EvcCreateCommand extends AbstractCreateCommand {
                 Node uniSource;
                 Node uniDestination;
                 // Retrieve the source and destination Unis
-                if (!optionalUniSource.isPresent() || !optionalUniDestination.isPresent()) {
-                    LOG.info("Unable to retrieve the Source and/or Destination Unis.");
-                    break;
-                } else {
+                if (optionalUniSource.isPresent() && optionalUniDestination.isPresent()) {
                     uniSource = optionalUniSource.get();
                     uniDestination = optionalUniDestination.get();
-                }
-                // Set source and destination
-                InstanceIdentifier<Node> sourceBridgeIid =
-                        UnimgrMapper.getOvsdbBridgeNodeIid(uniSource.getNodeId(),
-                                                           UnimgrConstants.DEFAULT_BRIDGE_NAME);
-                Optional<Node> optionalSourceBr = UnimgrUtils.readNode(dataBroker,
-                                                                       LogicalDatastoreType.CONFIGURATION,
-                                                                       sourceBridgeIid);
-                InstanceIdentifier<Node> destinationBridgeIid =
-                        UnimgrMapper.getOvsdbBridgeNodeIid(uniSource.getNodeId(),
-                                                           UnimgrConstants.DEFAULT_BRIDGE_NAME);
-                Optional<Node> optionalDestinationBr = UnimgrUtils.readNode(dataBroker,
-                                                                            LogicalDatastoreType.CONFIGURATION,
-                                                                            destinationBridgeIid);
-                if (!optionalSourceBr.isPresent() || !optionalDestinationBr.isPresent()) {
-                    LOG.info("Unable to retrieve the source and/or destination bridge.");
-                    break;
+                    // Set source and destination
+                    UniAugmentation sourceUniAugmentation =
+                                        uniSource.getAugmentation(UniAugmentation.class);
+                    UniAugmentation destinationUniAugmentation =
+                                        uniDestination.getAugmentation(UniAugmentation.class);
+                    Optional<Node> optionalSourceOvsdbNode =
+                                       UnimgrUtils.readNode(dataBroker,
+                                                            LogicalDatastoreType.OPERATIONAL,
+                                                            sourceUniAugmentation
+                                                                .getOvsdbNodeRef()
+                                                                .getValue());
+                    Optional<Node> optionalDestinationOvsdbNode =
+                                       UnimgrUtils.readNode(dataBroker,
+                                                            LogicalDatastoreType.OPERATIONAL,
+                                                            destinationUniAugmentation
+                                                                .getOvsdbNodeRef()
+                                                                .getValue());
+                    if (optionalSourceOvsdbNode.isPresent() && optionalDestinationOvsdbNode.isPresent()) {
+                        InstanceIdentifier<Node> sourceBridgeIid =
+                                UnimgrMapper.getOvsdbBridgeNodeIid(optionalSourceOvsdbNode.get());
+                        Optional<Node> optionalSourceBr = UnimgrUtils.readNode(dataBroker,
+                                                                               LogicalDatastoreType.OPERATIONAL,
+                                                                               sourceBridgeIid);
+                        InstanceIdentifier<Node> destinationBridgeIid =
+                                UnimgrMapper.getOvsdbBridgeNodeIid(optionalDestinationOvsdbNode.get());
+                        Optional<Node> optionalDestinationBr = UnimgrUtils.readNode(dataBroker,
+                                                                                    LogicalDatastoreType.OPERATIONAL,
+                                                                                    destinationBridgeIid);
+                        Node sourceBr;
+                        Node destinationBr;
+                        if (optionalSourceBr.isPresent() && optionalDestinationBr.isPresent()) {
+                            sourceBr = optionalSourceBr.get();
+                            destinationBr = optionalDestinationBr.get();
+                            UnimgrUtils.createTerminationPointNode(dataBroker,
+                                                                   uniSource.getAugmentation(UniAugmentation.class),
+                                                                   sourceBr,
+                                                                   UnimgrConstants.DEFAULT_BRIDGE_NAME,
+                                                                   UnimgrConstants.DEFAULT_TUNNEL_IFACE,
+                                                                   UnimgrConstants.DEFAULT_GRE_NAME);
+                            UnimgrUtils.createGreTunnel(dataBroker,
+                                                        uniSource.getAugmentation(UniAugmentation.class),
+                                                        uniDestination.getAugmentation(UniAugmentation.class),
+                                                        sourceBr,
+                                                        UnimgrConstants.DEFAULT_BRIDGE_NAME,
+                                                        "gre0");
+                            UnimgrUtils.createTerminationPointNode(dataBroker, 
+                                                                   uniSource.getAugmentation(UniAugmentation.class),
+                                                                   destinationBr,
+                                                                   UnimgrConstants.DEFAULT_BRIDGE_NAME,
+                                                                   UnimgrConstants.DEFAULT_TUNNEL_IFACE,
+                                                                   UnimgrConstants.DEFAULT_GRE_NAME);
+                            UnimgrUtils.createGreTunnel(dataBroker,
+                                                        uniDestination.getAugmentation(UniAugmentation.class),
+                                                        uniSource.getAugmentation(UniAugmentation.class), destinationBr,
+                                                        UnimgrConstants.DEFAULT_BRIDGE_NAME,
+                                                        "gre0");
+                        } else {
+                            LOG.info("Unable to retrieve the source and/or destination bridge.");
+                        }
+                    } else {
+                        LOG.info("Uname to retrieve the source and/or destination ovsdbNode.");
+                    }
                 } else {
-                    Node sourceBr = optionalSourceBr.get();
-                    Node destinationBr = optionalDestinationBr.get();
-                    UnimgrUtils.createTerminationPointNode(dataBroker,
-                                                           uniSource.getAugmentation(UniAugmentation.class),
-                                                           sourceBr,
-                                                           UnimgrConstants.DEFAULT_BRIDGE_NAME,
-                                                           UnimgrConstants.DEFAULT_TUNNEL_IFACE,
-                                                           UnimgrConstants.DEFAULT_GRE_NAME);
-                    UnimgrUtils.createGreTunnel(dataBroker,
-                                                uniSource.getAugmentation(UniAugmentation.class),
-                                                uniDestination.getAugmentation(UniAugmentation.class),
-                                                sourceBr,
-                                                UnimgrConstants.DEFAULT_BRIDGE_NAME,
-                                                "gre0");
-                    UnimgrUtils.createTerminationPointNode(dataBroker,
-                                                           uniSource.getAugmentation(UniAugmentation.class),
-                                                           destinationBr,
-                                                           UnimgrConstants.DEFAULT_BRIDGE_NAME,
-                                                           UnimgrConstants.DEFAULT_TUNNEL_IFACE,
-                                                           UnimgrConstants.DEFAULT_GRE_NAME);
-                    UnimgrUtils.createGreTunnel(dataBroker,
-                                                uniDestination.getAugmentation(UniAugmentation.class),
-                                                uniSource.getAugmentation(UniAugmentation.class),
-                                                destinationBr,
-                                                UnimgrConstants.DEFAULT_BRIDGE_NAME,
-                                                "gre0");
+                    LOG.info("Unable to retrieve the source and/or destination Uni.");
                 }
             }
         }

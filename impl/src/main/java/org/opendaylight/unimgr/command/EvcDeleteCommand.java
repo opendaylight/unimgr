@@ -48,13 +48,13 @@ public class EvcDeleteCommand extends AbstractDeleteCommand {
     @Override
     public void execute() {
         Map<InstanceIdentifier<Evc>, Evc> originalEvcs = UnimgrUtils.extractOriginal(changes, Evc.class);
-        Set<InstanceIdentifier<Evc>> removedEvcs = UnimgrUtils.extractRemoved(changes, Evc.class);
+        //Set<InstanceIdentifier<Evc>> removedEvcs = UnimgrUtils.extractRemoved(changes, Evc.class);
 
         Set<InstanceIdentifier<?>> removedPaths = changes.getRemovedPaths();
         if (!removedPaths.isEmpty()) {
             for (InstanceIdentifier<?> removedPath: removedPaths) {
                 Class<?> type = removedPath.getTargetType();
-                LOG.info("Removed paths instance identifier {}", type);
+                LOG.trace("Removed paths instance identifier {}", type);
                 if (type.equals(Evc.class)) {
                     LOG.info("Removed paths instance identifier {}", type);
                     for (Entry<InstanceIdentifier<Evc>, Evc> evc: originalEvcs.entrySet()) {
@@ -63,20 +63,32 @@ public class EvcDeleteCommand extends AbstractDeleteCommand {
                             List<UniSource> uniSourceLst = data.getUniSource();
                             for (UniSource uniSource : uniSourceLst) {
                                 InstanceIdentifier<?> iidUni = uniSource.getUni();
-                                Node ovsdbNd = getUniOvsdbNode(iidUni);
-                                List<TerminationPoint> termPointList = ovsdbNd.getTerminationPoint();
-                                for(TerminationPoint termPoint : termPointList) {
-                                    deleteTerminationPoint(termPoint, ovsdbNd);
+                                Optional<Node> optionalOvsdbNode =
+                                                   UnimgrUtils.readNode(dataBroker,
+                                                   LogicalDatastoreType.OPERATIONAL,
+                                                   iidUni);
+                                if (optionalOvsdbNode.isPresent()) {
+                                    Node ovsdbNode = optionalOvsdbNode.get();
+                                    List<TerminationPoint> termPointList = ovsdbNode.getTerminationPoint();
+                                    for(TerminationPoint termPoint : termPointList) {
+                                        deleteTerminationPoint(termPoint, ovsdbNode);
+                                    }
                                 }
                             }
                             LOG.info("Removed EVC Source {}", data.getUniSource());
                             List<UniDest> uniDestLst = data.getUniDest();
                             for (UniDest uniDest : uniDestLst) {
                                 InstanceIdentifier<?> iidUni = uniDest.getUni();
-                                Node ovsdbNd = getUniOvsdbNode(iidUni);
-                                List<TerminationPoint> termPointList = ovsdbNd.getTerminationPoint();
-                                for(TerminationPoint termPoint : termPointList) {
-                                    deleteTerminationPoint(termPoint, ovsdbNd);
+                                Optional<Node> optionalOvsdbNode =
+                                                   UnimgrUtils.readNode(dataBroker,
+                                                           LogicalDatastoreType.OPERATIONAL,
+                                                           iidUni);
+                                if (optionalOvsdbNode.isPresent()) {
+                                    Node ovsdbNode = optionalOvsdbNode.get();
+                                    List<TerminationPoint> termPointList = ovsdbNode.getTerminationPoint();
+                                    for(TerminationPoint termPoint : termPointList) {
+                                        deleteTerminationPoint(termPoint, ovsdbNode);
+                                    }
                                 }
                             }
                             LOG.info("Removed EVC Destination {}", data.getUniDest());
@@ -85,14 +97,6 @@ public class EvcDeleteCommand extends AbstractDeleteCommand {
                 }
             }
         }
-    }
-
-    private Node getUniOvsdbNode(InstanceIdentifier<?> iidUni) {
-        Optional<Node> nodeOpt = UnimgrUtils.readNode(dataBroker, iidUni);
-        if (nodeOpt.isPresent()) {
-            return  nodeOpt.get();
-        }
-        return null;
     }
 
     private boolean deleteTerminationPoint(TerminationPoint termPoint, Node ovsdbNode) {

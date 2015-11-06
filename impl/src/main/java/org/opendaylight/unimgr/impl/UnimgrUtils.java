@@ -77,52 +77,16 @@ public class UnimgrUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(UnimgrUtils.class);
 
-    @Deprecated
-    public static void createBridgeNode(DataBroker dataBroker,
-                                        NodeId ovsdbNodeId,
-                                        Uni uni,
-                                        String bridgeName) {
-        LOG.info("Creating a bridge on node {}", ovsdbNodeId);
-        InstanceIdentifier<Node> ovsdbNodeIid = UnimgrMapper
-                                                    .getOvsdbNodeIid(uni.getIpAddress());
-        ConnectionInfo connectionInfo = UnimgrUtils.getConnectionInfo(dataBroker, ovsdbNodeId);
-        if (connectionInfo != null) {
-            NodeBuilder bridgeNodeBuilder = new NodeBuilder();
-            InstanceIdentifier<Node> bridgeIid = UnimgrMapper
-                                                    .getOvsdbBridgeNodeIid(ovsdbNodeId, bridgeName);
-            NodeId bridgeNodeId = new NodeId(ovsdbNodeId
-                                             + UnimgrConstants.DEFAULT_BRIDGE_NODE_ID_SUFFIX
-                                             + bridgeName);
-            bridgeNodeBuilder.setNodeId(bridgeNodeId);
-            OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
-            ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
-            ovsdbBridgeAugmentationBuilder.setProtocolEntry(UnimgrUtils
-                                                                .createMdsalProtocols());
-            OvsdbNodeRef ovsdbNodeRef = new OvsdbNodeRef(ovsdbNodeIid);
-            ovsdbBridgeAugmentationBuilder.setManagedBy(ovsdbNodeRef);
-            bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class,
-                                              ovsdbBridgeAugmentationBuilder.build());
-            WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-            transaction.put(LogicalDatastoreType.CONFIGURATION,
-                            bridgeIid,
-                            bridgeNodeBuilder.build());
-            transaction.submit();
-        } else {
-            LOG.error("The OVSDB node is not connected {}", ovsdbNodeId);
-        }
-    }
-
     public static void createBridgeNode(DataBroker dataBroker,
                                         Node ovsdbNode,
                                         UniAugmentation uni,
                                         String bridgeName) {
-        LOG.info("Creating a bridge on node {}", ovsdbNode.getNodeId());
-        @SuppressWarnings("unchecked")
-        InstanceIdentifier<Node> ovsdbNodeIid = (InstanceIdentifier<Node>) uni.getOvsdbNodeRef().getValue();
+        LOG.info("Creating a bridge on node {}", ovsdbNode.getNodeId().getValue());
+        InstanceIdentifier<Node> ovsdbNodeIid = uni.getOvsdbNodeRef().getValue().firstIdentifierOf(Node.class);
         if (ovsdbNodeIid != null) {
             NodeBuilder bridgeNodeBuilder = new NodeBuilder();
-            InstanceIdentifier<Node> bridgeIid = UnimgrMapper.getOvsdbBridgeNodeIid(ovsdbNode.getNodeId(),
-                                                                                    bridgeName);
+            InstanceIdentifier<Node> bridgeIid = UnimgrMapper.createOvsdbBridgeNodeIid(ovsdbNode,
+                                                                                       bridgeName);
             NodeId bridgeNodeId = new NodeId(ovsdbNode.getNodeId()
                                            + UnimgrConstants.DEFAULT_BRIDGE_NODE_ID_SUFFIX
                                            + bridgeName);
@@ -153,8 +117,8 @@ public class UnimgrUtils {
                                                                     ovsdbNodeIid);
             if (optionalOvsdbNode.isPresent()) {
                 Node ovsdbNode = optionalOvsdbNode.get();
-                InstanceIdentifier<Node> bridgeIid = UnimgrMapper.getOvsdbBridgeNodeIid(ovsdbNode.getNodeId(),
-                                                                                        bridgeName);
+                InstanceIdentifier<Node> bridgeIid = UnimgrMapper.createOvsdbBridgeNodeIid(ovsdbNode,
+                                                                                           bridgeName);
                 NodeId bridgeNodeId = new NodeId(ovsdbNode.getNodeId().getValue()
                                                + UnimgrConstants.DEFAULT_BRIDGE_NODE_ID_SUFFIX
                                                + bridgeName);

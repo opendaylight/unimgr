@@ -71,8 +71,10 @@ public class UnimgrDataChangeListener  implements IUnimgrDataChangeListener {
                        DataObject> changes) {
         if (changes != null) {
             List<Command> commands = new ArrayList<Command>();
-            commands.add(new UniCreateCommand(dataBroker, changes));
-            commands.add(new EvcCreateCommand(dataBroker, changes));
+            Command uniCreate = new UniCreateCommand(dataBroker, changes);
+            Command evcCreate = new EvcCreateCommand(dataBroker, changes);
+            commands.add(uniCreate);
+            commands.add(evcCreate);
             invoker.setCommands(commands);
             invoker.invoke();
         }
@@ -83,8 +85,10 @@ public class UnimgrDataChangeListener  implements IUnimgrDataChangeListener {
                        DataObject> changes) {
         if (changes != null) {
             List<Command> commands = new ArrayList<Command>();
-            commands.add(new UniUpdateCommand(dataBroker, changes));
-            commands.add(new EvcUpdateCommand(dataBroker, changes));
+            Command uniUpdate = new UniUpdateCommand(dataBroker, changes);
+            Command evcUpdate = new EvcUpdateCommand(dataBroker, changes);
+            commands.add(uniUpdate);
+            commands.add(evcUpdate);
             invoker.setCommands(commands);
             invoker.invoke();
         }
@@ -95,8 +99,10 @@ public class UnimgrDataChangeListener  implements IUnimgrDataChangeListener {
                        DataObject> changes) {
         if (changes != null) {
             List<Command> commands = new ArrayList<Command>();
-            commands.add(new UniDeleteCommand(dataBroker, changes));
-            commands.add(new EvcDeleteCommand(dataBroker, changes));
+            Command uniDelete = new UniDeleteCommand(dataBroker, changes);
+            Command evcDelete = new EvcDeleteCommand(dataBroker, changes);
+            commands.add(uniDelete);
+            commands.add(evcDelete);
             invoker.setCommands(commands);
             invoker.invoke();
         }

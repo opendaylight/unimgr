@@ -43,7 +43,7 @@ public class UniCreateCommand extends AbstractCreateCommand {
             if (created.getValue() != null && created.getValue() instanceof UniAugmentation) {
                 UniAugmentation uni = (UniAugmentation) created.getValue();
                 InstanceIdentifier<?> uniKey = created.getKey();
-                LOG.info("New UNI created {}.", uni.getIpAddress().getIpv4Address());
+                LOG.trace("New UNI created {}.", uni.getIpAddress().getIpv4Address());
                 /* We assume that when the user specifies the
                  * ovsdb-node-ref that the node already exists in
                  * the controller and that the OVS instance is in

@@ -12,6 +12,7 @@ import java.util.List;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.LinkId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -29,7 +30,21 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class UnimgrMapper {
 
-    public static InstanceIdentifier<Link> getEvcLinkIID(LinkId id) {
+    public static InstanceIdentifier<Node> createOvsdbBridgeNodeIid(Node ovsdbNode,
+                                                                    String bridgeName) {
+        String bridgeNodeName = ovsdbNode.getNodeId().getValue()
+                            + UnimgrConstants.DEFAULT_BRIDGE_NODE_ID_SUFFIX
+                            + bridgeName;
+        NodeId bridgeNodeId = new NodeId(bridgeNodeName);
+        InstanceIdentifier<Node> bridgeNodePath = InstanceIdentifier
+                                                      .create(NetworkTopology.class)
+                                                      .child(Topology.class,
+                                                              new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
+                                                      .child(Node.class, new NodeKey(bridgeNodeId));
+        return bridgeNodePath;
+    }
+
+    public static InstanceIdentifier<Link> getEvcLinkIid(LinkId id) {
         InstanceIdentifier<Link> linkPath = InstanceIdentifier
                                                 .create(NetworkTopology.class)
                                                 .child(Topology.class,
@@ -56,18 +71,15 @@ public class UnimgrMapper {
         return nodePath;
     }
 
-    public static InstanceIdentifier<Node> getOvsdbBridgeNodeIid(NodeId ovsdbNode,
-                                                                 String bridgeName) {
-        String ovsdbNodeId = ovsdbNode.getValue();
-        NodeId bridgeNodeId = new NodeId(ovsdbNodeId
-                                       + UnimgrConstants.DEFAULT_BRIDGE_NODE_ID_SUFFIX
-                                       + bridgeName);
-        InstanceIdentifier<Node> nodePath = InstanceIdentifier
-                                                .create(NetworkTopology.class)
-                                                .child(Topology.class,
-                                                        new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
-                                                .child(Node.class,
-                                                        new NodeKey(bridgeNodeId));
+    public static InstanceIdentifier<Node> getOvsdbBridgeNodeIid(Node ovsdbNode) {
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+        InstanceIdentifier<Node> nodePath = ovsdbNodeAugmentation
+                                                .getManagedNodeEntry()
+                                                .iterator()
+                                                .next()
+                                                .getBridgeRef()
+                                                .getValue()
+                                                .firstIdentifierOf(Node.class);
         return nodePath;
     }
 

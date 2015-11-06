@@ -38,13 +38,13 @@ public class UniUpdateCommand extends AbstractUpdateCommand {
                 OvsdbNodeAugmentation ovsdbNodeAugmentation = (OvsdbNodeAugmentation) created
                         .getValue();
                 if (ovsdbNodeAugmentation != null) {
-                    LOG.info("Received an OVSDB node create {}",
+                    LOG.trace("Received an OVSDB node create {}",
                             ovsdbNodeAugmentation.getConnectionInfo()
                                     .getRemoteIp().getIpv4Address().getValue());
                     final List<ManagedNodeEntry> managedNodeEntries = ovsdbNodeAugmentation.getManagedNodeEntry();
                     if (managedNodeEntries != null) {
                         for (ManagedNodeEntry managedNodeEntry : managedNodeEntries) {
-                            LOG.info("Received an update from an OVSDB node {}.", managedNodeEntry.getKey());
+                            LOG.trace("Received an update from an OVSDB node {}.", managedNodeEntry.getKey());
                             // We received a node update from the southbound plugin
                             // so we have to check if it belongs to the UNI
                         }
