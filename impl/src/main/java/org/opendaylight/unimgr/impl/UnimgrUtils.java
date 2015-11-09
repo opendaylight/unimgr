@@ -320,6 +320,23 @@ public class UnimgrUtils {
         transaction.submit();
     }
 
+    public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean delete(
+            DataBroker dataBroker,
+            final LogicalDatastoreType store,
+            final InstanceIdentifier<D> path)  {
+        boolean result = false;
+        final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        transaction.delete(store, path);
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        try {
+            future.checkedGet();
+            result = true;
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Failed to delete {} ", path, e);
+        }
+        return result;
+    }
+
     public static CheckedFuture<Void,
                                 TransactionCommitFailedException>
                                 deleteTerminationPoint(DataBroker dataBroker,
@@ -347,6 +364,7 @@ public class UnimgrUtils {
                                 deleteNode(DataBroker dataBroker,
                                            InstanceIdentifier<?> genericNode,
                                            LogicalDatastoreType store) {
+        LOG.info("Received a request to delete node {}", genericNode);
         WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
         transaction.delete(store, genericNode);
         return transaction.submit();

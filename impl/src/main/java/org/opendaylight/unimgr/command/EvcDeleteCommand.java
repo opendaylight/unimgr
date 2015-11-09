@@ -13,6 +13,8 @@ import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
 import org.opendaylight.unimgr.impl.UnimgrUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
@@ -26,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 
 public class EvcDeleteCommand extends AbstractDeleteCommand {
 
@@ -116,17 +119,31 @@ public class EvcDeleteCommand extends AbstractDeleteCommand {
                         if (optionalSourceBridgeNode.isPresent()
                                 && optionalDestinationBridgeNode.isPresent()) {
                             Node sourceBridgeNode = optionalSourceBridgeNode.get();
-                            Node destinationBridgeNode = optionalSourceBridgeNode.get();
-                            TpId sourceTp = sourceBridgeNode.getTerminationPoint().iterator().next().getTpId();
-                            TpId destTp = destinationBridgeNode.getTerminationPoint().iterator().next().getTpId();
+                            Node destinationBridgeNode = optionalDestinationBridgeNode.get();
+                            TpId sourceTp = sourceBridgeNode.getTerminationPoint().get(2).getTpId();
+                            TpId destTp = destinationBridgeNode.getTerminationPoint().get(2).getTpId();
                             InstanceIdentifier<?> sourceTpIid = UnimgrMapper.getTerminationPointIid(sourceBridgeNode,
                                                                                                     sourceTp);
                             InstanceIdentifier<?> destinationTpIid = UnimgrMapper.getTerminationPointIid(destinationBridgeNode,
                                                                                                          destTp);
-                            UnimgrUtils.deleteNode(dataBroker, sourceTpIid, LogicalDatastoreType.CONFIGURATION);
-                            UnimgrUtils.deleteNode(dataBroker, destinationTpIid, LogicalDatastoreType.CONFIGURATION);
-                            UnimgrUtils.deleteNode(dataBroker, sourceTpIid, LogicalDatastoreType.OPERATIONAL);
-                            UnimgrUtils.deleteNode(dataBroker, destinationTpIid, LogicalDatastoreType.OPERATIONAL);
+                            CheckedFuture<Void, TransactionCommitFailedException> deleteOperNodeResult =
+                                                                                      UnimgrUtils.deleteNode(dataBroker,
+                                                                                                             sourceBridgeIid,
+                                                                                                             LogicalDatastoreType.CONFIGURATION);
+                            CheckedFuture<Void, TransactionCommitFailedException> deleteConfigNodeResult =
+                                                                                      UnimgrUtils.deleteNode(dataBroker,
+                                                                                                             destinationBridgeIid, 
+                                                                                                             LogicalDatastoreType.CONFIGURATION);
+                            if (deleteOperNodeResult.isDone() && deleteConfigNodeResult.isDone()) {
+                                UnimgrUtils.createBridgeNode(dataBroker,
+                                                             sourceOvsdbIid,
+                                                             sourceUniNode.getAugmentation(UniAugmentation.class),
+                                                             UnimgrConstants.DEFAULT_BRIDGE_NAME);
+                                UnimgrUtils.createBridgeNode(dataBroker,
+                                                             destOvsdbIid,
+                                                             destUniNode.getAugmentation(UniAugmentation.class),
+                                                             UnimgrConstants.DEFAULT_BRIDGE_NAME);
+                            }
                         } else {
                             LOG.info("Unable to retrieve the Ovsdb Bridge node source and/or destination.");
                         }

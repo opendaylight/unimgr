@@ -44,7 +44,7 @@ public class UniDeleteCommand extends AbstractDeleteCommand {
                 if(uniAug != null) {
                     LOG.info("Uni Augmentation present.");
                     OvsdbNodeRef ovsNdRef = uniAug.getOvsdbNodeRef();
-                    InstanceIdentifier<Node> iidNode = (InstanceIdentifier<Node>) ovsNdRef.getValue();
+                    InstanceIdentifier<Node> iidNode = ovsNdRef.getValue().firstIdentifierOf(Node.class);
                     Optional<Node> optNode = UnimgrUtils.readNode(dataBroker, LogicalDatastoreType.OPERATIONAL, iidNode);
                     if (optNode.isPresent()) {
                         Node ovsdbNode = optNode.get();
@@ -52,13 +52,11 @@ public class UniDeleteCommand extends AbstractDeleteCommand {
                         UnimgrUtils.deletePath(dataBroker, iidBridgeNode);
                         LOG.info("Received a request to remove a UNI BridgeNode ", iidBridgeNode);
                     }
-                    UnimgrUtils.deletePath(dataBroker, iidNode);
                     LOG.info("Received a request to remove an UNI ", removedUniIid);
                     UnimgrUtils.deletePath(dataBroker, LogicalDatastoreType.OPERATIONAL, removedUniIid);
                 }
                 else {LOG.info("Received Uni Augmentation is null", removedUniIid);}
             }
         }
-        else {LOG.info("Removed UNIs is empty.");}
     }
 }
