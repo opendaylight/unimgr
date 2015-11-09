@@ -97,7 +97,12 @@ public class UniCreateCommand extends AbstractCreateCommand {
                     Node ovsdbNode;
                     if (optionalOvsdbNode.isPresent()) {
                         ovsdbNode = optionalOvsdbNode.get();
+                        InstanceIdentifier<Node> ovsdbIid = UnimgrMapper.getOvsdbNodeIid(ovsdbNode.getNodeId());
                         LOG.info("Retrieved the OVSDB node");
+                        UnimgrUtils.createBridgeNode(dataBroker,
+                                                     ovsdbIid,
+                                                     uni,
+                                                     UnimgrConstants.DEFAULT_BRIDGE_NAME);
                         UnimgrUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION,
                                                   uniKey,
                                                   uni,

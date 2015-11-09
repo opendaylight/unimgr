@@ -13,6 +13,8 @@ import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
 import org.opendaylight.unimgr.impl.UnimgrUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
@@ -26,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 
 public class EvcDeleteCommand extends AbstractDeleteCommand {
 
@@ -87,48 +90,32 @@ public class EvcDeleteCommand extends AbstractDeleteCommand {
                             && optionalDestinationOvsdbNode.isPresent()) {
                         Node sourceOvsdbNode = optionalSourceOvsdNode.get();
                         Node destinationOvsdbNode = optionalDestinationOvsdbNode.get();
-                        OvsdbNodeAugmentation sourceOvsdbNodeAugmentation =
-                                                  sourceOvsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
-                        OvsdbNodeAugmentation destinationOvsdbNodeAugmentation =
-                                                  destinationOvsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
-                        InstanceIdentifier<Node> sourceBridgeIid =
-                                                     sourceOvsdbNodeAugmentation
-                                                         .getManagedNodeEntry()
-                                                         .iterator()
-                                                         .next()
-                                                         .getBridgeRef()
-                                                         .getValue()
-                                                         .firstIdentifierOf(Node.class);
-                        InstanceIdentifier<Node> destinationBridgeIid =
-                                                     destinationOvsdbNodeAugmentation
-                                                         .getManagedNodeEntry()
-                                                         .iterator()
-                                                         .next()
-                                                         .getBridgeRef()
-                                                         .getValue()
-                                                         .firstIdentifierOf(Node.class);
-                        Optional<Node> optionalSourceBridgeNode = UnimgrUtils.readNode(dataBroker,
-                                                                                       LogicalDatastoreType.OPERATIONAL,
-                                                                                       sourceBridgeIid);
-                        Optional<Node>  optionalDestinationBridgeNode = UnimgrUtils.readNode(dataBroker,
-                                                                                             LogicalDatastoreType.OPERATIONAL,
-                                                                                             destinationBridgeIid);
-                        if (optionalSourceBridgeNode.isPresent()
-                                && optionalDestinationBridgeNode.isPresent()) {
-                            Node sourceBridgeNode = optionalSourceBridgeNode.get();
-                            Node destinationBridgeNode = optionalSourceBridgeNode.get();
-                            TpId sourceTp = sourceBridgeNode.getTerminationPoint().iterator().next().getTpId();
-                            TpId destTp = destinationBridgeNode.getTerminationPoint().iterator().next().getTpId();
-                            InstanceIdentifier<?> sourceTpIid = UnimgrMapper.getTerminationPointIid(sourceBridgeNode,
-                                                                                                    sourceTp);
-                            InstanceIdentifier<?> destinationTpIid = UnimgrMapper.getTerminationPointIid(destinationBridgeNode,
-                                                                                                         destTp);
-                            UnimgrUtils.deleteNode(dataBroker, sourceTpIid, LogicalDatastoreType.CONFIGURATION);
-                            UnimgrUtils.deleteNode(dataBroker, destinationTpIid, LogicalDatastoreType.CONFIGURATION);
-                            UnimgrUtils.deleteNode(dataBroker, sourceTpIid, LogicalDatastoreType.OPERATIONAL);
-                            UnimgrUtils.deleteNode(dataBroker, destinationTpIid, LogicalDatastoreType.OPERATIONAL);
-                        } else {
-                            LOG.info("Unable to retrieve the Ovsdb Bridge node source and/or destination.");
+                        OvsdbNodeAugmentation sourceOvsdbNodeAugmentation = sourceOvsdbNode
+                                .getAugmentation(OvsdbNodeAugmentation.class);
+                        OvsdbNodeAugmentation destinationOvsdbNodeAugmentation = destinationOvsdbNode
+                                .getAugmentation(OvsdbNodeAugmentation.class);
+                        InstanceIdentifier<Node> sourceBridgeIid = sourceOvsdbNodeAugmentation.getManagedNodeEntry()
+                                .iterator().next().getBridgeRef().getValue().firstIdentifierOf(Node.class);
+                        InstanceIdentifier<Node> destinationBridgeIid = destinationOvsdbNodeAugmentation
+                                .getManagedNodeEntry().iterator().next().getBridgeRef().getValue()
+                                .firstIdentifierOf(Node.class);
+                        CheckedFuture<Void, TransactionCommitFailedException> deleteOperNodeResult = UnimgrUtils
+                                .deleteNode(dataBroker, sourceBridgeIid, LogicalDatastoreType.CONFIGURATION);
+                        CheckedFuture<Void, TransactionCommitFailedException> deleteConfigNodeResult = UnimgrUtils
+                                .deleteNode(dataBroker, destinationBridgeIid, LogicalDatastoreType.CONFIGURATION);
+                        try {
+                            deleteOperNodeResult.checkedGet();
+                            deleteConfigNodeResult.checkedGet();
+                            if (deleteOperNodeResult.isDone() && deleteConfigNodeResult.isDone()) {
+                                UnimgrUtils.createBridgeNode(dataBroker, sourceOvsdbIid,
+                                        sourceUniNode.getAugmentation(UniAugmentation.class),
+                                        UnimgrConstants.DEFAULT_BRIDGE_NAME);
+                                UnimgrUtils.createBridgeNode(dataBroker, destOvsdbIid,
+                                        destUniNode.getAugmentation(UniAugmentation.class),
+                                        UnimgrConstants.DEFAULT_BRIDGE_NAME);
+                            }
+                        } catch (TransactionCommitFailedException e) {
+                            LOG.error("Unable to delete bridges.");
                         }
                     } else {
                         LOG.info("Unable to retrieve the Ovsdb node source and/or destination.");

@@ -71,8 +71,8 @@ public class UnimgrMapper {
         return nodePath;
     }
 
-    public static InstanceIdentifier<Node> getOvsdbBridgeNodeIid(Node ovsdbNode) {
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+    public static InstanceIdentifier<Node> getOvsdbBridgeNodeIid(Node bridgeNode) {
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = bridgeNode.getAugmentation(OvsdbNodeAugmentation.class);
         InstanceIdentifier<Node> nodePath = ovsdbNodeAugmentation
                                                 .getManagedNodeEntry()
                                                 .iterator()
