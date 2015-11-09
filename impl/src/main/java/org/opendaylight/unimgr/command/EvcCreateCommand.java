@@ -40,6 +40,7 @@ public class EvcCreateCommand extends AbstractCreateCommand {
         for (Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
             if (created.getValue() != null && created.getValue() instanceof EvcAugmentation) {
                 EvcAugmentation evc = (EvcAugmentation) created.getValue();
+                InstanceIdentifier<?> evcKey = created.getKey();
                 LOG.trace("New EVC created, source IP: {} destination IP {}.",
                         evc.getUniSource().iterator().next().getIpAddress().getIpv4Address(),
                         evc.getUniDest().iterator().next().getIpAddress().getIpv4Address());
@@ -69,10 +70,10 @@ public class EvcCreateCommand extends AbstractCreateCommand {
                                                                LogicalDatastoreType.OPERATIONAL);
                 }
                 Optional<Node> optionalUniSource = UnimgrUtils.readNode(dataBroker,
-                                                                        LogicalDatastoreType.CONFIGURATION,
+                                                                        LogicalDatastoreType.OPERATIONAL,
                                                                         sourceUniIid);
                 Optional<Node> optionalUniDestination = UnimgrUtils.readNode(dataBroker,
-                                                                             LogicalDatastoreType.CONFIGURATION,
+                                                                             LogicalDatastoreType.OPERATIONAL,
                                                                              destinationUniIid);
                 Node uniSource;
                 Node uniDestination;
@@ -136,6 +137,18 @@ public class EvcCreateCommand extends AbstractCreateCommand {
                                                         uniSource.getAugmentation(UniAugmentation.class), destinationBr,
                                                         UnimgrConstants.DEFAULT_BRIDGE_NAME,
                                                         "gre0");
+                            UnimgrUtils.updateEvcNode(LogicalDatastoreType.CONFIGURATION,
+                                                      evcKey,
+                                                      evc,
+                                                      sourceUniIid,
+                                                      destinationUniIid,
+                                                      dataBroker);
+                            UnimgrUtils.updateEvcNode(LogicalDatastoreType.OPERATIONAL,
+                                                      evcKey,
+                                                      evc,
+                                                      sourceUniIid,
+                                                      destinationUniIid,
+                                                      dataBroker);
                         } else {
                             LOG.info("Unable to retrieve the source and/or destination bridge.");
                         }

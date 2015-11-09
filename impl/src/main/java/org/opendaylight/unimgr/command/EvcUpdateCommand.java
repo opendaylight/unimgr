@@ -10,6 +10,7 @@ package org.opendaylight.unimgr.command;
 import java.util.Map;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ public class EvcUpdateCommand extends AbstractUpdateCommand {
 
     @Override
     public void execute() {
-        LOG.info("Update has not been implemented yet.");
+        //TODO
     }
 
 }

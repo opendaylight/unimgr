@@ -129,6 +129,21 @@ public class UnimgrMapper {
         return terminationPointPath;
     }
 
+    public static InstanceIdentifier<TerminationPoint> getTerminationPointIid(
+                                                           Node bridgeNode,
+                                                           TpId tpId) {
+        InstanceIdentifier<TerminationPoint> terminationPointPath =
+                                                 InstanceIdentifier
+                                                     .create(NetworkTopology.class)
+                                                     .child(Topology.class,
+                                                             new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
+                                                     .child(Node.class,
+                                                             bridgeNode.getKey())
+                                                     .child(TerminationPoint.class,
+                                                             new TerminationPointKey(tpId));
+        return terminationPointPath;
+    }
+
     public static InstanceIdentifier<Node> getUniIid(DataBroker dataBroker,
                                                      IpAddress ip) {
         List<Node> uniNodes = UnimgrUtils.getUniNodes(dataBroker,

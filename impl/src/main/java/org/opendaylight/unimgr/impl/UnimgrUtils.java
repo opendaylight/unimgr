@@ -25,6 +25,7 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
@@ -51,13 +52,25 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Evc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniDest;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniDestBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniDestKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSource;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSourceBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSourceKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.LinkBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
@@ -290,7 +303,8 @@ public class UnimgrUtils {
         InstanceIdentifier<TerminationPoint> tpIid = UnimgrMapper
                                                         .getTerminationPointIid(bridgeNode,
                                                                                 portName);
-        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();
+        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder =
+                                                     new OvsdbTerminationPointAugmentationBuilder();
         tpAugmentationBuilder.setName(portName);
         if (type != null) {
             tpAugmentationBuilder.setInterfaceType(SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.get(type));
@@ -304,6 +318,38 @@ public class UnimgrUtils {
                         tpIid,
                         tpBuilder.build());
         transaction.submit();
+    }
+
+    public static CheckedFuture<Void,
+                                TransactionCommitFailedException>
+                                deleteTerminationPoint(DataBroker dataBroker,
+                                                       TerminationPoint terminationPoint,
+                                                       Node ovsdbNode) {
+        InstanceIdentifier<TerminationPoint> terminationPointPath =
+                                                 InstanceIdentifier
+                                                     .create(NetworkTopology.class)
+                                                     .child(Topology.class,
+                                                             new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
+                                                     .child(Node.class,
+                                                            ovsdbNode.getKey())
+                                                     .child(TerminationPoint.class,
+                                                            terminationPoint.getKey());
+        final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        transaction.delete(LogicalDatastoreType.CONFIGURATION, terminationPointPath);
+        transaction.delete(LogicalDatastoreType.OPERATIONAL, terminationPointPath);
+        transaction.submit();
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        return future;
+    }
+
+    public static CheckedFuture<Void,
+                                TransactionCommitFailedException>
+                                deleteNode(DataBroker dataBroker,
+                                           InstanceIdentifier<?> genericNode,
+                                           LogicalDatastoreType store) {
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        transaction.delete(store, genericNode);
+        return transaction.submit();
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extract(
@@ -521,6 +567,20 @@ public class UnimgrUtils {
         return Optional.absent();
     }
 
+    public static final Optional<Link> readLink(DataBroker dataBroker,
+                                                LogicalDatastoreType store,
+                                                InstanceIdentifier<?> genericNode) {
+        ReadTransaction read = dataBroker.newReadOnlyTransaction();
+        InstanceIdentifier<Link> linkIid = genericNode.firstIdentifierOf(Link.class);
+        CheckedFuture<Optional<Link>, ReadFailedException> linkFuture = read.read(store, linkIid);
+        try {
+            return linkFuture.checkedGet();
+        } catch (ReadFailedException e) {
+            LOG.info("Unable to read node with Iid {}", linkIid);
+        }
+        return Optional.absent();
+    }
+
     public static final Optional<Node> readNode(DataBroker dataBroker,
                                                 LogicalDatastoreType store,
                                                 InstanceIdentifier<?> genericNode) {
@@ -584,6 +644,57 @@ public class UnimgrUtils {
             nodeBuilder.addAugmentation(UniAugmentation.class, updatedUniBuilder.build());
             transaction.put(dataStore, uniKey.firstIdentifierOf(Node.class), nodeBuilder.build());
             transaction.submit();
+        }
+    }
+
+    public static void updateEvcNode(LogicalDatastoreType dataStore,
+                                     InstanceIdentifier<?> evcKey,
+                                     EvcAugmentation evcAugmentation,
+                                     InstanceIdentifier<?> sourceUniIid,
+                                     InstanceIdentifier<?> destinationUniIid,
+                                     DataBroker dataBroker) {
+        EvcAugmentationBuilder updatedEvcBuilder = new EvcAugmentationBuilder(evcAugmentation);
+        if (sourceUniIid != null && destinationUniIid != null) {
+            List<UniSource> sourceList = new ArrayList<UniSource>();
+            UniSourceKey sourceKey = evcAugmentation.getUniSource().iterator().next().getKey();
+            short sourceOrder = evcAugmentation.getUniSource().iterator().next().getOrder();
+            IpAddress sourceIp = evcAugmentation.getUniSource().iterator().next().getIpAddress();
+            UniSource uniSource = new UniSourceBuilder()
+                                          .setOrder(sourceOrder)
+                                          .setKey(sourceKey)
+                                          .setIpAddress(sourceIp)
+                                          .setUni(sourceUniIid)
+                                          .build();
+            sourceList.add(uniSource);
+            updatedEvcBuilder.setUniSource(sourceList);
+
+            List<UniDest> destinationList = new ArrayList<UniDest>();
+            UniDestKey destKey = evcAugmentation.getUniDest().iterator().next().getKey();
+            short destOrder = evcAugmentation.getUniDest().iterator().next().getOrder();
+            IpAddress destIp = evcAugmentation.getUniDest().iterator().next().getIpAddress();
+            UniDest uniDest = new UniDestBuilder()
+                                      .setIpAddress(destIp)
+                                      .setOrder(destOrder)
+                                      .setKey(destKey)
+                                      .setUni(destinationUniIid)
+                                      .build();
+            destinationList.add(uniDest);
+            updatedEvcBuilder.setUniDest(destinationList);
+            Optional<Link> optionalEvcLink = readLink(dataBroker,
+                                                      LogicalDatastoreType.CONFIGURATION,
+                                                      evcKey);
+            if (optionalEvcLink.isPresent()) {
+                Link link = optionalEvcLink.get();
+                WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+                LinkBuilder linkBuilder = new LinkBuilder();
+                linkBuilder.setKey(link.getKey());
+                linkBuilder.setLinkId(link.getLinkId());
+                linkBuilder.addAugmentation(EvcAugmentation.class, updatedEvcBuilder.build());
+                transaction.put(dataStore, evcKey.firstIdentifierOf(Link.class), linkBuilder.build());
+                transaction.submit();
+            }
+        } else {
+            LOG.info("Invalid instance identifiers for sourceUni and destUni.");
         }
     }
 }

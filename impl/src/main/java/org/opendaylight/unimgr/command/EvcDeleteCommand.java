@@ -7,33 +7,25 @@
  */
 package org.opendaylight.unimgr.command;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.unimgr.impl.UnimgrConstants;
+import org.opendaylight.unimgr.impl.UnimgrMapper;
 import org.opendaylight.unimgr.impl.UnimgrUtils;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Evc;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniDest;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSource;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 
 public class EvcDeleteCommand extends AbstractDeleteCommand {
 
@@ -47,74 +39,104 @@ public class EvcDeleteCommand extends AbstractDeleteCommand {
 
     @Override
     public void execute() {
-        Map<InstanceIdentifier<Evc>, Evc> originalEvcs = UnimgrUtils.extractOriginal(changes, Evc.class);
-        //Set<InstanceIdentifier<Evc>> removedEvcs = UnimgrUtils.extractRemoved(changes, Evc.class);
-
-        Set<InstanceIdentifier<?>> removedPaths = changes.getRemovedPaths();
-        if (!removedPaths.isEmpty()) {
-            for (InstanceIdentifier<?> removedPath: removedPaths) {
-                Class<?> type = removedPath.getTargetType();
-                LOG.trace("Removed paths instance identifier {}", type);
-                if (type.equals(Evc.class)) {
-                    LOG.info("Removed paths instance identifier {}", type);
-                    for (Entry<InstanceIdentifier<Evc>, Evc> evc: originalEvcs.entrySet()) {
-                        if (evc.getKey().equals(type)) {
-                            Evc data = evc.getValue();
-                            List<UniSource> uniSourceLst = data.getUniSource();
-                            for (UniSource uniSource : uniSourceLst) {
-                                InstanceIdentifier<?> iidUni = uniSource.getUni();
-                                Optional<Node> optionalOvsdbNode =
-                                                   UnimgrUtils.readNode(dataBroker,
-                                                   LogicalDatastoreType.OPERATIONAL,
-                                                   iidUni);
-                                if (optionalOvsdbNode.isPresent()) {
-                                    Node ovsdbNode = optionalOvsdbNode.get();
-                                    List<TerminationPoint> termPointList = ovsdbNode.getTerminationPoint();
-                                    for(TerminationPoint termPoint : termPointList) {
-                                        deleteTerminationPoint(termPoint, ovsdbNode);
-                                    }
-                                }
-                            }
-                            LOG.info("Removed EVC Source {}", data.getUniSource());
-                            List<UniDest> uniDestLst = data.getUniDest();
-                            for (UniDest uniDest : uniDestLst) {
-                                InstanceIdentifier<?> iidUni = uniDest.getUni();
-                                Optional<Node> optionalOvsdbNode =
-                                                   UnimgrUtils.readNode(dataBroker,
-                                                           LogicalDatastoreType.OPERATIONAL,
-                                                           iidUni);
-                                if (optionalOvsdbNode.isPresent()) {
-                                    Node ovsdbNode = optionalOvsdbNode.get();
-                                    List<TerminationPoint> termPointList = ovsdbNode.getTerminationPoint();
-                                    for(TerminationPoint termPoint : termPointList) {
-                                        deleteTerminationPoint(termPoint, ovsdbNode);
-                                    }
-                                }
-                            }
-                            LOG.info("Removed EVC Destination {}", data.getUniDest());
+        Map<InstanceIdentifier<?>, DataObject> originalData = changes.getOriginalData();
+        Set<InstanceIdentifier<?>> removedIids = changes.getRemovedPaths();
+        for (InstanceIdentifier<?> evcIid : removedIids) {
+            DataObject removedDataObject = originalData.get(evcIid);
+            if (removedDataObject instanceof Evc) {
+                Evc evc = (Evc)removedDataObject;
+                Optional<Node> optionalSourceUniNode = UnimgrUtils.readNode(dataBroker,
+                                                                             LogicalDatastoreType.OPERATIONAL,
+                                                                             evc.getUniSource()
+                                                                                .iterator()
+                                                                                .next()
+                                                                                .getUni());
+                Optional<Node> optionalDestinationUniNode = UnimgrUtils.readNode(dataBroker,
+                                                                                   LogicalDatastoreType.OPERATIONAL,
+                                                                                   evc.getUniDest()
+                                                                                      .iterator()
+                                                                                      .next()
+                                                                                      .getUni());
+                if (optionalSourceUniNode.isPresent()
+                        && optionalDestinationUniNode.isPresent()) {
+                    Node sourceUniNode = optionalSourceUniNode.get();
+                    Node destUniNode = optionalDestinationUniNode.get();
+                    UniAugmentation sourceUniAugmentation = sourceUniNode
+                                                                .getAugmentation(UniAugmentation.class);
+                    UniAugmentation destUniAugmentation = destUniNode
+                                                              .getAugmentation(UniAugmentation.class);
+                    InstanceIdentifier<Node> sourceOvsdbIid =
+                                                 sourceUniAugmentation
+                                                     .getOvsdbNodeRef()
+                                                     .getValue()
+                                                     .firstIdentifierOf(Node.class);
+                    InstanceIdentifier<Node> destOvsdbIid =
+                                                 destUniAugmentation
+                                                     .getOvsdbNodeRef()
+                                                     .getValue()
+                                                     .firstIdentifierOf(Node.class);
+                    Optional<Node> optionalSourceOvsdNode =
+                                       UnimgrUtils.readNode(dataBroker,
+                                                            LogicalDatastoreType.OPERATIONAL,
+                                                            sourceOvsdbIid);
+                    Optional<Node> optionalDestinationOvsdbNode =
+                                       UnimgrUtils.readNode(dataBroker,
+                                                            LogicalDatastoreType.OPERATIONAL,
+                                                            destOvsdbIid);
+                    if (optionalSourceOvsdNode.isPresent()
+                            && optionalDestinationOvsdbNode.isPresent()) {
+                        Node sourceOvsdbNode = optionalSourceOvsdNode.get();
+                        Node destinationOvsdbNode = optionalDestinationOvsdbNode.get();
+                        OvsdbNodeAugmentation sourceOvsdbNodeAugmentation =
+                                                  sourceOvsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+                        OvsdbNodeAugmentation destinationOvsdbNodeAugmentation =
+                                                  destinationOvsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+                        InstanceIdentifier<Node> sourceBridgeIid =
+                                                     sourceOvsdbNodeAugmentation
+                                                         .getManagedNodeEntry()
+                                                         .iterator()
+                                                         .next()
+                                                         .getBridgeRef()
+                                                         .getValue()
+                                                         .firstIdentifierOf(Node.class);
+                        InstanceIdentifier<Node> destinationBridgeIid =
+                                                     destinationOvsdbNodeAugmentation
+                                                         .getManagedNodeEntry()
+                                                         .iterator()
+                                                         .next()
+                                                         .getBridgeRef()
+                                                         .getValue()
+                                                         .firstIdentifierOf(Node.class);
+                        Optional<Node> optionalSourceBridgeNode = UnimgrUtils.readNode(dataBroker,
+                                                                                       LogicalDatastoreType.OPERATIONAL,
+                                                                                       sourceBridgeIid);
+                        Optional<Node>  optionalDestinationBridgeNode = UnimgrUtils.readNode(dataBroker,
+                                                                                             LogicalDatastoreType.OPERATIONAL,
+                                                                                             destinationBridgeIid);
+                        if (optionalSourceBridgeNode.isPresent()
+                                && optionalDestinationBridgeNode.isPresent()) {
+                            Node sourceBridgeNode = optionalSourceBridgeNode.get();
+                            Node destinationBridgeNode = optionalSourceBridgeNode.get();
+                            TpId sourceTp = sourceBridgeNode.getTerminationPoint().iterator().next().getTpId();
+                            TpId destTp = destinationBridgeNode.getTerminationPoint().iterator().next().getTpId();
+                            InstanceIdentifier<?> sourceTpIid = UnimgrMapper.getTerminationPointIid(sourceBridgeNode,
+                                                                                                    sourceTp);
+                            InstanceIdentifier<?> destinationTpIid = UnimgrMapper.getTerminationPointIid(destinationBridgeNode,
+                                                                                                         destTp);
+                            UnimgrUtils.deleteNode(dataBroker, sourceTpIid, LogicalDatastoreType.CONFIGURATION);
+                            UnimgrUtils.deleteNode(dataBroker, destinationTpIid, LogicalDatastoreType.CONFIGURATION);
+                            UnimgrUtils.deleteNode(dataBroker, sourceTpIid, LogicalDatastoreType.OPERATIONAL);
+                            UnimgrUtils.deleteNode(dataBroker, destinationTpIid, LogicalDatastoreType.OPERATIONAL);
+                        } else {
+                            LOG.info("Unable to retrieve the Ovsdb Bridge node source and/or destination.");
                         }
+                    } else {
+                        LOG.info("Unable to retrieve the Ovsdb node source and/or destination.");
                     }
+                } else {
+                    LOG.info("Unable to retrieve the Uni source and/or destination.");
                 }
             }
         }
-    }
-
-    private boolean deleteTerminationPoint(TerminationPoint termPoint, Node ovsdbNode) {
-        boolean result = false;
-        InstanceIdentifier<TerminationPoint> terminationPointPath = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class,ovsdbNode.getKey())
-                .child(TerminationPoint.class, termPoint.getKey());
-        final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-        transaction.delete(LogicalDatastoreType.OPERATIONAL, terminationPointPath);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-        try {
-            future.checkedGet();
-            result = true;
-        } catch (TransactionCommitFailedException e) {
-            LOG.warn("Failed to delete {} ", terminationPointPath, e);
-        }
-        return result;
     }
 }
