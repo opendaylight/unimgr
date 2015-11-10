@@ -44,13 +44,13 @@ public class UniDeleteCommand extends AbstractDeleteCommand {
                                                                    LogicalDatastoreType.OPERATIONAL,
                                                                    removedUniIid);
                 if(uniAugmentation != null) {
-                    OvsdbNodeRef ovsNdRef = uniAugmentation.getOvsdbNodeRef();
-                    InstanceIdentifier<Node> iidNode = ovsNdRef.getValue().firstIdentifierOf(Node.class);
-                    Optional<Node> optNode = UnimgrUtils.readNode(dataBroker,
-                                                                  LogicalDatastoreType.OPERATIONAL,
-                                                                  iidNode);
-                    if (optNode.isPresent()) {
-                        Node ovsdbNode = optNode.get();
+                    OvsdbNodeRef ovsNodedRef = uniAugmentation.getOvsdbNodeRef();
+                    InstanceIdentifier<Node> ovsdbNodeIid = ovsNodedRef.getValue().firstIdentifierOf(Node.class);
+                    Optional<Node> optionalNode = UnimgrUtils.readNode(dataBroker,
+                                                                       LogicalDatastoreType.OPERATIONAL,
+                                                                       ovsdbNodeIid);
+                    if (optionalNode.isPresent()) {
+                        Node ovsdbNode = optionalNode.get();
                         InstanceIdentifier<Node> bridgeIid = UnimgrMapper.getOvsdbBridgeNodeIid(ovsdbNode);
                             UnimgrUtils.deleteNode(dataBroker,
                                                    bridgeIid,
