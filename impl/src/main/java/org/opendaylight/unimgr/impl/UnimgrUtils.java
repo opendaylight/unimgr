@@ -88,6 +88,13 @@ public class UnimgrUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(UnimgrUtils.class);
 
+    /**
+     * Creates and submit a Bridge Node to the Configuration Data Store.
+     * @param dataBroker The Data Broker Instance to create a transaction
+     * @param ovsdbNode The OVSDB node
+     * @param uni The UNI linked to the OVSDB node
+     * @param bridgeName The bridge name (example: br0)
+     */
     public static void createBridgeNode(DataBroker dataBroker,
                                         Node ovsdbNode,
                                         UniAugmentation uni,
@@ -116,6 +123,13 @@ public class UnimgrUtils {
         }
     }
 
+    /**
+     * Creates and submit a Bridge Node to the Configuration Data Store.
+     * @param dataBroker The Data Broker Instance to create a transaction
+     * @param ovsdbNodeIid The OVSDB node Instance Identifier
+     * @param uni The UNI linked to the OVSDB node
+     * @param bridgeName The bridge name (example: br0)
+     */
     public static void createBridgeNode(DataBroker dataBroker,
                                         InstanceIdentifier<Node> ovsdbNodeIid,
                                         UniAugmentation uni,
@@ -152,6 +166,12 @@ public class UnimgrUtils {
         }
     }
 
+    /**
+     * Creates a List of Controller Entry to be used when adding controllers
+     * to a Bridge.
+     * @param targetString The URI in string format of the Controller Entry
+     * @return A List of Controller Entry to be used when adding controllers
+     */
     public static List<ControllerEntry> createControllerEntries(String targetString) {
         List<ControllerEntry> controllerEntries = new ArrayList<ControllerEntry>();
         ControllerEntryBuilder controllerEntryBuilder = new ControllerEntryBuilder();
@@ -160,6 +180,15 @@ public class UnimgrUtils {
         return controllerEntries;
     }
 
+    /**
+     * Creates a submit a GRE tunnel to the Configuration DataStore.
+     * @param dataBroker An instance of the Data Broker to create a transaction
+     * @param source The source UNI
+     * @param destination The destination UNI
+     * @param bridgeNode The bridge Node
+     * @param bridgeName The bridge name (example br0)
+     * @param portName The Port Name (example: eth0)
+     */
     public static void createGreTunnel(DataBroker dataBroker,
                                        Uni source,
                                        Uni destination,
@@ -191,6 +220,10 @@ public class UnimgrUtils {
         transaction.submit();
     }
 
+    /**
+     * Utility function used to create a protocol entry when creating a bridge node.
+     * @return A List of protocol entry
+     */
     public static List<ProtocolEntry> createMdsalProtocols() {
         List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
         ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
@@ -200,6 +233,12 @@ public class UnimgrUtils {
         return protocolList;
     }
 
+    /**
+     * Creates a Bridge Augmentation by using a UNI
+     * @param uni Contains data used to create the augmentation
+     * @return A Built OvsdbBridgeAugmentation with data.
+     * @throws Exception if the Ovsdb Node Reference cannot be found.
+     */
     public static OvsdbBridgeAugmentation createOvsdbBridgeAugmentation(Uni uni) throws Exception {
         OvsdbNodeRef ovsdbNodeRef = uni.getOvsdbNodeRef();
         if (ovsdbNodeRef != null && ovsdbNodeRef.getValue() != null) {
@@ -217,6 +256,12 @@ public class UnimgrUtils {
         }
     }
 
+    /**
+     * Creates a submit an OvsdbNode to the Configuration DataStore.
+     * @param dataBroker The instance of the Data Broker to create transactions.
+     * @param ovsdbNodeId The Ovsdb Node Id to use on creation
+     * @param uni The UNI's data
+     */
     public static void createOvsdbNode(DataBroker dataBroker,
                                        NodeId ovsdbNodeId,
                                        Uni uni) {
@@ -239,6 +284,12 @@ public class UnimgrUtils {
         }
     }
 
+    /**
+     * Creates and submit an OvsdbNode by using the Data contained in the UniAugmentation
+     * @param dataBroker The instance of the DataBroker to create transactions
+     * @param uni The UNI's data
+     * @return The instance of the Node
+     */
     public static Node createOvsdbNode(DataBroker dataBroker,
                                        UniAugmentation uni) {
         NodeId ovsdbNodeId = new NodeId(createOvsdbNodeId(uni.getIpAddress()));
@@ -263,6 +314,11 @@ public class UnimgrUtils {
         return null;
     }
 
+    /**
+     * Creates and Build the data for an OvsdbNodeAugmentation.
+     * @param uni The UNI"s data
+     * @return The built OsvdbNodeAugmentation
+     */
     public static OvsdbNodeAugmentation createOvsdbNodeAugmentation(Uni uni) {
         ConnectionInfo connectionInfos = new ConnectionInfoBuilder()
                                                 .setRemoteIp(uni.getIpAddress())
@@ -273,6 +329,11 @@ public class UnimgrUtils {
         return ovsdbNode;
     }
 
+    /**
+     * Creates an OVSDB node Id with an IP Address.
+     * @param ipAddress The IP address of the UNI (therefo the OVSDB node)
+     * @return A NodeId for a Specific Ovsdb Node Id
+     */
     public static NodeId createOvsdbNodeId(IpAddress ipAddress) {
         String nodeId = UnimgrConstants.OVSDB_PREFIX
                         + ipAddress.getIpv4Address().getValue().toString()
@@ -281,6 +342,11 @@ public class UnimgrUtils {
         return new NodeId(nodeId);
     }
 
+    /**
+     * Creates a built OvsdbTerminationAugmentation with data
+     * @param uni The UNI's data
+     * @return A Built OvsdbTerminationPointAugmentation with data
+     */
     public static OvsdbTerminationPointAugmentation createOvsdbTerminationPointAugmentation(Uni uni) {
         // we will use nodeId to set interface port id
         VlanId vlanID = new VlanId(1);
@@ -292,6 +358,16 @@ public class UnimgrUtils {
         return terminationPoint;
     }
 
+    /**
+     * Creates and Submit a termination point Node to the configuration DateStore.
+     * @param dataBroker The instance of the data broker to create transactions
+     * @param uni The UNI's data
+     * @param bridgeNode The Bridge node
+     * @param bridgeName The Bridge name (example: br0)
+     * @param portName The Port name (example: eth0)
+     * @param type The type of termination (example: gre) Refer to OVSDB_INTERFACE_TYPE_MAP
+     * to review the list of available Interface Types.
+     */
     public static void createTerminationPointNode(DataBroker dataBroker,
                                                   Uni uni,
                                                   Node bridgeNode,
@@ -318,6 +394,13 @@ public class UnimgrUtils {
         transaction.submit();
     }
 
+    /**
+     * Deletes a generic node
+     * @param dataBroker The instance of the data broker to create transactions
+     * @param store The DataStore where the delete
+     * @param path The path to delete
+     * @return An instance of a generic Data Object
+     */
     public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean delete(
             DataBroker dataBroker,
             final LogicalDatastoreType store,
@@ -335,6 +418,13 @@ public class UnimgrUtils {
         return result;
     }
 
+    /**
+     * Deletes a termination Point from the configuration data store.
+     * @param dataBroker The instance of the data broker to create transactions
+     * @param terminationPoint The Termination Point of the OVSDB bridge
+     * @param ovsdbNode The ovsdb Node
+     * @return A checked Future
+     */
     public static CheckedFuture<Void,
                                 TransactionCommitFailedException>
                                 deleteTerminationPoint(DataBroker dataBroker,
@@ -357,6 +447,12 @@ public class UnimgrUtils {
         return future;
     }
 
+    /**
+     * Generic function to delete a node on a specific dataStore
+     * @param dataBroker The instance of the data broker to create transactions.
+     * @param genericNode The instance identifier of a generic node
+     * @param store The dataStore where to send and submit the delete call.
+     */
     public static void deleteNode(DataBroker dataBroker,
                                   InstanceIdentifier<?> genericNode,
                                   LogicalDatastoreType store) {
@@ -370,6 +466,12 @@ public class UnimgrUtils {
         }
     }
 
+    /**
+     * Extract a data object by using its instance indentifier and it's class type.
+     * @param changes Data Change object
+     * @param klazz Class type
+     * @return The extracted DataObject as an Object casted as the class type
+     */
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extract(
             Map<InstanceIdentifier<?>, DataObject> changes, Class<T> klazz) {
         Map<InstanceIdentifier<T>,T> result = new HashMap<InstanceIdentifier<T>,T>();
@@ -390,11 +492,23 @@ public class UnimgrUtils {
         return result;
     }
 
+    /**
+     * Extract original data from the data store.
+     * @param changes The dataChange object
+     * @param klazz The class type
+     * @return The DataObject casted as a Class type
+     */
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractOriginal(
             AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
         return extract(changes.getOriginalData(),klazz);
     }
 
+    /**
+     * Extracts the removed nodes
+     * @param changes he dataChange object
+     * @param klazz The class type
+     * @return A set to removed nodes as DataObject casted as the class type
+     */
     public static <T extends DataObject> Set<InstanceIdentifier<T>> extractRemoved(
             AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
         Set<InstanceIdentifier<T>> result = new HashSet<InstanceIdentifier<T>>();
@@ -410,6 +524,12 @@ public class UnimgrUtils {
         return result;
     }
 
+    /**
+     * Search the Operational Datastore for a specific OvsdbNode.
+     * @param dataBroker The dataBroker instance to create transactions
+     * @param uni The UNI's data
+     * @return The Optional OvsdbNode
+     */
     public static Optional<Node> findOvsdbNode(DataBroker dataBroker,
                                                UniAugmentation uni) {
         List<Node> ovsdbNodes = getOvsdbNodes(dataBroker);
@@ -431,6 +551,12 @@ public class UnimgrUtils {
         return Optional.absent();
     }
 
+    /**
+     * Search the Operation DataStore for a specific UNI
+     * @param dataBroker The dataBroker instance to create transactions
+     * @param ipAddress The IP address of the UNI
+     * @return An Optional UNI Node
+     */
     public static Optional<Node> findUniNode(DataBroker dataBroker,
                                              IpAddress ipAddress) {
         List<Node> uniNodes = getUniNodes(dataBroker);
@@ -446,6 +572,13 @@ public class UnimgrUtils {
         return Optional.absent();
     }
 
+    /**
+     * Retrieves the connection information from an Ovsdb Connection by
+     * using the Ovsdb Node Id
+     * @param dataBroker The dataBroker instance to create transactions
+     * @param ovsdbNodeId The NodeId of the OVSDB node
+     * @return The ConnectionInfo object
+     */
     public static ConnectionInfo getConnectionInfo(DataBroker dataBroker,
                                                    NodeId ovsdbNodeId) {
         InstanceIdentifier<Node> nodeIid = UnimgrMapper.getOvsdbNodeIid(ovsdbNodeId);
@@ -463,8 +596,12 @@ public class UnimgrUtils {
         }
     }
 
-    public static List<Link> getEvcLinks(DataBroker dataBroker,
-                                         IpAddress ipAddress) {
+    /**
+     * Retrieve the list of links in the Operational DataStore
+     * @param dataBroker The dataBroker instance to create transactions
+     * @return A list of Links retrieved from the Operational DataStore
+     */
+    public static List<Link> getEvcLinks(DataBroker dataBroker) {
         List<Link> evcLinks = new ArrayList<>();
         InstanceIdentifier<Topology> evcTopology = UnimgrMapper.getEvcTopologyIid();
         Topology topology = UnimgrUtils.read(dataBroker,
@@ -481,6 +618,10 @@ public class UnimgrUtils {
         return evcLinks;
     }
 
+    /**
+     * Retrieve the Local IP of the controller
+     * @return The LocalIp object of the Controller
+     */
     public static IpAddress getLocalIp() {
         String ip;
         try {
@@ -494,6 +635,11 @@ public class UnimgrUtils {
         return new IpAddress(UnimgrConstants.LOCAL_IP);
     }
 
+    /**
+     * Retrieve a list of Ovsdb Nodes from the Operational DataStore
+     * @param dataBroker The dataBroker instance to create transactions
+     * @return The Ovsdb Node retrieved from the Operational DataStore
+     */
     public static List<Node> getOvsdbNodes(DataBroker dataBroker) {
         List<Node> ovsdbNodes = new ArrayList<>();
         InstanceIdentifier<Topology> ovsdbTopoIdentifier = UnimgrMapper.getOvsdbTopologyIid();
@@ -511,6 +657,11 @@ public class UnimgrUtils {
         return ovsdbNodes;
     }
 
+    /**
+     * Retrieve a list of Uni Nodes from the Configuration DataStore
+     * @param dataBroker The dataBroker instance to create transactions
+     * @return A list of Uni Nodes from the Config dataStore
+     */
     public static List<Node> getUniNodes(DataBroker dataBroker) {
         List<Node> uniNodes = new ArrayList<>();
         InstanceIdentifier<Topology> topologyInstanceIdentifier = UnimgrMapper.getUniTopologyIid();
@@ -528,6 +679,12 @@ public class UnimgrUtils {
         return uniNodes;
     }
 
+    /**
+     * Retrieve a list of Uni Nodes on a specific DataStore
+     * @param dataBroker The dataBroker instance to create transactions
+     * @param store The store to which to send the read request
+     * @return A List of UNI Nodes.
+     */
     public static List<Node> getUniNodes(DataBroker dataBroker,
                                          LogicalDatastoreType store) {
         List<Node> uniNodes = new ArrayList<>();
@@ -546,6 +703,14 @@ public class UnimgrUtils {
         return uniNodes;
     }
 
+    /**
+     * Read a specific datastore type and return a DataObject as a casted
+     * class type Object.
+     * @param dataBroker The dataBroker instance to create transactions
+     * @param store The store type to query
+     * @param path The generic path to query
+     * @return The DataObject as a casted Object
+     */
     public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> D read(
             DataBroker dataBroker,
             final LogicalDatastoreType store,
@@ -569,6 +734,12 @@ public class UnimgrUtils {
         return result;
     }
 
+    /**
+     * Read a specific node from the Operational Data store by default.
+     * @param dataBroker The dataBroker instance to create transactions
+     * @param genericNode The Instance Identifier of the Node
+     * @return The Optional Node instance
+     */
     @Deprecated
     public static final Optional<Node> readNode(DataBroker dataBroker,
                                                 InstanceIdentifier<?> genericNode) {
@@ -585,6 +756,13 @@ public class UnimgrUtils {
         return Optional.absent();
     }
 
+    /**
+     * Read a specific Link from a specific datastore
+     * @param dataBroker The dataBroker instance to create transactions
+     * @param store The datastore type.
+     * @param genericNode The Instance Identifier of the Link
+     * @return An Optional Link instance
+     */
     public static final Optional<Link> readLink(DataBroker dataBroker,
                                                 LogicalDatastoreType store,
                                                 InstanceIdentifier<?> genericNode) {
@@ -599,6 +777,13 @@ public class UnimgrUtils {
         return Optional.absent();
     }
 
+    /**
+     * Read a specific node from a specific data store type.
+     * @param dataBroker The dataBroker instance to create transactions
+     * @param store The data store type
+     * @param genericNode The Instance Identifier of a specific Node
+     * @return An Optional Node instance
+     */
     public static final Optional<Node> readNode(DataBroker dataBroker,
                                                 LogicalDatastoreType store,
                                                 InstanceIdentifier<?> genericNode) {
@@ -614,6 +799,14 @@ public class UnimgrUtils {
         return Optional.absent();
     }
 
+    /**
+     * Updates a specific Uni Node on a specific DataStore type
+     * @param dataStore The datastore type
+     * @param uniKey The UNI key
+     * @param uni The Uni's data
+     * @param ovsdbNode The Ovsdb Node
+     * @param dataBroker The dataBroker instance to create transactions
+     */
     public static void updateUniNode(LogicalDatastoreType dataStore,
                                      InstanceIdentifier<?> uniKey,
                                      UniAugmentation uni,
@@ -640,6 +833,14 @@ public class UnimgrUtils {
         }
     }
 
+    /**
+     * Update a specific UNI node on a specific datastore type
+     * @param dataStore The datastore type
+     * @param uniKey The UNI key
+     * @param uni The Uni's data
+     * @param ovsdbNodeIid The Ovsdb Node Instance Identifier
+     * @param dataBroker The dataBroker instance to create transactions
+     */
     public static void updateUniNode(LogicalDatastoreType dataStore,
                                      InstanceIdentifier<?> uniKey,
                                      UniAugmentation uni,
@@ -665,6 +866,15 @@ public class UnimgrUtils {
         }
     }
 
+    /**
+     * Updates a specific EVC into a specific DataStore type
+     * @param dataStore The datastore type
+     * @param evcKey The EVC key
+     * @param evcAugmentation The EVC's data
+     * @param sourceUniIid The Source Uni Instance Identifier
+     * @param destinationUniIid The destination Uni Instance Identifier
+     * @param dataBroker The dataBroker instance to create transactions
+     */
     public static void updateEvcNode(LogicalDatastoreType dataStore,
                                      InstanceIdentifier<?> evcKey,
                                      EvcAugmentation evcAugmentation,

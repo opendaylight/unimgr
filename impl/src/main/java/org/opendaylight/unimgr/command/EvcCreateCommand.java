@@ -55,6 +55,8 @@ public class EvcCreateCommand extends AbstractCreateCommand {
                 }
                 InstanceIdentifier<Node> sourceUniIid;
                 InstanceIdentifier<Node> destinationUniIid;
+                //FIXME we are assuming that there is only 1 UNI source and destination
+                // per evc
                 if (evc.getUniSource().iterator().next().getUni() != null) {
                     sourceUniIid = evc.getUniSource().iterator().next().getUni().firstIdentifierOf(Node.class);
                 } else {
