@@ -52,7 +52,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Evc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
@@ -66,7 +65,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.r
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSourceKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
@@ -359,37 +357,16 @@ public class UnimgrUtils {
         return future;
     }
 
-    public static CheckedFuture<Void,
-                                TransactionCommitFailedException>
-                                deleteNode(DataBroker dataBroker,
-                                           InstanceIdentifier<?> genericNode,
-                                           LogicalDatastoreType store) {
+    public static void deleteNode(DataBroker dataBroker,
+                                  InstanceIdentifier<?> genericNode,
+                                  LogicalDatastoreType store) {
         LOG.info("Received a request to delete node {}", genericNode);
         WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
         transaction.delete(store, genericNode);
-        return transaction.submit();
-    }
-
-    public static void deletePath(DataBroker dataBroker, LogicalDatastoreType dataStoreType, InstanceIdentifier<?> iid) {
-        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-        transaction.delete(dataStoreType, iid);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
         try {
-            future.checkedGet();
+            transaction.submit().checkedGet();
         } catch (TransactionCommitFailedException e) {
-            LOG.warn("Failed to delete iidNode {} {}", e.getMessage(), iid);
-        }
-    }
-
-    public static void deletePath(DataBroker dataBroker, InstanceIdentifier<?> iid) {
-        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-        transaction.delete(LogicalDatastoreType.OPERATIONAL, iid);
-        transaction.delete(LogicalDatastoreType.CONFIGURATION, iid);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-        try {
-            future.checkedGet();
-        } catch (TransactionCommitFailedException e) {
-            LOG.warn("Failed to delete iidNode {} {}", e.getMessage(), iid);
+            LOG.error("Unable to remove node with Iid {} from store {}.", genericNode, store);
         }
     }
 

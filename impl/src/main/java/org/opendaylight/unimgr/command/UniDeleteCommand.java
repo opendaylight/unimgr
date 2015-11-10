@@ -12,7 +12,6 @@ import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
 import org.opendaylight.unimgr.impl.UnimgrUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
@@ -37,25 +36,33 @@ public class UniDeleteCommand extends AbstractDeleteCommand {
 
     @Override
     public void execute() {
-        Set<InstanceIdentifier<UniAugmentation>> removedUnis = UnimgrUtils.extractRemoved(changes, UniAugmentation.class);
+        Set<InstanceIdentifier<UniAugmentation>> removedUnis = UnimgrUtils.extractRemoved(changes,
+                                                                                          UniAugmentation.class);
         if (!removedUnis.isEmpty()) {
             for (InstanceIdentifier<UniAugmentation> removedUniIid: removedUnis) {
-                UniAugmentation uniAug = UnimgrUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, removedUniIid);
-                if(uniAug != null) {
-                    LOG.info("Uni Augmentation present.");
-                    OvsdbNodeRef ovsNdRef = uniAug.getOvsdbNodeRef();
+                UniAugmentation uniAugmentation = UnimgrUtils.read(dataBroker,
+                                                                   LogicalDatastoreType.OPERATIONAL,
+                                                                   removedUniIid);
+                if(uniAugmentation != null) {
+                    OvsdbNodeRef ovsNdRef = uniAugmentation.getOvsdbNodeRef();
                     InstanceIdentifier<Node> iidNode = ovsNdRef.getValue().firstIdentifierOf(Node.class);
-                    Optional<Node> optNode = UnimgrUtils.readNode(dataBroker, LogicalDatastoreType.OPERATIONAL, iidNode);
+                    Optional<Node> optNode = UnimgrUtils.readNode(dataBroker,
+                                                                  LogicalDatastoreType.OPERATIONAL,
+                                                                  iidNode);
                     if (optNode.isPresent()) {
                         Node ovsdbNode = optNode.get();
-                        InstanceIdentifier<Node> iidBridgeNode = UnimgrMapper.getOvsdbBridgeNodeIid(ovsdbNode);
-                        UnimgrUtils.deletePath(dataBroker, iidBridgeNode);
-                        LOG.info("Received a request to remove a UNI BridgeNode ", iidBridgeNode);
+                        InstanceIdentifier<Node> bridgeIid = UnimgrMapper.getOvsdbBridgeNodeIid(ovsdbNode);
+                            UnimgrUtils.deleteNode(dataBroker,
+                                                   bridgeIid,
+                                                   LogicalDatastoreType.CONFIGURATION);
                     }
-                    LOG.info("Received a request to remove an UNI ", removedUniIid);
-                    UnimgrUtils.deletePath(dataBroker, LogicalDatastoreType.OPERATIONAL, removedUniIid);
+                    UnimgrUtils.deleteNode(dataBroker,
+                                           removedUniIid,
+                                           LogicalDatastoreType.OPERATIONAL);
                 }
-                else {LOG.info("Received Uni Augmentation is null", removedUniIid);}
+                else {
+                    LOG.info("Received Uni Augmentation is null", removedUniIid);
+                }
             }
         }
     }
