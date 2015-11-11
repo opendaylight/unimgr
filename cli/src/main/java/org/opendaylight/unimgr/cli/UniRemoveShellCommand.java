@@ -11,14 +11,15 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 
 @Command(name = "remove", scope = "uni", description = "Removes an Uni from the controller.")
 public class UniRemoveShellCommand extends OsgiCommandSupport {
 
     protected IUnimgrConsoleProvider provider;
 
-    @Argument(index = 0, name = "id", description = "Uni Id", required = true, multiValued = false)
-    String id;
+    @Argument(index = 0, name = "ip", description = "Uni ipAddress", required = true, multiValued = false)
+    String ipAddress;
 
     public UniRemoveShellCommand(IUnimgrConsoleProvider provider) {
         this.provider = provider;
@@ -26,7 +27,8 @@ public class UniRemoveShellCommand extends OsgiCommandSupport {
 
     @Override
     protected Object doExecute() throws Exception {
-        if (provider.removeUni(id)) {
+        IpAddress ipAddre = new IpAddress(ipAddress.toCharArray());
+        if (provider.removeUni(ipAddre)) {
             return String.format("Uni successfully removed");
         } else {
             return String.format("Error removing Uni");

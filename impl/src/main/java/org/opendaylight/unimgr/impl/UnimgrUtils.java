@@ -359,6 +359,44 @@ public class UnimgrUtils {
     }
 
     /**
+     * Creates and submit an UNI Node by using the Data contained in the UniAugmentation
+     * @param dataBroker The instance of the DataBroker to create transactions
+     * @param uni The UNI's data
+     * @return The instance of the UNI Node
+     */
+    public static boolean createUniNode(DataBroker dataBroker, UniAugmentation uni) {
+        NodeId uniNodeId = new NodeId(createUniNodeId(uni.getIpAddress()));
+        boolean result = false;
+        try {
+            InstanceIdentifier<Node> uniNodeIid = UnimgrMapper.getUniNodeIid(uniNodeId);
+            NodeKey uniNodeKey = new NodeKey(uniNodeId);
+            Node nodeData = new NodeBuilder()
+                                .setNodeId(uniNodeId)
+                                .setKey(uniNodeKey)
+                                .addAugmentation(UniAugmentation.class, uni)
+                                .build();
+            WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+            transaction.put(LogicalDatastoreType.CONFIGURATION, uniNodeIid, nodeData);
+            CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+            future.checkedGet();
+            result = true;
+            LOG.info("Created and submitted a new Uni node {}", nodeData.getNodeId());
+        } catch (Exception e) {
+            LOG.error("Exception while creating Uni Node" + "Uni Node Id: {}", uniNodeId);
+        }
+        return result;
+    }
+
+    /**
+     * Creates an UNI node Id with an IP Address.
+     * @param ipAddress The IP address of the UNI
+     * @return A NodeId for a Specific UNI Node Id
+     */
+    public static NodeId createUniNodeId(IpAddress ipAddress) {
+        return new NodeId(UnimgrConstants.UNI_PREFIX + ipAddress.getIpv4Address().getValue().toString());
+    }
+
+    /**
      * Creates and Submit a termination point Node to the configuration DateStore.
      * @param dataBroker The instance of the data broker to create transactions
      * @param uni The UNI's data
