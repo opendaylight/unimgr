@@ -14,12 +14,16 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
 import org.opendaylight.unimgr.command.TransactionInvoker;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Evc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -45,6 +49,9 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
 
     private DataBroker dataBroker;
     private ServiceRegistration<IUnimgrConsoleProvider> unimgrConsoleRegistration;
+
+    public UnimgrProvider() {
+    }
 
     @Override
     public void onSessionInitiated(ProviderContext session) {
@@ -128,32 +135,41 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
         if (uni.getIpAddress() == null || uni.getMacAddress() == null) {
             return false;
         }
-//        UniAugmentation uniAugmentation = new UniAugmentationBuilder()
-//                                                .setIpAddress(uni.getIpAddress())
-//                                                .setMacAddress(uni.getMacAddress())
-//                                                .build();
-//        ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
-//        InstanceIdentifier<Node> path = UnimgrMapper.getUniAugmentationIidByMac(uni.getMacAddress());
-        return true;
+        boolean result = false;
+        UniAugmentation uniAugmentation = new UniAugmentationBuilder(uni)
+                                                .build();
+        final ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
+        InstanceIdentifier<Uni> iidUni = InstanceIdentifier.create(Uni.class);
+        transaction.put(LogicalDatastoreType.CONFIGURATION, iidUni, uni);
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        try {
+            future.checkedGet();
+            result = true;
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Failed to Add Uni {}", uni);
+        }
+        return result;
     }
 
+
     @Override
-    public boolean removeUni(String uuid) {
+    public boolean removeUni(IpAddress ipAddress) {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public List<Uni> listUnis(boolean isConfigurationDatastore) {
+    public List<Uni> listUnis(LogicalDatastoreType dataStore) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Uni getUni(String uuid) {
+    public Uni getUni(IpAddress ipAddress) {
         // TODO Auto-generated method stub
         return null;
     }
+
 
     @Override
     public boolean removeEvc(String uuid) {

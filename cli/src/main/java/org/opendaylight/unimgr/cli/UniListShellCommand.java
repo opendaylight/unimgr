@@ -13,6 +13,7 @@ import java.util.List;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
 
@@ -35,7 +36,7 @@ public class UniListShellCommand extends OsgiCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
 
-        List<Uni> listUnis = provider.listUnis(isConfigurationData);
+        List<Uni> listUnis = provider.listUnis(LogicalDatastoreType.CONFIGURATION);
 
         if (listUnis.size() > 0) {
             StringBuilder sb = new StringBuilder();

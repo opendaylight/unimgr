@@ -9,6 +9,8 @@ package org.opendaylight.unimgr.api;
 
 import java.util.List;
 
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Evc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
 
@@ -16,11 +18,11 @@ public interface IUnimgrConsoleProvider extends AutoCloseable {
 
     boolean addUni(Uni uni);
 
-    boolean removeUni(String uuid);
+    boolean removeUni(IpAddress ipAddress);
 
-    List<Uni> listUnis(boolean isConfigurationDatastore);
+    List<Uni> listUnis(LogicalDatastoreType dataStore);
 
-    Uni getUni(String uuid);
+    Uni getUni(IpAddress ipAddress);
 
     boolean removeEvc(String uuid);
 
