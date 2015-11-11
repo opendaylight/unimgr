@@ -18,8 +18,10 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
 import org.opendaylight.unimgr.command.TransactionInvoker;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Evc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -46,6 +48,10 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
     private DataBroker dataBroker;
     private ServiceRegistration<IUnimgrConsoleProvider> unimgrConsoleRegistration;
 
+    public UnimgrProvider() {
+        LOG.info("Unimgr provider initialized");
+    }
+
     @Override
     public void onSessionInitiated(ProviderContext session) {
         LOG.info("UnimgrProvider Session Initiated");
@@ -55,10 +61,10 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
         invoker = new  TransactionInvoker();
 
         // Register the unimgr OSGi CLI
-        BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+        /*BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         unimgrConsoleRegistration = context.registerService(IUnimgrConsoleProvider.class,
                                                             this,
-                                                            null);
+                                                            null);*/
 
         // Register the uni data change listener
         listener = new UnimgrDataChangeListener(dataBroker, invoker);
@@ -123,37 +129,31 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
     }
 
     @Override
-    public boolean addUni(Uni uni) {
-        //TODO This code was left commented as an example
-        if (uni.getIpAddress() == null || uni.getMacAddress() == null) {
+    public boolean addUni(UniAugmentation uniAug) {
+        if (uniAug == null || uniAug.getIpAddress() == null || uniAug.getMacAddress() == null) {
             return false;
         }
-//        UniAugmentation uniAugmentation = new UniAugmentationBuilder()
-//                                                .setIpAddress(uni.getIpAddress())
-//                                                .setMacAddress(uni.getMacAddress())
-//                                                .build();
-//        ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
-//        InstanceIdentifier<Node> path = UnimgrMapper.getUniAugmentationIidByMac(uni.getMacAddress());
-        return true;
+        return UnimgrUtils.createUniNode(dataBroker, uniAug);
     }
 
     @Override
-    public boolean removeUni(String uuid) {
+    public boolean removeUni(IpAddress ipAddress) {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public List<Uni> listUnis(boolean isConfigurationDatastore) {
+    public List<Uni> listUnis(LogicalDatastoreType dataStore) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Uni getUni(String uuid) {
+    public Uni getUni(IpAddress ipAddress) {
         // TODO Auto-generated method stub
         return null;
     }
+
 
     @Override
     public boolean removeEvc(String uuid) {

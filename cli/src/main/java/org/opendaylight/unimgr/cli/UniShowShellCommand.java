@@ -11,6 +11,7 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
 
 @Command(name = "show", scope = "uni", description = "Shows detailed information about an uni.")
@@ -18,8 +19,8 @@ public class UniShowShellCommand extends OsgiCommandSupport {
 
     protected IUnimgrConsoleProvider provider;
 
-    @Argument(index = 0, name = "id", description = "Uni Id", required = true, multiValued = false)
-    String id;
+    @Argument(index = 0, name = "ip", description = "Uni ipAddress", required = true, multiValued = false)
+    String ipAddress;
 
     public UniShowShellCommand(IUnimgrConsoleProvider provider) {
         this.provider = provider;
@@ -28,7 +29,8 @@ public class UniShowShellCommand extends OsgiCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
         StringBuilder sb = new StringBuilder();
-        Uni uni = provider.getUni(id);
+        IpAddress ipAddre = new IpAddress(ipAddress.toCharArray());
+        Uni uni = provider.getUni(ipAddre);
 
         if (uni != null) {
             //sb.append(String.format("Uni Id: <%s>\n", uni.getUniId()));

@@ -24,6 +24,12 @@ module unimgr-impl {
     identity unimgr {
         base config:module-type;
         config:java-name-prefix Unimgr;
+        config:provided-service iunimgr-console-provider;
+    }
+
+    identity iunimgr-console-provider {
+        base config:service-type;
+        config:java-class "org.opendaylight.unimgr.api.IUnimgrConsoleProvider";
     }
 
     augment "/config:modules/config:module/config:configuration" {
