@@ -12,19 +12,26 @@ import java.util.List;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
 import org.opendaylight.unimgr.command.TransactionInvoker;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Evc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.framework.BundleContext;
@@ -45,6 +52,10 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
 
     private DataBroker dataBroker;
     private ServiceRegistration<IUnimgrConsoleProvider> unimgrConsoleRegistration;
+
+    public UnimgrProvider() {
+        LOG.info("Unimgr provider initialized");
+    }
 
     @Override
     public void onSessionInitiated(ProviderContext session) {
@@ -122,38 +133,60 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
         }
     }
 
-    @Override
-    public boolean addUni(Uni uni) {
-        //TODO This code was left commented as an example
-        if (uni.getIpAddress() == null || uni.getMacAddress() == null) {
-            return false;
-        }
-//        UniAugmentation uniAugmentation = new UniAugmentationBuilder()
-//                                                .setIpAddress(uni.getIpAddress())
-//                                                .setMacAddress(uni.getMacAddress())
-//                                                .build();
-//        ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
-//        InstanceIdentifier<Node> path = UnimgrMapper.getUniAugmentationIidByMac(uni.getMacAddress());
-        return true;
+    private OvsdbNodeRef createOvsdbNode(UniAugmentation uni) {
+        Node ovsdbNode = UnimgrUtils.createOvsdbNode(dataBroker, uni);
+        InstanceIdentifier<Node> ovsdbNodeIid = UnimgrMapper.getOvsdbNodeIid(ovsdbNode.getNodeId());
+        OvsdbNodeRef ovsdbNodeRef = new OvsdbNodeRef(ovsdbNodeIid);
+        return ovsdbNodeRef;
     }
 
     @Override
-    public boolean removeUni(String uuid) {
+    public boolean addUni(UniAugmentation uniAug) {
+        if (uniAug == null || uniAug.getIpAddress() == null || uniAug.getMacAddress() == null) {
+            return false;
+        }
+        LOG.warn("print ip " + uniAug.getIpAddress().getValue());
+        LOG.warn("print mac " + uniAug.getMacAddress().getValue());
+        LOG.warn("print speed " + uniAug.getSpeed().toString());
+        boolean result = false;
+        final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+      
+        InstanceIdentifier<UniAugmentation> iidUni = InstanceIdentifier.create(UniAugmentation.class);
+        UniAugmentation uni = new UniAugmentationBuilder(uniAug)
+                                  .setOvsdbNodeRef(createOvsdbNode(uniAug))
+                                  .build();
+        try {
+            Node nd = UnimgrUtils.readNode(dataBroker, LogicalDatastoreType.CONFIGURATION, uni.getOvsdbNodeRef().getValue()).get();
+            
+            LOG.warn("print nodeid " + nd.getNodeId().getValue());
+            transaction.put(LogicalDatastoreType.CONFIGURATION, iidUni, uni, true);
+            CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+            future.checkedGet();
+            result = true;
+        } catch (TransactionCommitFailedException | IllegalStateException e) {
+            LOG.warn("Failed to Add Uni {}", e.getMessage());
+        }
+        return result;
+    }
+
+    @Override
+    public boolean removeUni(IpAddress ipAddress) {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public List<Uni> listUnis(boolean isConfigurationDatastore) {
+    public List<Uni> listUnis(LogicalDatastoreType dataStore) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Uni getUni(String uuid) {
+    public Uni getUni(IpAddress ipAddress) {
         // TODO Auto-generated method stub
         return null;
     }
+
 
     @Override
     public boolean removeEvc(String uuid) {
