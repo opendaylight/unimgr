@@ -282,4 +282,19 @@ public class UnimgrMapper {
         return nodePath;
     }
 
+    /**
+     * Generates an Instance Identifier for a specific UNI node by
+     * using the node Id
+     * @param nodeId The node ID of a specific UNI node.
+     * @return An Instance Identifier for a specific UNI node.
+     */
+    public static InstanceIdentifier<Node> getUniNodeIid(NodeId nodeId) {
+    InstanceIdentifier<Node> nodePath = InstanceIdentifier
+                                            .create(NetworkTopology.class)
+                                            .child(Topology.class,
+                                                    new TopologyKey(UnimgrConstants.UNI_TOPOLOGY_ID))
+                                            .child(Node.class,
+                                                    new NodeKey(nodeId));
+    return nodePath;
+}
 }
