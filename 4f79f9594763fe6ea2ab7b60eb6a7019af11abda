@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7aade967_353a5a37",
+        "filename": "cli/src/main/java/org/opendaylight/unimgr/cli/UniListShellCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2015-11-13T13:37:28Z",
+      "side": 1,
+      "message": "yes the user should be able to choose between configurational and operational store. so -c for Config and -o will be for operational and the command name should change cause list is one of native commands in karaf. Actually I didn\u0027t work on that yet will do for next patch.",
+      "parentUuid": "7aade967_7a944137",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 83
+      },
+      "revId": "4f79f9594763fe6ea2ab7b60eb6a7019af11abda",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_daa2159a",
         "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/UnimgrProvider.java",
         "patchSetId": 4
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "7aade967_b545eab4",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/UnimgrProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2015-11-13T13:37:28Z",
+      "side": 1,
+      "message": "actually I didn\u0027t do that, but can u explain more why the other way is better ? is it because of register the service in the yang as the patch link?\n\nconfig:provided-service nic-console-provider;",
+      "parentUuid": "7aade967_daa2159a",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 67,
+        "endChar": 66
+      },
+      "revId": "4f79f9594763fe6ea2ab7b60eb6a7019af11abda",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_fa9fd14e",
         "filename": "impl/src/main/resources/OSGI-INF/blueprint/blueprint.xml",
         "patchSetId": 4
@@ -59,6 +107,30 @@
       "writtenOn": "2015-11-13T04:25:33Z",
       "side": 1,
       "message": "is this new blueprint useful?",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 4,
+        "endChar": 12
+      },
+      "revId": "4f79f9594763fe6ea2ab7b60eb6a7019af11abda",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_751772a4",
+        "filename": "impl/src/main/resources/OSGI-INF/blueprint/blueprint.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2015-11-13T13:37:28Z",
+      "side": 1,
+      "message": "yes its mandatory, without it the the commands in cli project couldn\u0027t find the unimgrProvider.",
+      "parentUuid": "7aade967_fa9fd14e",
       "range": {
         "startLine": 1,
         "startChar": 0,
