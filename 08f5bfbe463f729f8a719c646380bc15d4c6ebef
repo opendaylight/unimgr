@@ -16,6 +16,29 @@
       "revId": "08f5bfbe463f729f8a719c646380bc15d4c6ebef",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_3410124e",
+        "filename": "impl/src/main/config/default-config.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-11-16T20:46:31Z",
+      "side": 1,
+      "message": "/modules/module[type\u003d\u0027unimgr-impl\u0027][name\u003d\u0027unimgr-impl\u0027]",
+      "range": {
+        "startLine": 33,
+        "startChar": 52,
+        "endLine": 33,
+        "endChar": 58
+      },
+      "revId": "08f5bfbe463f729f8a719c646380bc15d4c6ebef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
