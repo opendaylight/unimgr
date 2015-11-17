@@ -742,6 +742,54 @@ public class UnimgrUtils {
     }
 
     /**
+     * Retrieve a list of Unis on a specific DataStore
+     * @param dataBroker instance to create transactions
+     * @param store to which send the read request
+     * @return A List of Unis.
+     */
+    public static List<UniAugmentation> getUnis(DataBroker dataBroker,
+                                         LogicalDatastoreType store) {
+        List<UniAugmentation> unis = new ArrayList<>();
+        InstanceIdentifier<Topology> topologyInstanceIdentifier = UnimgrMapper.getUniTopologyIid();
+        Topology topology = read(dataBroker,
+                                 store,
+                                 topologyInstanceIdentifier);
+        if (topology != null && topology.getNode() != null) {
+            for (Node node : topology.getNode()) {
+                UniAugmentation uniAugmentation = node.getAugmentation(UniAugmentation.class);
+                if (uniAugmentation != null) {
+                    unis.add(uniAugmentation);
+                }
+            }
+        }
+        return unis;
+    }
+
+    /**
+     * Retrieve a list of Unis on a specific DataStore
+     * @param dataBroker instance to create transactions
+     * @param store to which send the read request
+     * @param ipAddress of the required Uni
+     * @return uni.
+     */
+    public static UniAugmentation getUni(DataBroker dataBroker,
+                                         LogicalDatastoreType store, IpAddress ipAddress) {
+        InstanceIdentifier<Topology> topologyInstanceIdentifier = UnimgrMapper.getUniTopologyIid();
+        Topology topology = read(dataBroker,
+                                 store,
+                                 topologyInstanceIdentifier);
+        if (topology != null && topology.getNode() != null) {
+            for (Node node : topology.getNode()) {
+                UniAugmentation uniAugmentation = node.getAugmentation(UniAugmentation.class);
+                if (uniAugmentation != null && uniAugmentation.getIpAddress().getIpv4Address().getValue().equals(ipAddress.getIpv4Address().getValue())) {
+                    return uniAugmentation;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Read a specific datastore type and return a DataObject as a casted
      * class type Object.
      * @param dataBroker The dataBroker instance to create transactions

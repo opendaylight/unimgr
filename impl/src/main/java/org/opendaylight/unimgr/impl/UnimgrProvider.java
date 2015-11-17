@@ -20,7 +20,6 @@ import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
 import org.opendaylight.unimgr.command.TransactionInvoker;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Evc;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopologyBuilder;
@@ -143,15 +142,13 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
     }
 
     @Override
-    public List<Uni> listUnis(Boolean isConfigurationData) {
-        // TODO Auto-generated method stub
-        return null;
+    public List<UniAugmentation> listUnis(LogicalDatastoreType dataStoreType) {
+        return UnimgrUtils.getUnis(dataBroker, dataStoreType);
     }
 
     @Override
-    public Uni getUni(IpAddress ipAddress) {
-        // TODO Auto-generated method stub
-        return null;
+    public UniAugmentation getUni(IpAddress ipAddress) {
+        return UnimgrUtils.getUni(dataBroker, LogicalDatastoreType.CONFIGURATION, ipAddress);
     }
 
 

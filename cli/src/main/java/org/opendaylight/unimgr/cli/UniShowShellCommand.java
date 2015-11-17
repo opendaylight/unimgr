@@ -12,9 +12,9 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 
-@Command(name = "show", scope = "uni", description = "Shows detailed information about an uni.")
+@Command(name = "uni-show", scope = "uni", description = "Shows detailed information about an uni.")
 public class UniShowShellCommand extends OsgiCommandSupport {
 
     protected IUnimgrConsoleProvider provider;
@@ -30,12 +30,12 @@ public class UniShowShellCommand extends OsgiCommandSupport {
     protected Object doExecute() throws Exception {
         StringBuilder sb = new StringBuilder();
         IpAddress ipAddre = new IpAddress(ipAddress.toCharArray());
-        Uni uni = provider.getUni(ipAddre);
+        UniAugmentation uni = provider.getUni(ipAddre);
 
         if (uni != null) {
-            //sb.append(String.format("Uni Id: <%s>\n", uni.getUniId()));
-            sb.append(String.format("Physical medium: <%s>\n", uni.getPhysicalMedium()));
+            sb.append(String.format("Ip Address: <%s>\n", uni.getIpAddress().getIpv4Address().getValue()));
             sb.append(String.format("Mac address: <%s>\n", uni.getMacAddress()));
+            sb.append(String.format("Physical medium: <%s>\n", uni.getPhysicalMedium()));
             sb.append(String.format("Speed: " + uni.getSpeed() + "\n"));
             sb.append(String.format("Mode: <%s>\n", uni.getMode()));
             sb.append(String.format("Mac layer: <%s>\n", uni.getMacLayer()));
