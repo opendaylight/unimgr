@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_9a824f51",
+        "filename": "cli/src/main/java/org/opendaylight/unimgr/cli/UniListShellCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-11-17T13:39:23Z",
+      "side": 1,
+      "message": "either this can be removed",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 40
+      },
+      "revId": "26a6d05d9cb461ccaf7e8a7d90bf080490d90874",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_5a7cd772",
+        "filename": "cli/src/main/java/org/opendaylight/unimgr/cli/UniListShellCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-11-17T13:39:23Z",
+      "side": 1,
+      "message": "or this is isConfigurationData.\n\nIf I understand correctly, the user can only get the list a UNI under the DS/Config? Is that right?",
+      "range": {
+        "startLine": 39,
+        "startChar": 47,
+        "endLine": 39,
+        "endChar": 81
+      },
+      "revId": "26a6d05d9cb461ccaf7e8a7d90bf080490d90874",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
