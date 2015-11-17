@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7aade967_ba0aabd0",
+        "filename": "cli/src/main/java/org/opendaylight/unimgr/cli/UniListShellCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2015-11-17T14:59:30Z",
+      "side": 1,
+      "message": "okay will change this and do it in another patch",
+      "parentUuid": "7aade967_9a824f51",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 40
+      },
+      "revId": "26a6d05d9cb461ccaf7e8a7d90bf080490d90874",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_5a7cd772",
         "filename": "cli/src/main/java/org/opendaylight/unimgr/cli/UniListShellCommand.java",
         "patchSetId": 6
