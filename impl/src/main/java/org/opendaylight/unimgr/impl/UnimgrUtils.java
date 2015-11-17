@@ -491,17 +491,20 @@ public class UnimgrUtils {
      * @param genericNode The instance identifier of a generic node
      * @param store The dataStore where to send and submit the delete call.
      */
-    public static void deleteNode(DataBroker dataBroker,
+    public static boolean deleteNode(DataBroker dataBroker,
                                   InstanceIdentifier<?> genericNode,
                                   LogicalDatastoreType store) {
         LOG.info("Received a request to delete node {}", genericNode);
+        boolean result = false;
         WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
         transaction.delete(store, genericNode);
         try {
             transaction.submit().checkedGet();
+            return !result;
         } catch (TransactionCommitFailedException e) {
             LOG.error("Unable to remove node with Iid {} from store {}.", genericNode, store);
         }
+        return result;
     }
 
     /**

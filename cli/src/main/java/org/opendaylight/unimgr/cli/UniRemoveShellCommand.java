@@ -13,7 +13,7 @@ import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 
-@Command(name = "remove", scope = "uni", description = "Removes an Uni from the controller.")
+@Command(name = "uni-remove", scope = "uni", description = "Removes an Uni from the controller.")
 public class UniRemoveShellCommand extends OsgiCommandSupport {
 
     protected IUnimgrConsoleProvider provider;

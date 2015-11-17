@@ -56,9 +56,8 @@ public class UniDeleteCommand extends AbstractDeleteCommand {
                                                    bridgeIid,
                                                    LogicalDatastoreType.CONFIGURATION);
                     }
-                    UnimgrUtils.deleteNode(dataBroker,
-                                           removedUniIid,
-                                           LogicalDatastoreType.OPERATIONAL);
+                    InstanceIdentifier<Node> iidUni = UnimgrMapper.getUniIid(dataBroker, uniAugmentation.getIpAddress(), LogicalDatastoreType.OPERATIONAL);
+                    UnimgrUtils.deleteNode(dataBroker, iidUni, LogicalDatastoreType.OPERATIONAL);
                 }
                 else {
                     LOG.info("Received Uni Augmentation is null", removedUniIid);

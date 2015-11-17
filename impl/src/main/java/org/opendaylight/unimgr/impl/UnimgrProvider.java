@@ -26,6 +26,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.framework.BundleContext;
@@ -137,8 +138,11 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
 
     @Override
     public boolean removeUni(IpAddress ipAddress) {
-        // TODO Auto-generated method stub
-        return false;
+        InstanceIdentifier<Node> iidUni = UnimgrMapper.getUniIid(dataBroker, ipAddress, LogicalDatastoreType.CONFIGURATION);
+        if (iidUni == null)
+            return false;
+
+        return UnimgrUtils.deleteNode(dataBroker, iidUni, LogicalDatastoreType.CONFIGURATION);
     }
 
     @Override
