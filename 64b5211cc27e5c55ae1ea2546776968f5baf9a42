@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_9dba49e0",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/UnimgrUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 498,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-11-17T21:51:53Z",
+      "side": 1,
+      "message": "remove this",
+      "range": {
+        "startLine": 498,
+        "startChar": 8,
+        "endLine": 498,
+        "endChar": 31
+      },
+      "revId": "64b5211cc27e5c55ae1ea2546776968f5baf9a42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_fded7df0",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/UnimgrUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 503,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-11-17T21:51:53Z",
+      "side": 1,
+      "message": "true",
+      "range": {
+        "startLine": 503,
+        "startChar": 20,
+        "endLine": 503,
+        "endChar": 26
+      },
+      "revId": "64b5211cc27e5c55ae1ea2546776968f5baf9a42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_ddf0c1cb",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/UnimgrUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-11-17T21:51:53Z",
+      "side": 1,
+      "message": "false",
+      "range": {
+        "startLine": 507,
+        "startChar": 15,
+        "endLine": 507,
+        "endChar": 21
+      },
+      "revId": "64b5211cc27e5c55ae1ea2546776968f5baf9a42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
