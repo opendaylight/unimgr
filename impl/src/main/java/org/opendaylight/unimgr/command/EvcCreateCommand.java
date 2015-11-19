@@ -127,7 +127,7 @@ public class EvcCreateCommand extends AbstractCreateCommand {
                                                         uniDestination.getAugmentation(UniAugmentation.class),
                                                         sourceBr,
                                                         UnimgrConstants.DEFAULT_BRIDGE_NAME,
-                                                        "gre0");
+                                                        UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
                             UnimgrUtils.createTerminationPointNode(dataBroker, 
                                                                    uniSource.getAugmentation(UniAugmentation.class),
                                                                    destinationBr,
@@ -138,7 +138,7 @@ public class EvcCreateCommand extends AbstractCreateCommand {
                                                         uniDestination.getAugmentation(UniAugmentation.class),
                                                         uniSource.getAugmentation(UniAugmentation.class), destinationBr,
                                                         UnimgrConstants.DEFAULT_BRIDGE_NAME,
-                                                        "gre0");
+                                                        UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
                             UnimgrUtils.updateEvcNode(LogicalDatastoreType.CONFIGURATION,
                                                       evcKey,
                                                       evc,
