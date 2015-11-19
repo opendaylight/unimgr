@@ -29,7 +29,7 @@ public class UnimgrConstants {
 
     public static final Ipv4Address LOCAL_IP = new Ipv4Address("127.0.0.1");
 
-    public static final String DEFAULT_BRIDGE_NAME = "br0";
+    public static final String DEFAULT_BRIDGE_NAME = "ovsbr0";
 
 //    public static final String DEFAULT_BRIDGE2_NAME = "br2";
 
@@ -40,4 +40,6 @@ public class UnimgrConstants {
     public static final String DEFAULT_TUNNEL_IFACE = "eth1";
 
     public static final String DEFAULT_GRE_NAME = "gre";
+
+    public static final String DEFAULT_GRE_TUNNEL_NAME = "gre1";
 }

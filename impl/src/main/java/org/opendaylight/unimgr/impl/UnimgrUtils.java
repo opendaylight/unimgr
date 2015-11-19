@@ -433,6 +433,37 @@ public class UnimgrUtils {
     }
 
     /**
+     * Creates and Submit a termination point Node without specifying its interface type.
+     * @param dataBroker The instance of the data broker to create transactions
+     * @param uni The UNI's data
+     * @param bridgeNode The Bridge node
+     * @param bridgeName The Bridge name (example: br0)
+     * @param portName The Port name (example: eth0)
+     */
+    public static void createTerminationPointNode(DataBroker dataBroker,
+                                                  Uni uni,
+                                                  Node bridgeNode,
+                                                  String bridgeName,
+                                                  String portName) {
+        InstanceIdentifier<TerminationPoint> tpIid = UnimgrMapper
+                                                        .getTerminationPointIid(bridgeNode,
+                                                                                portName);
+        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder =
+                                                     new OvsdbTerminationPointAugmentationBuilder();
+        tpAugmentationBuilder.setName(portName);
+        tpAugmentationBuilder.setInterfaceType(null);
+        TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
+        tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
+        tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class,
+                                  tpAugmentationBuilder.build());
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        transaction.put(LogicalDatastoreType.CONFIGURATION,
+                        tpIid,
+                        tpBuilder.build());
+        transaction.submit();
+    }
+
+    /**
      * Deletes a generic node
      * @param dataBroker The instance of the data broker to create transactions
      * @param store The DataStore where the delete
