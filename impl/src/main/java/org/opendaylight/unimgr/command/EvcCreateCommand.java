@@ -41,9 +41,6 @@ public class EvcCreateCommand extends AbstractCreateCommand {
             if (created.getValue() != null && created.getValue() instanceof EvcAugmentation) {
                 EvcAugmentation evc = (EvcAugmentation) created.getValue();
                 InstanceIdentifier<?> evcKey = created.getKey();
-                LOG.trace("New EVC created, source IP: {} destination IP {}.",
-                        evc.getUniSource().iterator().next().getIpAddress().getIpv4Address(),
-                        evc.getUniDest().iterator().next().getIpAddress().getIpv4Address());
                 // For now, we assume that there is 1 uni per source/destination
                 if (evc.getUniDest() == null || evc.getUniDest().isEmpty()) {
                     LOG.error("Destination UNI cannot be null.");
@@ -53,19 +50,24 @@ public class EvcCreateCommand extends AbstractCreateCommand {
                     LOG.error("Source UNI cannot be null.");
                     break;
                 }
+                LOG.trace("New EVC created, source IP: {} destination IP {}.",
+                        evc.getUniSource().iterator().next().getIpAddress().getIpv4Address(),
+                        evc.getUniDest().iterator().next().getIpAddress().getIpv4Address());
                 InstanceIdentifier<Node> sourceUniIid;
                 InstanceIdentifier<Node> destinationUniIid;
                 //FIXME we are assuming that there is only 1 UNI source and destination
                 // per evc
-                if (evc.getUniSource().iterator().next().getUni() != null) {
-                    sourceUniIid = evc.getUniSource().iterator().next().getUni().firstIdentifierOf(Node.class);
+                InstanceIdentifier<?> iidSource = evc.getUniSource().iterator().next().getUni();
+                if (iidSource != null) {
+                    sourceUniIid = iidSource.firstIdentifierOf(Node.class);
                 } else {
                     sourceUniIid = UnimgrMapper.getUniIid(dataBroker,
                                                           evc.getUniSource().iterator().next().getIpAddress(),
                                                           LogicalDatastoreType.OPERATIONAL);
                 }
-                if (evc.getUniDest().iterator().next().getUni() != null) {
-                    destinationUniIid = evc.getUniDest().iterator().next().getUni().firstIdentifierOf(Node.class);
+                InstanceIdentifier<?> iidDest = evc.getUniDest().iterator().next().getUni();
+                if (iidDest != null) {
+                    destinationUniIid = iidDest.firstIdentifierOf(Node.class);
                 } else {
                     destinationUniIid = UnimgrMapper.getUniIid(dataBroker,
                                                                evc.getUniDest().iterator().next().getIpAddress(),
@@ -120,25 +122,23 @@ public class EvcCreateCommand extends AbstractCreateCommand {
                                                                    uniSource.getAugmentation(UniAugmentation.class),
                                                                    sourceBr,
                                                                    UnimgrConstants.DEFAULT_BRIDGE_NAME,
-                                                                   UnimgrConstants.DEFAULT_TUNNEL_IFACE,
-                                                                   UnimgrConstants.DEFAULT_GRE_NAME);
+                                                                   UnimgrConstants.DEFAULT_TUNNEL_IFACE);
                             UnimgrUtils.createGreTunnel(dataBroker,
                                                         uniSource.getAugmentation(UniAugmentation.class),
                                                         uniDestination.getAugmentation(UniAugmentation.class),
                                                         sourceBr,
                                                         UnimgrConstants.DEFAULT_BRIDGE_NAME,
-                                                        "gre0");
+                                                        UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
                             UnimgrUtils.createTerminationPointNode(dataBroker, 
                                                                    uniSource.getAugmentation(UniAugmentation.class),
                                                                    destinationBr,
                                                                    UnimgrConstants.DEFAULT_BRIDGE_NAME,
-                                                                   UnimgrConstants.DEFAULT_TUNNEL_IFACE,
-                                                                   UnimgrConstants.DEFAULT_GRE_NAME);
+                                                                   UnimgrConstants.DEFAULT_TUNNEL_IFACE);
                             UnimgrUtils.createGreTunnel(dataBroker,
                                                         uniDestination.getAugmentation(UniAugmentation.class),
                                                         uniSource.getAugmentation(UniAugmentation.class), destinationBr,
                                                         UnimgrConstants.DEFAULT_BRIDGE_NAME,
-                                                        "gre0");
+                                                        UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
                             UnimgrUtils.updateEvcNode(LogicalDatastoreType.CONFIGURATION,
                                                       evcKey,
                                                       evc,
