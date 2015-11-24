@@ -47,6 +47,7 @@ public class UniUpdateCommand extends AbstractUpdateCommand {
                             LOG.trace("Received an update from an OVSDB node {}.", managedNodeEntry.getKey());
                             // We received a node update from the southbound plugin
                             // so we have to check if it belongs to the UNI
+
                         }
                     }
                 }
