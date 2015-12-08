@@ -108,6 +108,7 @@ public class UniCreateCommand extends AbstractCreateCommand {
                                                   uni,
                                                   ovsdbNode,
                                                   dataBroker);
+                        UnimgrUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniKey, uni, ovsdbNode, dataBroker);
                     } else {
                         ovsdbNode = UnimgrUtils.createOvsdbNode(dataBroker,
                                                                 uni);

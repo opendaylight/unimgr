@@ -531,7 +531,7 @@ public class UnimgrUtils {
         transaction.delete(store, genericNode);
         try {
             transaction.submit().checkedGet();
-            return !result;
+            result = true;
         } catch (TransactionCommitFailedException e) {
             LOG.error("Unable to remove node with Iid {} from store {}.", genericNode, store);
         }
