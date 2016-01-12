@@ -10,8 +10,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>config-parent</artifactId>
-    <version>0.5.0-SNAPSHOT</version>
+    <artifactId>mdsal-it-parent</artifactId>
+    <version>1.4.0-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
@@ -19,46 +19,21 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>unimgr-it</artifactId>
   <version>0.1.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>unimgr-artifacts</artifactId>
-        <version>${project.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-artifacts</artifactId>
-        <version>0.5.0-SNAPSHOT</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>mdsal-artifacts</artifactId>
-        <version>${mdsal.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+  <packaging>bundle</packaging>
+
+  <properties>
+    <skipITs>false</skipITs>
+    <karaf.distro.groupId>org.opendaylight.unimgr</karaf.distro.groupId>
+    <karaf.distro.artifactId>unimgr-karaf</karaf.distro.artifactId>
+    <karaf.distro.version>${project.version}</karaf.distro.version>
+    <karaf.distro.type>zip</karaf.distro.type>
+  </properties>
+
   <dependencies>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-common-api</artifactId>
-    </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>unimgr-features</artifactId>
-      <classifier>features</classifier>
-      <type>xml</type>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 
