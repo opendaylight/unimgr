@@ -12,6 +12,7 @@ import java.util.List;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Evc;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 
 public interface IUnimgrConsoleProvider extends AutoCloseable {
@@ -26,7 +27,7 @@ public interface IUnimgrConsoleProvider extends AutoCloseable {
 
     boolean removeEvc(String uuid);
 
-    boolean addEvc(Evc evc);
+    boolean addEvc(EvcAugmentation evc);
 
     Evc getEvc(String uuid);
 }

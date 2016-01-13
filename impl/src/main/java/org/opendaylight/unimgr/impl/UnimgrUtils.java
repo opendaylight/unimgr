@@ -359,10 +359,20 @@ public class UnimgrUtils {
     }
 
     /**
+     * Creates and submit an evc by using the Data contained in the EvcAugmentation
+     * @param dataBroker The instance of the DataBroker to create transactions
+     * @param evc The EVC's data
+     * @return true if evc created
+     */
+    public static boolean createEvc(DataBroker dataBroker, EvcAugmentation evc) {
+         return false;
+    }
+
+    /**
      * Creates and submit an UNI Node by using the Data contained in the UniAugmentation
      * @param dataBroker The instance of the DataBroker to create transactions
      * @param uni The UNI's data
-     * @return The instance of the UNI Node
+     * @return true if uni created
      */
     public static boolean createUniNode(DataBroker dataBroker, UniAugmentation uni) {
         NodeId uniNodeId = new NodeId(createUniNodeId(uni.getIpAddress()));
@@ -1037,6 +1047,8 @@ public class UnimgrUtils {
                 LinkBuilder linkBuilder = new LinkBuilder();
                 linkBuilder.setKey(link.getKey());
                 linkBuilder.setLinkId(link.getLinkId());
+                linkBuilder.setDestination(link.getDestination());
+                linkBuilder.setSource(link.getSource());
                 linkBuilder.addAugmentation(EvcAugmentation.class, updatedEvcBuilder.build());
                 transaction.put(dataStore, evcKey.firstIdentifierOf(Link.class), linkBuilder.build());
                 transaction.submit();
