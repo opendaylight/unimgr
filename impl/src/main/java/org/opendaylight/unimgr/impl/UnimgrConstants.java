@@ -23,6 +23,8 @@ public class UnimgrConstants {
 
     public static final String OVSDB_PREFIX = "ovsdb://";
 
+    public static final String EVC_PREFIX = "evc://";
+
     public static final Integer OVSDB_PORT = new Integer(6640);
 
     public static final Integer OPENFLOW_PORT = new Integer(6633);

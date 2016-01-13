@@ -30,6 +30,11 @@
                  <argument ref="unimgrConsoleProvider" />
             </action>
         </command>
+        <command>
+            <action class="org.opendaylight.unimgr.cli.EvcAddShellCommand">
+                 <argument ref="unimgrConsoleProvider" />
+            </action>
+        </command>
     </command-bundle>
 
 </blueprint>

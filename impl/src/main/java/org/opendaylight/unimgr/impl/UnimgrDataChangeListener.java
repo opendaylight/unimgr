@@ -56,6 +56,7 @@ public class UnimgrDataChangeListener  implements IUnimgrDataChangeListener {
                                                             UnimgrMapper.getOvsdbTopologyIid(),
                                                             this,
                                                             DataChangeScope.SUBTREE));
+        LOG.info("UnimgrDataChangeListener initialized");
     }
 
     @Override
