@@ -381,10 +381,10 @@ public class UnimgrUtils {
             InstanceIdentifier<Node> uniNodeIid = UnimgrMapper.getUniNodeIid(uniNodeId);
             NodeKey uniNodeKey = new NodeKey(uniNodeId);
             Node nodeData = new NodeBuilder()
-                                .setNodeId(uniNodeId)
-                                .setKey(uniNodeKey)
-                                .addAugmentation(UniAugmentation.class, uni)
-                                .build();
+                                    .setNodeId(uniNodeId)
+                                    .setKey(uniNodeKey)
+                                    .addAugmentation(UniAugmentation.class, uni)
+                                    .build();
             WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
             transaction.put(LogicalDatastoreType.CONFIGURATION, uniNodeIid, nodeData);
             CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
