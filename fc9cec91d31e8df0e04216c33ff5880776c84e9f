@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_409fda5f",
+        "filename": "impl/src/test/java/org/opendaylight/unimgr/impl/UnimgrProviderTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-01-18T15:25:06Z",
+      "side": 1,
+      "message": "You could make sure those have been called:\n\nhttps://github.com/opendaylight/unimgr/blob/master/impl/src/main/java/org/opendaylight/unimgr/impl/UnimgrProvider.java#l74l81",
+      "parentUuid": "9a3d3df0_0095d23f",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 105,
+        "endChar": 5
+      },
+      "revId": "fc9cec91d31e8df0e04216c33ff5880776c84e9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_60a65ec3",
         "filename": "impl/src/test/java/org/opendaylight/unimgr/impl/UnimgrProviderTest.java",
         "patchSetId": 7
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "The implementation is not done for theses, not going to implement for Be",
       "parentUuid": "9a3d3df0_60a65ec3",
+      "range": {
+        "startLine": 264,
+        "startChar": 0,
+        "endLine": 277,
+        "endChar": 5
+      },
+      "revId": "fc9cec91d31e8df0e04216c33ff5880776c84e9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_209c5669",
+        "filename": "impl/src/test/java/org/opendaylight/unimgr/impl/UnimgrProviderTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-01-18T15:25:06Z",
+      "side": 1,
+      "message": "Ack, fair enough",
+      "parentUuid": "9a3d3df0_a0b066f5",
       "range": {
         "startLine": 264,
         "startChar": 0,
