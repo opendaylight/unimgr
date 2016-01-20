@@ -1,7 +1,6 @@
 package org.opendaylight.unimgr.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -9,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -33,7 +33,6 @@ import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
@@ -74,6 +73,21 @@ public class UnimgrUtilsTest {
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
+    @Mock private DataBroker dataBroker;
+    @Mock private Node bridgeNode;
+    @Mock private String bridgeName;
+    @Mock private String portName;
+    @Mock private String type;
+    @Mock private WriteTransaction transaction;
+    @Mock private IpAddress mockIp;
+    @SuppressWarnings({ "rawtypes" })
+    @Mock private CheckedFuture checkedFuture;
+    @SuppressWarnings("unchecked")
+    private static final InstanceIdentifier<TerminationPoint> tpIid = PowerMockito.mock(InstanceIdentifier.class);
+    private static final IpAddress IP = new IpAddress(new Ipv4Address("192.168.1.2"));
+    private static final NodeId OVSDB_NODE_ID = new NodeId("ovsdb://7011db35-f44b-4aab-90f6-d89088caf9d8");
+    @SuppressWarnings("unchecked")
+    private static final InstanceIdentifier<Node> MOCK_NODE_IID = PowerMockito.mock(InstanceIdentifier.class);
 
     @Before
     public void setUp() throws Exception {
@@ -90,7 +104,7 @@ public class UnimgrUtilsTest {
      */
     @Test
     public void testCreateBridgeNode() throws Exception {
-        // TODO
+        //TODO
     }
 
     @Test
@@ -106,7 +120,6 @@ public class UnimgrUtilsTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreateGreTunnel() throws Exception {
-        DataBroker dataBroker = PowerMockito.mock(DataBroker.class);
 
         UniAugmentation sourceUniAug = new UniAugmentationBuilder()
                 .setIpAddress(new IpAddress(new Ipv4Address("192.168.1.1")))
@@ -115,16 +128,11 @@ public class UnimgrUtilsTest {
                 .setIpAddress(new IpAddress(new Ipv4Address("192.168.1.2")))
                 .build();
 
-        Node bridgeNode = PowerMockito.mock(Node.class);
-        String bridgeName = PowerMockito.mock(String.class);
-        String portName = PowerMockito.mock(String.class);
-
-        WriteTransaction transaction = mock(WriteTransaction.class);
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
         doNothing().when(transaction).put(any(LogicalDatastoreType.class),
                                           any(InstanceIdentifier.class),
                                           any(TerminationPoint.class));
-        when(transaction.submit()).thenReturn(mock(CheckedFuture.class));
+        when(transaction.submit()).thenReturn(checkedFuture);
 
         MemberModifier.suppress(MemberMatcher.method(UnimgrMapper.class, "getTerminationPointIid", Node.class, String.class));
         MemberModifier.suppress(MemberMatcher.method(UnimgrUtils.class, "createMdsalProtocols"));
@@ -176,35 +184,33 @@ public class UnimgrUtilsTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreateOvsdbNode() {
-        DataBroker dataBroker = PowerMockito.mock(DataBroker.class);
         MemberModifier.suppress(MemberMatcher.method(UnimgrMapper.class, "getOvsdbNodeIid", IpAddress.class));
-        IpAddress mockIp = mock(IpAddress.class);
-        InstanceIdentifier<Node> ovsdbNodeIid = PowerMockito.mock(InstanceIdentifier.class);
-        PowerMockito.when(UnimgrMapper.getOvsdbNodeIid(mockIp)).thenReturn(ovsdbNodeIid);
-        WriteTransaction transaction = mock(WriteTransaction.class);
+        PowerMockito.when(UnimgrMapper.getOvsdbNodeIid(mockIp)).thenReturn(MOCK_NODE_IID);
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
-        NodeId ovsdbNodeId = new NodeId("abcde");
+        //when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
         Uni uni = new UniAugmentationBuilder().setIpAddress(new IpAddress(new Ipv4Address("192.168.1.2"))).build();
         // createOvsdbNode with NodeId and Uni
-        UnimgrUtils.createOvsdbNode(dataBroker, ovsdbNodeId, uni);
+        UnimgrUtils.createOvsdbNode(dataBroker, OVSDB_NODE_ID, uni);
         doNothing().when(transaction).put(any(LogicalDatastoreType.class),
                                           any(InstanceIdentifier.class),
                                           any(Node.class));
+        when(transaction.submit()).thenReturn(checkedFuture);
         verify(transaction).put(any(LogicalDatastoreType.class),
                                 any(InstanceIdentifier.class),
                                 any(Node.class));
         verify(transaction).submit();
         // Test with a null uni
         exception.expect(Exception.class);
-        UnimgrUtils.createOvsdbNode(dataBroker, ovsdbNodeId, null);
+        UnimgrUtils.createOvsdbNode(dataBroker, OVSDB_NODE_ID, null);
         // createOvsdbNode with Uni
         UniAugmentation uniAug = new UniAugmentationBuilder(uni).build();
         UnimgrUtils.createOvsdbNode(dataBroker, uniAug);
         MemberModifier.suppress(MemberMatcher.method(UnimgrMapper.class, "getOvsdbNodeIid", NodeId.class));
-        PowerMockito.when(UnimgrMapper.getOvsdbNodeIid(ovsdbNodeId)).thenReturn(ovsdbNodeIid);
+        PowerMockito.when(UnimgrMapper.getOvsdbNodeIid(OVSDB_NODE_ID)).thenReturn(MOCK_NODE_IID);
         doNothing().when(transaction).put(any(LogicalDatastoreType.class),
                                           any(InstanceIdentifier.class),
                                           any(Node.class));
+        when(transaction.submit()).thenReturn(checkedFuture);
         verify(transaction).put(any(LogicalDatastoreType.class),
                                 any(InstanceIdentifier.class),
                                 any(Node.class));
@@ -228,12 +234,11 @@ public class UnimgrUtilsTest {
 
     @Test
     public void testCreateOvsdbNodeId() {
-        IpAddress ipAddress = new IpAddress(new Ipv4Address("192.168.1.2"));
         String nodeId = UnimgrConstants.OVSDB_PREFIX
-                + ipAddress.getIpv4Address().getValue().toString()
+                + IP.getIpv4Address().getValue().toString()
                 + ":"
                 + UnimgrConstants.OVSDB_PORT;
-        assertEquals(new NodeId(nodeId), UnimgrUtils.createOvsdbNodeId(ipAddress));
+        assertEquals(new NodeId(nodeId), UnimgrUtils.createOvsdbNodeId(IP));
     }
 
     @Test
@@ -250,7 +255,6 @@ public class UnimgrUtilsTest {
 
     @Test
     public void testCreateEvc() {
-        DataBroker dataBroker = mock(DataBroker.class);
         EvcAugmentation evc = mock(EvcAugmentation.class);
         assertEquals(false, UnimgrUtils.createEvc(dataBroker, evc));
     }
@@ -258,16 +262,14 @@ public class UnimgrUtilsTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreateUniNode() {
-        DataBroker dataBroker = PowerMockito.mock(DataBroker.class);
         UniAugmentation uniAug = new UniAugmentationBuilder()
                                         .setIpAddress(new IpAddress(new Ipv4Address("192.168.1.2")))
                                         .build();
         // false case
         assertEquals(false, UnimgrUtils.createUniNode(dataBroker, uniAug));
         MemberModifier.suppress(MemberMatcher.method(UnimgrMapper.class, "getUniNodeIid", NodeId.class));
-        InstanceIdentifier<Node> uniNodeIid = PowerMockito.mock(InstanceIdentifier.class);
-        PowerMockito.when(UnimgrMapper.getUniNodeIid(any(NodeId.class))).thenReturn(uniNodeIid);
-        WriteTransaction transaction = mock(WriteTransaction.class);
+        PowerMockito.when(UnimgrMapper.getUniNodeIid(any(NodeId.class))).thenReturn(MOCK_NODE_IID);
+
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
         UnimgrUtils.createUniNode(dataBroker, uniAug);
         verify(transaction).put(any(LogicalDatastoreType.class),
@@ -278,9 +280,8 @@ public class UnimgrUtilsTest {
 
     @Test
     public void testCreateUniNodeId() {
-        IpAddress ipAddress = new IpAddress(new Ipv4Address("192.168.1.2"));
-        NodeId nodeId = new NodeId(UnimgrConstants.UNI_PREFIX + ipAddress.getIpv4Address().getValue().toString());
-        assertEquals(nodeId, UnimgrUtils.createUniNodeId(ipAddress));
+        NodeId nodeId = new NodeId(UnimgrConstants.UNI_PREFIX + IP.getIpv4Address().getValue().toString());
+        assertEquals(nodeId, UnimgrUtils.createUniNodeId(IP));
     }
 
     /*
@@ -290,14 +291,9 @@ public class UnimgrUtilsTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreateTerminationPointNode() {
-        DataBroker dataBroker = mock(DataBroker.class);
         Uni uni = new UniAugmentationBuilder().build();
-        InstanceIdentifier<TerminationPoint> tpIid = PowerMockito.mock(InstanceIdentifier.class);
         Node bridgeNode = new NodeBuilder().build();
-        String bridgeName = "br0";
-        String portName = "tp1";
-        String type = "gre";
-        WriteTransaction transaction = mock(WriteTransaction.class);
+
         MemberModifier.suppress(MemberMatcher.method(UnimgrMapper.class,
                                                      "getTerminationPointIid",
                                                      Node.class,
@@ -312,6 +308,7 @@ public class UnimgrUtilsTest {
         doNothing().when(transaction).put(any(LogicalDatastoreType.class),
                                           any(InstanceIdentifier.class),
                                           any(TerminationPoint.class));
+        when(transaction.submit()).thenReturn(checkedFuture);
         UnimgrUtils.createTerminationPointNode(dataBroker, uni, bridgeNode, bridgeName, portName);
         verify(transaction, times(2)).put(any(LogicalDatastoreType.class),
                                           any(InstanceIdentifier.class),
