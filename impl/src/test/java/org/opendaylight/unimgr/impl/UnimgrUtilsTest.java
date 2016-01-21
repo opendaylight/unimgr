@@ -1,6 +1,7 @@
 package org.opendaylight.unimgr.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -14,6 +15,7 @@ import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.util.concurrent.CheckedFuture;
 
@@ -31,8 +33,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
@@ -57,10 +61,20 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.EgressBw;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.IngressBw;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniDest;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniDestBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniDestKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSource;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSourceBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSourceKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -403,27 +417,122 @@ public class UnimgrUtilsTest {
     }
 
     @Test
-    public void testReadLink() {
-      //TODO
+    public void testReadLink() throws ReadFailedException {
+        DataBroker dataBroker = mock(DataBroker.class);
+        InstanceIdentifier<?> nodeIid = PowerMockito.mock(InstanceIdentifier.class);
+        ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
+        when(dataBroker.newReadOnlyTransaction()).thenReturn(transaction);
+        CheckedFuture<Optional<Link>, ReadFailedException> linkFuture = mock(CheckedFuture.class);
+        Optional<Link> optLink = mock(Optional.class);
+        when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(linkFuture);
+        when(linkFuture.checkedGet()).thenReturn(optLink);
+        Optional<Link> expectedOpt = UnimgrUtils.readLink(dataBroker, LogicalDatastoreType.CONFIGURATION, nodeIid);
+        verify(transaction).read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        assertNotNull(expectedOpt);
+        assertEquals(expectedOpt, optLink);
     }
 
     @Test
-    public void testReadNode() {
-      //TODO
+    public void testReadNode() throws ReadFailedException {
+        DataBroker dataBroker = mock(DataBroker.class);
+        InstanceIdentifier<?> nodeIid = PowerMockito.mock(InstanceIdentifier.class);
+        ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
+        when(dataBroker.newReadOnlyTransaction()).thenReturn(transaction);
+        CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture = mock(CheckedFuture.class);
+        Optional<Node> optNode = mock(Optional.class);
+        when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(nodeFuture);
+        when(nodeFuture.checkedGet()).thenReturn(optNode);
+        Optional<Node> expectedOpt = UnimgrUtils.readNode(dataBroker, LogicalDatastoreType.CONFIGURATION, nodeIid);
+        verify(transaction).read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        assertNotNull(expectedOpt);
+        assertEquals(expectedOpt, optNode);
     }
 
-    /*
-     *  This test for 2 functions with the
-     *  same name that take different parameters.
-     */
     @Test
     public void testUpdateUniNode() {
-      //TODO
+        DataBroker dataBroker = mock(DataBroker.class);
+        UniAugmentation uni = PowerMockito.mock(UniAugmentation.class);
+        InstanceIdentifier<?> uniKey = PowerMockito.mock(InstanceIdentifier.class);
+        InstanceIdentifier<Node> ovsdbNodeIid = mock(InstanceIdentifier.class);
+        Optional<Node> optionalNode = mock(Optional.class, Mockito.RETURNS_MOCKS);
+        Node nd = mock(Node.class, Mockito.RETURNS_MOCKS);
+        when(optionalNode.isPresent()).thenReturn(true);
+        when(optionalNode.get()).thenReturn(nd);
+        WriteTransaction transaction = mock(WriteTransaction.class);
+        when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrUtils.class, "readNode", DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class));
+        when(UnimgrUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(optionalNode);
+        UnimgrUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniKey, uni, ovsdbNodeIid, dataBroker);
+        verify(transaction).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class));
+        verify(transaction).submit();
+    }
+
+    @Test
+    public void testUpdateUniNode2() {
+        DataBroker dataBroker = mock(DataBroker.class);
+        UniAugmentation uni = PowerMockito.mock(UniAugmentation.class);
+        InstanceIdentifier<?> uniKey = PowerMockito.mock(InstanceIdentifier.class);
+        Node ovsdbNode = mock(Node.class);
+        InstanceIdentifier<Node> ovsdbNodeIid = mock(InstanceIdentifier.class);
+        Optional<Node> optionalNode = mock(Optional.class, Mockito.RETURNS_MOCKS);
+        Node nd = mock(Node.class, Mockito.RETURNS_MOCKS);
+        when(optionalNode.isPresent()).thenReturn(true);
+        when(optionalNode.get()).thenReturn(nd);
+        WriteTransaction transaction = mock(WriteTransaction.class);
+        when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrMapper.class, "getOvsdbNodeIid", NodeId.class));
+        when(UnimgrMapper.getOvsdbNodeIid(any(NodeId.class))).thenReturn(ovsdbNodeIid);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrUtils.class, "readNode", DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class));
+        when(UnimgrUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(optionalNode);
+        UnimgrUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniKey, uni, ovsdbNode, dataBroker);
+        verify(transaction).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class));
+        verify(transaction).submit();
     }
 
     @Test
     public void testUpdateEvcNode() {
-      //TODO
+        DataBroker dataBroker = mock(DataBroker.class);
+        InstanceIdentifier<?> evcKey = PowerMockito.mock(InstanceIdentifier.class);
+        InstanceIdentifier<?> sourceUniIid = PowerMockito.mock(InstanceIdentifier.class);
+        InstanceIdentifier<?> destinationUniIid = PowerMockito.mock(InstanceIdentifier.class);
+        WriteTransaction transaction = mock(WriteTransaction.class);
+        when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
+        Short order = new Short("0");
+        IpAddress ipAddreSource = new IpAddress("10.10.1.1".toCharArray());
+        UniSource uniSource = new UniSourceBuilder()
+                                  .setIpAddress(ipAddreSource)
+                                  .setKey(new UniSourceKey(order))
+                                  .setOrder(order)
+                                  .build();
+        List<UniSource> uniSourceList = new ArrayList<UniSource>();
+        uniSourceList.add(uniSource);
+        IpAddress ipAddreDest = new IpAddress("10.10.0.2".toCharArray());
+        UniDest uniDest = new UniDestBuilder()
+                          .setOrder(order)
+                          .setKey(new UniDestKey(order))
+                          .setIpAddress(ipAddreDest)
+                          .build();
+        List<UniDest> uniDestList = new ArrayList<UniDest>();
+        uniDestList.add(uniDest);
+        EgressBw egressBw = mock(EgressBw.class);
+        IngressBw ingressBw = mock(IngressBw.class);
+        EvcAugmentation evcAug = new EvcAugmentationBuilder()
+                                     .setCosId(UnimgrConstants.EVC_PREFIX + 1)
+                                     .setEgressBw(egressBw)
+                                     .setIngressBw(ingressBw)
+                                     .setUniDest(uniDestList)
+                                     .setUniSource(uniSourceList)
+                                     .build();
+        Optional<Link> optionalEvcLink = mock(Optional.class, Mockito.RETURNS_MOCKS);
+        Link lnk = mock (Link.class, Mockito.RETURNS_MOCKS);
+        when(optionalEvcLink.isPresent()).thenReturn(true);
+        when(optionalEvcLink.get()).thenReturn(lnk);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrUtils.class, "readLink", DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class));
+        when(UnimgrUtils.readLink(any(DataBroker.class), any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(optionalEvcLink);
+        UnimgrUtils.updateEvcNode(LogicalDatastoreType.OPERATIONAL, evcKey, evcAug,
+                                        sourceUniIid, destinationUniIid, dataBroker);
+        verify(transaction).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class));
+        verify(transaction).submit();
     }
 
 }
