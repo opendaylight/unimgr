@@ -8,23 +8,33 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
 
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.util.concurrent.CheckedFuture;
+
+import ch.qos.logback.core.Appender;
+import ch.qos.logback.classic.spi.LoggingEvent;
+import org.mockito.ArgumentMatcher;
 
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.api.support.membermodification.MemberModifier;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -35,8 +45,10 @@ import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
@@ -73,16 +85,26 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.r
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSource;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSourceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSourceKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.LinkId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.LinkKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({InstanceIdentifier.class, LogicalDatastoreType.class, UnimgrMapper.class, UnimgrUtils.class, UUID.class})
+@PrepareForTest({LogicalDatastoreType.class, UnimgrMapper.class, UnimgrUtils.class, UUID.class})
 public class UnimgrUtilsTest {
 
     @Rule
@@ -94,6 +116,8 @@ public class UnimgrUtilsTest {
     @Mock private String type;
     @Mock private WriteTransaction transaction;
     @Mock private IpAddress mockIp;
+    @SuppressWarnings("rawtypes")
+    @Mock private Appender mockAppender;
     @SuppressWarnings({ "rawtypes" })
     @Mock private CheckedFuture checkedFuture;
     @SuppressWarnings("unchecked")
@@ -102,23 +126,80 @@ public class UnimgrUtilsTest {
     private static final NodeId OVSDB_NODE_ID = new NodeId("ovsdb://7011db35-f44b-4aab-90f6-d89088caf9d8");
     @SuppressWarnings("unchecked")
     private static final InstanceIdentifier<Node> MOCK_NODE_IID = PowerMockito.mock(InstanceIdentifier.class);
+    private ch.qos.logback.classic.Logger root;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(UnimgrUtils.class, Mockito.CALLS_REAL_METHODS);
         PowerMockito.mockStatic(UnimgrMapper.class, Mockito.CALLS_REAL_METHODS);
-        PowerMockito.mockStatic(InstanceIdentifier.class);
         PowerMockito.mockStatic(LogicalDatastoreType.class);
         PowerMockito.mockStatic(UUID.class);
+        root = (ch.qos.logback.classic.Logger)
+                LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+        // Check logger messages
+        when(mockAppender.getName()).thenReturn("MOCK");
+        root.addAppender(mockAppender);
     }
 
     /*
      *  This test for 2 functions with the
      *  same name that take different parameters.
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testCreateBridgeNode() throws Exception {
-        //TODO
+        // Function 1
+        Node ovsdbNode = new NodeBuilder().setNodeId(OVSDB_NODE_ID).build();
+        InstanceIdentifier<Node> nodeIid = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class,
+                        new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class,
+                        new NodeKey(OVSDB_NODE_ID));
+        OvsdbNodeRef ovsdbNodeRef = new OvsdbNodeRef(nodeIid);
+        UniAugmentation uni = new UniAugmentationBuilder()
+                                      .setIpAddress(new IpAddress(new Ipv4Address("192.168.1.1")))
+                                      .setOvsdbNodeRef(ovsdbNodeRef)
+                                      .build();
+
+        when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
+        doNothing().when(transaction).put(any(LogicalDatastoreType.class),
+                                          any(InstanceIdentifier.class),
+                                          any(Node.class));
+        when(transaction.submit()).thenReturn(checkedFuture);
+        MemberModifier.suppress(MemberMatcher.method(UnimgrMapper.class, "createOvsdbBridgeNodeIid", Node.class, String.class));
+        when(UnimgrMapper.createOvsdbBridgeNodeIid(any(Node.class),
+                                                   any(String.class))).thenReturn(MOCK_NODE_IID);
+        UnimgrUtils.createBridgeNode(dataBroker, ovsdbNode, uni, "br0");
+        verify(transaction).put(any(LogicalDatastoreType.class),
+                                any(InstanceIdentifier.class),
+                                any(Node.class));
+        verify(transaction).submit();
+
+        // Function 2
+        MemberModifier.suppress(MemberMatcher.method(UnimgrUtils.class,
+                                                     "readNode",
+                                                     DataBroker.class,
+                                                     LogicalDatastoreType.class,
+                                                     InstanceIdentifier.class));
+        Optional<Node> mockOptional = mock(Optional.class);
+        when(UnimgrUtils.readNode(any(DataBroker.class),
+                                  any(LogicalDatastoreType.class),
+                                  any(InstanceIdentifier.class))).thenReturn(mockOptional);
+        UnimgrUtils.createBridgeNode(dataBroker, nodeIid, uni, "br0");
+        verify(transaction).put(any(LogicalDatastoreType.class),
+                                any(InstanceIdentifier.class),
+                                any(Node.class));
+        verify(transaction).submit();
+
+        // Ensure correct logging
+        verify(mockAppender, times(2)).doAppend(argThat(new ArgumentMatcher() {
+            @Override
+            public boolean matches(final Object argument) {
+              return ((LoggingEvent)argument).getFormattedMessage().contains("Creating a bridge on node");
+            }
+          }));
     }
 
     @Test
@@ -151,6 +232,15 @@ public class UnimgrUtilsTest {
         MemberModifier.suppress(MemberMatcher.method(UnimgrMapper.class, "getTerminationPointIid", Node.class, String.class));
         MemberModifier.suppress(MemberMatcher.method(UnimgrUtils.class, "createMdsalProtocols"));
 
+        Node bNode = new NodeBuilder().setKey(new NodeKey(OVSDB_NODE_ID)).build();
+        InstanceIdentifier<TerminationPoint> tpIid = InstanceIdentifier
+                                                        .create(NetworkTopology.class)
+                                                        .child(Topology.class,
+                                                                new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
+                                                        .child(Node.class, bNode.getKey())
+                                                        .child(TerminationPoint.class,
+                                                                new TerminationPointKey(new TpId(portName)));
+        when(UnimgrMapper.getTerminationPointIid(any(Node.class), any(String.class))).thenReturn(tpIid);
         UnimgrUtils.createGreTunnel(dataBroker,
                                     sourceUniAug,
                                     destUniAug,
@@ -195,7 +285,7 @@ public class UnimgrUtilsTest {
      *  This test for 2 functions with the
      *  same name that take different parameters.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testCreateOvsdbNode() {
         MemberModifier.suppress(MemberMatcher.method(UnimgrMapper.class, "getOvsdbNodeIid", IpAddress.class));
@@ -205,6 +295,13 @@ public class UnimgrUtilsTest {
         Uni uni = new UniAugmentationBuilder().setIpAddress(new IpAddress(new Ipv4Address("192.168.1.2"))).build();
         // createOvsdbNode with NodeId and Uni
         UnimgrUtils.createOvsdbNode(dataBroker, OVSDB_NODE_ID, uni);
+        // Ensure correct logging
+        verify(mockAppender).doAppend(argThat(new ArgumentMatcher() {
+            @Override
+            public boolean matches(final Object argument) {
+              return ((LoggingEvent)argument).getFormattedMessage().contains("Created and submitted a new OVSDB node");
+            }
+          }));
         doNothing().when(transaction).put(any(LogicalDatastoreType.class),
                                           any(InstanceIdentifier.class),
                                           any(Node.class));
@@ -216,11 +313,18 @@ public class UnimgrUtilsTest {
         // Test with a null uni
         exception.expect(Exception.class);
         UnimgrUtils.createOvsdbNode(dataBroker, OVSDB_NODE_ID, null);
+        // Ensure correct logging
+        verify(mockAppender).doAppend(argThat(new ArgumentMatcher() {
+            @Override
+            public boolean matches(final Object argument) {
+              return ((LoggingEvent)argument).getFormattedMessage().contains("Created and submitted a new OVSDB node");
+            }
+          }));
         // createOvsdbNode with Uni
         UniAugmentation uniAug = new UniAugmentationBuilder(uni).build();
         UnimgrUtils.createOvsdbNode(dataBroker, uniAug);
         MemberModifier.suppress(MemberMatcher.method(UnimgrMapper.class, "getOvsdbNodeIid", NodeId.class));
-        PowerMockito.when(UnimgrMapper.getOvsdbNodeIid(OVSDB_NODE_ID)).thenReturn(MOCK_NODE_IID);
+        PowerMockito.when(UnimgrMapper.getOvsdbNodeIid(any(NodeId.class))).thenReturn(MOCK_NODE_IID);
         doNothing().when(transaction).put(any(LogicalDatastoreType.class),
                                           any(InstanceIdentifier.class),
                                           any(Node.class));
@@ -230,6 +334,8 @@ public class UnimgrUtilsTest {
                                 any(Node.class));
         verify(transaction).submit();
         // try with a null uni
+        PowerMockito.when(UnimgrMapper.getOvsdbNodeIid(any(NodeId.class))).thenReturn(null);
+        UnimgrUtils.createOvsdbNode(dataBroker, null);
         exception.expect(Exception.class);
         UnimgrUtils.createOvsdbNode(dataBroker, null);
     }
@@ -273,14 +379,24 @@ public class UnimgrUtilsTest {
         assertEquals(false, UnimgrUtils.createEvc(dataBroker, evc));
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testCreateUniNode() {
         UniAugmentation uniAug = new UniAugmentationBuilder()
                                         .setIpAddress(new IpAddress(new Ipv4Address("192.168.1.2")))
                                         .build();
-        // false case
+        when(UnimgrMapper.getUniNodeIid(any(NodeId.class))).thenReturn(mock(InstanceIdentifier.class));
+        doNothing().when(transaction).put(any(LogicalDatastoreType.class),
+                                          any(InstanceIdentifier.class),
+                                          any(Node.class));
+        when(transaction.submit()).thenReturn(checkedFuture);
         assertEquals(false, UnimgrUtils.createUniNode(dataBroker, uniAug));
+        verify(mockAppender).doAppend(argThat(new ArgumentMatcher() {
+            @Override
+            public boolean matches(final Object argument) {
+              return ((LoggingEvent)argument).getFormattedMessage().contains("Exception while creating Uni Node");
+            }
+          }));
         MemberModifier.suppress(MemberMatcher.method(UnimgrMapper.class, "getUniNodeIid", NodeId.class));
         PowerMockito.when(UnimgrMapper.getUniNodeIid(any(NodeId.class))).thenReturn(MOCK_NODE_IID);
 
@@ -290,6 +406,12 @@ public class UnimgrUtilsTest {
                                 any(InstanceIdentifier.class),
                                 any(Node.class));
         verify(transaction).submit();
+        verify(mockAppender).doAppend(argThat(new ArgumentMatcher() {
+            @Override
+            public boolean matches(final Object argument) {
+              return ((LoggingEvent)argument).getFormattedMessage().contains("Created and submitted a new Uni");
+            }
+          }));
     }
 
     @Test
@@ -315,8 +437,17 @@ public class UnimgrUtilsTest {
         PowerMockito.when(UnimgrMapper.getTerminationPointIid(any(Node.class),
                                                               any(String.class))).thenReturn(tpIid);
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
+        Node bNode = new NodeBuilder().setKey(new NodeKey(OVSDB_NODE_ID)).build();
+        InstanceIdentifier<TerminationPoint> tpIid = InstanceIdentifier
+                                                        .create(NetworkTopology.class)
+                                                        .child(Topology.class,
+                                                                new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
+                                                        .child(Node.class, bNode.getKey())
+                                                        .child(TerminationPoint.class,
+                                                                new TerminationPointKey(new TpId(portName)));
+        when(UnimgrMapper.getTerminationPointIid(any(Node.class), any(String.class))).thenReturn(tpIid);
         // Function 1
-        UnimgrUtils.createTerminationPointNode(dataBroker, uni, bridgeNode, bridgeName, portName, type);
+        UnimgrUtils.createTerminationPointNode(dataBroker, uni, bNode, bridgeName, portName, type);
 
         //Function 2
         doNothing().when(transaction).put(any(LogicalDatastoreType.class),
@@ -336,35 +467,91 @@ public class UnimgrUtilsTest {
         // see bug: https://bugs.opendaylight.org/show_bug.cgi?id=5035
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testDeleteTerminationPoint() {
-      //TODO
+        TerminationPointKey tpKey = new TerminationPointKey(new TpId("abcde"));
+        TerminationPoint terminationPoint = new TerminationPointBuilder().setKey(tpKey).build();
+        Node ovsdbNode = new NodeBuilder().setKey(new NodeKey(OVSDB_NODE_ID)).build();
+        when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
+        doNothing().when(transaction).delete(any(LogicalDatastoreType.class),
+                                             any(InstanceIdentifier.class));
+
+        UnimgrUtils.deleteTerminationPoint(dataBroker, terminationPoint, ovsdbNode);
+        verify(transaction,times(2)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(transaction,times(2)).submit();
+        CheckedFuture<Void, TransactionCommitFailedException> mockCheckedFuture = mock(CheckedFuture.class);
+        when(transaction.submit()).thenReturn(mockCheckedFuture);
+        assertEquals(mockCheckedFuture, UnimgrUtils.deleteTerminationPoint(dataBroker, terminationPoint, ovsdbNode));
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void testDeleteNode() {
-      //TODO
+    public void testDeleteNode() throws Exception {
+        InstanceIdentifier<Node> genericNode = InstanceIdentifier
+                                                   .create(NetworkTopology.class)
+                                                   .child(Topology.class,
+                                                           new TopologyKey(UnimgrConstants.UNI_TOPOLOGY_ID))
+                                                   .child(Node.class);
+        when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
+        doNothing().when(transaction).delete(any(LogicalDatastoreType.class),
+                                             any(InstanceIdentifier.class));
+        when(transaction.submit()).thenReturn(checkedFuture);
+        assertEquals(true, UnimgrUtils.deleteNode(dataBroker, genericNode, LogicalDatastoreType.CONFIGURATION));
+        verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(transaction).submit();
+        verify(mockAppender).doAppend(argThat(new ArgumentMatcher() {
+            @Override
+            public boolean matches(final Object argument) {
+              return ((LoggingEvent)argument).getFormattedMessage().contains("Received a request to delete node");
+            }
+          }));
     }
 
     @Test
     public void testExtract() {
-        // FIXME this function will be moved into an MdsalUtils class.
-        // see bug: https://bugs.opendaylight.org/show_bug.cgi?id=5035
+        Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
+        Class<DataObject> klazz = DataObject.class;
+        assertEquals(HashMap.class, UnimgrUtils.extract(changes, klazz).getClass());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testExtractOriginal() {
-      //TODO
+        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes = mock(AsyncDataChangeEvent.class);
+        Class<DataObject> klazz = DataObject.class;
+        Map<InstanceIdentifier<?>, DataObject> map = new HashMap<>();
+        when(changes.getOriginalData()).thenReturn(map);
+        when(UnimgrUtils.extract(any(Map.class),eq(DataObject.class))).thenReturn(map);
+        assertEquals(map, UnimgrUtils.extractOriginal(changes, klazz));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testExtractRemoved() {
-      //TODO
+        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes = mock(AsyncDataChangeEvent.class);
+        Class<DataObject> klazz = DataObject.class;
+        assertEquals(HashSet.class, UnimgrUtils.extractRemoved(changes, klazz).getClass());
     }
 
     @Test
     public void testFindOvsdbNode() {
-      //TODO
+        List<Node> ovsdbNodes = new ArrayList<Node>();
+        UniAugmentation uni = new UniAugmentationBuilder()
+                                      .setIpAddress(IP)
+                                      .build();
+        ConnectionInfo connInfo = new ConnectionInfoBuilder().setRemoteIp(IP).build();
+        OvsdbNodeAugmentation augmentation = new OvsdbNodeAugmentationBuilder()
+                                                     .setConnectionInfo(connInfo)
+                                                     .build();
+        Node node = new NodeBuilder().addAugmentation(OvsdbNodeAugmentation.class, augmentation).build();
+        ovsdbNodes.add(node);
+        MemberModifier.suppress(MemberMatcher.method(UnimgrUtils.class,
+                                                     "getOvsdbNodes",
+                                                     DataBroker.class));
+        when(UnimgrUtils.getOvsdbNodes(any(DataBroker.class))).thenReturn(ovsdbNodes);
+        Optional<Node> optNode = Optional.of(node);
+        assertEquals(optNode, UnimgrUtils.findOvsdbNode(dataBroker, uni));
     }
 
     @Test
@@ -416,10 +603,16 @@ public class UnimgrUtilsTest {
       //TODO
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testReadLink() throws ReadFailedException {
-        DataBroker dataBroker = mock(DataBroker.class);
-        InstanceIdentifier<?> nodeIid = PowerMockito.mock(InstanceIdentifier.class);
+        LinkId linkId = new LinkId("evc://7011db35-f44b-4aab-90f6-d89088caf9d8");
+        InstanceIdentifier<?> nodeIid = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class,
+                        new TopologyKey(UnimgrConstants.EVC_TOPOLOGY_ID))
+                .child(Link.class,
+                        new LinkKey(linkId));
         ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
         when(dataBroker.newReadOnlyTransaction()).thenReturn(transaction);
         CheckedFuture<Optional<Link>, ReadFailedException> linkFuture = mock(CheckedFuture.class);
@@ -432,10 +625,15 @@ public class UnimgrUtilsTest {
         assertEquals(expectedOpt, optLink);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testReadNode() throws ReadFailedException {
-        DataBroker dataBroker = mock(DataBroker.class);
-        InstanceIdentifier<?> nodeIid = PowerMockito.mock(InstanceIdentifier.class);
+        InstanceIdentifier<?> nodeIid = InstanceIdentifier
+                                            .create(NetworkTopology.class)
+                                            .child(Topology.class,
+                                                    new TopologyKey(UnimgrConstants.UNI_TOPOLOGY_ID))
+                                            .child(Node.class,
+                                                    new NodeKey(OVSDB_NODE_ID));
         ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
         when(dataBroker.newReadOnlyTransaction()).thenReturn(transaction);
         CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture = mock(CheckedFuture.class);
@@ -448,18 +646,26 @@ public class UnimgrUtilsTest {
         assertEquals(expectedOpt, optNode);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testUpdateUniNode() {
-        DataBroker dataBroker = mock(DataBroker.class);
         UniAugmentation uni = PowerMockito.mock(UniAugmentation.class);
-        InstanceIdentifier<?> uniKey = PowerMockito.mock(InstanceIdentifier.class);
+        InstanceIdentifier<?> uniKey = InstanceIdentifier
+                                           .create(NetworkTopology.class)
+                                           .child(Topology.class,
+                                                   new TopologyKey(UnimgrConstants.UNI_TOPOLOGY_ID))//Any node id is fine for tests
+                                           .child(Node.class,
+                                                   new NodeKey(OVSDB_NODE_ID));
         InstanceIdentifier<Node> ovsdbNodeIid = mock(InstanceIdentifier.class);
-        Optional<Node> optionalNode = mock(Optional.class, Mockito.RETURNS_MOCKS);
+        Optional<Node> optionalNode = mock(Optional.class);
         Node nd = mock(Node.class, Mockito.RETURNS_MOCKS);
         when(optionalNode.isPresent()).thenReturn(true);
         when(optionalNode.get()).thenReturn(nd);
         WriteTransaction transaction = mock(WriteTransaction.class);
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
+        doNothing().when(transaction).put(any(LogicalDatastoreType.class),
+                                          any(InstanceIdentifier.class),
+                                          any(Node.class));
         PowerMockito.suppress(MemberMatcher.method(UnimgrUtils.class, "readNode", DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class));
         when(UnimgrUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(optionalNode);
         UnimgrUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniKey, uni, ovsdbNodeIid, dataBroker);
@@ -467,18 +673,25 @@ public class UnimgrUtilsTest {
         verify(transaction).submit();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testUpdateUniNode2() {
-        DataBroker dataBroker = mock(DataBroker.class);
         UniAugmentation uni = PowerMockito.mock(UniAugmentation.class);
-        InstanceIdentifier<?> uniKey = PowerMockito.mock(InstanceIdentifier.class);
+        InstanceIdentifier<?> uniKey = InstanceIdentifier
+                                           .create(NetworkTopology.class)
+                                           .child(Topology.class,
+                                                   new TopologyKey(UnimgrConstants.UNI_TOPOLOGY_ID))
+                                           .child(Node.class,
+                                                   new NodeKey(OVSDB_NODE_ID));//Any node id is fine for tests
         Node ovsdbNode = mock(Node.class);
         InstanceIdentifier<Node> ovsdbNodeIid = mock(InstanceIdentifier.class);
-        Optional<Node> optionalNode = mock(Optional.class, Mockito.RETURNS_MOCKS);
-        Node nd = mock(Node.class, Mockito.RETURNS_MOCKS);
+        Optional<Node> optionalNode = mock(Optional.class);
+        Node nd = mock(Node.class);
         when(optionalNode.isPresent()).thenReturn(true);
         when(optionalNode.get()).thenReturn(nd);
-        WriteTransaction transaction = mock(WriteTransaction.class);
+        doNothing().when(transaction).put(any(LogicalDatastoreType.class),
+                                          any(InstanceIdentifier.class),
+                                          any(Node.class));
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
         PowerMockito.suppress(MemberMatcher.method(UnimgrMapper.class, "getOvsdbNodeIid", NodeId.class));
         when(UnimgrMapper.getOvsdbNodeIid(any(NodeId.class))).thenReturn(ovsdbNodeIid);
@@ -489,10 +702,16 @@ public class UnimgrUtilsTest {
         verify(transaction).submit();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testUpdateEvcNode() {
-        DataBroker dataBroker = mock(DataBroker.class);
-        InstanceIdentifier<?> evcKey = PowerMockito.mock(InstanceIdentifier.class);
+        LinkId id = new LinkId("abcde");
+        InstanceIdentifier<?> evcKey = InstanceIdentifier
+                                           .create(NetworkTopology.class)
+                                           .child(Topology.class,
+                                                   new TopologyKey(UnimgrConstants.EVC_TOPOLOGY_ID))
+                                           .child(Link.class,
+                                                   new LinkKey(id));
         InstanceIdentifier<?> sourceUniIid = PowerMockito.mock(InstanceIdentifier.class);
         InstanceIdentifier<?> destinationUniIid = PowerMockito.mock(InstanceIdentifier.class);
         WriteTransaction transaction = mock(WriteTransaction.class);
@@ -523,12 +742,15 @@ public class UnimgrUtilsTest {
                                      .setUniDest(uniDestList)
                                      .setUniSource(uniSourceList)
                                      .build();
-        Optional<Link> optionalEvcLink = mock(Optional.class, Mockito.RETURNS_MOCKS);
-        Link lnk = mock (Link.class, Mockito.RETURNS_MOCKS);
+        Optional<Link> optionalEvcLink = mock(Optional.class);
+        Link lnk = mock (Link.class);
         when(optionalEvcLink.isPresent()).thenReturn(true);
         when(optionalEvcLink.get()).thenReturn(lnk);
         PowerMockito.suppress(MemberMatcher.method(UnimgrUtils.class, "readLink", DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class));
         when(UnimgrUtils.readLink(any(DataBroker.class), any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(optionalEvcLink);
+        doNothing().when(transaction).put(any(LogicalDatastoreType.class),
+                                          any(InstanceIdentifier.class),
+                                          any(Node.class));
         UnimgrUtils.updateEvcNode(LogicalDatastoreType.OPERATIONAL, evcKey, evcAug,
                                         sourceUniIid, destinationUniIid, dataBroker);
         verify(transaction).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class));
