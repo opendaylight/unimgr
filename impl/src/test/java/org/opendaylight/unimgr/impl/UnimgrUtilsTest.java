@@ -2,6 +2,7 @@ package org.opendaylight.unimgr.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -30,6 +31,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.api.support.membermodification.MemberModifier;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -556,51 +559,202 @@ public class UnimgrUtilsTest {
 
     @Test
     public void testFindUniNode() {
-      //TODO
+    	DataBroker dataBroker = mock(DataBroker.class); 
+        IpAddress ipAddress = mock(IpAddress.class);
+        UniAugmentation uniAugmentation = mock(UniAugmentation.class);
+        List<Node> uniNodes = new ArrayList<Node>();
+        Node nd = mock(Node.class);
+        uniNodes.add(nd);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrUtils.class, "getUniNodes", DataBroker.class));
+        when(UnimgrUtils.getUniNodes(any(DataBroker.class))).thenReturn(uniNodes);
+        when(nd.getAugmentation(UniAugmentation.class)).thenReturn(uniAugmentation);
+        when(uniAugmentation.getIpAddress()).thenReturn(ipAddress);
+        Optional<Node> optNode = UnimgrUtils.findUniNode(dataBroker, ipAddress);
+        assertNotNull(optNode);
+        assertTrue(optNode.isPresent());
+        uniNodes.remove(0);
+        optNode = UnimgrUtils.findUniNode(dataBroker, ipAddress);
+        assertTrue(optNode.absent() == Optional.absent());
     }
 
     @Test
     public void testGetConnectionInfo() {
-      //TODO
+        DataBroker dataBroker = mock(DataBroker.class);
+        InstanceIdentifier<Node> nodeIid = PowerMockito.mock(InstanceIdentifier.class);
+        NodeId ovsdbNodeId = mock(NodeId.class);
+        Optional<Node> optNode = mock(Optional.class);
+        Node node = mock(Node.class);
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
+        ConnectionInfo connectionInfo = mock(ConnectionInfo.class);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrMapper.class, "getOvsdbNodeIid", NodeId.class));
+        when(UnimgrMapper.getOvsdbNodeIid(any(NodeId.class))).thenReturn(nodeIid);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrUtils.class, "readNode", DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class));
+        when(UnimgrUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(optNode);
+        when(optNode.isPresent()).thenReturn(true);
+        when(optNode.get()).thenReturn(node);
+        when(node.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
+        when(ovsdbNodeAugmentation.getConnectionInfo()).thenReturn(connectionInfo);
+        ConnectionInfo expectedConnInfo = UnimgrUtils.getConnectionInfo(dataBroker, ovsdbNodeId);
+        assertNotNull(expectedConnInfo);
+        assertEquals(expectedConnInfo, connectionInfo);
     }
 
     @Test
     public void testGetEvcLinks() {
-      //TODO
+        Link link = mock(Link.class);
+        List<Link> lnkList = new ArrayList<Link>();
+        lnkList.add(link);
+        Topology topology = mock (Topology.class);
+        DataBroker dataBroker = mock(DataBroker.class);
+        EvcAugmentation evcAugmentation = mock(EvcAugmentation.class, Mockito.RETURNS_MOCKS);
+        InstanceIdentifier<Topology> topologyInstanceIdentifier = mock(InstanceIdentifier.class);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrMapper.class, "getEvcTopologyIid"));
+        when(UnimgrMapper.getEvcTopologyIid()).thenReturn(topologyInstanceIdentifier);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrUtils.class, "read", DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class));
+        when(UnimgrUtils.read(any(DataBroker.class), any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(topology);
+        when(topology.getLink()).thenReturn(lnkList);
+        when(link.getAugmentation(EvcAugmentation.class)).thenReturn(evcAugmentation);
+        List<Link> expectedListLink = UnimgrUtils.getEvcLinks(dataBroker);
+        assertNotNull(expectedListLink);
+        assertEquals(expectedListLink.get(0), link);
     }
 
     @Test
     public void testGetLocalIp() {
-      //TODO
+        String ip = "";
+        try {
+            ip = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        IpAddress ipAddress = UnimgrUtils.getLocalIp();
+        assertNotNull(ipAddress);
+        String expectedIp = new String(ipAddress.getValue());
+        assertTrue(expectedIp.equals("127.0.0.1") || expectedIp.equals(ip));
     }
 
     @Test
     public void testGetOvsdbNodes() {
-      //TODO
+        Node node = mock(Node.class);
+        List<Node> ndList = new ArrayList<Node>();
+        ndList.add(node);
+        Topology topology = mock (Topology.class);
+        DataBroker dataBroker = mock(DataBroker.class);
+        OvsdbNodeAugmentation ovsNdAugmentation = mock(OvsdbNodeAugmentation.class, Mockito.RETURNS_MOCKS);
+        InstanceIdentifier<Topology> topologyInstanceIdentifier = mock(InstanceIdentifier.class);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrMapper.class, "getOvsdbTopologyIid"));
+        when(UnimgrMapper.getOvsdbTopologyIid()).thenReturn(topologyInstanceIdentifier);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrUtils.class, "read", DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class));
+        when(UnimgrUtils.read(any(DataBroker.class), any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(topology);
+        when(topology.getNode()).thenReturn(ndList);
+        when(node.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsNdAugmentation);
+        List<Node> expectedListNnList = UnimgrUtils.getOvsdbNodes(dataBroker);
+        assertNotNull(expectedListNnList);
+        assertEquals(expectedListNnList.get(0), node);
     }
 
-    /*
-     *  This test for 2 functions with the
-     *  same name that take different parameters.
-     */
     @Test
     public void testGetUniNodes() {
-      //TODO
+        Node node = mock(Node.class);
+        List<Node> ndList = new ArrayList<Node>();
+        ndList.add(node);
+        Topology topology = mock (Topology.class);
+        DataBroker dataBroker = mock(DataBroker.class);
+        UniAugmentation uniAugmentation = mock(UniAugmentation.class);
+        InstanceIdentifier<Topology> topologyInstanceIdentifier = mock(InstanceIdentifier.class);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrMapper.class, "getUniTopologyIid"));
+        when(UnimgrMapper.getUniTopologyIid()).thenReturn(topologyInstanceIdentifier);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrUtils.class, "read", DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class));
+        when(UnimgrUtils.read(any(DataBroker.class), any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(topology);
+        when(topology.getNode()).thenReturn(ndList);
+        when(node.getAugmentation(UniAugmentation.class)).thenReturn(uniAugmentation);
+        List<Node> expectedListNnList = UnimgrUtils.getUniNodes(dataBroker);
+        assertNotNull(expectedListNnList);
+        assertEquals(expectedListNnList, ndList);
+    }
+
+    @Test
+    public void testGetUniNodes2() {
+        Node node = mock(Node.class);
+        List<Node> ndList = new ArrayList<Node>();
+        ndList.add(node);
+        Topology topology = mock (Topology.class);
+        DataBroker dataBroker = mock(DataBroker.class);
+        UniAugmentation uniAugmentation = mock(UniAugmentation.class);
+        InstanceIdentifier<Topology> topologyInstanceIdentifier = mock(InstanceIdentifier.class);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrMapper.class, "getUniTopologyIid"));
+        when(UnimgrMapper.getUniTopologyIid()).thenReturn(topologyInstanceIdentifier);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrUtils.class, "read", DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class));
+        when(UnimgrUtils.read(any(DataBroker.class), any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(topology);
+        when(topology.getNode()).thenReturn(ndList);
+        when(node.getAugmentation(UniAugmentation.class)).thenReturn(uniAugmentation);
+        List<Node> expectedListNnList = UnimgrUtils.getUniNodes(dataBroker, LogicalDatastoreType.OPERATIONAL);
+        assertNotNull(expectedListNnList);
+        assertEquals(expectedListNnList, ndList);
     }
 
     @Test
     public void testGetUnis() {
-      //TODO
+        Node node = mock(Node.class);
+        List<Node> ndList = new ArrayList<Node>();
+        ndList.add(node);
+        Topology topology = mock (Topology.class);
+        DataBroker dataBroker = mock(DataBroker.class);
+        UniAugmentation uniAugmentation = mock(UniAugmentation.class);
+        InstanceIdentifier<Topology> topologyInstanceIdentifier = mock(InstanceIdentifier.class);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrMapper.class, "getUniTopologyIid"));
+        when(UnimgrMapper.getUniTopologyIid()).thenReturn(topologyInstanceIdentifier);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrUtils.class, "read", DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class));
+        when(UnimgrUtils.read(any(DataBroker.class), any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(topology);
+        when(topology.getNode()).thenReturn(ndList);
+        when(node.getAugmentation(UniAugmentation.class)).thenReturn(uniAugmentation);
+        List<UniAugmentation> expectedListUni = UnimgrUtils.getUnis(dataBroker, LogicalDatastoreType.CONFIGURATION);
+        assertNotNull(expectedListUni);
+        assertEquals(expectedListUni.iterator().next(), uniAugmentation);
     }
 
     @Test
     public void testGetUni() {
-      //TODO
+        Node node = mock(Node.class);
+        List<Node> ndList = new ArrayList<Node>();
+        ndList.add(node);
+        Topology topology = mock (Topology.class);
+        DataBroker dataBroker = mock(DataBroker.class);
+        UniAugmentation uniAugmentation = mock(UniAugmentation.class);
+        IpAddress ipAddreDest = new IpAddress("10.10.0.2".toCharArray());
+        InstanceIdentifier<Topology> topologyInstanceIdentifier = mock(InstanceIdentifier.class);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrMapper.class, "getUniTopologyIid"));
+        when(UnimgrMapper.getUniTopologyIid()).thenReturn(topologyInstanceIdentifier);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrUtils.class, "read", DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class));
+        when(UnimgrUtils.read(any(DataBroker.class), any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(topology);
+        when(topology.getNode()).thenReturn(ndList);
+        when(node.getAugmentation(UniAugmentation.class)).thenReturn(uniAugmentation);
+        when(uniAugmentation.getIpAddress()).thenReturn(ipAddreDest);
+        PowerMockito.suppress(MemberMatcher.method(UnimgrMapper.class, "getUniTopologyIid"));
+        when(UnimgrMapper.getUniTopologyIid()).thenReturn(topologyInstanceIdentifier);
+        UniAugmentation expectedUniAug = UnimgrUtils.getUni(dataBroker, LogicalDatastoreType.CONFIGURATION, ipAddreDest);
+        assertNotNull(expectedUniAug);
+        assertEquals(expectedUniAug, uniAugmentation);
     }
 
     @Test
-    public void testRead() {
-      //TODO
+    public void testRead() throws ReadFailedException {
+        DataBroker dataBroker = mock(DataBroker.class);
+        InstanceIdentifier<Node> nodeIid = PowerMockito.mock(InstanceIdentifier.class);
+        ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
+        when(dataBroker.newReadOnlyTransaction()).thenReturn(transaction);
+        Optional<Node> optionalDataObject = mock(Optional.class);
+        CheckedFuture<Optional<Node>, ReadFailedException> future = mock(CheckedFuture.class);
+        Node nd = mock(Node.class);
+        when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(future);
+        when(future.checkedGet()).thenReturn(optionalDataObject);
+        when(optionalDataObject.isPresent()).thenReturn(true);
+        when(optionalDataObject.get()).thenReturn(nd);
+        Node expectedNode = UnimgrUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, nodeIid);
+        verify(transaction).read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(transaction).close();
+        assertNotNull(expectedNode);
+        assertEquals(expectedNode, nd);
     }
 
     @SuppressWarnings("unchecked")
