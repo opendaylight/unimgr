@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_93fc8340",
+        "filename": "impl/src/test/java/org/opendaylight/unimgr/impl/UnimgrUtilsTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-01-22T14:51:26Z",
+      "side": 1,
+      "message": "you\u0027re not asserting/verifying anything here",
+      "range": {
+        "startLine": 336,
+        "startChar": 0,
+        "endLine": 340,
+        "endChar": 54
+      },
+      "revId": "3ff13762b8257a8dbb2c0a96b37c43738fe644b6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
