@@ -167,15 +167,6 @@ public class UnimgrIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testCreateUni() {
-        LOG.info("Test for create Uni");
-    }
-
-    private void testDeleteUni() {
-        LOG.info("Test for delete Uni");
-    }
-
-    @Test
     public void testCreateEvc() {
         LOG.info("Test for create Evc");
         // Create an evc between the two Uni nodes
@@ -358,5 +349,61 @@ public class UnimgrIT extends AbstractMdsalTestBase {
         }
         transaction.close();
         return result;
+    }
+
+    @Test
+    public void createAndDeleteUNITest() {
+        UniAugmentation uni = new UniAugmentationBuilder()
+                .setMacAddress(new MacAddress(MAC_ADDRESS_1))
+                .setMacLayer(MAC_LAYER)
+                .setMode(MODE)
+                .setMtuSize(BigInteger.valueOf(Long.valueOf(MTU_SIZE)))
+                .setPhysicalMedium(PHY_MEDIUM)
+                .setSpeed(null)
+                .setType(TYPE)
+                .setIpAddress(new IpAddress(IP_1.toCharArray()))
+                .build();
+
+        InstanceIdentifier<Node> nodePath = createUniNode(MAC_ADDRESS_1, IP_1);
+        Assert.assertTrue(validateUni(true, nodePath));
+
+        InstanceIdentifier<Node> deletedNodePath = deleteNode(MAC_ADDRESS_1, IP_1);
+        Assert.assertTrue(validateUni(false, deletedNodePath));
+    }
+
+    private boolean validateUni(boolean forCreate, InstanceIdentifier<Node> iid) {
+        Node uni = read(LogicalDatastoreType.CONFIGURATION, iid);
+        if (forCreate && uni != null) {
+            return true;
+        } else if (!forCreate && uni == null) {
+            return true;
+        }
+        return false;
+    }
+
+    private InstanceIdentifier<Node> deleteNode(String macAddress, String ipAddress) {
+        UniAugmentation uni = new UniAugmentationBuilder().setMacAddress(new MacAddress(macAddress))
+                .setMacLayer(MAC_LAYER).setMode(MODE).setMtuSize(BigInteger.valueOf(Long.valueOf(MTU_SIZE)))
+                .setPhysicalMedium(PHY_MEDIUM).setType(TYPE).setIpAddress(new IpAddress(ipAddress.toCharArray()))
+                .build();
+
+        NodeId uniNodeId = new NodeId(new NodeId("uni://" + uni.getIpAddress().getIpv4Address().getValue().toString()));
+        InstanceIdentifier<Node> genericNode = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class,
+                        new TopologyKey(new TopologyId(new Uri("unimgr:uni"))))
+                .child(Node.class,
+                        new NodeKey(uniNodeId));
+
+        LOG.info("Received a request to delete node {}", genericNode);
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        transaction.delete(LogicalDatastoreType.CONFIGURATION, genericNode);
+        try {
+            transaction.submit().checkedGet();
+        } catch (TransactionCommitFailedException e) {
+            LOG.error("Unable to remove node with Iid {} from store {}.", genericNode, LogicalDatastoreType.CONFIGURATION);
+            return null;
+        }
+        return genericNode;
     }
 }
