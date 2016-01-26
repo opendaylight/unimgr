@@ -44,4 +44,14 @@ public class UnimgrConstants {
     public static final String DEFAULT_GRE_NAME = "gre";
 
     public static final String DEFAULT_GRE_TUNNEL_NAME = "gre1";
+
+    public static final String QOS_DSCP_ATTRIBUTE = "dscp";
+
+    public static final String QOS_DSCP_ATTRIBUTE_VALUE = "0";
+
+    public static final String QOS_MAX_RATE = "max-rate";
+
+    public static final String QOS_PREFIX = "qos://";
+
+    public static final String QUEUE_PREFIX = "queue://";
 }
