@@ -5,6 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
+
 package org.opendaylight.unimgr.it;
 
 import static org.ops4j.pax.exam.CoreOptions.composite;
@@ -16,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -26,16 +26,9 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
-import org.opendaylight.unimgr.impl.UnimgrConstants;
-import org.opendaylight.unimgr.impl.UnimgrMapper;
-import org.opendaylight.unimgr.impl.UnimgrUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
@@ -96,7 +89,7 @@ public class UnimgrIT extends AbstractMdsalTestBase {
     public void setup() throws Exception {
         super.setup();
         Thread.sleep(3000);
-        dataBroker =  getSession().getSALService(DataBroker.class);
+        dataBroker = getSession().getSALService(DataBroker.class);
         Assert.assertNotNull("db should not be null", dataBroker);
     }
 
@@ -112,12 +105,8 @@ public class UnimgrIT extends AbstractMdsalTestBase {
 
     @Override
     public MavenUrlReference getFeatureRepo() {
-        return maven()
-                .groupId("org.opendaylight.unimgr")
-                .artifactId("unimgr-features")
-                .classifier("features")
-                .type("xml")
-                .versionAsInProject();
+        return maven().groupId("org.opendaylight.unimgr").artifactId("unimgr-features").classifier("features")
+                .type("xml").versionAsInProject();
     }
 
     @Override
@@ -127,8 +116,7 @@ public class UnimgrIT extends AbstractMdsalTestBase {
 
     @Override
     public Option getLoggingOption() {
-        Option option = editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
-                logConfiguration(UnimgrIT.class),
+        Option option = editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG, logConfiguration(UnimgrIT.class),
                 LogLevel.INFO.name());
         option = composite(option, super.getLoggingOption());
         return option;
@@ -141,53 +129,55 @@ public class UnimgrIT extends AbstractMdsalTestBase {
 
     @Test
     public void testUnimgr() {
-        InstanceIdentifier<Topology> uniTopoPath = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class,
-                        new TopologyKey(new TopologyId(new Uri("unimgr:uni"))));
-        InstanceIdentifier<Topology> evcTopoPath = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class,
-                        new TopologyKey(new TopologyId(new Uri("unimgr:evc"))));
-        InstanceIdentifier<Topology> ovdbTopoPath = InstanceIdentifier
-                .create(NetworkTopology.class)
+        InstanceIdentifier<Topology> uniTopoPath = InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(new TopologyId(new Uri("unimgr:uni"))));
+        InstanceIdentifier<Topology> evcTopoPath = InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(new TopologyId(new Uri("unimgr:evc"))));
+        InstanceIdentifier<Topology> ovdbTopoPath = InstanceIdentifier.create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(new TopologyId(new Uri("ovsdb:1"))));
 
-        // Read from md-sal and check if it is initialized with Uni and Evc augmentations
+        // Read from md-sal and check if it is initialized with Uni and Evc
+        // augmentations
         Topology topology = read(LogicalDatastoreType.CONFIGURATION, uniTopoPath);
-        Assert.assertNotNull("UNI Topology could not be found in " + LogicalDatastoreType.CONFIGURATION,
-                topology);
+        Assert.assertNotNull("UNI Topology could not be found in " + LogicalDatastoreType.CONFIGURATION, topology);
         topology = read(LogicalDatastoreType.OPERATIONAL, uniTopoPath);
-        Assert.assertNotNull("UNI Topology could not be found in " + LogicalDatastoreType.OPERATIONAL,
-                topology);
+        Assert.assertNotNull("UNI Topology could not be found in " + LogicalDatastoreType.OPERATIONAL, topology);
         topology = read(LogicalDatastoreType.CONFIGURATION, evcTopoPath);
-        Assert.assertNotNull("EVC Topology could not be found in " + LogicalDatastoreType.CONFIGURATION,
-                topology);
+        Assert.assertNotNull("EVC Topology could not be found in " + LogicalDatastoreType.CONFIGURATION, topology);
         topology = read(LogicalDatastoreType.OPERATIONAL, evcTopoPath);
-        Assert.assertNotNull("EVC Topology could not be found in " + LogicalDatastoreType.OPERATIONAL,
-                topology);
+        Assert.assertNotNull("EVC Topology could not be found in " + LogicalDatastoreType.OPERATIONAL, topology);
         topology = read(LogicalDatastoreType.CONFIGURATION, ovdbTopoPath);
-        Assert.assertNotNull("OVSDB Topology could not be found in " + LogicalDatastoreType.CONFIGURATION,
-                topology);
+        Assert.assertNotNull("OVSDB Topology could not be found in " + LogicalDatastoreType.CONFIGURATION, topology);
         topology = read(LogicalDatastoreType.CONFIGURATION, ovdbTopoPath);
-        Assert.assertNotNull("OVSDB Topology could not be found in " + LogicalDatastoreType.OPERATIONAL,
-                topology);
+        Assert.assertNotNull("OVSDB Topology could not be found in " + LogicalDatastoreType.OPERATIONAL, topology);
     }
 
     @Test
-    public void testCreateUni() {
-        LOG.info("Test for create Uni");
-    }
+    public void createAndDeleteUNITest() {
+        UniAugmentation uni = new UniAugmentationBuilder()
+                .setMacAddress(new MacAddress(MAC_ADDRESS_1))
+                .setMacLayer(MAC_LAYER)
+                .setMode(MODE)
+                .setMtuSize(BigInteger.valueOf(Long.valueOf(MTU_SIZE)))
+                .setPhysicalMedium(PHY_MEDIUM)
+                .setSpeed(null)
+                .setType(TYPE)
+                .setIpAddress(new IpAddress(IP_1.toCharArray()))
+                .build();
 
-    private void testDeleteUni() {
-        LOG.info("Test for delete Uni");
+        InstanceIdentifier<Node> nodePath = createUniNode(MAC_ADDRESS_1, IP_1);
+        Assert.assertTrue(validateUni(true, nodePath));
+
+        InstanceIdentifier<Node> deletedNodePath = deleteNode(MAC_ADDRESS_1, IP_1);
+        Assert.assertTrue(validateUni(false, deletedNodePath));
     }
 
     @Test
     public void testCreateEvc() {
         LOG.info("Test for create Evc");
         // Create an evc between the two Uni nodes
-        InstanceIdentifier<Link> evcIid = createOrDeleteEvcLink(IP_1, MAC_ADDRESS_1, IP_2, MAC_ADDRESS_2, EVC_ID_1, true);
+        InstanceIdentifier<Link> evcIid = createOrDeleteEvcLink(IP_1, MAC_ADDRESS_1, IP_2, MAC_ADDRESS_2, EVC_ID_1,
+                true);
         Assert.assertNotNull(evcIid);
 
         // Validate Evc create operation
@@ -199,10 +189,11 @@ public class UnimgrIT extends AbstractMdsalTestBase {
     public void testDeleteEvc() {
         LOG.info("Test for delete Evc");
         // Create an evc between the two Uni nodes
-        InstanceIdentifier<Link> evcIid = createOrDeleteEvcLink(IP_1, MAC_ADDRESS_1, IP_2, MAC_ADDRESS_2, EVC_ID_1, true);
+        InstanceIdentifier<Link> evcIid = createOrDeleteEvcLink(IP_1, MAC_ADDRESS_1, IP_2, MAC_ADDRESS_2, EVC_ID_1,
+                true);
         Assert.assertNotNull(evcIid);
 
-        //Delete the Evc
+        // Delete the Evc
         evcIid = createOrDeleteEvcLink(IP_1, MAC_ADDRESS_1, IP_2, MAC_ADDRESS_2, EVC_ID_1, false);
         Assert.assertNotNull(evcIid);
 
@@ -223,14 +214,9 @@ public class UnimgrIT extends AbstractMdsalTestBase {
     }
 
     private InstanceIdentifier<Node> createUniNode(String macAddress, String ipAddress) {
-        UniAugmentation uni = new UniAugmentationBuilder()
-                .setMacAddress(new MacAddress(macAddress))
-                .setMacLayer(MAC_LAYER)
-                .setMode(MODE)
-                .setMtuSize(BigInteger.valueOf(Long.valueOf(MTU_SIZE)))
-                .setPhysicalMedium(PHY_MEDIUM)
-                .setType(TYPE)
-                .setIpAddress(new IpAddress(ipAddress.toCharArray()))
+        UniAugmentation uni = new UniAugmentationBuilder().setMacAddress(new MacAddress(macAddress))
+                .setMacLayer(MAC_LAYER).setMode(MODE).setMtuSize(BigInteger.valueOf(Long.valueOf(MTU_SIZE)))
+                .setPhysicalMedium(PHY_MEDIUM).setType(TYPE).setIpAddress(new IpAddress(ipAddress.toCharArray()))
                 .build();
 
         NodeId uniNodeId = new NodeId(new NodeId("uni://" + uni.getIpAddress().getIpv4Address().getValue().toString()));
@@ -238,11 +224,8 @@ public class UnimgrIT extends AbstractMdsalTestBase {
         try {
             uniNodeIid = getUniIid("uni://" + uni.getIpAddress().getIpv4Address().getValue().toString());
             NodeKey uniNodeKey = new NodeKey(uniNodeId);
-            Node nodeData = new NodeBuilder()
-                                    .setNodeId(uniNodeId)
-                                    .setKey(uniNodeKey)
-                                    .addAugmentation(UniAugmentation.class, uni)
-                                    .build();
+            Node nodeData = new NodeBuilder().setNodeId(uniNodeId).setKey(uniNodeKey)
+                    .addAugmentation(UniAugmentation.class, uni).build();
             WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
             transaction.put(LogicalDatastoreType.CONFIGURATION, uniNodeIid, nodeData);
             CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
@@ -255,9 +238,8 @@ public class UnimgrIT extends AbstractMdsalTestBase {
         return uniNodeIid;
     }
 
-    private InstanceIdentifier<Link> createOrDeleteEvcLink(String srcUniIp, String srcMac,
-            String dstUniIp, String dstMac, String evcId,
-            boolean isCreate) {
+    private InstanceIdentifier<Link> createOrDeleteEvcLink(String srcUniIp, String srcMac, String dstUniIp,
+            String dstMac, String evcId, boolean isCreate) {
         // Create two Uni nodes before creating an Evc
         InstanceIdentifier<Node> uniIid = createUniNode(srcMac, srcUniIp);
         Assert.assertNotNull(uniIid);
@@ -268,44 +250,31 @@ public class UnimgrIT extends AbstractMdsalTestBase {
         // Create Evc link between the two Uni Nodes
         List<UniSource> src = new ArrayList<>();
         InstanceIdentifier<?> srcUniIid = getUniIid("uni://" + srcUniIp);
-        UniSource uniSrc = new UniSourceBuilder()
-                .setIpAddress(new IpAddress(srcUniIp.toCharArray()))
-                .setOrder((short) 1)
-                .setKey(new UniSourceKey((short) 1))
-                .setUni(srcUniIid)
-                .build();
+        UniSource uniSrc = new UniSourceBuilder().setIpAddress(new IpAddress(srcUniIp.toCharArray()))
+                .setOrder((short) 1).setKey(new UniSourceKey((short) 1)).setUni(srcUniIid).build();
         src.add(uniSrc);
 
         List<UniDest> dst = new ArrayList<>();
-        InstanceIdentifier<?> dstUniIid = getUniIid("uni://" + dstUniIp);;
-        UniDest uniDst = new UniDestBuilder()
-                .setIpAddress(new IpAddress(dstUniIp.toCharArray()))
-                .setOrder((short) 2)
-                .setKey(new UniDestKey((short) 2))
-                .setUni(dstUniIid)
-                .build();
+        InstanceIdentifier<?> dstUniIid = getUniIid("uni://" + dstUniIp);
+        ;
+        UniDest uniDst = new UniDestBuilder().setIpAddress(new IpAddress(dstUniIp.toCharArray())).setOrder((short) 2)
+                .setKey(new UniDestKey((short) 2)).setUni(dstUniIid).build();
         dst.add(uniDst);
 
-        EvcAugmentation evc = new EvcAugmentationBuilder()
-                .setUniDest(dst)
-                .setUniSource(src)
-                .build();
+        EvcAugmentation evc = new EvcAugmentationBuilder().setUniDest(dst).setUniSource(src).build();
 
         LinkId evcLinkId = new LinkId(new LinkId("evc://" + evcId));
         InstanceIdentifier<Link> evcLinkIid = null;
         try {
             evcLinkIid = getEvcLinkIid(evcId);
-            if(isCreate) {
+            if (isCreate) {
                 LinkKey evcLinkKey = new LinkKey(evcLinkId);
                 Source mandatorySrcNode = new SourceBuilder().setSourceNode(new NodeId("uni://" + srcUniIp)).build();
-                Destination mandatoryDstNode = new DestinationBuilder().setDestNode(new NodeId("uni://" + dstUniIp)).build();
-                Link linkData = new LinkBuilder()
-                        .setKey(evcLinkKey)
-                        .setSource(mandatorySrcNode)
-                        .setDestination(mandatoryDstNode)
-                        .setLinkId(evcLinkId)
-                        .addAugmentation(EvcAugmentation.class, evc)
+                Destination mandatoryDstNode = new DestinationBuilder().setDestNode(new NodeId("uni://" + dstUniIp))
                         .build();
+                Link linkData = new LinkBuilder().setKey(evcLinkKey).setSource(mandatorySrcNode)
+                        .setDestination(mandatoryDstNode).setLinkId(evcLinkId)
+                        .addAugmentation(EvcAugmentation.class, evc).build();
                 WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
                 transaction.put(LogicalDatastoreType.CONFIGURATION, evcLinkIid, linkData);
                 CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
@@ -331,8 +300,7 @@ public class UnimgrIT extends AbstractMdsalTestBase {
 
     private InstanceIdentifier<Node> getUniIid(String nodeId) {
         NodeId uniNodeId = new NodeId(new NodeId(nodeId));
-        InstanceIdentifier<Node> uniNodeIid = InstanceIdentifier
-                .create(NetworkTopology.class)
+        InstanceIdentifier<Node> uniNodeIid = InstanceIdentifier.create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(new TopologyId(new Uri("unimgr:uni"))))
                 .child(Node.class, new NodeKey(uniNodeId));
         return uniNodeIid;
@@ -340,15 +308,14 @@ public class UnimgrIT extends AbstractMdsalTestBase {
 
     private InstanceIdentifier<Link> getEvcLinkIid(String linkId) {
         LinkId evcLinkId = new LinkId(new LinkId("evc://" + linkId));
-        InstanceIdentifier<Link> linkPath = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class,new TopologyKey(new TopologyId(new Uri("unimgr:evc"))))
+        InstanceIdentifier<Link> linkPath = InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(new TopologyId(new Uri("unimgr:evc"))))
                 .child(Link.class, new LinkKey(evcLinkId));
         return linkPath;
     }
 
-    private <D extends org.opendaylight.yangtools.yang.binding.DataObject> D read(
-            final LogicalDatastoreType store, final InstanceIdentifier<D> path)  {
+    private <D extends org.opendaylight.yangtools.yang.binding.DataObject> D read(final LogicalDatastoreType store,
+            final InstanceIdentifier<D> path) {
         D result = null;
         final ReadOnlyTransaction transaction = dataBroker.newReadOnlyTransaction();
         Optional<D> optionalDataObject;
@@ -358,13 +325,47 @@ public class UnimgrIT extends AbstractMdsalTestBase {
             if (optionalDataObject.isPresent()) {
                 result = optionalDataObject.get();
             } else {
-                LOG.error("{}: Failed to read {}",
-                        Thread.currentThread().getStackTrace()[1], path);
+                LOG.error("{}: Failed to read {}", Thread.currentThread().getStackTrace()[1], path);
             }
         } catch (ReadFailedException e) {
             LOG.error("Failed to read {} ", path, e);
         }
         transaction.close();
         return result;
+    }
+    private InstanceIdentifier<Node> deleteNode(String macAddress, String ipAddress) {
+        UniAugmentation uni = new UniAugmentationBuilder().setMacAddress(new MacAddress(macAddress))
+                .setMacLayer(MAC_LAYER).setMode(MODE).setMtuSize(BigInteger.valueOf(Long.valueOf(MTU_SIZE)))
+                .setPhysicalMedium(PHY_MEDIUM).setType(TYPE).setIpAddress(new IpAddress(ipAddress.toCharArray()))
+                .build();
+
+        NodeId uniNodeId = new NodeId(new NodeId("uni://" + uni.getIpAddress().getIpv4Address().getValue().toString()));
+        InstanceIdentifier<Node> genericNode = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class,
+                        new TopologyKey(new TopologyId(new Uri("unimgr:uni"))))
+                .child(Node.class,
+                        new NodeKey(uniNodeId));
+
+        LOG.info("Received a request to delete node {}", genericNode);
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        transaction.delete(LogicalDatastoreType.CONFIGURATION, genericNode);
+        try {
+            transaction.submit().checkedGet();
+        } catch (TransactionCommitFailedException e) {
+            LOG.error("Unable to remove node with Iid {} from store {}.", genericNode, LogicalDatastoreType.CONFIGURATION);
+            return null;
+        }
+        return genericNode;
+    }
+
+    private boolean validateUni(boolean forCreate, InstanceIdentifier<Node> iid) {
+        Node uni = read(LogicalDatastoreType.CONFIGURATION, iid);
+        if (forCreate && uni != null) {
+            return true;
+        } else if (!forCreate && uni == null) {
+            return true;
+        }
+        return false;
     }
 }
