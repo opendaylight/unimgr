@@ -27,6 +27,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
+import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
@@ -43,12 +44,31 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosExternalIdsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosOtherConfig;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosOtherConfigBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosOtherConfigKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QueueList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QueueListBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QueueListKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfig;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfigBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfigKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsKey;
@@ -63,6 +83,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.r
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSource;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSourceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSourceKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed100M;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed10G;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed10M;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed10MBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed1G;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.uni.Speed;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -87,6 +113,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 public class UnimgrUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(UnimgrUtils.class);
+    private static final Uuid QUEUE_UUID = new Uuid(UUID.randomUUID().toString());
 
     /**
      * Creates and submit a Bridge Node to the Configuration Data Store.
@@ -324,9 +351,110 @@ public class UnimgrUtils {
                                                 .setRemoteIp(uni.getIpAddress())
                                                 .setRemotePort(new PortNumber(UnimgrConstants.OVSDB_PORT))
                                                 .build();
+
+        List<QosEntries> qosEntries = new ArrayList<>();
+        List<Queues> queues =  new ArrayList<>();
+        if (uni.getSpeed() != null) {
+            // Set QoS attributes to ovsdb by configuring default queue #0
+            // for best effort dscp and specified max rate
+            qosEntries = createQosEnteries(uni, 0L);
+            queues = createQueues(uni, 0L);
+        }
         OvsdbNodeAugmentation ovsdbNode = new OvsdbNodeAugmentationBuilder()
-                                                .setConnectionInfo(connectionInfos).build();
+                                                .setConnectionInfo(connectionInfos)
+                                                .setQosEntries(qosEntries)
+                                                .setQueues(queues)
+                                                .build();
         return ovsdbNode;
+    }
+
+    private static List<QosEntries> createQosEnteries(Uni uni, Long queueNumber) {
+        Class<? extends QosTypeBase> qosType = SouthboundMapper.createQosType(SouthboundConstants.QOS_LINUX_HTB);
+        QosEntriesKey key = new QosEntriesKey(new Uri(SouthboundConstants.QOS_LINUX_HTB));
+
+        List<QueueList> listQueue = new ArrayList<>();
+        QueueList queueList = new QueueListBuilder()
+                .setKey(new QueueListKey(queueNumber))
+                .setQueueNumber(queueNumber)
+                .setQueueUuid(QUEUE_UUID)
+                .build();
+        listQueue.add(queueList);
+
+        // Configure queue for best-effort dscp and max rate
+        List<QosOtherConfig> otherConfig = new ArrayList<>();
+        QosOtherConfig qOtherConfig = new QosOtherConfigBuilder()
+                .setKey(new QosOtherConfigKey(UnimgrConstants.QOS_DSCP_ATTRIBUTE))
+                .setOtherConfigKey(UnimgrConstants.QOS_DSCP_ATTRIBUTE)
+                .setOtherConfigValue(UnimgrConstants.QOS_DSCP_ATTRIBUTE_VALUE)
+                .build();
+        otherConfig.add(qOtherConfig);
+
+        qOtherConfig = new QosOtherConfigBuilder()
+                .setKey(new QosOtherConfigKey(UnimgrConstants.QOS_MAX_RATE))
+                .setOtherConfigKey(UnimgrConstants.QOS_MAX_RATE)
+                .setOtherConfigValue(getSpeed(uni.getSpeed()))
+                .build();
+        otherConfig.add(qOtherConfig);
+
+        QosEntries qosEntry = new QosEntriesBuilder()
+                .setKey(key)
+                .setQosId(new Uri(SouthboundConstants.QOS_LINUX_HTB))
+                .setQosOtherConfig(otherConfig)
+                .setQosType(qosType)
+                .setQosUuid(new Uuid(UUID.randomUUID().toString()))
+                .setQueueList(listQueue)
+                .build();
+
+        List<QosEntries> qosEntries = new ArrayList<>();
+        qosEntries.add(qosEntry);
+        return qosEntries;
+    }
+
+    private static List<Queues> createQueues(Uni uni, Long queueNumber) {
+        List<QueuesOtherConfig> otherConfig = new ArrayList<>();
+        QueuesOtherConfig queuesOtherConfig = new QueuesOtherConfigBuilder()
+                .setKey(new QueuesOtherConfigKey(UnimgrConstants.QOS_DSCP_ATTRIBUTE))
+                .setQueueOtherConfigKey(UnimgrConstants.QOS_DSCP_ATTRIBUTE)
+                .setQueueOtherConfigValue(UnimgrConstants.QOS_DSCP_ATTRIBUTE_VALUE)
+                .build();
+        otherConfig.add(queuesOtherConfig);
+
+        queuesOtherConfig = new QueuesOtherConfigBuilder()
+                .setKey(new QueuesOtherConfigKey(UnimgrConstants.QOS_MAX_RATE))
+                .setQueueOtherConfigKey(UnimgrConstants.QOS_MAX_RATE)
+                .setQueueOtherConfigValue(getSpeed(uni.getSpeed()))
+                .build();
+        otherConfig.add(queuesOtherConfig);
+
+        // Configure dscp value for best-effort
+        Queues queues = new QueuesBuilder()
+                .setDscp(Short.parseShort(UnimgrConstants.QOS_DSCP_ATTRIBUTE_VALUE))
+                .setKey(new QueuesKey(new Uri(queueNumber.toString())))
+                .setQueueId(new Uri(queueNumber.toString()))
+                .setQueuesOtherConfig(otherConfig)
+                .setQueueUuid(QUEUE_UUID)
+                .build();
+
+        List<Queues> queuesList = new ArrayList<>();
+        queuesList.add(queues);
+        return queuesList;
+    }
+
+    private static String getSpeed(Speed speedObject) {
+        String speed = null;
+        if (speedObject.getSpeed() instanceof Speed10M) {
+            speed = "10000000";
+        }
+        else if (speedObject.getSpeed() instanceof Speed100M) {
+            speed = "100000000";
+        }
+        else if (speedObject.getSpeed() instanceof Speed1G) {
+            speed = "1000000000";
+        }
+        else if (speedObject.getSpeed() instanceof Speed10G) {
+            speed = "10000000000";
+        }
+        return speed;
     }
 
     /**
