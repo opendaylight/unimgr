@@ -8,27 +8,176 @@
 package org.opendaylight.unimgr.command;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.unimgr.impl.UnimgrConstants;
+import org.opendaylight.unimgr.impl.UnimgrMapper;
+import org.opendaylight.unimgr.impl.UnimgrUtils;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
+
 public class EvcUpdateCommand extends AbstractUpdateCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(EvcUpdateCommand.class);
 
-    public EvcUpdateCommand(DataBroker dataBroker,
-            Map<InstanceIdentifier<?>, DataObject> changes) {
+    public EvcUpdateCommand(final DataBroker dataBroker,
+            final Map<InstanceIdentifier<?>, DataObject> changes) {
         super.dataBroker = dataBroker;
         super.changes = changes;
     }
 
     @Override
     public void execute() {
-        //TODO
-    }
+        for (final Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
+            if (created.getValue() != null && created.getValue() instanceof EvcAugmentation) {
+                final EvcAugmentation evc = (EvcAugmentation) created.getValue();
+                final InstanceIdentifier<?> evcKey = created.getKey();
 
+                // FIXME: For now, we assume that there is 1 uni per
+                // source/destination
+                if (evc.getUniDest() == null || evc.getUniDest().isEmpty()) {
+                    LOG.error("Destination UNI cannot be null.");
+                    break;
+                }
+                if (evc.getUniSource() == null || evc.getUniSource().isEmpty()) {
+                    LOG.error("Source UNI cannot be null.");
+                    break;
+                }
+                LOG.trace("New EVC created, source IP: {} destination IP {}.",
+                        evc.getUniSource().iterator().next().getIpAddress().getIpv4Address(),
+                        evc.getUniDest().iterator().next().getIpAddress().getIpv4Address());
+                InstanceIdentifier<Node> sourceUniIid;
+                InstanceIdentifier<Node> destinationUniIid;
+
+                final InstanceIdentifier<?> iidSource = evc.getUniSource().iterator().next().getUni();
+                if (iidSource != null) {
+                    sourceUniIid = iidSource.firstIdentifierOf(Node.class);
+                } else {
+                    sourceUniIid = UnimgrMapper.getUniIid(dataBroker,
+                            evc.getUniSource().iterator().next().getIpAddress(),
+                            LogicalDatastoreType.OPERATIONAL);
+                }
+                final InstanceIdentifier<?> iidDest = evc.getUniDest().iterator().next().getUni();
+                if (iidDest != null) {
+                    destinationUniIid = iidDest.firstIdentifierOf(Node.class);
+                } else {
+                    destinationUniIid = UnimgrMapper.getUniIid(dataBroker,
+                            evc.getUniDest().iterator().next().getIpAddress(),
+                            LogicalDatastoreType.OPERATIONAL);
+                }
+
+                // Retrieve the source and destination UNIs
+                final Optional<Node> optionalUniSource = UnimgrUtils.readNode(dataBroker,
+                        LogicalDatastoreType.OPERATIONAL,
+                        sourceUniIid);
+                final Optional<Node> optionalUniDestination = UnimgrUtils.readNode(dataBroker,
+                        LogicalDatastoreType.OPERATIONAL,
+                        destinationUniIid);
+
+                Node uniSource = null;
+                Node uniDestination = null;
+
+                if (optionalUniSource.isPresent() && optionalUniDestination.isPresent()) {
+                    uniSource = optionalUniSource.get();
+                    uniDestination = optionalUniDestination.get();
+
+                    // Retrieve the source and/or destination OVSDB node
+                    final UniAugmentation sourceUniAugmentation =
+                            uniSource.getAugmentation(UniAugmentation.class);
+                    final UniAugmentation destinationUniAugmentation =
+                            uniDestination.getAugmentation(UniAugmentation.class);
+                    final Optional<Node> optionalSourceOvsdbNode =
+                            UnimgrUtils.readNode(dataBroker,
+                                    LogicalDatastoreType.OPERATIONAL,
+                                    sourceUniAugmentation
+                                    .getOvsdbNodeRef()
+                                    .getValue());
+                    final Optional<Node> optionalDestinationOvsdbNode =
+                            UnimgrUtils.readNode(dataBroker,
+                                    LogicalDatastoreType.OPERATIONAL,
+                                    destinationUniAugmentation
+                                    .getOvsdbNodeRef()
+                                    .getValue());
+                    if (optionalSourceOvsdbNode.isPresent() && optionalDestinationOvsdbNode.isPresent()) {
+                        // Retrieve the source and/or destination bridge
+                        final InstanceIdentifier<Node> sourceBridgeIid =
+                                UnimgrMapper.getOvsdbBridgeNodeIid(optionalSourceOvsdbNode.get());
+                        final Optional<Node> optionalSourceBr = UnimgrUtils.readNode(dataBroker,
+                                LogicalDatastoreType.OPERATIONAL,
+                                sourceBridgeIid);
+                        final InstanceIdentifier<Node> destinationBridgeIid =
+                                UnimgrMapper.getOvsdbBridgeNodeIid(optionalDestinationOvsdbNode.get());
+                        final Optional<Node> optionalDestinationBr = UnimgrUtils.readNode(dataBroker,
+                                LogicalDatastoreType.OPERATIONAL,
+                                destinationBridgeIid);
+                        Node sourceBr = null;
+                        Node destinationBr = null;
+                        if (optionalSourceBr.isPresent() && optionalDestinationBr.isPresent()) {
+                            sourceBr = optionalSourceBr.get();
+                            destinationBr = optionalDestinationBr.get();
+
+                            // Creating termination points (OVSDB CONFIG
+                            // datastore)
+                            UnimgrUtils.createTerminationPointNode(dataBroker,
+                                    uniSource.getAugmentation(UniAugmentation.class),
+                                    sourceBr,
+                                    UnimgrConstants.DEFAULT_BRIDGE_NAME,
+                                    UnimgrConstants.DEFAULT_TUNNEL_IFACE);
+
+                            // Create GRE tunnel (OVSDB CONFIG datastore)
+                            UnimgrUtils.createGreTunnel(dataBroker,
+                                    uniSource.getAugmentation(UniAugmentation.class),
+                                    uniDestination.getAugmentation(UniAugmentation.class),
+                                    sourceBr,
+                                    UnimgrConstants.DEFAULT_BRIDGE_NAME,
+                                    UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
+
+                            // Create termination points (CONFIG datastore)
+                            UnimgrUtils.createTerminationPointNode(dataBroker,
+                                    uniSource.getAugmentation(UniAugmentation.class),
+                                    destinationBr,
+                                    UnimgrConstants.DEFAULT_BRIDGE_NAME,
+                                    UnimgrConstants.DEFAULT_TUNNEL_IFACE);
+
+                            // Create GRE tunnel (OVSDB CONFIG datastore)
+                            UnimgrUtils.createGreTunnel(dataBroker,
+                                    uniDestination.getAugmentation(UniAugmentation.class),
+                                    uniSource.getAugmentation(UniAugmentation.class), destinationBr,
+                                    UnimgrConstants.DEFAULT_BRIDGE_NAME,
+                                    UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
+
+                            // Update EVC
+                            UnimgrUtils.updateEvcNode(LogicalDatastoreType.CONFIGURATION,
+                                    evcKey,
+                                    evc,
+                                    sourceUniIid,
+                                    destinationUniIid,
+                                    dataBroker);
+                            UnimgrUtils.updateEvcNode(LogicalDatastoreType.OPERATIONAL,
+                                    evcKey,
+                                    evc,
+                                    sourceUniIid,
+                                    destinationUniIid,
+                                    dataBroker);
+                        } else {
+                            LOG.info("Unable to retrieve the source and/or destination bridge.");
+                        }
+                    } else {
+                        LOG.info("Uname to retrieve the source and/or destination ovsdbNode.");
+                    }
+                } else {
+                    LOG.info("Unable to retrieve the source and/or destination Uni.");
+                }
+            }
+        }
+    }
 }
