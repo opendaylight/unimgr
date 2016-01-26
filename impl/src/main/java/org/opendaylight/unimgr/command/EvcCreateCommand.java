@@ -113,6 +113,8 @@ public class EvcCreateCommand extends AbstractCreateCommand {
                         Optional<Node> optionalDestinationBr = UnimgrUtils.readNode(dataBroker,
                                                                                     LogicalDatastoreType.OPERATIONAL,
                                                                                     destinationBridgeIid);
+                        //update ovsdb qos-entry and queues with max-rate to match evc ingress BW
+                        UnimgrUtils.updateMaxRate(dataBroker, sourceUniAugmentation, destinationUniAugmentation, evc);
                         Node sourceBr;
                         Node destinationBr;
                         if (optionalSourceBr.isPresent() && optionalDestinationBr.isPresent()) {
