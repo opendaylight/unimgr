@@ -229,7 +229,7 @@ public class UnimgrUtils {
         ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
                 SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
         protocolList.add(new ProtocolEntryBuilder().
-                setProtocol((Class<? extends OvsdbBridgeProtocolBase>) mapper.get("OpenFlow13")).build());
+                setProtocol(mapper.get("OpenFlow13")).build());
         return protocolList;
     }
 
@@ -998,31 +998,32 @@ public class UnimgrUtils {
 
     /**
      * Updates a specific EVC into a specific DataStore type
-     * @param dataStore The datastore type
-     * @param evcKey The EVC key
-     * @param evcAugmentation The EVC's data
-     * @param sourceUniIid The Source Uni Instance Identifier
-     * @param destinationUniIid The destination Uni Instance Identifier
-     * @param dataBroker The dataBroker instance to create transactions
+     * 
+     * @param dataStore
+     *            The datastore type
+     * @param evcKey
+     *            The EVC key
+     * @param evcAugmentation
+     *            The EVC's data
+     * @param sourceUniIid
+     *            The Source Uni Instance Identifier
+     * @param destinationUniIid
+     *            The destination Uni Instance Identifier
+     * @param dataBroker
+     *            The dataBroker instance to create transactions
+     * @return
      */
-    public static void updateEvcNode(LogicalDatastoreType dataStore,
-                                     InstanceIdentifier<?> evcKey,
-                                     EvcAugmentation evcAugmentation,
-                                     InstanceIdentifier<?> sourceUniIid,
-                                     InstanceIdentifier<?> destinationUniIid,
-                                     DataBroker dataBroker) {
+    public static boolean updateEvcNode(LogicalDatastoreType dataStore, InstanceIdentifier<?> evcKey,
+            EvcAugmentation evcAugmentation, InstanceIdentifier<?> sourceUniIid,
+            InstanceIdentifier<?> destinationUniIid, DataBroker dataBroker) {
         EvcAugmentationBuilder updatedEvcBuilder = new EvcAugmentationBuilder(evcAugmentation);
         if (sourceUniIid != null && destinationUniIid != null) {
             List<UniSource> sourceList = new ArrayList<UniSource>();
             UniSourceKey sourceKey = evcAugmentation.getUniSource().iterator().next().getKey();
             short sourceOrder = evcAugmentation.getUniSource().iterator().next().getOrder();
             IpAddress sourceIp = evcAugmentation.getUniSource().iterator().next().getIpAddress();
-            UniSource uniSource = new UniSourceBuilder()
-                                          .setOrder(sourceOrder)
-                                          .setKey(sourceKey)
-                                          .setIpAddress(sourceIp)
-                                          .setUni(sourceUniIid)
-                                          .build();
+            UniSource uniSource = new UniSourceBuilder().setOrder(sourceOrder).setKey(sourceKey).setIpAddress(sourceIp)
+                    .setUni(sourceUniIid).build();
             sourceList.add(uniSource);
             updatedEvcBuilder.setUniSource(sourceList);
 
@@ -1030,17 +1031,11 @@ public class UnimgrUtils {
             UniDestKey destKey = evcAugmentation.getUniDest().iterator().next().getKey();
             short destOrder = evcAugmentation.getUniDest().iterator().next().getOrder();
             IpAddress destIp = evcAugmentation.getUniDest().iterator().next().getIpAddress();
-            UniDest uniDest = new UniDestBuilder()
-                                      .setIpAddress(destIp)
-                                      .setOrder(destOrder)
-                                      .setKey(destKey)
-                                      .setUni(destinationUniIid)
-                                      .build();
+            UniDest uniDest = new UniDestBuilder().setIpAddress(destIp).setOrder(destOrder).setKey(destKey)
+                    .setUni(destinationUniIid).build();
             destinationList.add(uniDest);
             updatedEvcBuilder.setUniDest(destinationList);
-            Optional<Link> optionalEvcLink = readLink(dataBroker,
-                                                      LogicalDatastoreType.CONFIGURATION,
-                                                      evcKey);
+            Optional<Link> optionalEvcLink = readLink(dataBroker, LogicalDatastoreType.CONFIGURATION, evcKey);
             if (optionalEvcLink.isPresent()) {
                 Link link = optionalEvcLink.get();
                 WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
@@ -1052,9 +1047,13 @@ public class UnimgrUtils {
                 linkBuilder.addAugmentation(EvcAugmentation.class, updatedEvcBuilder.build());
                 transaction.put(dataStore, evcKey.firstIdentifierOf(Link.class), linkBuilder.build());
                 transaction.submit();
+                return true;
+            } else {
+                LOG.info("EvcLink is not present: " + optionalEvcLink.get().getKey());
             }
         } else {
             LOG.info("Invalid instance identifiers for sourceUni and destUni.");
         }
+        return false;
     }
 }

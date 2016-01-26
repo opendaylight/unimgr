@@ -20,6 +20,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Evc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniDest;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSource;
 
 public class UnimgrConsoleProviderTest implements IUnimgrConsoleProvider {
 
@@ -79,4 +81,9 @@ public class UnimgrConsoleProviderTest implements IUnimgrConsoleProvider {
     @Override
     public void close() throws Exception { }
 
+    @Override
+    public boolean updateEvc(EvcAugmentation evcKey, EvcAugmentation evc, UniSource uniSource, UniDest uniDest) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }
