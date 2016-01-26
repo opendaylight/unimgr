@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Alexis de Talhouët <adetalhouet@inocybe.com>
+Submitted-by: Alexis de Talhouët <adetalhouet@inocybe.com>
+Submitted-at: Tue, 26 Jan 2016 18:07:46 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/33566
+Project: unimgr
+Branch: refs/heads/stable/beryllium
