@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -26,16 +25,9 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
-import org.opendaylight.unimgr.impl.UnimgrConstants;
-import org.opendaylight.unimgr.impl.UnimgrMapper;
-import org.opendaylight.unimgr.impl.UnimgrUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
@@ -172,15 +164,6 @@ public class UnimgrIT extends AbstractMdsalTestBase {
         topology = read(LogicalDatastoreType.CONFIGURATION, ovdbTopoPath);
         Assert.assertNotNull("OVSDB Topology could not be found in " + LogicalDatastoreType.OPERATIONAL,
                 topology);
-    }
-
-    @Test
-    public void testCreateUni() {
-        LOG.info("Test for create Uni");
-    }
-
-    private void testDeleteUni() {
-        LOG.info("Test for delete Uni");
     }
 
     @Test
@@ -366,5 +349,61 @@ public class UnimgrIT extends AbstractMdsalTestBase {
         }
         transaction.close();
         return result;
+    }
+
+    @Test
+    public void createAndDeleteUNITest() {
+        UniAugmentation uni = new UniAugmentationBuilder()
+                .setMacAddress(new MacAddress(MAC_ADDRESS_1))
+                .setMacLayer(MAC_LAYER)
+                .setMode(MODE)
+                .setMtuSize(BigInteger.valueOf(Long.valueOf(MTU_SIZE)))
+                .setPhysicalMedium(PHY_MEDIUM)
+                .setSpeed(null)
+                .setType(TYPE)
+                .setIpAddress(new IpAddress(IP_1.toCharArray()))
+                .build();
+
+        InstanceIdentifier<Node> nodePath = createUniNode(MAC_ADDRESS_1, IP_1);
+        Assert.assertTrue(validateUni(true, nodePath));
+
+        InstanceIdentifier<Node> deletedNodePath = deleteNode(MAC_ADDRESS_1, IP_1);
+        Assert.assertTrue(validateUni(false, deletedNodePath));
+    }
+
+    private boolean validateUni(boolean forCreate, InstanceIdentifier<Node> iid) {
+        Node uni = read(LogicalDatastoreType.CONFIGURATION, iid);
+        if (forCreate && uni != null) {
+            return true;
+        } else if (!forCreate && uni == null) {
+            return true;
+        }
+        return false;
+    }
+
+    private InstanceIdentifier<Node> deleteNode(String macAddress, String ipAddress) {
+        UniAugmentation uni = new UniAugmentationBuilder().setMacAddress(new MacAddress(macAddress))
+                .setMacLayer(MAC_LAYER).setMode(MODE).setMtuSize(BigInteger.valueOf(Long.valueOf(MTU_SIZE)))
+                .setPhysicalMedium(PHY_MEDIUM).setType(TYPE).setIpAddress(new IpAddress(ipAddress.toCharArray()))
+                .build();
+
+        NodeId uniNodeId = new NodeId(new NodeId("uni://" + uni.getIpAddress().getIpv4Address().getValue().toString()));
+        InstanceIdentifier<Node> genericNode = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class,
+                        new TopologyKey(new TopologyId(new Uri("unimgr:uni"))))
+                .child(Node.class,
+                        new NodeKey(uniNodeId));
+
+        LOG.info("Received a request to delete node {}", genericNode);
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        transaction.delete(LogicalDatastoreType.CONFIGURATION, genericNode);
+        try {
+            transaction.submit().checkedGet();
+        } catch (TransactionCommitFailedException e) {
+            LOG.error("Unable to remove node with Iid {} from store {}.", genericNode, LogicalDatastoreType.CONFIGURATION);
+            return null;
+        }
+        return genericNode;
     }
 }
