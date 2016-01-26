@@ -27,6 +27,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
+import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
@@ -43,12 +44,34 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosExternalIdsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosOtherConfig;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosOtherConfigBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosOtherConfigKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QueueList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QueueListBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QueueListKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesExternalIdsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfig;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfigBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfigKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsKey;
@@ -63,6 +86,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.r
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSource;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSourceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSourceKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed100M;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed10G;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed10M;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed1G;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.uni.Speed;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -87,6 +115,8 @@ import com.google.common.util.concurrent.CheckedFuture;
 public class UnimgrUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(UnimgrUtils.class);
+    private static final Uuid QUEUE_UUID = UnimgrConstants.QUEUE_UUID;
+    private static final Uuid QOS_UUID = UnimgrConstants.QOS_UUID;
 
     /**
      * Creates and submit a Bridge Node to the Configuration Data Store.
@@ -324,9 +354,143 @@ public class UnimgrUtils {
                                                 .setRemoteIp(uni.getIpAddress())
                                                 .setRemotePort(new PortNumber(UnimgrConstants.OVSDB_PORT))
                                                 .build();
-        OvsdbNodeAugmentation ovsdbNode = new OvsdbNodeAugmentationBuilder()
-                                                .setConnectionInfo(connectionInfos).build();
+
+        OvsdbNodeAugmentationBuilder ovsdbNodeAugmentationBuilder = new OvsdbNodeAugmentationBuilder();
+        if (uni.getSpeed() != null) {
+            // Set QoS attributes to ovsdb by configuring default queue #0
+            // for best effort dscp and specified max rate
+            List<QosEntries> qosEntries = createQosEnteries(uni, 0L);
+            List<Queues> queues = createQueues(uni, 0L);
+            if (qosEntries != null && !qosEntries.isEmpty()) {
+                ovsdbNodeAugmentationBuilder.setQosEntries(qosEntries);
+            }
+            if (queues != null && !queues.isEmpty()) {
+                ovsdbNodeAugmentationBuilder.setQueues(queues);
+            }
+        }
+        OvsdbNodeAugmentation ovsdbNode = ovsdbNodeAugmentationBuilder
+                                                .setConnectionInfo(connectionInfos)
+                                                .build();
         return ovsdbNode;
+    }
+
+    private static List<QosEntries> createQosEnteries(Uni uni, Long queueNumber) {
+        List<QueueList> listQueue = new ArrayList<>();
+        QueueList queueList = new QueueListBuilder()
+                .setKey(new QueueListKey(queueNumber))
+                .setQueueNumber(queueNumber)
+                .setQueueUuid(QUEUE_UUID)
+                .build();
+        listQueue.add(queueList);
+
+        // Configure queue for best-effort dscp and max rate
+        List<QosOtherConfig> otherConfig = new ArrayList<>();
+        QosOtherConfig qOtherConfig = new QosOtherConfigBuilder()
+                .setKey(new QosOtherConfigKey(UnimgrConstants.QOS_DSCP_ATTRIBUTE))
+                .setOtherConfigKey(UnimgrConstants.QOS_DSCP_ATTRIBUTE)
+                .setOtherConfigValue(UnimgrConstants.QOS_DSCP_ATTRIBUTE_VALUE)
+                .build();
+        otherConfig.add(qOtherConfig);
+
+        qOtherConfig = new QosOtherConfigBuilder()
+                .setKey(new QosOtherConfigKey(UnimgrConstants.QOS_MAX_RATE))
+                .setOtherConfigKey(UnimgrConstants.QOS_MAX_RATE)
+                .setOtherConfigValue(getSpeed(uni.getSpeed()))
+                .build();
+        otherConfig.add(qOtherConfig);
+
+        List<QosExternalIds> externalIds = new ArrayList<>();
+        QosExternalIds externalId = new QosExternalIdsBuilder()
+                .setKey(new QosExternalIdsKey(UnimgrConstants.QOS_DSCP_ATTRIBUTE))
+                .setQosExternalIdKey(UnimgrConstants.QOS_DSCP_ATTRIBUTE)
+                .setQosExternalIdValue(UnimgrConstants.QOS_DSCP_ATTRIBUTE_VALUE)
+                .build();
+        externalIds.add(externalId);
+
+        externalId = new QosExternalIdsBuilder()
+                .setKey(new QosExternalIdsKey(UnimgrConstants.QOS_MAX_RATE))
+                .setQosExternalIdKey(UnimgrConstants.QOS_MAX_RATE)
+                .setQosExternalIdValue(getSpeed(uni.getSpeed()))
+                .build();
+        externalIds.add(externalId);
+
+
+        QosEntries qosEntry = new QosEntriesBuilder()
+                .setKey(new QosEntriesKey(new Uri(UnimgrConstants.QOS_PREFIX + QOS_UUID.getValue())))
+                .setQosId(new Uri(UnimgrConstants.QOS_PREFIX + QOS_UUID.getValue()))
+                .setQosOtherConfig(otherConfig)
+                .setQosExternalIds(externalIds)
+                .setQosType(SouthboundMapper.createQosType(SouthboundConstants.QOS_LINUX_HTB))
+                .setQosUuid(QOS_UUID)
+                .setQueueList(listQueue)
+                .build();
+
+        List<QosEntries> qosEntries = new ArrayList<>();
+        qosEntries.add(qosEntry);
+        return qosEntries;
+    }
+
+    private static List<Queues> createQueues(Uni uni, Long queueNumber) {
+        List<QueuesOtherConfig> otherConfig = new ArrayList<>();
+        QueuesOtherConfig queuesOtherConfig = new QueuesOtherConfigBuilder()
+                .setKey(new QueuesOtherConfigKey(UnimgrConstants.QOS_DSCP_ATTRIBUTE))
+                .setQueueOtherConfigKey(UnimgrConstants.QOS_DSCP_ATTRIBUTE)
+                .setQueueOtherConfigValue(UnimgrConstants.QOS_DSCP_ATTRIBUTE_VALUE)
+                .build();
+        otherConfig.add(queuesOtherConfig);
+
+        queuesOtherConfig = new QueuesOtherConfigBuilder()
+                .setKey(new QueuesOtherConfigKey(UnimgrConstants.QOS_MAX_RATE))
+                .setQueueOtherConfigKey(UnimgrConstants.QOS_MAX_RATE)
+                .setQueueOtherConfigValue(getSpeed(uni.getSpeed()))
+                .build();
+        otherConfig.add(queuesOtherConfig);
+
+        List<QueuesExternalIds> externalIds = new ArrayList<>();
+        QueuesExternalIds externalId = new QueuesExternalIdsBuilder()
+                .setKey(new QueuesExternalIdsKey(UnimgrConstants.QOS_DSCP_ATTRIBUTE))
+                .setQueuesExternalIdKey(UnimgrConstants.QOS_DSCP_ATTRIBUTE)
+                .setQueuesExternalIdValue(UnimgrConstants.QOS_DSCP_ATTRIBUTE_VALUE)
+                .build();
+        externalIds.add(externalId);
+
+        externalId = new QueuesExternalIdsBuilder()
+                .setKey(new QueuesExternalIdsKey(UnimgrConstants.QOS_MAX_RATE))
+                .setQueuesExternalIdKey(UnimgrConstants.QOS_MAX_RATE)
+                .setQueuesExternalIdValue(getSpeed(uni.getSpeed()))
+                .build();
+        externalIds.add(externalId);
+
+        // Configure dscp value for best-effort
+        Queues queues = new QueuesBuilder()
+                .setDscp(Short.parseShort(UnimgrConstants.QOS_DSCP_ATTRIBUTE_VALUE))
+                .setKey(new QueuesKey(new Uri(UnimgrConstants.QUEUE_PREFIX + QUEUE_UUID.getValue())))
+                .setQueueId(new Uri(UnimgrConstants.QUEUE_PREFIX + QUEUE_UUID.getValue()))
+                .setQueuesOtherConfig(otherConfig)
+                .setQueuesExternalIds(externalIds)
+                .setQueueUuid(QUEUE_UUID)
+                .build();
+
+        List<Queues> queuesList = new ArrayList<>();
+        queuesList.add(queues);
+        return queuesList;
+    }
+
+    private static String getSpeed(Speed speedObject) {
+        String speed = null;
+        if (speedObject.getSpeed() instanceof Speed10M) {
+            speed = "10000000";
+        }
+        else if (speedObject.getSpeed() instanceof Speed100M) {
+            speed = "100000000";
+        }
+        else if (speedObject.getSpeed() instanceof Speed1G) {
+            speed = "1000000000";
+        }
+        else if (speedObject.getSpeed() instanceof Speed10G) {
+            speed = "10000000000";
+        }
+        return speed;
     }
 
     /**
@@ -462,6 +626,9 @@ public class UnimgrUtils {
                                                      new OvsdbTerminationPointAugmentationBuilder();
         tpAugmentationBuilder.setName(portName);
         tpAugmentationBuilder.setInterfaceType(null);
+        if (uni.getSpeed() != null) {
+            tpAugmentationBuilder.setQos(QOS_UUID);
+        }
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
         tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class,

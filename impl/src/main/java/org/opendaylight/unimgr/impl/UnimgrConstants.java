@@ -7,8 +7,11 @@
  */
 package org.opendaylight.unimgr.impl;
 
+import java.util.UUID;
+
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 
 public class UnimgrConstants {
@@ -44,4 +47,18 @@ public class UnimgrConstants {
     public static final String DEFAULT_GRE_NAME = "gre";
 
     public static final String DEFAULT_GRE_TUNNEL_NAME = "gre1";
+
+    public static final String QOS_DSCP_ATTRIBUTE = "dscp";
+
+    public static final String QOS_DSCP_ATTRIBUTE_VALUE = "0";
+
+    public static final String QOS_MAX_RATE = "max-rate";
+
+    public static final String QOS_PREFIX = "qos://";
+
+    public static final String QUEUE_PREFIX = "queue://";
+
+    public static final Uuid QUEUE_UUID = new Uuid(UUID.randomUUID().toString());
+
+    public static final Uuid QOS_UUID = new Uuid(UUID.randomUUID().toString());
 }
