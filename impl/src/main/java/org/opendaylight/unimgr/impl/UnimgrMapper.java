@@ -13,6 +13,16 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosOtherConfig;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosOtherConfigKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QueueList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QueueListKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfig;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfigKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.LinkId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -297,4 +307,41 @@ public class UnimgrMapper {
                                                     new NodeKey(nodeId));
     return nodePath;
 }
+
+    public static InstanceIdentifier<QueueList> getOvsdbQueueListIid (NodeId ovsdbNodeId,
+            QosEntriesKey qosEntryKey,
+            Long queueNumber) {
+        InstanceIdentifier<QueueList> queueIid = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class, new NodeKey(ovsdbNodeId))
+                .augmentation(OvsdbNodeAugmentation.class)
+                .child(QosEntries.class, qosEntryKey)
+                .child(QueueList.class, new QueueListKey(queueNumber));
+        return queueIid;
+    }
+
+    public static InstanceIdentifier<QosOtherConfig> getQosOtherConfigIid (NodeId ovsdbNodeId,
+            QosEntriesKey qosEntryKey) {
+        InstanceIdentifier<QosOtherConfig> qosOtherConfigIid = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class, new NodeKey(ovsdbNodeId))
+                .augmentation(OvsdbNodeAugmentation.class)
+                .child(QosEntries.class, qosEntryKey)
+                .child(QosOtherConfig.class, new QosOtherConfigKey(UnimgrConstants.QOS_MAX_RATE));
+        return qosOtherConfigIid;
+    }
+
+    public static InstanceIdentifier<QueuesOtherConfig> getQueuesOtherConfigIid (NodeId ovsdbNodeId,
+            QueuesKey queuesKey) {
+        InstanceIdentifier<QueuesOtherConfig> queuesOtherConfig = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class, new NodeKey(ovsdbNodeId))
+                .augmentation(OvsdbNodeAugmentation.class)
+                .child(Queues.class, queuesKey)
+                .child(QueuesOtherConfig.class, new QueuesOtherConfigKey(UnimgrConstants.QOS_MAX_RATE));
+        return queuesOtherConfig;
+    }
 }
