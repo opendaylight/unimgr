@@ -39,10 +39,10 @@ public class UniCreateCommand extends AbstractCreateCommand {
 
     @Override
     public void execute() {
-        for (Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
+        for (final Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
             if (created.getValue() != null && created.getValue() instanceof UniAugmentation) {
-                UniAugmentation uni = (UniAugmentation) created.getValue();
-                InstanceIdentifier<?> uniKey = created.getKey();
+                final UniAugmentation uni = (UniAugmentation) created.getValue();
+                final InstanceIdentifier<?> uniKey = created.getKey();
                 LOG.trace("New UNI created {}.", uni.getIpAddress().getIpv4Address());
                 /* We assume that when the user specifies the
                  * ovsdb-node-ref that the node already exists in
@@ -59,14 +59,14 @@ public class UniCreateCommand extends AbstractCreateCommand {
                  *
                  */
                 if (uni.getOvsdbNodeRef() != null) {
-                    OvsdbNodeRef ovsdbNodeRef = uni.getOvsdbNodeRef();
-                    Optional<Node> optionalNode = UnimgrUtils.readNode(dataBroker,
+                    final OvsdbNodeRef ovsdbNodeRef = uni.getOvsdbNodeRef();
+                    final Optional<Node> optionalNode = UnimgrUtils.readNode(dataBroker,
                                                                        LogicalDatastoreType.OPERATIONAL,
                                                                        ovsdbNodeRef.getValue());
                     if (!optionalNode.isPresent()) {
                         LOG.info("Invalid OVSDB node instance identifier specified, "
                                + "attempting to retrieve the node.");
-                        Optional<Node> optionalOvsdbNode = UnimgrUtils.findOvsdbNode(dataBroker,
+                        final Optional<Node> optionalOvsdbNode = UnimgrUtils.findOvsdbNode(dataBroker,
                                                                                      uni);
                         Node ovsdbNode;
                         if (optionalOvsdbNode.isPresent()) {
@@ -96,12 +96,12 @@ public class UniCreateCommand extends AbstractCreateCommand {
                 } else {
                     // We assume the ovs is in passive mode
                     // Check if the ovsdb node exist
-                    Optional<Node> optionalOvsdbNode = UnimgrUtils.findOvsdbNode(dataBroker,
+                    final Optional<Node> optionalOvsdbNode = UnimgrUtils.findOvsdbNode(dataBroker,
                                                                                  uni);
                     Node ovsdbNode;
                     if (optionalOvsdbNode.isPresent()) {
                         ovsdbNode = optionalOvsdbNode.get();
-                        InstanceIdentifier<Node> ovsdbIid = UnimgrMapper.getOvsdbNodeIid(ovsdbNode.getNodeId());
+                        final InstanceIdentifier<Node> ovsdbIid = UnimgrMapper.getOvsdbNodeIid(ovsdbNode.getNodeId());
                         LOG.info("Retrieved the OVSDB node");
                         // Update QoS entries to ovsdb if speed is configured to UNI node
                         if (uni.getSpeed() != null) {
@@ -133,31 +133,31 @@ public class UniCreateCommand extends AbstractCreateCommand {
                 }
             }
             if (created.getValue() != null && created.getValue() instanceof OvsdbNodeAugmentation) {
-                OvsdbNodeAugmentation ovsdbNodeAugmentation = (OvsdbNodeAugmentation) created
+                final OvsdbNodeAugmentation ovsdbNodeAugmentation = (OvsdbNodeAugmentation) created
                                                                                           .getValue();
-                InstanceIdentifier<Node> ovsdbIid = created.getKey().firstIdentifierOf(Node.class);
+                final InstanceIdentifier<Node> ovsdbIid = created.getKey().firstIdentifierOf(Node.class);
                 if (ovsdbNodeAugmentation != null) {
                     LOG.info("Received an OVSDB node create {}",
                             ovsdbNodeAugmentation.getConnectionInfo()
                                                  .getRemoteIp()
                                                  .getIpv4Address()
                                                  .getValue());
-                    List<Node> uniNodes = UnimgrUtils.getUniNodes(dataBroker);
+                    final List<Node> uniNodes = UnimgrUtils.getUniNodes(dataBroker);
                     if (uniNodes != null && !uniNodes.isEmpty()) {
-                        for (Node uniNode: uniNodes) {
-                            UniAugmentation uniAugmentation = uniNode.getAugmentation(UniAugmentation.class);
+                        for (final Node uniNode: uniNodes) {
+                            final UniAugmentation uniAugmentation = uniNode.getAugmentation(UniAugmentation.class);
                             if (uniAugmentation.getOvsdbNodeRef() != null
                                     && uniAugmentation.getOvsdbNodeRef().getValue() != null) {
-                                InstanceIdentifier<Node> ovsdbNodeRefIid = uniAugmentation
+                                final InstanceIdentifier<Node> ovsdbNodeRefIid = uniAugmentation
                                                                             .getOvsdbNodeRef()
                                                                             .getValue()
                                                                             .firstIdentifierOf(Node.class);
                                 if (ovsdbNodeRefIid.equals(ovsdbIid)) {
-                                    Optional<Node> optionalOvsdbNode = UnimgrUtils.readNode(dataBroker,
+                                    final Optional<Node> optionalOvsdbNode = UnimgrUtils.readNode(dataBroker,
                                                                                             LogicalDatastoreType.OPERATIONAL,
                                                                                             ovsdbIid);
                                     if (optionalOvsdbNode.isPresent()) {
-                                        InstanceIdentifier<Node> uniIid =
+                                        final InstanceIdentifier<Node> uniIid =
                                                                     UnimgrMapper.getUniIid(dataBroker,
                                                                                            uniAugmentation.getIpAddress(),
                                                                                            LogicalDatastoreType.CONFIGURATION);
@@ -180,7 +180,7 @@ public class UniCreateCommand extends AbstractCreateCommand {
                                           .getConnectionInfo()
                                           .getRemoteIp()
                                           .equals(uniAugmentation.getIpAddress())) {
-                                InstanceIdentifier<Node> uniIid = UnimgrMapper.getUniIid(dataBroker,
+                                final InstanceIdentifier<Node> uniIid = UnimgrMapper.getUniIid(dataBroker,
                                                                                          uniAugmentation.getIpAddress(),
                                                                                          LogicalDatastoreType.CONFIGURATION);
                                 UnimgrUtils.createBridgeNode(dataBroker,

@@ -352,8 +352,7 @@ public class UnimgrUtils {
                                                 .setRemotePort(new PortNumber(UnimgrConstants.OVSDB_PORT))
                                                 .build();
         OvsdbNodeAugmentation ovsdbNode = new OvsdbNodeAugmentationBuilder()
-                                                .setConnectionInfo(connectionInfos)
-                                                .build();
+                                                .setConnectionInfo(connectionInfos).build();
         return ovsdbNode;
     }
 
@@ -1287,13 +1286,14 @@ public class UnimgrUtils {
     /**
      * Updates a specific Uni Node on a specific DataStore type
      * @param dataStore The datastore type
-     * @param uniKey The UNI key
+     * @param uniIID The UNI InstanceIdentifier
      * @param uni The Uni's data
      * @param ovsdbNode The Ovsdb Node
      * @param dataBroker The dataBroker instance to create transactions
+     * @return true if uni is updated
      */
-    public static void updateUniNode(LogicalDatastoreType dataStore,
-                                     InstanceIdentifier<?> uniKey,
+    public static boolean updateUniNode(LogicalDatastoreType dataStore,
+                                     InstanceIdentifier<?> uniIID,
                                      UniAugmentation uni,
                                      Node ovsdbNode,
                                      DataBroker dataBroker) {
@@ -1305,7 +1305,7 @@ public class UnimgrUtils {
         }
         Optional<Node> optionalNode = readNode(dataBroker,
                                                LogicalDatastoreType.CONFIGURATION,
-                                               uniKey);
+                                               uniIID);
         if (optionalNode.isPresent()) {
             Node node = optionalNode.get();
             WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
@@ -1313,9 +1313,11 @@ public class UnimgrUtils {
             nodeBuilder.setKey(node.getKey());
             nodeBuilder.setNodeId(node.getNodeId());
             nodeBuilder.addAugmentation(UniAugmentation.class, updatedUniBuilder.build());
-            transaction.put(dataStore, uniKey.firstIdentifierOf(Node.class), nodeBuilder.build());
+            transaction.put(dataStore, uniIID.firstIdentifierOf(Node.class), nodeBuilder.build());
             transaction.submit();
+            return true;
         }
+        return false;
     }
 
     /**
@@ -1325,8 +1327,9 @@ public class UnimgrUtils {
      * @param uni The Uni's data
      * @param ovsdbNodeIid The Ovsdb Node Instance Identifier
      * @param dataBroker The dataBroker instance to create transactions
+     * @return true if uni is updated
      */
-    public static void updateUniNode(LogicalDatastoreType dataStore,
+    public static boolean updateUniNode(LogicalDatastoreType dataStore,
                                      InstanceIdentifier<?> uniKey,
                                      UniAugmentation uni,
                                      InstanceIdentifier<?> ovsdbNodeIid,
@@ -1348,7 +1351,9 @@ public class UnimgrUtils {
             nodeBuilder.addAugmentation(UniAugmentation.class, updatedUniBuilder.build());
             transaction.put(dataStore, uniKey.firstIdentifierOf(Node.class), nodeBuilder.build());
             transaction.submit();
+            return true;
         }
+        return false;
     }
 
     /**
@@ -1407,9 +1412,13 @@ public class UnimgrUtils {
                 linkBuilder.addAugmentation(EvcAugmentation.class, updatedEvcBuilder.build());
                 transaction.put(dataStore, evcKey.firstIdentifierOf(Link.class), linkBuilder.build());
                 transaction.submit();
+                return true;
+            } else {
+                LOG.info("EvcLink is not present: " + optionalEvcLink.get().getKey());
             }
         } else {
             LOG.info("Invalid instance identifiers for sourceUni and destUni.");
         }
+        return false;
     }
 }

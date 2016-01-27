@@ -19,16 +19,21 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
 import org.opendaylight.unimgr.command.TransactionInvoker;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Evc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniDest;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSource;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopologyBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeAttributes;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -62,7 +67,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
         invoker = new  TransactionInvoker();
 
         // Register the unimgr OSGi CLI
-        BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+        final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         unimgrConsoleRegistration = context.registerService(IUnimgrConsoleProvider.class,
                                                             this,
                                                             null);
@@ -90,41 +95,41 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
 
     protected void initDatastore(final LogicalDatastoreType type,
                                  TopologyId topoId) {
-        InstanceIdentifier<Topology> path = InstanceIdentifier
+        final InstanceIdentifier<Topology> path = InstanceIdentifier
                                                 .create(NetworkTopology.class)
                                                 .child(Topology.class,
                                                         new TopologyKey(topoId));
         initializeTopology(type);
-        ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
-        CheckedFuture<Optional<Topology>, ReadFailedException> unimgrTp = transaction.read(type,
+        final ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
+        final CheckedFuture<Optional<Topology>, ReadFailedException> unimgrTp = transaction.read(type,
                                                                                            path);
         try {
             if (!unimgrTp.get().isPresent()) {
-                TopologyBuilder tpb = new TopologyBuilder();
+                final TopologyBuilder tpb = new TopologyBuilder();
                 tpb.setTopologyId(topoId);
                 transaction.put(type, path, tpb.build());
                 transaction.submit();
             } else {
                 transaction.cancel();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error("Error initializing unimgr topology", e);
         }
     }
 
     private void initializeTopology(LogicalDatastoreType type) {
-        ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
-        InstanceIdentifier<NetworkTopology> path = InstanceIdentifier.create(NetworkTopology.class);
-        CheckedFuture<Optional<NetworkTopology>, ReadFailedException> topology = transaction.read(type,path);
+        final ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
+        final InstanceIdentifier<NetworkTopology> path = InstanceIdentifier.create(NetworkTopology.class);
+        final CheckedFuture<Optional<NetworkTopology>, ReadFailedException> topology = transaction.read(type,path);
         try {
             if (!topology.get().isPresent()) {
-                NetworkTopologyBuilder ntb = new NetworkTopologyBuilder();
+                final NetworkTopologyBuilder ntb = new NetworkTopologyBuilder();
                 transaction.put(type,path,ntb.build());
                 transaction.submit();
             } else {
                 transaction.cancel();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error("Error initializing unimgr topology {}",e);
         }
     }
@@ -139,7 +144,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
 
     @Override
     public boolean removeUni(IpAddress ipAddress) {
-        InstanceIdentifier<Node> iidUni = UnimgrMapper.getUniIid(dataBroker, ipAddress, LogicalDatastoreType.CONFIGURATION);
+        final InstanceIdentifier<Node> iidUni = UnimgrMapper.getUniIid(dataBroker, ipAddress, LogicalDatastoreType.CONFIGURATION);
         if (iidUni == null)
             return false;
 
@@ -177,4 +182,38 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
         return null;
     }
 
+    @Override
+    public boolean updateEvc(InstanceIdentifier<Link> evcKey, EvcAugmentation evc, UniSource uniSource,
+            UniDest uniDest) {
+        final InstanceIdentifier<?> sourceUniIid = uniSource.getUni();
+        final InstanceIdentifier<?> destinationUniIid = uniDest.getUni();
+        return UnimgrUtils.updateEvcNode(LogicalDatastoreType.CONFIGURATION, evcKey, evc, sourceUniIid,
+                destinationUniIid, dataBroker);
+    }
+
+    @Override
+    public boolean updateUni(UniAugmentation uni) {
+        // Remove the old UNI with IpAdress and create a new one with updated informations
+        if (uni != null && uni.getOvsdbNodeRef() != null) {
+            LOG.trace("UNI updated {}.", uni.getIpAddress().getIpv4Address());
+            final InstanceIdentifier<?> uniIID = UnimgrMapper.getUniIid(dataBroker,
+                    uni.getIpAddress(), LogicalDatastoreType.OPERATIONAL);
+            Node ovsdbNode;
+            if (uni.getOvsdbNodeRef() != null) {
+                final OvsdbNodeRef ovsdbNodeRef = uni.getOvsdbNodeRef();
+                ovsdbNode= UnimgrUtils.readNode(dataBroker,
+                        LogicalDatastoreType.OPERATIONAL, ovsdbNodeRef.getValue()).get();
+
+                UnimgrUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniIID, uni, ovsdbNode, dataBroker);
+                LOG.trace("UNI updated {}.", uni.getIpAddress().getIpv4Address());
+            } else {
+                final Optional<Node> optionalOvsdbNode = UnimgrUtils.findOvsdbNode(dataBroker, uni);
+                ovsdbNode = optionalOvsdbNode.get();
+            }
+            UnimgrUtils.deleteNode(dataBroker, uniIID, LogicalDatastoreType.OPERATIONAL);
+            return UnimgrUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniIID,
+                    uni, ovsdbNode, dataBroker);
+        }
+        return false;
+    }
 }
