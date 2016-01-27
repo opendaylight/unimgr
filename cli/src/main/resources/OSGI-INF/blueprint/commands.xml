@@ -11,6 +11,11 @@
             </action>
         </command>
         <command>
+            <action class="org.opendaylight.unimgr.cli.UniUpdateShellCommand">
+                 <argument ref="unimgrConsoleProvider" />
+            </action>
+        </command>
+        <command>
             <action class="org.opendaylight.unimgr.cli.UniRemoveShellCommand">
                  <argument ref="unimgrConsoleProvider" />
             </action>
