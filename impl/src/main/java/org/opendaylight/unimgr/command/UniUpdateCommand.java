@@ -12,12 +12,21 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.unimgr.impl.UnimgrConstants;
+import org.opendaylight.unimgr.impl.UnimgrMapper;
+import org.opendaylight.unimgr.impl.UnimgrUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
 
 public class UniUpdateCommand extends AbstractUpdateCommand {
 
@@ -31,27 +40,58 @@ public class UniUpdateCommand extends AbstractUpdateCommand {
 
     @Override
     public void execute() {
-        for (Entry<InstanceIdentifier<?>, DataObject> created : changes
-                .entrySet()) {
-            if (created.getValue() != null
-                    && created.getValue() instanceof OvsdbNodeAugmentation) {
-                OvsdbNodeAugmentation ovsdbNodeAugmentation = (OvsdbNodeAugmentation) created
+        for (final Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
+            if (created.getValue() != null && created.getValue() instanceof OvsdbNodeAugmentation) {
+                final OvsdbNodeAugmentation ovsdbNodeAugmentation = (OvsdbNodeAugmentation) created
                         .getValue();
+                final InstanceIdentifier<Node> ovsdbIid = created.getKey()
+                        .firstIdentifierOf(Node.class);
                 if (ovsdbNodeAugmentation != null) {
                     LOG.trace("Received an OVSDB node create {}",
                             ovsdbNodeAugmentation.getConnectionInfo()
                                     .getRemoteIp().getIpv4Address().getValue());
-                    final List<ManagedNodeEntry> managedNodeEntries = ovsdbNodeAugmentation.getManagedNodeEntry();
+                    final List<ManagedNodeEntry> managedNodeEntries = ovsdbNodeAugmentation
+                            .getManagedNodeEntry();
                     if (managedNodeEntries != null) {
-                        for (ManagedNodeEntry managedNodeEntry : managedNodeEntries) {
-                            LOG.trace("Received an update from an OVSDB node {}.", managedNodeEntry.getKey());
+                        for (final ManagedNodeEntry managedNodeEntry : managedNodeEntries) {
+                            LOG.trace("Received an update from an OVSDB node {}.",
+                                    managedNodeEntry.getKey());
                             // We received a node update from the southbound plugin
                             // so we have to check if it belongs to the UNI
+
+                            final InstanceIdentifier<Node> bridgeIid = managedNodeEntry.
+                                    getBridgeRef().getValue().firstIdentifierOf(Node.class);
+                            final Optional<Node> optNode = UnimgrUtils.readNode(dataBroker,
+                                    LogicalDatastoreType.OPERATIONAL, bridgeIid);
+                            if(optNode.isPresent()){
+                                final Node bridgeNode = optNode.get();
+                                final InstanceIdentifier<TerminationPoint> iidGreTermPoint =
+                                        UnimgrMapper.getTerminationPointIid(bridgeNode,
+                                                UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
+                                final InstanceIdentifier<TerminationPoint> iidEthTermPoint =
+                                        UnimgrMapper.getTerminationPointIid(bridgeNode,
+                                                UnimgrConstants.DEFAULT_TUNNEL_IFACE);
+                                if (iidGreTermPoint.equals(ovsdbIid) ||
+                                        iidEthTermPoint.equals(ovsdbIid)){
+                                    //updateUni(ovsdbIid);
+                                    final Optional<Node> optionalOvsdbNode = UnimgrUtils.readNode(
+                                            dataBroker, LogicalDatastoreType.OPERATIONAL, ovsdbIid);
+                                    if(optionalOvsdbNode.isPresent()){
+                                        final Node node = optionalOvsdbNode.get();
+                                        final UniAugmentation uniAug = node.getAugmentation(UniAugmentation.class);
+                                        final LogicalDatastoreType dataStore = LogicalDatastoreType.CONFIGURATION;
+                                        final InstanceIdentifier<Node> uniKey = UnimgrMapper.getUniIid(dataBroker,
+                                                uniAug.getIpAddress(), LogicalDatastoreType.CONFIGURATION);
+                                        final InstanceIdentifier<Node> ovsdbNodeIid = uniAug.getOvsdbNodeRef().
+                                                getValue().firstIdentifierOf(Node.class);
+                                        UnimgrUtils.updateUniNode(dataStore, uniKey, uniAug, ovsdbNodeIid, dataBroker);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
     }
-
 }
