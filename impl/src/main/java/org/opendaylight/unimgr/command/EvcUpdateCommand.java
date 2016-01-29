@@ -9,12 +9,17 @@ package org.opendaylight.unimgr.command;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
 import org.opendaylight.unimgr.impl.UnimgrUtils;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -24,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 
 public class EvcUpdateCommand extends AbstractUpdateCommand {
 
@@ -37,10 +43,10 @@ public class EvcUpdateCommand extends AbstractUpdateCommand {
 
     @Override
     public void execute() {
-        for (final Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
-            if (created.getValue() != null && created.getValue() instanceof EvcAugmentation) {
-                final EvcAugmentation evc = (EvcAugmentation) created.getValue();
-                final InstanceIdentifier<?> evcKey = created.getKey();
+        for (final Entry<InstanceIdentifier<?>, DataObject> updated : changes.entrySet()) {
+            if (updated.getValue() != null && updated.getValue() instanceof EvcAugmentation) {
+                final EvcAugmentation evc = (EvcAugmentation) updated.getValue();
+                final InstanceIdentifier<?> evcKey = updated.getKey();
 
                 // FIXME: For now, we assume that there is 1 uni per
                 // source/destination
@@ -52,9 +58,44 @@ public class EvcUpdateCommand extends AbstractUpdateCommand {
                     LOG.error("Source UNI cannot be null.");
                     break;
                 }
-                LOG.trace("New EVC created, source IP: {} destination IP {}.",
-                        evc.getUniSource().iterator().next().getIpAddress().getIpv4Address(),
-                        evc.getUniDest().iterator().next().getIpAddress().getIpv4Address());
+
+                final Ipv4Address laterUni1Ip = evc.getUniSource().iterator().next().getIpAddress().getIpv4Address();
+                final Ipv4Address laterUni2Ip = evc.getUniDest().iterator().next().getIpAddress().getIpv4Address();
+                LOG.trace("New EVC created, source IP: {} destination IP {}.", laterUni1Ip, laterUni2Ip);
+
+
+                final ReadTransaction readTransac = dataBroker.newReadOnlyTransaction();
+                final CheckedFuture<?, ReadFailedException> retFormerEvc = readTransac.read(LogicalDatastoreType.OPERATIONAL, evcKey);
+                EvcAugmentation formerEvc;
+                try {
+                    formerEvc = (EvcAugmentation) ((Optional<EvcAugmentation>) retFormerEvc.checkedGet()).get();
+                    final Ipv4Address formerUni1ip = formerEvc.getUniDest().iterator().next().getIpAddress().getIpv4Address();
+                    final Ipv4Address formerUni2ip = formerEvc.getUniDest().iterator().next().getIpAddress().getIpv4Address();
+
+                    if (formerUni1ip.equals(laterUni1Ip)) {
+                        // do nothing
+                    } else if (formerUni1ip.equals(laterUni2Ip)) {
+                        // do nothing
+                    } else {
+                        LOG.info("{} is not part of the EVC, removing configuration", formerUni1ip);
+                        final InstanceIdentifier<?> formerUniIID = UnimgrMapper.getUniIid(dataBroker, new IpAddress(formerUni1ip), LogicalDatastoreType.OPERATIONAL);
+                        final Optional<Node> formerUni = UnimgrUtils.readNode(dataBroker, LogicalDatastoreType.OPERATIONAL, formerUniIID);
+                        UnimgrUtils.deleteEvcData(dataBroker, formerUni);
+                    }
+                    if (formerUni2ip.equals(laterUni1Ip)) {
+                        // do nothing
+                    } else if (formerUni2ip.equals(laterUni2Ip)) {
+                        // do nothing
+                    } else {
+                        LOG.info("{} is not part of the EVC, removing configuration", formerUni1ip);
+                        final InstanceIdentifier<?> formerUniIID = UnimgrMapper.getUniIid(dataBroker, new IpAddress(formerUni1ip), LogicalDatastoreType.OPERATIONAL);
+                        final Optional<Node> formerUni = UnimgrUtils.readNode(dataBroker, LogicalDatastoreType.OPERATIONAL, formerUniIID);
+                        UnimgrUtils.deleteEvcData(dataBroker, formerUni);
+                        }
+                } catch (ReadFailedException e) {
+                    LOG.error("Failed to retrieve former EVC {}", evcKey, e);
+                }
+
                 InstanceIdentifier<Node> sourceUniIid;
                 InstanceIdentifier<Node> destinationUniIid;
 

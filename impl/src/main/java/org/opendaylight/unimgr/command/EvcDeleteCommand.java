@@ -13,27 +13,17 @@ import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.unimgr.impl.UnimgrConstants;
-import org.opendaylight.unimgr.impl.UnimgrMapper;
 import org.opendaylight.unimgr.impl.UnimgrUtils;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniDest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSource;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
 public class EvcDeleteCommand extends AbstractDeleteCommand {
-
-    private static final Logger LOG = LoggerFactory.getLogger(EvcDeleteCommand.class);
 
     public EvcDeleteCommand(DataBroker dataBroker,
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
@@ -60,7 +50,7 @@ public class EvcDeleteCommand extends AbstractDeleteCommand {
                                                    UnimgrUtils.readNode(dataBroker,
                                                                         LogicalDatastoreType.OPERATIONAL,
                                                                         source.getUni());
-                                deleteEvcData(optionalSourceUniNode);
+                                UnimgrUtils.deleteEvcData(dataBroker, optionalSourceUniNode);
                             }
                         }
                     }
@@ -71,53 +61,13 @@ public class EvcDeleteCommand extends AbstractDeleteCommand {
                                                    UnimgrUtils.readNode(dataBroker,
                                                                         LogicalDatastoreType.OPERATIONAL,
                                                                         dest.getUni());
-                                deleteEvcData(optionalDestUniNode);
+                                UnimgrUtils.deleteEvcData(dataBroker, optionalDestUniNode);
                             }
                         }
                     }
                 }
                 UnimgrUtils.deleteNode(dataBroker, removedEvcIid, LogicalDatastoreType.OPERATIONAL);
             }
-        }
-    }
-
-    private void deleteEvcData(Optional<Node> optionalUni) {
-        if (optionalUni.isPresent()) {
-            UniAugmentation uniAugmentation =
-                                optionalUni
-                                    .get()
-                                    .getAugmentation(UniAugmentation.class);
-            InstanceIdentifier<Node> ovsdbNodeIid =
-                                              uniAugmentation
-                                             .getOvsdbNodeRef()
-                                             .getValue()
-                                             .firstIdentifierOf(Node.class);
-            Optional<Node> optionalOvsdNode =
-                    UnimgrUtils.readNode(dataBroker,
-                                         LogicalDatastoreType.OPERATIONAL,
-                                         ovsdbNodeIid);
-            if (optionalOvsdNode.isPresent()) {
-                Node ovsdbNode = optionalOvsdNode.get();
-                OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
-                for (ManagedNodeEntry managedNodeEntry: ovsdbNodeAugmentation.getManagedNodeEntry()) {
-                    InstanceIdentifier<Node> bridgeIid = managedNodeEntry
-                                                             .getBridgeRef()
-                                                             .getValue()
-                                                             .firstIdentifierOf(Node.class);
-                    Optional<Node> optBridgeNode = UnimgrUtils.readNode(dataBroker, bridgeIid);
-                    if (optBridgeNode.isPresent()) {
-                        Node bridgeNode = optBridgeNode.get();
-                        InstanceIdentifier<TerminationPoint> iidGreTermPoint = UnimgrMapper.getTerminationPointIid(bridgeNode,
-                                                                                        UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
-                        InstanceIdentifier<TerminationPoint> iidEthTermPoint = UnimgrMapper.getTerminationPointIid(bridgeNode,
-                                                                                        UnimgrConstants.DEFAULT_TUNNEL_IFACE);
-                        UnimgrUtils.deleteNode(dataBroker, iidGreTermPoint, LogicalDatastoreType.CONFIGURATION);
-                        UnimgrUtils.deleteNode(dataBroker, iidEthTermPoint, LogicalDatastoreType.CONFIGURATION);
-                    }
-                }
-            }
-        } else {
-            LOG.info("Unable to retrieve UNI from the EVC.");
         }
     }
 }
