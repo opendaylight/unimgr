@@ -50,6 +50,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesKey;
@@ -79,11 +80,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.r
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSource;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSourceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSourceKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.Speed;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed100M;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed10G;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed10M;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed1G;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.Speed;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -809,6 +810,46 @@ public class UnimgrUtils {
             LOG.warn("Failed to delete {} ", path, e);
         }
         return result;
+    }
+
+    public static void deleteEvcData(DataBroker dataBroker, Optional<Node> optionalUni) {
+        if (optionalUni.isPresent()) {
+            UniAugmentation uniAugmentation =
+                                optionalUni
+                                    .get()
+                                    .getAugmentation(UniAugmentation.class);
+            InstanceIdentifier<Node> ovsdbNodeIid =
+                                              uniAugmentation
+                                             .getOvsdbNodeRef()
+                                             .getValue()
+                                             .firstIdentifierOf(Node.class);
+            Optional<Node> optionalOvsdNode =
+                    UnimgrUtils.readNode(dataBroker,
+                                         LogicalDatastoreType.OPERATIONAL,
+                                         ovsdbNodeIid);
+            if (optionalOvsdNode.isPresent()) {
+                Node ovsdbNode = optionalOvsdNode.get();
+                OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+                for (ManagedNodeEntry managedNodeEntry: ovsdbNodeAugmentation.getManagedNodeEntry()) {
+                    InstanceIdentifier<Node> bridgeIid = managedNodeEntry
+                                                             .getBridgeRef()
+                                                             .getValue()
+                                                             .firstIdentifierOf(Node.class);
+                    Optional<Node> optBridgeNode = UnimgrUtils.readNode(dataBroker, bridgeIid);
+                    if (optBridgeNode.isPresent()) {
+                        Node bridgeNode = optBridgeNode.get();
+                        InstanceIdentifier<TerminationPoint> iidGreTermPoint = UnimgrMapper.getTerminationPointIid(bridgeNode,
+                                                                                        UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
+                        InstanceIdentifier<TerminationPoint> iidEthTermPoint = UnimgrMapper.getTerminationPointIid(bridgeNode,
+                                                                                        UnimgrConstants.DEFAULT_TUNNEL_IFACE);
+                        UnimgrUtils.deleteNode(dataBroker, iidGreTermPoint, LogicalDatastoreType.CONFIGURATION);
+                        UnimgrUtils.deleteNode(dataBroker, iidEthTermPoint, LogicalDatastoreType.CONFIGURATION);
+                    }
+                }
+            }
+        } else {
+            LOG.info("Unable to retrieve UNI from the EVC.");
+        }
     }
 
     /**
