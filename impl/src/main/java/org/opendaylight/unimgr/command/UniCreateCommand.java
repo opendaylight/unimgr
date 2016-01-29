@@ -72,6 +72,10 @@ public class UniCreateCommand extends AbstractCreateCommand {
                         if (optionalOvsdbNode.isPresent()) {
                             ovsdbNode = optionalOvsdbNode.get();
                             LOG.info("Retrieved the OVSDB node {}", ovsdbNode.getNodeId());
+                            // Update QoS entries to ovsdb if speed is configured to UNI node
+                            if (uni.getSpeed() != null) {
+                                UnimgrUtils.createQoSForOvsdbNode(dataBroker, uni);
+                            }
                             UnimgrUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION,
                                                       uniKey,
                                                       uni,
@@ -99,6 +103,10 @@ public class UniCreateCommand extends AbstractCreateCommand {
                         ovsdbNode = optionalOvsdbNode.get();
                         InstanceIdentifier<Node> ovsdbIid = UnimgrMapper.getOvsdbNodeIid(ovsdbNode.getNodeId());
                         LOG.info("Retrieved the OVSDB node");
+                        // Update QoS entries to ovsdb if speed is configured to UNI node
+                        if (uni.getSpeed() != null) {
+                            UnimgrUtils.createQoSForOvsdbNode(dataBroker, uni);
+                        }
                         UnimgrUtils.createBridgeNode(dataBroker,
                                                      ovsdbIid,
                                                      uni,
@@ -153,6 +161,10 @@ public class UniCreateCommand extends AbstractCreateCommand {
                                                                     UnimgrMapper.getUniIid(dataBroker,
                                                                                            uniAugmentation.getIpAddress(),
                                                                                            LogicalDatastoreType.CONFIGURATION);
+                                        // Update QoS entries to ovsdb if speed is configured to UNI node
+                                        if (uniAugmentation.getSpeed() != null) {
+                                            UnimgrUtils.createQoSForOvsdbNode(dataBroker, uniAugmentation);
+                                        }
                                         UnimgrUtils.createBridgeNode(dataBroker,
                                                                      ovsdbIid,
                                                                      uniAugmentation,
