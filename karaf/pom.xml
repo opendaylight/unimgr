@@ -54,7 +54,29 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </dependencies>
   <!-- DO NOT install or deploy the karaf artifact -->
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources/</directory>
+        <filtering>false</filtering>
+      </resource>
+    </resources>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>process-resources</id>
+            <goals>
+              <goal>resources</goal>
+            </goals>
+            <configuration>
+                <outputDirectory>${project.build.directory}/assembly/</outputDirectory>
+                <overwrite>true</overwrite>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
