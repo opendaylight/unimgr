@@ -6,12 +6,13 @@ This program and the accompanying materials are made available under the
 terms of the Eclipse Public License v1.0 which accompanies this distribution,
 and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>karaf-parent</artifactId>
     <version>1.7.0-SNAPSHOT</version>
-    <relativePath/>
+    <relativePath />
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.unimgr</groupId>
@@ -37,8 +38,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </dependencyManagement>
   <dependencies>
     <dependency>
-      <!-- scope is compile so all features (there is only one) are installed
-      into startup.properties and the feature repo itself is not installed -->
+      <!-- scope is compile so all features (there is only one) are installed 
+        into startup.properties and the feature repo itself is not installed -->
       <groupId>org.apache.karaf.features</groupId>
       <artifactId>framework</artifactId>
       <type>kar</type>
@@ -54,7 +55,29 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </dependencies>
   <!-- DO NOT install or deploy the karaf artifact -->
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources/</directory>
+        <filtering>false</filtering>
+      </resource>
+    </resources>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>process-resources</id>
+            <goals>
+              <goal>resources</goal>
+            </goals>
+            <configuration>
+                <outputDirectory>${project.build.directory}/assembly/</outputDirectory>
+                <overwrite>true</overwrite> 
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
