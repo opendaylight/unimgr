@@ -7,6 +7,7 @@
  */
 package org.opendaylight.unimgr.command;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -14,7 +15,9 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
 import org.opendaylight.unimgr.impl.UnimgrUtils;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -37,45 +40,87 @@ public class UniUpdateCommand extends AbstractUpdateCommand {
 
     @Override
     public void execute() {
-        for (final Entry<InstanceIdentifier<?>, DataObject> updated : changes.entrySet()) {
+        for (Entry<InstanceIdentifier<?>, DataObject> updated : changes.entrySet()) {
             if (updated.getValue() != null && updated.getValue() instanceof UniAugmentation) {
-                final UniAugmentation uni = (UniAugmentation) updated.getValue();
-                final InstanceIdentifier<?> uniIID = UnimgrMapper.getUniIid(dataBroker,
-                        uni.getIpAddress(), LogicalDatastoreType.OPERATIONAL);
-                final UniAugmentation uniAug = UnimgrUtils.getUni(dataBroker, LogicalDatastoreType.OPERATIONAL, uni.getIpAddress());
-                Preconditions.checkArgument(uniAug != null, "No UNI %s on OPERATION Topoligy",
-                        uni.getIpAddress().getIpv4Address().getValue());
-                Preconditions.checkArgument(uniAug.getIpAddress().getIpv4Address().getValue().equals(
-                        uni.getIpAddress().getIpv4Address().getValue()), "New IpAddress %s should be the same than %s",
-                        uniAug.getIpAddress().getIpv4Address().getValue(),
-                        uni.getIpAddress().getIpv4Address().getValue());
-                Node ovsdbNode;
-                if (uni.getOvsdbNodeRef() != null) {
-                    final OvsdbNodeRef ovsdbNodeRef = uni.getOvsdbNodeRef();
-                    final Optional<Node> ovsdbNodeIID = UnimgrUtils.readNode(dataBroker,
-                            LogicalDatastoreType.OPERATIONAL, ovsdbNodeRef.getValue());
-                    if(ovsdbNodeIID.isPresent()){
-                        ovsdbNode= ovsdbNodeIID.get();
+                final UniAugmentation updatedUni = (UniAugmentation) updated.getValue();
+                final UniAugmentation formerUni = UnimgrUtils.getUni(dataBroker, LogicalDatastoreType.OPERATIONAL, updatedUni.getIpAddress());
+
+                if (formerUni != null) {
+                    String formerUniIp = formerUni.getIpAddress().getIpv4Address().getValue();
+                    String updatedUniIp = updatedUni.getIpAddress().getIpv4Address().getValue();
+                    String uniKey = updated.getKey().firstKeyOf(Node.class).toString();
+                    Preconditions.checkArgument(formerUniIp.equals(updatedUniIp),
+                            "Can't update UNI with a different IP address. Former IP was %s"
+                                    + "Updated IP is %s. Please create a UNI instead of updating this one %s",
+                                    formerUniIp, updatedUniIp, uniKey);
+                    Node ovsdbNode;
+                    if (updatedUni.getOvsdbNodeRef() != null) {
+                        LOG.info("OVSDB NODE ref retreive for updated UNI {}", updatedUni.getOvsdbNodeRef());
+                        final OvsdbNodeRef ovsdbNodeRef = updatedUni.getOvsdbNodeRef();
+                        Optional<Node> optOvsdbNode = UnimgrUtils.readNode(dataBroker,LogicalDatastoreType.OPERATIONAL, ovsdbNodeRef.getValue());
+                        if(optOvsdbNode.isPresent()) {
+                            ovsdbNode= optOvsdbNode.get();
+                            LOG.info("Retrieved the OVSDB node {}", ovsdbNode.getNodeId());
+                            // Update QoS entries to ovsdb if speed is configured to UNI node
+                            if (updatedUni.getSpeed() != null) {
+                                UnimgrUtils.createQoSForOvsdbNode(dataBroker, updatedUni);
+                            }
+                            UnimgrUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION,
+                                    updated.getKey(),
+                                    updatedUni,
+                                    ovsdbNode,
+                                    dataBroker);
+                        }  else {
+                            // This should never happen, because on creation,
+                            // the UNI is assigned and OVSDB node
+                            LOG.error("OVSDB node not found for UNI {}, but got OVSDB ref", uniKey, updatedUni.getOvsdbNodeRef());
+                            return;
+                        }
                     } else {
-                        final Optional<Node> optionalOvsdbNode = UnimgrUtils.findOvsdbNode(dataBroker, uni);
-                        if (optionalOvsdbNode.isPresent()) {
-                            ovsdbNode = optionalOvsdbNode.get();
+                        Optional<Node> optOvsdbNode = UnimgrUtils.findOvsdbNode(dataBroker, updatedUni);
+                        if (optOvsdbNode.isPresent()) {
+                            ovsdbNode = optOvsdbNode.get();
+                            LOG.info("Retrieved the OVSDB node {}", ovsdbNode.getNodeId());
+                            // Update QoS entries to ovsdb if speed is configured to UNI node
+                            if (updatedUni.getSpeed() != null) {
+
+                                UnimgrUtils.createQoSForOvsdbNode(dataBroker, updatedUni);
+                            }
+                            UnimgrUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION,
+                                    updated.getKey(),
+                                    updatedUni,
+                                    ovsdbNode,
+                                    dataBroker);
                         } else {
-                            ovsdbNode = UnimgrUtils.createOvsdbNode(dataBroker, uni);
+                            // This should never happen, because on creation,
+                            // the UNI is assigned and OVSDB node
+                            LOG.error("OVSDB node not found for UNI {}", uniKey);
+                            return;
                         }
                     }
-                    LOG.trace("UNI updated {}.", uni.getIpAddress().getIpv4Address());
-                } else {
-                    final Optional<Node> optionalOvsdbNode = UnimgrUtils.findOvsdbNode(dataBroker, uni);
-                    if (optionalOvsdbNode.isPresent()) {
-                        ovsdbNode = optionalOvsdbNode.get();
-                    } else {
-                        ovsdbNode = UnimgrUtils.createOvsdbNode(dataBroker, uni);
+                    LOG.info("UNI {} updated", uniKey);
+
+                    final InstanceIdentifier<?> uniIID = UnimgrMapper.getUniIid(dataBroker, updatedUni.getIpAddress(), LogicalDatastoreType.OPERATIONAL);
+                    UnimgrUtils.deleteNode(dataBroker, uniIID, LogicalDatastoreType.OPERATIONAL);
+                    UnimgrUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniIID, updatedUni, ovsdbNode, dataBroker);
+                }
+            }
+            if (updated.getValue() != null
+                    && updated.getValue() instanceof OvsdbNodeAugmentation) {
+                OvsdbNodeAugmentation ovsdbNodeAugmentation = (OvsdbNodeAugmentation) updated.getValue();
+                if (ovsdbNodeAugmentation != null) {
+                    LOG.trace("Received an OVSDB node create {}",
+                            ovsdbNodeAugmentation.getConnectionInfo()
+                                    .getRemoteIp().getIpv4Address().getValue());
+                    final List<ManagedNodeEntry> managedNodeEntries = ovsdbNodeAugmentation.getManagedNodeEntry();
+                    if (managedNodeEntries != null) {
+                        for (ManagedNodeEntry managedNodeEntry : managedNodeEntries) {
+                            LOG.trace("Received an update from an OVSDB node {}.", managedNodeEntry.getKey());
+                            // We received a node update from the southbound plugin
+                            // so we have to check if it belongs to the UNI
+                        }
                     }
                 }
-                UnimgrUtils.deleteNode(dataBroker, uniIID, LogicalDatastoreType.OPERATIONAL);
-                UnimgrUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniIID,
-                        uni, ovsdbNode, dataBroker);
             }
         }
     }
