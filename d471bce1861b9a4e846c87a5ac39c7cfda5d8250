@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_76c0b1e0",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/command/UniUpdateCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2016-01-31T21:12:17Z",
+      "side": 1,
+      "message": "change and to an",
+      "range": {
+        "startLine": 75,
+        "startChar": 51,
+        "endLine": 75,
+        "endChar": 54
+      },
+      "revId": "d471bce1861b9a4e846c87a5ac39c7cfda5d8250",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
