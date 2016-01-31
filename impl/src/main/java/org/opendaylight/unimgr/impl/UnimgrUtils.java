@@ -380,6 +380,7 @@ public class UnimgrUtils {
             final OvsdbNodeAugmentation ovsdbNodeAugmentation = createOvsdbNodeAugmentation(uni,
                     getRemotePort(dataBroker, uni));
             final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+            transaction.delete(LogicalDatastoreType.CONFIGURATION, ovsdbNodeAugmentationIid);
             transaction.put(LogicalDatastoreType.CONFIGURATION, ovsdbNodeAugmentationIid, ovsdbNodeAugmentation, true);
             final CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
             try {
@@ -520,6 +521,7 @@ public class UnimgrUtils {
                     .build();
 
             final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+            transaction.delete(LogicalDatastoreType.CONFIGURATION, queueIid);
             transaction.put(LogicalDatastoreType.CONFIGURATION, queueIid, queueList, true);
             final CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
             try {

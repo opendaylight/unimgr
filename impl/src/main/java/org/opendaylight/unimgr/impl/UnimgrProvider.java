@@ -181,16 +181,6 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
         return null;
     }
 
-    @Override
-    public boolean updateEvc(InstanceIdentifier<Link> evcKey, EvcAugmentation evc, UniSource uniSource,
-            UniDest uniDest) {
-        final InstanceIdentifier<?> sourceUniIid = uniSource.getUni();
-        final InstanceIdentifier<?> destinationUniIid = uniDest.getUni();
-        return UnimgrUtils.updateEvcNode(LogicalDatastoreType.CONFIGURATION, evcKey, evc, sourceUniIid,
-                destinationUniIid, dataBroker);
-    }
-
-    @Override
     public boolean updateUni(UniAugmentation uni) {
         // Remove the old UNI with IpAdress and create a new one with updated informations
         if (uni != null && uni.getOvsdbNodeRef() != null) {

@@ -88,12 +88,4 @@ public class UnimgrConsoleProviderTest implements IUnimgrConsoleProvider {
         // TODO Auto-generated method stub
         return false;
     }
-
-    @Override
-    public boolean updateEvc(InstanceIdentifier<Link> evcKey, EvcAugmentation evc, UniSource uniSource,
-            UniDest uniDest) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
 }
