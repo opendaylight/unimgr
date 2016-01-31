@@ -79,4 +79,9 @@ public class UnimgrConsoleProviderTest implements IUnimgrConsoleProvider {
     @Override
     public void close() throws Exception { }
 
+    @Override
+    public boolean updateUni(UniAugmentation uni) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

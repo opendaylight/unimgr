@@ -19,6 +19,8 @@ public interface IUnimgrConsoleProvider extends AutoCloseable {
 
     boolean addUni(UniAugmentation uni);
 
+    boolean updateUni(UniAugmentation uni);
+
     boolean removeUni(IpAddress ipAddress);
 
     List<UniAugmentation> listUnis(LogicalDatastoreType dataStoreType);
