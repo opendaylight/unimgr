@@ -38,19 +38,19 @@ public class EvcCreateCommand extends AbstractCreateCommand {
     @Override
     public void execute() {
         for (Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
-            if (created.getValue() != null && created.getValue() instanceof EvcAugmentation) {
+            if ((created.getValue() != null) && (created.getValue() instanceof EvcAugmentation)) {
                 EvcAugmentation evc = (EvcAugmentation) created.getValue();
                 InstanceIdentifier<?> evcKey = created.getKey();
                 // For now, we assume that there is 1 uni per source/destination
-                if (evc.getUniDest() == null || evc.getUniDest().isEmpty()) {
+                if ((evc.getUniDest() == null) || evc.getUniDest().isEmpty()) {
                     LOG.error("Destination UNI cannot be null.");
                     break;
                 }
-                if (evc.getUniSource() == null || evc.getUniSource().isEmpty()) {
+                if ((evc.getUniSource() == null) || evc.getUniSource().isEmpty()) {
                     LOG.error("Source UNI cannot be null.");
                     break;
                 }
-                LOG.trace("New EVC created, source IP: {} destination IP {}.",
+                LOG.info("New EVC created, source IP: {} destination IP {}.",
                         evc.getUniSource().iterator().next().getIpAddress().getIpv4Address(),
                         evc.getUniDest().iterator().next().getIpAddress().getIpv4Address());
                 InstanceIdentifier<Node> sourceUniIid;
@@ -132,7 +132,7 @@ public class EvcCreateCommand extends AbstractCreateCommand {
                                                         UnimgrConstants.DEFAULT_BRIDGE_NAME,
                                                         UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
                             UnimgrUtils.createTerminationPointNode(dataBroker,
-                                                                   uniSource.getAugmentation(UniAugmentation.class),
+                                                                   uniDestination.getAugmentation(UniAugmentation.class),
                                                                    destinationBr,
                                                                    UnimgrConstants.DEFAULT_BRIDGE_NAME,
                                                                    UnimgrConstants.DEFAULT_TUNNEL_IFACE);
