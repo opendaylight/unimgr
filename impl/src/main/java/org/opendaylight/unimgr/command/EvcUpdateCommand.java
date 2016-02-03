@@ -9,7 +9,6 @@ package org.opendaylight.unimgr.command;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
@@ -44,17 +43,17 @@ public class EvcUpdateCommand extends AbstractUpdateCommand {
     @Override
     public void execute() {
         for (final Entry<InstanceIdentifier<?>, DataObject> updated : changes.entrySet()) {
-            if (updated.getValue() != null && updated.getValue() instanceof EvcAugmentation) {
+            if ((updated.getValue() != null) && (updated.getValue() instanceof EvcAugmentation)) {
                 final EvcAugmentation evc = (EvcAugmentation) updated.getValue();
                 final InstanceIdentifier<?> evcKey = updated.getKey();
 
                 // FIXME: For now, we assume that there is 1 uni per
                 // source/destination
-                if (evc.getUniDest() == null || evc.getUniDest().isEmpty()) {
+                if ((evc.getUniDest() == null) || evc.getUniDest().isEmpty()) {
                     LOG.error("Destination UNI cannot be null.");
                     break;
                 }
-                if (evc.getUniSource() == null || evc.getUniSource().isEmpty()) {
+                if ((evc.getUniSource() == null) || evc.getUniSource().isEmpty()) {
                     LOG.error("Source UNI cannot be null.");
                     break;
                 }
@@ -160,6 +159,8 @@ public class EvcUpdateCommand extends AbstractUpdateCommand {
                         final Optional<Node> optionalDestinationBr = UnimgrUtils.readNode(dataBroker,
                                 LogicalDatastoreType.OPERATIONAL,
                                 destinationBridgeIid);
+                        //update ovsdb qos-entry and queues with max-rate to match evc ingress BW
+                        UnimgrUtils.updateMaxRate(dataBroker, sourceUniAugmentation, destinationUniAugmentation, evc);
                         Node sourceBr = null;
                         Node destinationBr = null;
                         if (optionalSourceBr.isPresent() && optionalDestinationBr.isPresent()) {

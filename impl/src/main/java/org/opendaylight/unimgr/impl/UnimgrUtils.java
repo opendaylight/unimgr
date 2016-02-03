@@ -268,7 +268,7 @@ public class UnimgrUtils {
      */
     public static OvsdbBridgeAugmentation createOvsdbBridgeAugmentation(Uni uni) throws Exception {
         final OvsdbNodeRef ovsdbNodeRef = uni.getOvsdbNodeRef();
-        if (ovsdbNodeRef != null && ovsdbNodeRef.getValue() != null) {
+        if ((ovsdbNodeRef != null) && (ovsdbNodeRef.getValue() != null)) {
             final UUID bridgeUuid = UUID.randomUUID();
             final OvsdbBridgeAugmentation ovsdbBridge = new OvsdbBridgeAugmentationBuilder()
                                                         .setBridgeName(
@@ -474,20 +474,20 @@ public class UnimgrUtils {
     private static String getSpeed(Speed speedObject) {
         String speed = null;
         if (speedObject instanceof Speed10M) {
-            // map to 1MB
-            speed = "1000000";
+            // map to 10MB
+            speed = "10000000";
         }
         else if (speedObject instanceof Speed100M) {
-            // map to 2MB
-            speed = "2000000";
+            // map to 20MB
+            speed = "20000000";
         }
         else if (speedObject instanceof Speed1G) {
-            // map to 3MB
-            speed = "3000000";
+            // map to 30MB
+            speed = "30000000";
         }
         else if (speedObject instanceof Speed10G) {
-            // map to 4MB
-            speed = "4000000";
+            // map to 40MB
+            speed = "40000000";
         }
         return speed;
     }
@@ -913,7 +913,7 @@ public class UnimgrUtils {
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extract(
             Map<InstanceIdentifier<?>, DataObject> changes, Class<T> klazz) {
         final Map<InstanceIdentifier<T>,T> result = new HashMap<InstanceIdentifier<T>,T>();
-        if (changes != null && changes.entrySet() != null) {
+        if ((changes != null) && (changes.entrySet() != null)) {
             for (final Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
                 if (klazz.isInstance(created.getValue())) {
                     @SuppressWarnings("unchecked")
@@ -952,7 +952,7 @@ public class UnimgrUtils {
     public static <T extends DataObject> Set<InstanceIdentifier<T>> extractRemoved(
             AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
         final Set<InstanceIdentifier<T>> result = new HashSet<InstanceIdentifier<T>>();
-        if (changes != null && changes.getRemovedPaths() != null) {
+        if ((changes != null) && (changes.getRemovedPaths() != null)) {
             for (final InstanceIdentifier<?> iid : changes.getRemovedPaths()) {
                 if (iid.getTargetType().equals(klazz)) {
                     @SuppressWarnings("unchecked") // Actually checked above
@@ -1048,7 +1048,7 @@ public class UnimgrUtils {
         final Topology topology = UnimgrUtils.read(dataBroker,
                                              LogicalDatastoreType.OPERATIONAL,
                                              evcTopology);
-        if (topology != null && topology.getLink() != null) {
+        if ((topology != null) && (topology.getLink() != null)) {
             for (final Link link : topology.getLink()) {
                 final EvcAugmentation evcAugmentation = link.getAugmentation(EvcAugmentation.class);
                 if (evcAugmentation != null) {
@@ -1087,7 +1087,7 @@ public class UnimgrUtils {
         final Topology topology = UnimgrUtils.read(dataBroker,
                                              LogicalDatastoreType.OPERATIONAL,
                                              ovsdbTopoIdentifier);
-        if (topology != null && topology.getNode() != null) {
+        if ((topology != null) && (topology.getNode() != null)) {
             for (final Node node : topology.getNode()) {
                 final OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
                 if (ovsdbNodeAugmentation != null) {
@@ -1109,7 +1109,7 @@ public class UnimgrUtils {
         final Topology topology = read(dataBroker,
                                  LogicalDatastoreType.CONFIGURATION,
                                  topologyInstanceIdentifier);
-        if (topology != null && topology.getNode() != null) {
+        if ((topology != null) && (topology.getNode() != null)) {
             for (final Node node : topology.getNode()) {
                 final UniAugmentation uniAugmentation = node.getAugmentation(UniAugmentation.class);
                 if (uniAugmentation != null) {
@@ -1133,7 +1133,7 @@ public class UnimgrUtils {
         final Topology topology = read(dataBroker,
                                  store,
                                  topologyInstanceIdentifier);
-        if (topology != null && topology.getNode() != null) {
+        if ((topology != null) && (topology.getNode() != null)) {
             for (final Node node : topology.getNode()) {
                 final UniAugmentation uniAugmentation = node.getAugmentation(UniAugmentation.class);
                 if (uniAugmentation != null) {
@@ -1157,7 +1157,7 @@ public class UnimgrUtils {
         final Topology topology = read(dataBroker,
                                  store,
                                  topologyInstanceIdentifier);
-        if (topology != null && topology.getNode() != null) {
+        if ((topology != null) && (topology.getNode() != null)) {
             for (final Node node : topology.getNode()) {
                 final UniAugmentation uniAugmentation = node.getAugmentation(UniAugmentation.class);
                 if (uniAugmentation != null) {
@@ -1181,10 +1181,10 @@ public class UnimgrUtils {
         final Topology topology = read(dataBroker,
                                  store,
                                  topologyInstanceIdentifier);
-        if (topology != null && topology.getNode() != null) {
+        if ((topology != null) && (topology.getNode() != null)) {
             for (final Node node : topology.getNode()) {
                 final UniAugmentation uniAugmentation = node.getAugmentation(UniAugmentation.class);
-                if (uniAugmentation != null && uniAugmentation.getIpAddress().getIpv4Address().getValue().equals(ipAddress.getIpv4Address().getValue())) {
+                if ((uniAugmentation != null) && uniAugmentation.getIpAddress().getIpv4Address().getValue().equals(ipAddress.getIpv4Address().getValue())) {
                     return uniAugmentation;
                 }
             }
@@ -1378,7 +1378,7 @@ public class UnimgrUtils {
                                      InstanceIdentifier<?> destinationUniIid,
                                      DataBroker dataBroker) {
         final EvcAugmentationBuilder updatedEvcBuilder = new EvcAugmentationBuilder(evcAugmentation);
-        if (sourceUniIid != null && destinationUniIid != null) {
+        if ((sourceUniIid != null) && (destinationUniIid != null)) {
             final List<UniSource> sourceList = new ArrayList<UniSource>();
             final UniSourceKey sourceKey = evcAugmentation.getUniSource().iterator().next().getKey();
             final short sourceOrder = evcAugmentation.getUniSource().iterator().next().getOrder();
