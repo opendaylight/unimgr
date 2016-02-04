@@ -68,7 +68,7 @@ public class EvcUpdateCommand extends AbstractUpdateCommand {
                 EvcAugmentation formerEvc;
                 try {
                     formerEvc = (EvcAugmentation) ((Optional<EvcAugmentation>) retFormerEvc.checkedGet()).get();
-                    final Ipv4Address formerUni1ip = formerEvc.getUniDest().iterator().next().getIpAddress().getIpv4Address();
+                    final Ipv4Address formerUni1ip = formerEvc.getUniSource().iterator().next().getIpAddress().getIpv4Address();
                     final Ipv4Address formerUni2ip = formerEvc.getUniDest().iterator().next().getIpAddress().getIpv4Address();
 
                     if (formerUni1ip.equals(laterUni1Ip)) {
@@ -86,12 +86,12 @@ public class EvcUpdateCommand extends AbstractUpdateCommand {
                     } else if (formerUni2ip.equals(laterUni2Ip)) {
                         // do nothing
                     } else {
-                        LOG.info("{} is not part of the EVC, removing configuration", formerUni1ip);
-                        final InstanceIdentifier<?> formerUniIID = UnimgrMapper.getUniIid(dataBroker, new IpAddress(formerUni1ip), LogicalDatastoreType.OPERATIONAL);
+                        LOG.info("{} is not part of the EVC, removing configuration", formerUni2ip);
+                        final InstanceIdentifier<?> formerUniIID = UnimgrMapper.getUniIid(dataBroker, new IpAddress(formerUni2ip), LogicalDatastoreType.OPERATIONAL);
                         final Optional<Node> formerUni = UnimgrUtils.readNode(dataBroker, LogicalDatastoreType.OPERATIONAL, formerUniIID);
                         UnimgrUtils.deleteEvcData(dataBroker, formerUni);
-                        }
-                } catch (ReadFailedException e) {
+                    }
+                } catch (final ReadFailedException e) {
                     LOG.error("Failed to retrieve former EVC {}", evcKey, e);
                 }
 
