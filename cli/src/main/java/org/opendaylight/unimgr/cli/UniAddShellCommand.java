@@ -8,7 +8,6 @@
 package org.opendaylight.unimgr.cli;
 
 import java.math.BigInteger;
-
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
@@ -17,11 +16,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed100MBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed10GBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed10MBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed1GBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.uni.Speed;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.uni.SpeedBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,8 +74,8 @@ public class UniAddShellCommand extends OsgiCommandSupport {
             aliases = { "--speed" },
             description = "Spped.\n-s / --speed 10M/100M/1G/10G",
             required = false,
-            multiValued = true)
-    private String speed = "";
+            multiValued = false)
+    private String speed = "1G";
 
     @Option(name = "-ip",
             aliases = { "--ipAddress" },
@@ -93,23 +88,6 @@ public class UniAddShellCommand extends OsgiCommandSupport {
         this.provider = provider;
     }
 
-    private Object getSpeed() {
-        Object speedObject = null;
-        if (speed.equals("10M")) {
-            speedObject = new Speed10MBuilder().build();
-        }
-        else if (speed.equals("100M")) {
-            speedObject = new Speed100MBuilder().build();
-        }
-        else if (speed.equals("1G")) {
-            speedObject = new Speed1GBuilder().build();
-        }
-        else if (speed.equals("10G")) {
-            speedObject = new Speed10GBuilder().build();
-        }
-        return speedObject;
-    }
-
     @Override
     protected Object doExecute() throws Exception {
         UniAugmentation uni = new UniAugmentationBuilder()
@@ -118,11 +96,10 @@ public class UniAddShellCommand extends OsgiCommandSupport {
                         .setMode(mode)
                         .setMtuSize(BigInteger.valueOf(Long.valueOf(mtuSize)))
                         .setPhysicalMedium(physicalMedium)
-                        .setSpeed((Speed) getSpeed())
+                        .setSpeed(new SpeedBuilder().setSpeed(Utilis.getSpeed(speed)).build())
                         .setType(type)
                         .setIpAddress(new IpAddress(ipAddress.toCharArray()))
                         .build();
-
         if (provider.addUni(uni)) {
             return new String("Uni with ip " +ipAddress+" created");
         } else {

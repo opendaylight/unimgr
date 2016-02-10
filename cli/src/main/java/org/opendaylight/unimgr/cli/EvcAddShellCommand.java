@@ -8,12 +8,10 @@
 
 package org.opendaylight.unimgr.cli;
 
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
@@ -22,19 +20,14 @@ import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.EgressBw;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.IngressBw;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.EgressBwBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.IngressBwBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniDest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniDestBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniDestKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSource;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSourceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSourceKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed100MBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed10GBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed10MBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed1GBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,32 +58,15 @@ public class EvcAddShellCommand extends OsgiCommandSupport {
             aliases = { "--egress-speed" },
             description = "egress speed.\n-s / --speed 10M/100M/1G/10G",
             required = false,
-            multiValued = true)
-    private String egress = "";
+            multiValued = false)
+    private String egress = "1G";
 
     @Option(name = "-ingress",
             aliases = { "--ingress-speed" },
             description = "ingress speed.\n-s / --speed 10M/100M/1G/10G",
             required = false,
-            multiValued = true)
-    private String ingress = "";
-
-    private Object getSpeed(String speed) {
-        Object speedObject = null;
-        if (speed.equals("10M")) {
-            speedObject = new Speed10MBuilder().build();
-        }
-        else if (speed.equals("100M")) {
-            speedObject = new Speed100MBuilder().build();
-        }
-        else if (speed.equals("1G")) {
-            speedObject = new Speed1GBuilder().build();
-        }
-        else if (speed.equals("10G")) {
-            speedObject = new Speed10GBuilder().build();
-        }
-        return speedObject;
-    }
+            multiValued = false)
+    private String ingress = "1G";
 
     public EvcAddShellCommand(IUnimgrConsoleProvider provider) {
         this.provider = provider;
@@ -117,8 +93,8 @@ public class EvcAddShellCommand extends OsgiCommandSupport {
         uniDestList.add(uniDest);
         EvcAugmentation evcAug = new EvcAugmentationBuilder()
                                      .setCosId(UnimgrConstants.EVC_PREFIX + 1)
-                                     .setEgressBw((EgressBw) getSpeed(egress))
-                                     .setIngressBw((IngressBw) getSpeed(ingress))
+                                     .setEgressBw(new EgressBwBuilder().setSpeed(Utilis.getSpeed(egress)).build())
+                                     .setIngressBw(new IngressBwBuilder().setSpeed(Utilis.getSpeed(ingress)).build())
                                      .setUniDest(uniDestList)
                                      .setUniSource(uniSourceList)
                                      .build();
