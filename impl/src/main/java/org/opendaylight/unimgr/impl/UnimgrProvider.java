@@ -157,7 +157,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
 
     @Override
     public UniAugmentation getUni(IpAddress ipAddress) {
-        return UnimgrUtils.getUni(dataBroker, LogicalDatastoreType.CONFIGURATION, ipAddress);
+        return UnimgrUtils.getUni(dataBroker, LogicalDatastoreType.OPERATIONAL, ipAddress);
     }
 
 
@@ -193,7 +193,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
     @Override
     public boolean updateUni(UniAugmentation uni) {
         // Remove the old UNI with IpAdress and create a new one with updated informations
-        if (uni != null && uni.getOvsdbNodeRef() != null) {
+        if (uni != null) {
             LOG.trace("UNI updated {}.", uni.getIpAddress().getIpv4Address());
             final InstanceIdentifier<?> uniIID = UnimgrMapper.getUniIid(dataBroker,
                     uni.getIpAddress(), LogicalDatastoreType.OPERATIONAL);
@@ -210,8 +210,9 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
                 ovsdbNode = optionalOvsdbNode.get();
             }
             UnimgrUtils.deleteNode(dataBroker, uniIID, LogicalDatastoreType.OPERATIONAL);
-            return UnimgrUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniIID,
-                    uni, ovsdbNode, dataBroker);
+            return (UnimgrUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION, uniIID,
+                    uni, ovsdbNode, dataBroker) && UnimgrUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniIID,
+                    uni, ovsdbNode, dataBroker));
         }
         return false;
     }
