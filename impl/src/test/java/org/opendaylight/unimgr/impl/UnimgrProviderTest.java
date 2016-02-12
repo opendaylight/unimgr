@@ -7,17 +7,16 @@
  */
 package org.opendaylight.unimgr.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.isNull;
-
-import static org.junit.Assert.assertEquals;
 
 import java.util.Dictionary;
 import java.util.List;
@@ -33,7 +32,6 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
-import org.opendaylight.unimgr.command.TransactionInvoker;
 import org.opendaylight.unimgr.utils.MdsalUtils;
 import org.opendaylight.unimgr.utils.OvsdbUtils;
 import org.opendaylight.unimgr.utils.UniUtils;
@@ -77,74 +75,60 @@ import com.google.common.util.concurrent.CheckedFuture;
                  UnimgrMapper.class})
 public class UnimgrProviderTest {
 
-    @Mock private UnimgrDataChangeListener listener;
-    @Mock private DataBroker dataBroker;
-    @Mock private UnimgrProvider unimgrProvider;
     @Mock private IUnimgrConsoleProvider console;
+    @Mock private DataBroker dataBroker;
     @Mock private ServiceRegistration<IUnimgrConsoleProvider> mockUnimgrConsoleRegistration;
+    @Mock private UnimgrProvider unimgrProvider;
 
     @Before
     public void setUp() throws Exception {
         unimgrProvider = PowerMockito.mock(UnimgrProvider.class, Mockito.CALLS_REAL_METHODS);
-        MemberModifier.field(UnimgrProvider.class, "listener").set(unimgrProvider, listener);
         MemberModifier.field(UnimgrProvider.class, "dataBroker").set(unimgrProvider, dataBroker);
         console = unimgrProvider;
     }
 
-    @SuppressWarnings("unchecked")
     @Test
-    public void testOnSessionInitiated() throws Exception {
-        final ProviderContext session = mock(ProviderContext.class);
-        when(session.getSALService(DataBroker.class)).thenReturn(dataBroker);
-        final BundleContext context = mock(BundleContext.class);
-        PowerMockito.mockStatic(FrameworkUtil.class);
-        final Bundle bundle = mock(Bundle.class);
-        when(bundle.getBundleContext()).thenReturn(context);
-        PowerMockito.when(FrameworkUtil.getBundle(unimgrProvider.getClass())).thenReturn(bundle);
-        mockUnimgrConsoleRegistration = mock(ServiceRegistration.class);
-        when(context.registerService(eq(IUnimgrConsoleProvider.class),
-                                     any(IUnimgrConsoleProvider.class),
-                                     isNull(Dictionary.class))).thenReturn(mockUnimgrConsoleRegistration);
-        PowerMockito.whenNew(UnimgrDataChangeListener.class).withArguments(any(DataBroker.class),
-                                                                           any(TransactionInvoker.class))
-                                                            .thenReturn(listener);
-        MemberModifier.suppress(MemberMatcher.method(UnimgrProvider.class, "initDatastore"));
-        unimgrProvider.onSessionInitiated(session);
-        verify(unimgrProvider, atLeast(4)).initDatastore(any(LogicalDatastoreType.class), any(TopologyId.class));
+    public void testAddEvc() throws Exception {
+        assertEquals(false, unimgrProvider.addEvc(any(EvcAugmentation.class)));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
-    public void testInitializeTopology() throws Exception {
-        final InstanceIdentifier<NetworkTopology> path = mock(InstanceIdentifier.class);
-        PowerMockito.mockStatic(InstanceIdentifier.class);
-        when(InstanceIdentifier.create(NetworkTopology.class)).thenReturn(path);
+    public void testAddUni() throws Exception {
+        PowerMockito.mockStatic(UniUtils.class);
+        assertEquals(unimgrProvider.addUni(null), false);
+        final UniAugmentation mockUniAug = mock(UniAugmentation.class);
+        // false case
+        when(mockUniAug.getIpAddress()).thenReturn(null);
+        assertEquals(unimgrProvider.addUni(mockUniAug), false);
+        when(mockUniAug.getMacAddress()).thenReturn(null);
+        assertEquals(unimgrProvider.addUni(mockUniAug), false);
+        // true case
+        when(mockUniAug.getIpAddress()).thenReturn(mock(IpAddress.class));
+        when(mockUniAug.getMacAddress()).thenReturn(mock(MacAddress.class));
+        final UniAugmentationBuilder uniAugBuilder = new UniAugmentationBuilder()
+                                                    .setIpAddress(mock(IpAddress.class))
+                                                    .setMacAddress(mock(MacAddress.class));
+        when(UniUtils.createUniNode(any(DataBroker.class),
+                                       any(UniAugmentation.class)))
+                        .thenReturn(true);
+        assertEquals(true, unimgrProvider.addUni(uniAugBuilder.build()));
+    }
 
-        final CheckedFuture<Optional<NetworkTopology>, ReadFailedException> topology = mock(CheckedFuture.class);
-        final ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        when(dataBroker.newReadWriteTransaction()).thenReturn(transaction);
-        when(transaction.read(any(LogicalDatastoreType.class),
-                              any(InstanceIdentifier.class))).thenReturn(topology);
+    @Test
+    public void testGetEvc() throws Exception {
+        assertEquals(null, unimgrProvider.getEvc(any(String.class)));
+    }
 
-        final Optional<NetworkTopology> optNetTopo = mock(Optional.class);
-        when(topology.get()).thenReturn(optNetTopo);
-        when(optNetTopo.isPresent()).thenReturn(false);
-        final NetworkTopologyBuilder ntb = mock(NetworkTopologyBuilder.class);
-        PowerMockito.whenNew(NetworkTopologyBuilder.class).withNoArguments().thenReturn(ntb);
-        final NetworkTopology networkTopology = mock(NetworkTopology.class);
-        when(ntb.build()).thenReturn(networkTopology);
-        doNothing().when(transaction).put(any(LogicalDatastoreType.class),
-                                          any(InstanceIdentifier.class),
-                                          any(NetworkTopology.class));
-        when(transaction.submit()).thenReturn(mock(CheckedFuture.class));
-
-        final LogicalDatastoreType type = PowerMockito.mock(LogicalDatastoreType.class);
-        Whitebox.invokeMethod(unimgrProvider, "initializeTopology", type);
-        verify(ntb).build();
-        verify(transaction).put(any(LogicalDatastoreType.class),
-                                any(InstanceIdentifier.class),
-                                any(NetworkTopology.class));
-        verify(transaction).submit();
+    @Test
+    public void testgetUni() throws Exception {
+        PowerMockito.mockStatic(UniUtils.class);
+        final UniAugmentation mockUniAug = mock(UniAugmentation.class);
+        when(UniUtils.getUni(any(DataBroker.class),
+                                any(LogicalDatastoreType.class),
+                                any(IpAddress.class)))
+                        .thenReturn(mockUniAug);
+        final IpAddress mockIpAddress = mock(IpAddress.class);
+        assertEquals(mockUniAug, unimgrProvider.getUni(mockIpAddress));
     }
 
     @SuppressWarnings("unchecked")
@@ -195,26 +179,74 @@ public class UnimgrProviderTest {
                                                                     any(LogicalDatastoreType.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    public void testAddUni() throws Exception {
+    public void testInitializeTopology() throws Exception {
+        final InstanceIdentifier<NetworkTopology> path = mock(InstanceIdentifier.class);
+        PowerMockito.mockStatic(InstanceIdentifier.class);
+        when(InstanceIdentifier.create(NetworkTopology.class)).thenReturn(path);
+
+        final CheckedFuture<Optional<NetworkTopology>, ReadFailedException> topology = mock(CheckedFuture.class);
+        final ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        when(dataBroker.newReadWriteTransaction()).thenReturn(transaction);
+        when(transaction.read(any(LogicalDatastoreType.class),
+                              any(InstanceIdentifier.class))).thenReturn(topology);
+
+        final Optional<NetworkTopology> optNetTopo = mock(Optional.class);
+        when(topology.get()).thenReturn(optNetTopo);
+        when(optNetTopo.isPresent()).thenReturn(false);
+        final NetworkTopologyBuilder ntb = mock(NetworkTopologyBuilder.class);
+        PowerMockito.whenNew(NetworkTopologyBuilder.class).withNoArguments().thenReturn(ntb);
+        final NetworkTopology networkTopology = mock(NetworkTopology.class);
+        when(ntb.build()).thenReturn(networkTopology);
+        doNothing().when(transaction).put(any(LogicalDatastoreType.class),
+                                          any(InstanceIdentifier.class),
+                                          any(NetworkTopology.class));
+        when(transaction.submit()).thenReturn(mock(CheckedFuture.class));
+
+        final LogicalDatastoreType type = PowerMockito.mock(LogicalDatastoreType.class);
+        Whitebox.invokeMethod(unimgrProvider, "initializeTopology", type);
+        verify(ntb).build();
+        verify(transaction).put(any(LogicalDatastoreType.class),
+                                any(InstanceIdentifier.class),
+                                any(NetworkTopology.class));
+        verify(transaction).submit();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testlistUnis() throws Exception {
         PowerMockito.mockStatic(UniUtils.class);
-        assertEquals(unimgrProvider.addUni(null), false);
-        final UniAugmentation mockUniAug = mock(UniAugmentation.class);
-        // false case
-        when(mockUniAug.getIpAddress()).thenReturn(null);
-        assertEquals(unimgrProvider.addUni(mockUniAug), false);
-        when(mockUniAug.getMacAddress()).thenReturn(null);
-        assertEquals(unimgrProvider.addUni(mockUniAug), false);
-        // true case
-        when(mockUniAug.getIpAddress()).thenReturn(mock(IpAddress.class));
-        when(mockUniAug.getMacAddress()).thenReturn(mock(MacAddress.class));
-        final UniAugmentationBuilder uniAugBuilder = new UniAugmentationBuilder()
-                                                    .setIpAddress(mock(IpAddress.class))
-                                                    .setMacAddress(mock(MacAddress.class));
-        when(UniUtils.createUniNode(any(DataBroker.class),
-                                       any(UniAugmentation.class)))
-                        .thenReturn(true);
-        assertEquals(true, unimgrProvider.addUni(uniAugBuilder.build()));
+        final List<UniAugmentation> mockUniList = mock(List.class);
+        when(UniUtils.getUnis(any(DataBroker.class),
+                                 any(LogicalDatastoreType.class)))
+                        .thenReturn(mockUniList);
+        assertEquals(mockUniList,
+                     unimgrProvider.listUnis(any(LogicalDatastoreType.class)));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testOnSessionInitiated() throws Exception {
+        final ProviderContext session = mock(ProviderContext.class);
+        when(session.getSALService(DataBroker.class)).thenReturn(dataBroker);
+        final BundleContext context = mock(BundleContext.class);
+        PowerMockito.mockStatic(FrameworkUtil.class);
+        final Bundle bundle = mock(Bundle.class);
+        when(bundle.getBundleContext()).thenReturn(context);
+        PowerMockito.when(FrameworkUtil.getBundle(unimgrProvider.getClass())).thenReturn(bundle);
+        mockUnimgrConsoleRegistration = mock(ServiceRegistration.class);
+        when(context.registerService(eq(IUnimgrConsoleProvider.class),
+                                     any(IUnimgrConsoleProvider.class),
+                                     isNull(Dictionary.class))).thenReturn(mockUnimgrConsoleRegistration);
+        MemberModifier.suppress(MemberMatcher.method(UnimgrProvider.class, "initDatastore"));
+        unimgrProvider.onSessionInitiated(session);
+        verify(unimgrProvider, atLeast(4)).initDatastore(any(LogicalDatastoreType.class), any(TopologyId.class));
+    }
+
+    @Test
+    public void testRemoveEvc() throws Exception {
+        assertEquals(false, unimgrProvider.removeEvc(any(String.class)));
     }
 
     @SuppressWarnings("unchecked")
@@ -244,45 +276,6 @@ public class UnimgrProviderTest {
                                                  any(LogicalDatastoreType.class)))
                                      .thenReturn(true);
         assertEquals(true, unimgrProvider.removeUni(ipAddress));
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    public void testlistUnis() throws Exception {
-        PowerMockito.mockStatic(UniUtils.class);
-        final List<UniAugmentation> mockUniList = mock(List.class);
-        when(UniUtils.getUnis(any(DataBroker.class),
-                                 any(LogicalDatastoreType.class)))
-                        .thenReturn(mockUniList);
-        assertEquals(mockUniList,
-                     unimgrProvider.listUnis(any(LogicalDatastoreType.class)));
-    }
-
-    @Test
-    public void testgetUni() throws Exception {
-        PowerMockito.mockStatic(UniUtils.class);
-        final UniAugmentation mockUniAug = mock(UniAugmentation.class);
-        when(UniUtils.getUni(any(DataBroker.class),
-                                any(LogicalDatastoreType.class),
-                                any(IpAddress.class)))
-                        .thenReturn(mockUniAug);
-        final IpAddress mockIpAddress = mock(IpAddress.class);
-        assertEquals(mockUniAug, unimgrProvider.getUni(mockIpAddress));
-    }
-
-    @Test
-    public void testRemoveEvc() throws Exception {
-        assertEquals(false, unimgrProvider.removeEvc(any(String.class)));
-    }
-
-    @Test
-    public void testAddEvc() throws Exception {
-        assertEquals(false, unimgrProvider.addEvc(any(EvcAugmentation.class)));
-    }
-
-    @Test
-    public void testGetEvc() throws Exception {
-        assertEquals(null, unimgrProvider.getEvc(any(String.class)));
     }
 
     @Test
