@@ -43,16 +43,12 @@ public class EvcUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(EvcUtils.class);
 
-    private EvcUtils() {
-        throw new AssertionError("Instantiating utility class.");
-    }
-
     /**
      * Delete EVC data from configuration datastore
      * @param dataBroker The dataBroker instance to create transactions
      * @param optionalUni Optional Uni Node
      */
-    public static void deleteEvcData(DataBroker dataBroker, Optional<Node> optionalUni) {
+    public static void deleteEvcData(final DataBroker dataBroker, final Optional<Node> optionalUni) {
         if (optionalUni.isPresent()) {
             final UniAugmentation uniAugmentation =
                                 optionalUni
@@ -97,7 +93,7 @@ public class EvcUtils {
      * @param dataBroker The dataBroker instance to create transactions
      * @return A list of Links retrieved from the Operational DataStore
      */
-    public static List<Link> getEvcLinks(DataBroker dataBroker) {
+    public static List<Link> getEvcLinks(final DataBroker dataBroker) {
         final List<Link> evcLinks = new ArrayList<>();
         final InstanceIdentifier<Topology> evcTopology = UnimgrMapper.getEvcTopologyIid();
         final Topology topology = MdsalUtils.read(dataBroker,
@@ -124,18 +120,19 @@ public class EvcUtils {
      * @param dataBroker The dataBroker instance to create transactions
      * @return true if evc is updated
      */
-    public static boolean updateEvcNode(LogicalDatastoreType dataStore,
-                                     InstanceIdentifier<?> evcKey,
-                                     EvcAugmentation evcAugmentation,
-                                     InstanceIdentifier<?> sourceUniIid,
-                                     InstanceIdentifier<?> destinationUniIid,
-                                     DataBroker dataBroker) {
+    public static boolean updateEvcNode(final LogicalDatastoreType dataStore,
+                                     final InstanceIdentifier<?> evcKey,
+                                     final EvcAugmentation evcAugmentation,
+                                     final InstanceIdentifier<?> sourceUniIid,
+                                     final InstanceIdentifier<?> destinationUniIid,
+                                     final DataBroker dataBroker) {
         final EvcAugmentationBuilder updatedEvcBuilder = new EvcAugmentationBuilder(evcAugmentation);
         if ((sourceUniIid != null) && (destinationUniIid != null)) {
             final List<UniSource> sourceList = new ArrayList<UniSource>();
-            final UniSourceKey sourceKey = evcAugmentation.getUniSource().iterator().next().getKey();
-            final short sourceOrder = evcAugmentation.getUniSource().iterator().next().getOrder();
-            final IpAddress sourceIp = evcAugmentation.getUniSource().iterator().next().getIpAddress();
+            final UniSource evcUniSource = evcAugmentation.getUniSource().iterator().next();
+            final UniSourceKey sourceKey = evcUniSource.getKey();
+            final short sourceOrder = evcUniSource.getOrder();
+            final IpAddress sourceIp = evcUniSource.getIpAddress();
             final UniSource uniSource = new UniSourceBuilder()
                                           .setOrder(sourceOrder)
                                           .setKey(sourceKey)
@@ -146,9 +143,10 @@ public class EvcUtils {
             updatedEvcBuilder.setUniSource(sourceList);
 
             final List<UniDest> destinationList = new ArrayList<UniDest>();
-            final UniDestKey destKey = evcAugmentation.getUniDest().iterator().next().getKey();
-            final short destOrder = evcAugmentation.getUniDest().iterator().next().getOrder();
-            final IpAddress destIp = evcAugmentation.getUniDest().iterator().next().getIpAddress();
+            final UniDest evcUniDest = evcAugmentation.getUniDest().iterator().next();
+            final UniDestKey destKey = evcUniDest.getKey();
+            final short destOrder = evcUniDest.getOrder();
+            final IpAddress destIp = evcUniDest.getIpAddress();
             final UniDest uniDest = new UniDestBuilder()
                                       .setIpAddress(destIp)
                                       .setOrder(destOrder)
@@ -179,5 +177,9 @@ public class EvcUtils {
             LOG.info("Invalid instance identifiers for sourceUni and destUni.");
         }
         return false;
+    }
+
+    private EvcUtils() {
+        throw new AssertionError("Instantiating utility class.");
     }
 }

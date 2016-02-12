@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
@@ -40,6 +41,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -52,13 +54,16 @@ import com.google.common.base.Optional;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({UniUtils.class, OvsdbUtils.class, MdsalUtils.class, UnimgrMapper.class})
-public class UniCreateCommandTest {
+public class UniAddCommandTest {
 
     private static final NodeId OVSDB_NODE_ID = new NodeId("ovsdb://7011db35-f44b-4aab-90f6-d89088caf9d8");
 
-    private UniCreateCommand uniCreateCommand;
+    private UniAddCommand uniAddCommand;
     private Map<InstanceIdentifier<?>, DataObject> changes;
+    private DataTreeModification<Node> uni;
     private DataBroker dataBroker;
+    private Node uniNode;
+    private Optional<Node> optUniNode;
 
     @SuppressWarnings("unchecked")
     @Before
@@ -67,13 +72,13 @@ public class UniCreateCommandTest {
         PowerMockito.mockStatic(OvsdbUtils.class);
         PowerMockito.mockStatic(MdsalUtils.class);
         PowerMockito.mockStatic(UnimgrMapper.class);
-        changes = mock(Map.class);
+
         dataBroker = mock(DataBroker.class);
-        uniCreateCommand = new UniCreateCommand(dataBroker, changes);
+        uniAddCommand = new UniAddCommand(dataBroker, uni);
     }
 
     /**
-     * Test method for {@link org.opendaylight.unimgr.command.UniCreateCommand#execute()}.
+     * Test method for {@link org.opendaylight.unimgr.command.uniAddCommandTest#execute()}.
      * @throws Exception
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -195,7 +200,7 @@ public class UniCreateCommandTest {
     }
 
     private void verifyExecute(int qosTimes, int bridgeTimes, int updateNodeTime, int updateIIDTimes){
-        uniCreateCommand.execute();
+        uniAddCommand.execute();
         PowerMockito.verifyStatic(times(qosTimes));
         OvsdbUtils.createQoSForOvsdbNode(any(DataBroker.class), any(UniAugmentation.class));
         PowerMockito.verifyStatic(times(bridgeTimes));

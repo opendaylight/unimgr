@@ -7,7 +7,6 @@
  */
 package org.opendaylight.unimgr.impl;
 
-
 import java.util.List;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -17,7 +16,6 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
-import org.opendaylight.unimgr.command.TransactionInvoker;
 import org.opendaylight.unimgr.utils.EvcUtils;
 import org.opendaylight.unimgr.utils.MdsalUtils;
 import org.opendaylight.unimgr.utils.OvsdbUtils;
@@ -50,11 +48,10 @@ import com.google.common.util.concurrent.CheckedFuture;
 public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUnimgrConsoleProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(UnimgrProvider.class);
-
-    private UnimgrDataChangeListener listener;
-    private TransactionInvoker invoker;
-
     private DataBroker dataBroker;
+    private EvcDataTreeChangeListener evcListener;
+    private OvsNodeDataTreeChangeListener ovsListener;
+    private UniDataTreeChangeListener uniListener;
     private ServiceRegistration<IUnimgrConsoleProvider> unimgrConsoleRegistration;
 
     public UnimgrProvider() {
@@ -62,42 +59,41 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
     }
 
     @Override
-    public void onSessionInitiated(ProviderContext session) {
-        LOG.info("UnimgrProvider Session Initiated");
+    public boolean addEvc(final EvcAugmentation evc) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
-        // Retrieve the data broker to create transactions
-        dataBroker =  session.getSALService(DataBroker.class);
-        invoker = new  TransactionInvoker();
-
-        // Register the unimgr OSGi CLI
-        final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-        unimgrConsoleRegistration = context.registerService(IUnimgrConsoleProvider.class,
-                                                            this,
-                                                            null);
-
-        // Register the uni data change listener
-        listener = new UnimgrDataChangeListener(dataBroker, invoker);
-
-        // Initialize operational and default config data in MD-SAL data store
-        initDatastore(LogicalDatastoreType.CONFIGURATION,
-                      UnimgrConstants.UNI_TOPOLOGY_ID);
-        initDatastore(LogicalDatastoreType.OPERATIONAL,
-                      UnimgrConstants.UNI_TOPOLOGY_ID);
-        initDatastore(LogicalDatastoreType.CONFIGURATION,
-                      UnimgrConstants.EVC_TOPOLOGY_ID);
-        initDatastore(LogicalDatastoreType.OPERATIONAL,
-                      UnimgrConstants.EVC_TOPOLOGY_ID);
+    @Override
+    public boolean addUni(final UniAugmentation uniAug) {
+        if ((uniAug == null) || (uniAug.getIpAddress() == null) || (uniAug.getMacAddress() == null)) {
+            return false;
+        }
+        return UniUtils.createUniNode(dataBroker, uniAug);
     }
 
     @Override
     public void close() throws Exception {
         LOG.info("UnimgrProvider Closed");
         unimgrConsoleRegistration.unregister();
-        listener.close();
+        uniListener.close();
+        evcListener.close();
+        ovsListener.close();
+    }
+
+    @Override
+    public Evc getEvc(final String uuid) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public UniAugmentation getUni(final IpAddress ipAddress) {
+        return UniUtils.getUni(dataBroker, LogicalDatastoreType.OPERATIONAL, ipAddress);
     }
 
     protected void initDatastore(final LogicalDatastoreType type,
-                                 TopologyId topoId) {
+                                 final TopologyId topoId) {
         final InstanceIdentifier<Topology> path = InstanceIdentifier
                                                 .create(NetworkTopology.class)
                                                 .child(Topology.class,
@@ -120,7 +116,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
         }
     }
 
-    private void initializeTopology(LogicalDatastoreType type) {
+    private void initializeTopology(final LogicalDatastoreType type) {
         final ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
         final InstanceIdentifier<NetworkTopology> path = InstanceIdentifier.create(NetworkTopology.class);
         final CheckedFuture<Optional<NetworkTopology>, ReadFailedException> topology = transaction.read(type,path);
@@ -138,55 +134,54 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
     }
 
     @Override
-    public boolean addUni(UniAugmentation uniAug) {
-        if ((uniAug == null) || (uniAug.getIpAddress() == null) || (uniAug.getMacAddress() == null)) {
-            return false;
-        }
-        return UniUtils.createUniNode(dataBroker, uniAug);
-    }
-
-    @Override
-    public boolean removeUni(IpAddress ipAddress) {
-        final InstanceIdentifier<Node> iidUni = UnimgrMapper.getUniIid(dataBroker, ipAddress, LogicalDatastoreType.CONFIGURATION);
-        if (iidUni == null) {
-            return false;
-        }
-
-        return MdsalUtils.deleteNode(dataBroker, iidUni, LogicalDatastoreType.CONFIGURATION);
-    }
-
-    @Override
-    public List<UniAugmentation> listUnis(LogicalDatastoreType dataStoreType) {
+    public List<UniAugmentation> listUnis(final LogicalDatastoreType dataStoreType) {
         return UniUtils.getUnis(dataBroker, dataStoreType);
     }
 
     @Override
-    public UniAugmentation getUni(IpAddress ipAddress) {
-        return UniUtils.getUni(dataBroker, LogicalDatastoreType.OPERATIONAL, ipAddress);
+    public void onSessionInitiated(final ProviderContext session) {
+        LOG.info("UnimgrProvider Session Initiated");
+
+        // Retrieve the data broker to create transactions
+        dataBroker =  session.getSALService(DataBroker.class);
+        // Register the unimgr OSGi CLI
+        final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+        unimgrConsoleRegistration = context.registerService(IUnimgrConsoleProvider.class,this, null);
+
+        // Register the data trees change listener
+        uniListener = new UniDataTreeChangeListener(dataBroker);
+        evcListener = new EvcDataTreeChangeListener(dataBroker);
+        ovsListener = new OvsNodeDataTreeChangeListener(dataBroker);
+
+        // Initialize operational and default config data in MD-SAL data store
+        initDatastore(LogicalDatastoreType.CONFIGURATION,
+                      UnimgrConstants.UNI_TOPOLOGY_ID);
+        initDatastore(LogicalDatastoreType.OPERATIONAL,
+                      UnimgrConstants.UNI_TOPOLOGY_ID);
+        initDatastore(LogicalDatastoreType.CONFIGURATION,
+                      UnimgrConstants.EVC_TOPOLOGY_ID);
+        initDatastore(LogicalDatastoreType.OPERATIONAL,
+                      UnimgrConstants.EVC_TOPOLOGY_ID);
     }
 
-
     @Override
-    public boolean removeEvc(String uuid) {
+    public boolean removeEvc(final String uuid) {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public boolean addEvc(EvcAugmentation evc) {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean removeUni(final IpAddress ipAddress) {
+        final InstanceIdentifier<Node> iidUni = UnimgrMapper.getUniIid(dataBroker, ipAddress, LogicalDatastoreType.CONFIGURATION);
+        if (iidUni == null) {
+            return false;
+        }
+        return MdsalUtils.deleteNode(dataBroker, iidUni, LogicalDatastoreType.CONFIGURATION);
     }
 
     @Override
-    public Evc getEvc(String uuid) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean updateEvc(InstanceIdentifier<Link> evcKey, EvcAugmentation evc, UniSource uniSource,
-            UniDest uniDest) {
+    public boolean updateEvc(final InstanceIdentifier<Link> evcKey, final EvcAugmentation evc, final UniSource uniSource,
+            final UniDest uniDest) {
         final InstanceIdentifier<?> sourceUniIid = uniSource.getUni();
         final InstanceIdentifier<?> destinationUniIid = uniDest.getUni();
         return EvcUtils.updateEvcNode(LogicalDatastoreType.CONFIGURATION, evcKey, evc, sourceUniIid,
@@ -194,7 +189,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
     }
 
     @Override
-    public boolean updateUni(UniAugmentation uni) {
+    public boolean updateUni(final UniAugmentation uni) {
         // Remove the old UNI with IpAdress and create a new one with updated informations
         if (uni != null) {
             LOG.trace("UNI updated {}.", uni.getIpAddress().getIpv4Address());
