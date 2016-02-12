@@ -83,6 +83,8 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
                       UnimgrConstants.EVC_TOPOLOGY_ID);
         initDatastore(LogicalDatastoreType.OPERATIONAL,
                       UnimgrConstants.EVC_TOPOLOGY_ID);
+
+        LOG.info("UnimgrProvider initalize {}", UniDataTreeChangeListener.class.toString());
     }
 
     @Override
