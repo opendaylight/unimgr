@@ -48,6 +48,8 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
     private static final Logger LOG = LoggerFactory.getLogger(UnimgrProvider.class);
 
     private UnimgrDataChangeListener listener;
+    private UniDataTreeChangeListener uniListener;
+    private EvcDataTreeChangeListener evcListener;
     private TransactionInvoker invoker;
 
     private DataBroker dataBroker;
@@ -83,6 +85,11 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
                       UnimgrConstants.EVC_TOPOLOGY_ID);
         initDatastore(LogicalDatastoreType.OPERATIONAL,
                       UnimgrConstants.EVC_TOPOLOGY_ID);
+
+        // Register the new data Tree change listner
+        uniListener = new UniDataTreeChangeListener(dataBroker);
+        //evcListener = new EvcDataTreeChangeListener(dataBroker);
+        LOG.info("UnimgrProvider initalize {}", UniDataTreeChangeListener.class.toString());
     }
 
     @Override
@@ -90,6 +97,8 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
         LOG.info("UnimgrProvider Closed");
         unimgrConsoleRegistration.unregister();
         listener.close();
+        uniListener.close();
+        evcListener.close();
     }
 
     protected void initDatastore(final LogicalDatastoreType type,
@@ -107,7 +116,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
                 final TopologyBuilder tpb = new TopologyBuilder();
                 tpb.setTopologyId(topoId);
                 transaction.put(type, path, tpb.build());
-                transaction.submit();
+                transaction.submit().get();
             } else {
                 transaction.cancel();
             }
@@ -124,7 +133,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
             if (!topology.get().isPresent()) {
                 final NetworkTopologyBuilder ntb = new NetworkTopologyBuilder();
                 transaction.put(type,path,ntb.build());
-                transaction.submit();
+                transaction.submit().get();
             } else {
                 transaction.cancel();
             }
