@@ -52,6 +52,9 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
     private static final Logger LOG = LoggerFactory.getLogger(UnimgrProvider.class);
 
     private UnimgrDataChangeListener listener;
+    private UniDataTreeChangeListener uniListener;
+    private EvcDataTreeChangeListener evcListener;
+    private OvsNodeDataTreeChangeListener ovsListener;
     private TransactionInvoker invoker;
 
     private DataBroker dataBroker;
@@ -76,7 +79,10 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
                                                             null);
 
         // Register the uni data change listener
-        listener = new UnimgrDataChangeListener(dataBroker, invoker);
+        //listener = new UnimgrDataChangeListener(dataBroker, invoker);
+        uniListener = new UniDataTreeChangeListener(dataBroker);
+        evcListener = new EvcDataTreeChangeListener(dataBroker);
+        ovsListener = new OvsNodeDataTreeChangeListener(dataBroker);
 
         // Initialize operational and default config data in MD-SAL data store
         initDatastore(LogicalDatastoreType.CONFIGURATION,
@@ -93,7 +99,10 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
     public void close() throws Exception {
         LOG.info("UnimgrProvider Closed");
         unimgrConsoleRegistration.unregister();
-        listener.close();
+        //listener.close();
+        uniListener.close();
+        evcListener.close();
+        ovsListener.close();
     }
 
     protected void initDatastore(final LogicalDatastoreType type,
