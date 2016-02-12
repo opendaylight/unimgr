@@ -167,30 +167,42 @@ public class UnimgrIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testCreateEvc() {
+    public void createAndDeleteUNITest() {
+        UniAugmentation uni = new UniAugmentationBuilder()
+                .setMacAddress(new MacAddress(MAC_ADDRESS_1))
+                .setMacLayer(MAC_LAYER)
+                .setMode(MODE)
+                .setMtuSize(BigInteger.valueOf(Long.valueOf(MTU_SIZE)))
+                .setPhysicalMedium(PHY_MEDIUM)
+                .setSpeed(null)
+                .setType(TYPE)
+                .setIpAddress(new IpAddress(IP_1.toCharArray()))
+                .build();
+
+        InstanceIdentifier<Node> nodePath = createUniNode(MAC_ADDRESS_1, IP_1);
+        Assert.assertTrue(validateUni(true, nodePath));
+
+        InstanceIdentifier<Node> deletedNodePath = deleteNode(MAC_ADDRESS_1, IP_1);
+        Assert.assertTrue(validateUni(false, deletedNodePath));
+    }
+
+    @Test
+    public void testCreateAndDeleteEvc() {
         LOG.info("Test for create Evc");
         // Create an evc between the two Uni nodes
-        InstanceIdentifier<Link> evcIid = createOrDeleteEvcLink(IP_1, MAC_ADDRESS_1, IP_2, MAC_ADDRESS_2, EVC_ID_1, true);
+        InstanceIdentifier<Link> evcIid = createEvcLink(IP_1, MAC_ADDRESS_1, IP_2, MAC_ADDRESS_2, EVC_ID_1);
         Assert.assertNotNull(evcIid);
 
         // Validate Evc create operation
         boolean status = validateEvc(true, EVC_ID_1);
         Assert.assertTrue(status);
-    }
-
-    @Test
-    public void testDeleteEvc() {
-        LOG.info("Test for delete Evc");
-        // Create an evc between the two Uni nodes
-        InstanceIdentifier<Link> evcIid = createOrDeleteEvcLink(IP_1, MAC_ADDRESS_1, IP_2, MAC_ADDRESS_2, EVC_ID_1, true);
-        Assert.assertNotNull(evcIid);
 
         //Delete the Evc
-        evcIid = createOrDeleteEvcLink(IP_1, MAC_ADDRESS_1, IP_2, MAC_ADDRESS_2, EVC_ID_1, false);
+        evcIid = deleteEvc(EVC_ID_1);
         Assert.assertNotNull(evcIid);
 
         // Validate Evc delete operation
-        boolean status = validateEvc(false, EVC_ID_1);
+        status = validateEvc(false, EVC_ID_1);
         Assert.assertTrue(status);
     }
 
@@ -238,9 +250,26 @@ public class UnimgrIT extends AbstractMdsalTestBase {
         return uniNodeIid;
     }
 
-    private InstanceIdentifier<Link> createOrDeleteEvcLink(String srcUniIp, String srcMac,
-            String dstUniIp, String dstMac, String evcId,
-            boolean isCreate) {
+    private InstanceIdentifier<Link> deleteEvc(String evcId) {
+        LinkId evcLinkId = new LinkId(new LinkId("evc://" + evcId));
+        InstanceIdentifier<Link> evcLinkIid = null;
+        evcLinkIid = getEvcLinkIid(evcId);
+        if (evcLinkIid != null) {
+            WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+            transaction.delete(LogicalDatastoreType.CONFIGURATION, evcLinkIid);
+            CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+            try {
+                future.checkedGet();
+            } catch (TransactionCommitFailedException e) {
+                LOG.error("Error while deleting Evc {}", evcLinkIid);
+            }
+            LOG.info("Deleted an Evc link {}", evcLinkId);
+        }
+        return evcLinkIid;
+    }
+
+    private InstanceIdentifier<Link> createEvcLink(String srcUniIp, String srcMac,
+            String dstUniIp, String dstMac, String evcId) {
         // Create two Uni nodes before creating an Evc
         InstanceIdentifier<Node> uniIid = createUniNode(srcMac, srcUniIp);
         Assert.assertNotNull(uniIid);
@@ -278,35 +307,23 @@ public class UnimgrIT extends AbstractMdsalTestBase {
         InstanceIdentifier<Link> evcLinkIid = null;
         try {
             evcLinkIid = getEvcLinkIid(evcId);
-            if(isCreate) {
-                LinkKey evcLinkKey = new LinkKey(evcLinkId);
-                Source mandatorySrcNode = new SourceBuilder().setSourceNode(new NodeId("uni://" + srcUniIp)).build();
-                Destination mandatoryDstNode = new DestinationBuilder().setDestNode(new NodeId("uni://" + dstUniIp)).build();
-                Link linkData = new LinkBuilder()
+            LinkKey evcLinkKey = new LinkKey(evcLinkId);
+            Source mandatorySrcNode = new SourceBuilder().setSourceNode(new NodeId("uni://" + srcUniIp)).build();
+            Destination mandatoryDstNode = new DestinationBuilder().setDestNode(new NodeId("uni://" + dstUniIp)).build();
+            Link linkData = new LinkBuilder()
                         .setKey(evcLinkKey)
                         .setSource(mandatorySrcNode)
                         .setDestination(mandatoryDstNode)
                         .setLinkId(evcLinkId)
                         .addAugmentation(EvcAugmentation.class, evc)
                         .build();
-                WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-                transaction.put(LogicalDatastoreType.CONFIGURATION, evcLinkIid, linkData);
-                CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-                future.checkedGet();
-                LOG.info("Created and submitted a new Evc link {}", evcLinkId);
-            } else {
-                WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-                transaction.delete(LogicalDatastoreType.CONFIGURATION, evcLinkIid);
-                CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-                future.checkedGet();
-                LOG.info("Deleted an Evc link {}", evcLinkId);
-            }
+            WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+            transaction.put(LogicalDatastoreType.CONFIGURATION, evcLinkIid, linkData);
+            CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+            future.checkedGet();
+            LOG.info("Created and submitted a new Evc link {}", evcLinkId);
         } catch (Exception e) {
-            if (isCreate) {
-                LOG.error("Exception while creating Evc " + "Evc link Id: {}, {}", evcLinkId, e);
-            } else {
-                LOG.error("Exception while deleting Evc " + "Evc link Id: {}, {}", evcLinkId, e);
-            }
+            LOG.error("Exception while creating Evc " + "Evc link Id: {}, {}", evcLinkId, e);
             return null;
         }
         return evcLinkIid;
@@ -349,26 +366,6 @@ public class UnimgrIT extends AbstractMdsalTestBase {
         }
         transaction.close();
         return result;
-    }
-
-    @Test
-    public void createAndDeleteUNITest() {
-        UniAugmentation uni = new UniAugmentationBuilder()
-                .setMacAddress(new MacAddress(MAC_ADDRESS_1))
-                .setMacLayer(MAC_LAYER)
-                .setMode(MODE)
-                .setMtuSize(BigInteger.valueOf(Long.valueOf(MTU_SIZE)))
-                .setPhysicalMedium(PHY_MEDIUM)
-                .setSpeed(null)
-                .setType(TYPE)
-                .setIpAddress(new IpAddress(IP_1.toCharArray()))
-                .build();
-
-        InstanceIdentifier<Node> nodePath = createUniNode(MAC_ADDRESS_1, IP_1);
-        Assert.assertTrue(validateUni(true, nodePath));
-
-        InstanceIdentifier<Node> deletedNodePath = deleteNode(MAC_ADDRESS_1, IP_1);
-        Assert.assertTrue(validateUni(false, deletedNodePath));
     }
 
     private boolean validateUni(boolean forCreate, InstanceIdentifier<Node> iid) {

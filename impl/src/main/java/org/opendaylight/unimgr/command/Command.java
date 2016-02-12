@@ -9,6 +9,9 @@ package org.opendaylight.unimgr.command;
 
 public interface Command {
 
+    /**
+     * Method implements the command execution.
+     */
     public void execute();
 
 }

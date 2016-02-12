@@ -899,7 +899,7 @@ public class OvsdbUtils {
     public static List<Node> getOvsdbNodes(DataBroker dataBroker) {
         final List<Node> ovsdbNodes = new ArrayList<>();
         final InstanceIdentifier<Topology> ovsdbTopoIdentifier = UnimgrMapper.getOvsdbTopologyIid();
-        final Topology topology = MdsalUtils.read(dataBroker,
+        Topology topology = MdsalUtils.read(dataBroker,
                 LogicalDatastoreType.OPERATIONAL,
                 ovsdbTopoIdentifier);
         if ((topology != null) && (topology.getNode() != null)) {
@@ -907,6 +907,16 @@ public class OvsdbUtils {
                 final OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
                 if (ovsdbNodeAugmentation != null) {
                     ovsdbNodes.add(node);
+                }
+            }
+        } else {
+            topology = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, ovsdbTopoIdentifier);
+            if ((topology != null) && (topology.getNode() != null)) {
+                for (final Node node : topology.getNode()) {
+                    final OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
+                    if (ovsdbNodeAugmentation != null) {
+                        ovsdbNodes.add(node);
+                    }
                 }
             }
         }
