@@ -13,23 +13,19 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
 import org.opendaylight.unimgr.utils.EvcUtils;
 import org.opendaylight.unimgr.utils.MdsalUtils;
 import org.opendaylight.unimgr.utils.OvsdbUtils;
-import org.opendaylight.unimgr.utils.UniUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
@@ -41,9 +37,9 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -53,13 +49,15 @@ import com.google.common.base.Optional;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({EvcUtils.class, MdsalUtils.class, OvsdbUtils.class, UnimgrMapper.class})
-public class EvcCreateCommandTest {
+public class EvcAddCommandTest {
 
     private static final NodeId OVSDB_NODE_ID = new NodeId("ovsdb://7011db35-f44b-4aab-90f6-d89088caf9d8");
 
-    private EvcCreateCommand evcCreateCommand;
-    private Map<InstanceIdentifier<?>, DataObject> changes;
+    private EvcAddCommand evcAddCommand;
+    private DataTreeModification<Link> evcLink;
     private DataBroker dataBroker;
+    private Link link;
+    private Optional<Link> optLinks;
 
     @SuppressWarnings("unchecked")
     @Before
@@ -68,13 +66,15 @@ public class EvcCreateCommandTest {
         PowerMockito.mockStatic(EvcUtils.class);
         PowerMockito.mockStatic(OvsdbUtils.class);
         PowerMockito.mockStatic(UnimgrMapper.class);
-        changes = mock(Map.class);
         dataBroker = mock(DataBroker.class);
-        evcCreateCommand = new EvcCreateCommand(dataBroker, changes);
+        link = mock(Link.class);
+        optLinks = mock(Optional.class);
+        evcLink = DataTreeModificationHelper.getEvcLink(link);
+        evcAddCommand = new EvcAddCommand(dataBroker, evcLink);
     }
 
     /**
-     * Test method for {@link org.opendaylight.unimgr.command.EvcCreateCommand#execute()}.
+     * Test method for {@link org.opendaylight.unimgr.command.evcAddCommand#execute()}.
      * @throws Exception
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -95,21 +95,11 @@ public class EvcCreateCommandTest {
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(UnimgrConstants.EVC_TOPOLOGY_ID))
                 .child(Node.class, new NodeKey(OVSDB_NODE_ID));
-        final Set<Entry<InstanceIdentifier<?>, DataObject>> setCreated = new HashSet<Map.Entry<InstanceIdentifier<?>,DataObject>>();
-        final Entry<InstanceIdentifier<?>, DataObject> created = new Entry<InstanceIdentifier<?>, DataObject>() {
-            @Override
-            public DataObject setValue(DataObject value) { return null; }
-            @Override
-            public DataObject getValue() { return evcAugmentation; }
-            @Override
-            public InstanceIdentifier getKey() { return evcKey; }
-        };
-
-        setCreated.add(created);
         unisSource.add(uniSource);
         unisDest.add(uniDest);
 
-        when(changes.entrySet()).thenReturn(setCreated);
+        when(link.getAugmentation(EvcAugmentation.class)).thenReturn(evcAugmentation);
+        when(optLinks.isPresent()).thenReturn(false);
         when(uniAugmentation.getOvsdbNodeRef()).thenReturn(ovsNodedRef);
         when(evcAugmentation.getUniSource()).thenReturn(unisSource);
         when(evcAugmentation.getUniDest()).thenReturn(unisDest);
@@ -125,6 +115,8 @@ public class EvcCreateCommandTest {
         when(node.getAugmentation(any(Class.class))).thenReturn(uniAugmentation);
         when(ovsNodedRef.getValue()).thenReturn(evcKey);
 
+        when(MdsalUtils.readLink(any(DataBroker.class), any(LogicalDatastoreType.class),
+                any(InstanceIdentifier.class))).thenReturn(optLinks);
         when(MdsalUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class))).thenReturn(optionalOvsdbNode);
         PowerMockito.doNothing().when(OvsdbUtils.class, "updateMaxRate", dataBroker, uniAugmentation,
@@ -139,7 +131,7 @@ public class EvcCreateCommandTest {
         when(UnimgrMapper.getUniIid(any(DataBroker.class), any(IpAddress.class),
                 any(LogicalDatastoreType.class))).thenReturn(evcKey);
 
-        evcCreateCommand.execute();
+        evcAddCommand.execute();
         PowerMockito.verifyStatic(times(2));
         OvsdbUtils.createTerminationPointNode(any(DataBroker.class), any(UniAugmentation.class),
                 any(Node.class), any(String.class), any(String.class));
@@ -150,7 +142,6 @@ public class EvcCreateCommandTest {
         EvcUtils.updateEvcNode(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                 any(EvcAugmentation.class), any(InstanceIdentifier.class),
                 any(InstanceIdentifier.class), any(DataBroker.class));
-
     }
 
 }

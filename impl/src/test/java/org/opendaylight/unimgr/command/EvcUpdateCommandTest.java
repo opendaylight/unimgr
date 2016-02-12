@@ -13,20 +13,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
 import org.opendaylight.unimgr.utils.EvcUtils;
@@ -44,11 +39,10 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -62,7 +56,8 @@ public class EvcUpdateCommandTest {
     private static final NodeId OVSDB_NODE_ID = new NodeId("ovsdb://7011db35-f44b-4aab-90f6-d89088caf9d8");
 
     private EvcUpdateCommand evcUpdateCommand;
-    private Map<InstanceIdentifier<?>, DataObject> changes;
+    private Link link;
+    private DataTreeModification<Link> evcLink;
     private DataBroker dataBroker;
 
     @SuppressWarnings("unchecked")
@@ -73,16 +68,17 @@ public class EvcUpdateCommandTest {
         PowerMockito.mockStatic(EvcUtils.class);
         PowerMockito.mockStatic(OvsdbUtils.class);
         PowerMockito.mockStatic(UnimgrMapper.class);
-        changes = mock(Map.class);
         dataBroker = mock(DataBroker.class);
-        evcUpdateCommand = new EvcUpdateCommand(dataBroker, changes);
+        link = mock(Link.class);
+        evcLink = DataTreeModificationHelper.getEvcLink(link);
+        evcUpdateCommand = new EvcUpdateCommand(dataBroker, evcLink);
     }
     /**
      * Test method for {@link org.opendaylight.unimgr.command.EvcUpdateCommand#execute()}.
      * @throws Exception
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test//(expected = ReadFailedException.class)
+    @Test
     public void testExecute() throws Exception {
         final ReadTransaction readTransac = mock(ReadOnlyTransaction.class);
         final CheckedFuture retFormerEvc = mock(CheckedFuture.class);
@@ -113,17 +109,6 @@ public class EvcUpdateCommandTest {
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(UnimgrConstants.EVC_TOPOLOGY_ID))
                 .child(Node.class, new NodeKey(OVSDB_NODE_ID));
-        final Set<Entry<InstanceIdentifier<?>, DataObject>> setCreated = new HashSet<Map.Entry<InstanceIdentifier<?>,DataObject>>();
-        final Entry<InstanceIdentifier<?>, DataObject> created = new Entry<InstanceIdentifier<?>, DataObject>() {
-            @Override
-            public DataObject setValue(DataObject value) { return null; }
-            @Override
-            public DataObject getValue() { return evcAugmentation; }
-            @Override
-            public InstanceIdentifier getKey() { return evcKey; }
-        };
-
-        setCreated.add(created);
         unisSource.add(uniSource);
         unisDest.add(uniDest);
         formerUnisSource.add(formerUniSource);
@@ -131,7 +116,7 @@ public class EvcUpdateCommandTest {
 
         // Case EVC1 : formerUni1ip.equals(laterUni1Ip), formerUni2ip.equals(laterUni2Ip)
         //              iidSource != null, iidDest != null
-        when(changes.entrySet()).thenReturn(setCreated);
+        when(link.getAugmentation(EvcAugmentation.class)).thenReturn(evcAugmentation);
         when(dataBroker.newReadOnlyTransaction()).thenReturn((ReadOnlyTransaction) readTransac);
         when(readTransac.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
                 .thenReturn(retFormerEvc);
@@ -177,19 +162,12 @@ public class EvcUpdateCommandTest {
                 any(LogicalDatastoreType.class))).thenReturn(evcKey);
         verifyExecute(0, 0, 6, 2);
 
-
-        // Case EVC2 : formerUni1ip.equals(laterUni1Ip), formerUni2ip.equals(laterUni2Ip)
-        //              iidSource != null, iidDest != null
+        // iidSource != null, iidDest != null
         when(formerUniSource.getIpAddress()).thenReturn(formerIpAddressSource);
         when(formerUniDest.getIpAddress()).thenReturn(formerIpAddressDest);
         when(uniSource.getUni()).thenReturn(null);
         when(uniDest.getUni()).thenReturn(null);
-        verifyExecute(4, 2, 14, 4);
-
-        // Case EVC3 : EVC2 with ReadFailedError
-        when(retFormerEvc.checkedGet()).thenThrow(
-                new ReadFailedException("Test ReadFailedException", (RpcError[]) null));
-        verifyExecute(6, 2, 20, 6);
+        verifyExecute(2, 0, 12, 4);
     }
 
     @SuppressWarnings("unchecked")
