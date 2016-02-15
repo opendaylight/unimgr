@@ -107,7 +107,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
                 final TopologyBuilder tpb = new TopologyBuilder();
                 tpb.setTopologyId(topoId);
                 transaction.put(type, path, tpb.build());
-                transaction.submit();
+                transaction.submit().get();
             } else {
                 transaction.cancel();
             }
@@ -124,7 +124,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
             if (!topology.get().isPresent()) {
                 final NetworkTopologyBuilder ntb = new NetworkTopologyBuilder();
                 transaction.put(type,path,ntb.build());
-                transaction.submit();
+                transaction.submit().get();
             } else {
                 transaction.cancel();
             }
@@ -135,7 +135,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
 
     @Override
     public boolean addUni(UniAugmentation uniAug) {
-        if (uniAug == null || uniAug.getIpAddress() == null || uniAug.getMacAddress() == null) {
+        if ((uniAug == null) || (uniAug.getIpAddress() == null) || (uniAug.getMacAddress() == null)) {
             return false;
         }
         return UnimgrUtils.createUniNode(dataBroker, uniAug);
@@ -144,8 +144,9 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
     @Override
     public boolean removeUni(IpAddress ipAddress) {
         final InstanceIdentifier<Node> iidUni = UnimgrMapper.getUniIid(dataBroker, ipAddress, LogicalDatastoreType.CONFIGURATION);
-        if (iidUni == null)
+        if (iidUni == null) {
             return false;
+        }
 
         return UnimgrUtils.deleteNode(dataBroker, iidUni, LogicalDatastoreType.CONFIGURATION);
     }
@@ -169,10 +170,11 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
 
     @Override
     public boolean addEvc(EvcAugmentation evc) {
-        if(evc == null || evc.getUniDest().isEmpty() || evc.getUniSource().isEmpty())
+        if((evc == null) || evc.getUniDest().isEmpty() || evc.getUniSource().isEmpty()) {
             return false;
-        else
+        } else {
             return UnimgrUtils.createEvc(dataBroker, evc);
+        }
     }
 
     @Override
