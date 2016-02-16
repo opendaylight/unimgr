@@ -28,7 +28,9 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
-import org.opendaylight.unimgr.impl.UnimgrUtils;
+import org.opendaylight.unimgr.utils.MdsalUtils;
+import org.opendaylight.unimgr.utils.OvsdbUtils;
+import org.opendaylight.unimgr.utils.UniUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
@@ -53,7 +55,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.google.common.base.Optional;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({UnimgrUtils.class,
+@PrepareForTest({UniUtils.class, OvsdbUtils.class, MdsalUtils.class,
         UnimgrMapper.class})
 public class UniDeleteCommandTest {
 
@@ -67,7 +69,9 @@ public class UniDeleteCommandTest {
     @SuppressWarnings("unchecked")
     @Before
     public void setUp(){
-        PowerMockito.mockStatic(UnimgrUtils.class);
+        PowerMockito.mockStatic(UniUtils.class);
+        PowerMockito.mockStatic(OvsdbUtils.class);
+        PowerMockito.mockStatic(MdsalUtils.class);
         PowerMockito.mockStatic(UnimgrMapper.class);
         changes = mock(AsyncDataChangeEvent.class);
         dataBroker = mock(DataBroker.class);
@@ -97,25 +101,25 @@ public class UniDeleteCommandTest {
         when(ovsNodedRef.getValue()).thenReturn(uniKey);
         when(optionalNode.isPresent()).thenReturn(true);
         when(optionalNode.get()).thenReturn(mock(Node.class));
-        when(UnimgrUtils.extractRemoved(any(AsyncDataChangeEvent.class), any(Class.class)))
+        when(OvsdbUtils.extractRemoved(any(AsyncDataChangeEvent.class), any(Class.class)))
                 .thenReturn(removedUnis);
-        when(UnimgrUtils.read(any(DataBroker.class), any(LogicalDatastoreType.class),
+        when(MdsalUtils.read(any(DataBroker.class), any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class))).thenReturn(uniAugmentation);
-        when(UnimgrUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class),
+        when(MdsalUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class))).thenReturn(optionalNode);
-        when(UnimgrUtils.readNode(any(DataBroker.class), any(InstanceIdentifier.class)))
+        when(MdsalUtils.readNode(any(DataBroker.class), any(InstanceIdentifier.class)))
                 .thenReturn(optionalNode);
         when(UnimgrMapper.getOvsdbBridgeNodeIid(any(Node.class))).thenReturn(instanceOfNode);
         when(UnimgrMapper.getTerminationPointIid(any(Node.class), any(String.class)))
                 .thenReturn(instanceOfNode);
         when(UnimgrMapper.getUniIid(any(DataBroker.class), any(IpAddress.class),
                 any(LogicalDatastoreType.class))).thenReturn(instanceOfNode);
-        when(UnimgrUtils.deleteNode(any(DataBroker.class), any(InstanceIdentifier.class),
+        when(MdsalUtils.deleteNode(any(DataBroker.class), any(InstanceIdentifier.class),
                 any(LogicalDatastoreType.class))).thenReturn(true);
         uniDeleteCommand.execute();
 
         PowerMockito.verifyStatic(times(3));
-        UnimgrUtils.deleteNode(any(DataBroker.class), any(InstanceIdentifier.class),
+        MdsalUtils.deleteNode(any(DataBroker.class), any(InstanceIdentifier.class),
                 any(LogicalDatastoreType.class));
     }
 

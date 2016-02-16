@@ -14,7 +14,8 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
-import org.opendaylight.unimgr.impl.UnimgrUtils;
+import org.opendaylight.unimgr.utils.MdsalUtils;
+import org.opendaylight.unimgr.utils.OvsdbUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -38,36 +39,36 @@ public class UniDeleteCommand extends AbstractDeleteCommand {
 
     @Override
     public void execute() {
-        Set<InstanceIdentifier<UniAugmentation>> removedUnis = UnimgrUtils.extractRemoved(changes,
+        Set<InstanceIdentifier<UniAugmentation>> removedUnis = OvsdbUtils.extractRemoved(changes,
                                                                                           UniAugmentation.class);
         if (!removedUnis.isEmpty()) {
             for (InstanceIdentifier<UniAugmentation> removedUniIid: removedUnis) {
-                UniAugmentation uniAugmentation = UnimgrUtils.read(dataBroker,
+                UniAugmentation uniAugmentation = MdsalUtils.read(dataBroker,
                                                                    LogicalDatastoreType.OPERATIONAL,
                                                                    removedUniIid);
                 if (uniAugmentation != null) {
                     OvsdbNodeRef ovsNodedRef = uniAugmentation.getOvsdbNodeRef();
                     InstanceIdentifier<Node> ovsdbNodeIid = ovsNodedRef.getValue().firstIdentifierOf(Node.class);
-                    Optional<Node> optionalNode = UnimgrUtils.readNode(dataBroker,
+                    Optional<Node> optionalNode = MdsalUtils.readNode(dataBroker,
                                                                        LogicalDatastoreType.OPERATIONAL,
                                                                        ovsdbNodeIid);
                     if (optionalNode.isPresent()) {
                         LOG.info("Delete bride node");
                         Node ovsdbNode = optionalNode.get();
                         InstanceIdentifier<Node> bridgeIid = UnimgrMapper.getOvsdbBridgeNodeIid(ovsdbNode);
-                        Optional<Node> optBridgeNode = UnimgrUtils.readNode(dataBroker, bridgeIid);
+                        Optional<Node> optBridgeNode = MdsalUtils.readNode(dataBroker, bridgeIid);
                         if (optBridgeNode.isPresent()) {
                             Node bridgeNode = optBridgeNode.get();
                             InstanceIdentifier<TerminationPoint> iidTermPoint = UnimgrMapper.getTerminationPointIid(bridgeNode,
                                                                                             UnimgrConstants.DEFAULT_BRIDGE_NAME);
-                            UnimgrUtils.deleteNode(dataBroker, iidTermPoint, LogicalDatastoreType.CONFIGURATION);
+                            MdsalUtils.deleteNode(dataBroker, iidTermPoint, LogicalDatastoreType.CONFIGURATION);
                         }
-                        UnimgrUtils.deleteNode(dataBroker, bridgeIid, LogicalDatastoreType.CONFIGURATION);
+                        MdsalUtils.deleteNode(dataBroker, bridgeIid, LogicalDatastoreType.CONFIGURATION);
                     }
                     InstanceIdentifier<Node> iidUni = UnimgrMapper.getUniIid(dataBroker, uniAugmentation.getIpAddress(),
                                                                              LogicalDatastoreType.OPERATIONAL);
                     if (iidUni != null)
-                        UnimgrUtils.deleteNode(dataBroker, iidUni, LogicalDatastoreType.OPERATIONAL);
+                        MdsalUtils.deleteNode(dataBroker, iidUni, LogicalDatastoreType.OPERATIONAL);
                 }
                 else {
                     LOG.info("Received Uni Augmentation is null", removedUniIid);
