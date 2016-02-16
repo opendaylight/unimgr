@@ -26,7 +26,9 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
-import org.opendaylight.unimgr.impl.UnimgrUtils;
+import org.opendaylight.unimgr.utils.MdsalUtils;
+import org.opendaylight.unimgr.utils.OvsdbUtils;
+import org.opendaylight.unimgr.utils.UniUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
@@ -49,8 +51,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.google.common.base.Optional;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({UnimgrUtils.class,
-        UnimgrMapper.class})
+@PrepareForTest({UniUtils.class, OvsdbUtils.class, MdsalUtils.class, UnimgrMapper.class})
 public class UniCreateCommandTest {
 
     private static final NodeId OVSDB_NODE_ID = new NodeId("ovsdb://7011db35-f44b-4aab-90f6-d89088caf9d8");
@@ -62,7 +63,9 @@ public class UniCreateCommandTest {
     @SuppressWarnings("unchecked")
     @Before
     public void setUp(){
-        PowerMockito.mockStatic(UnimgrUtils.class);
+        PowerMockito.mockStatic(UniUtils.class);
+        PowerMockito.mockStatic(OvsdbUtils.class);
+        PowerMockito.mockStatic(MdsalUtils.class);
         PowerMockito.mockStatic(UnimgrMapper.class);
         changes = mock(Map.class);
         dataBroker = mock(DataBroker.class);
@@ -118,30 +121,30 @@ public class UniCreateCommandTest {
         when(node.getAugmentation(any(Class.class))).thenReturn(uniAugmentation);
         when(node.getNodeId()).thenReturn(nodeId);
         when(nodeId.toString()).thenReturn("ovsdbNodeId_test");
-        when(UnimgrUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class),
+        when(MdsalUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class))).thenReturn(optionalOvsdbNode);
-        when(UnimgrUtils.findOvsdbNode(any(DataBroker.class), any(UniAugmentation.class)))
+        when(OvsdbUtils.findOvsdbNode(any(DataBroker.class), any(UniAugmentation.class)))
                 .thenReturn(optionalOvsdbNode);
-        when(UnimgrUtils.createQoSForOvsdbNode(any(DataBroker.class), any(UniAugmentation.class)))
+        when(OvsdbUtils.createQoSForOvsdbNode(any(DataBroker.class), any(UniAugmentation.class)))
                 .thenReturn(null);
-        when(UnimgrUtils.updateUniNode(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+        when(UniUtils.updateUniNode(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                 any(UniAugmentation.class), any(Node.class), any(DataBroker.class))).thenReturn(true);
-        when(UnimgrUtils.updateUniNode(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+        when(UniUtils.updateUniNode(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                 any(UniAugmentation.class), any(InstanceIdentifier.class), any(DataBroker.class)))
                 .thenReturn(true);
-        when(UnimgrUtils.createOvsdbNode(any(DataBroker.class), any(UniAugmentation.class)))
+        when(OvsdbUtils.createOvsdbNode(any(DataBroker.class), any(UniAugmentation.class)))
                 .thenReturn(node);
-        PowerMockito.doNothing().when(UnimgrUtils.class, "createBridgeNode",
+        PowerMockito.doNothing().when(OvsdbUtils.class, "createBridgeNode",
                 dataBroker, uniKey,
                 uniAugmentation, UnimgrConstants.DEFAULT_BRIDGE_NAME);
-        when(UnimgrUtils.getUniNodes(any(DataBroker.class))).thenReturn(nodes);
+        when(UniUtils.getUniNodes(any(DataBroker.class))).thenReturn(nodes);
         when(UnimgrMapper.getOvsdbNodeIid(any(NodeId.class))).thenReturn(uniKey);
         when(UnimgrMapper.getUniIid(any(DataBroker.class), any(IpAddress.class),
                 any(LogicalDatastoreType.class))).thenReturn(uniKey);
         verifyExecute(1, 0, 1, 0);
 
         // Case UNI2 : optionalNode.isPresent()
-        when(UnimgrUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class),
+        when(MdsalUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class))).thenReturn(optionalOvsdbNode);
         verifyExecute(1, 0, 1, 0);
 
@@ -194,15 +197,15 @@ public class UniCreateCommandTest {
     private void verifyExecute(int qosTimes, int bridgeTimes, int updateNodeTime, int updateIIDTimes){
         uniCreateCommand.execute();
         PowerMockito.verifyStatic(times(qosTimes));
-        UnimgrUtils.createQoSForOvsdbNode(any(DataBroker.class), any(UniAugmentation.class));
+        OvsdbUtils.createQoSForOvsdbNode(any(DataBroker.class), any(UniAugmentation.class));
         PowerMockito.verifyStatic(times(bridgeTimes));
-        UnimgrUtils.createBridgeNode(any(DataBroker.class), any(InstanceIdentifier.class),
+        OvsdbUtils.createBridgeNode(any(DataBroker.class), any(InstanceIdentifier.class),
                 any(UniAugmentation.class), any(String.class));
         PowerMockito.verifyStatic(times(updateNodeTime));
-        UnimgrUtils.updateUniNode(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+        UniUtils.updateUniNode(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                 any(UniAugmentation.class), any(Node.class), any(DataBroker.class));
         PowerMockito.verifyStatic(times(updateIIDTimes));
-        UnimgrUtils.updateUniNode(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+        UniUtils.updateUniNode(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                 any(UniAugmentation.class), any(InstanceIdentifier.class), any(DataBroker.class));
     }
 

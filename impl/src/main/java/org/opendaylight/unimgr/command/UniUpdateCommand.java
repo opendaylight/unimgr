@@ -14,7 +14,9 @@ import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
-import org.opendaylight.unimgr.impl.UnimgrUtils;
+import org.opendaylight.unimgr.utils.MdsalUtils;
+import org.opendaylight.unimgr.utils.OvsdbUtils;
+import org.opendaylight.unimgr.utils.UniUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
@@ -43,7 +45,7 @@ public class UniUpdateCommand extends AbstractUpdateCommand {
         for (Entry<InstanceIdentifier<?>, DataObject> updated : changes.entrySet()) {
             if (updated.getValue() != null && updated.getValue() instanceof UniAugmentation) {
                 final UniAugmentation updatedUni = (UniAugmentation) updated.getValue();
-                final UniAugmentation formerUni = UnimgrUtils.getUni(dataBroker, LogicalDatastoreType.OPERATIONAL, updatedUni.getIpAddress());
+                final UniAugmentation formerUni = UniUtils.getUni(dataBroker, LogicalDatastoreType.OPERATIONAL, updatedUni.getIpAddress());
 
                 if (formerUni != null) {
                     String formerUniIp = formerUni.getIpAddress().getIpv4Address().getValue();
@@ -57,15 +59,15 @@ public class UniUpdateCommand extends AbstractUpdateCommand {
                     if (updatedUni.getOvsdbNodeRef() != null) {
                         LOG.info("OVSDB NODE ref retreive for updated UNI {}", updatedUni.getOvsdbNodeRef());
                         final OvsdbNodeRef ovsdbNodeRef = updatedUni.getOvsdbNodeRef();
-                        Optional<Node> optOvsdbNode = UnimgrUtils.readNode(dataBroker,LogicalDatastoreType.OPERATIONAL, ovsdbNodeRef.getValue());
+                        Optional<Node> optOvsdbNode = MdsalUtils.readNode(dataBroker,LogicalDatastoreType.OPERATIONAL, ovsdbNodeRef.getValue());
                         if(optOvsdbNode.isPresent()) {
                             ovsdbNode= optOvsdbNode.get();
                             LOG.info("Retrieved the OVSDB node {}", ovsdbNode.getNodeId());
                             // Update QoS entries to ovsdb if speed is configured to UNI node
                             if (updatedUni.getSpeed() != null) {
-                                UnimgrUtils.createQoSForOvsdbNode(dataBroker, updatedUni);
+                                OvsdbUtils.createQoSForOvsdbNode(dataBroker, updatedUni);
                             }
-                            UnimgrUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION,
+                            UniUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION,
                                     updated.getKey(),
                                     updatedUni,
                                     ovsdbNode,
@@ -77,16 +79,16 @@ public class UniUpdateCommand extends AbstractUpdateCommand {
                             return;
                         }
                     } else {
-                        Optional<Node> optOvsdbNode = UnimgrUtils.findOvsdbNode(dataBroker, updatedUni);
+                        Optional<Node> optOvsdbNode = OvsdbUtils.findOvsdbNode(dataBroker, updatedUni);
                         if (optOvsdbNode.isPresent()) {
                             ovsdbNode = optOvsdbNode.get();
                             LOG.info("Retrieved the OVSDB node {}", ovsdbNode.getNodeId());
                             // Update QoS entries to ovsdb if speed is configured to UNI node
                             if (updatedUni.getSpeed() != null) {
 
-                                UnimgrUtils.createQoSForOvsdbNode(dataBroker, updatedUni);
+                                OvsdbUtils.createQoSForOvsdbNode(dataBroker, updatedUni);
                             }
-                            UnimgrUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION,
+                            UniUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION,
                                     updated.getKey(),
                                     updatedUni,
                                     ovsdbNode,
@@ -101,8 +103,8 @@ public class UniUpdateCommand extends AbstractUpdateCommand {
                     LOG.info("UNI {} updated", uniKey);
 
                     final InstanceIdentifier<?> uniIID = UnimgrMapper.getUniIid(dataBroker, updatedUni.getIpAddress(), LogicalDatastoreType.OPERATIONAL);
-                    UnimgrUtils.deleteNode(dataBroker, uniIID, LogicalDatastoreType.OPERATIONAL);
-                    UnimgrUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniIID, updatedUni, ovsdbNode, dataBroker);
+                    MdsalUtils.deleteNode(dataBroker, uniIID, LogicalDatastoreType.OPERATIONAL);
+                    UniUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniIID, updatedUni, ovsdbNode, dataBroker);
                 }
             }
             if (updated.getValue() != null
