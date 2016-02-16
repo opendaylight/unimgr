@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.unimgr.utils.UniUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeRef;
@@ -45,7 +46,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-@PrepareForTest({UnimgrUtils.class})
+@PrepareForTest({UniUtils.class})
 @RunWith(PowerMockRunner.class)
 public class UnimgrMapperTest {
 
@@ -196,8 +197,8 @@ public class UnimgrMapperTest {
         Node node = mock(Node.class);
         uniNodes.add(node);
 
-        PowerMockito.mockStatic(UnimgrUtils.class);
-        PowerMockito.when(UnimgrUtils.getUniNodes(any(DataBroker.class), any(LogicalDatastoreType.class))).thenReturn(uniNodes);
+        PowerMockito.mockStatic(UniUtils.class);
+        PowerMockito.when(UniUtils.getUniNodes(any(DataBroker.class), any(LogicalDatastoreType.class))).thenReturn(uniNodes);
 
         UniAugmentation uniAugmentation = mock(UniAugmentation.class);
         when(node.getAugmentation(UniAugmentation.class)).thenReturn(uniAugmentation);
