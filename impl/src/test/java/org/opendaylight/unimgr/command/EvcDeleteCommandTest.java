@@ -24,11 +24,12 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
-import org.opendaylight.unimgr.impl.UnimgrUtils;
+import org.opendaylight.unimgr.utils.EvcUtils;
+import org.opendaylight.unimgr.utils.MdsalUtils;
+import org.opendaylight.unimgr.utils.OvsdbUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniDest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSource;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -39,7 +40,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.google.common.base.Optional;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({UnimgrUtils.class})
+@PrepareForTest({EvcUtils.class, MdsalUtils.class, OvsdbUtils.class, UnimgrMapper.class})
 public class EvcDeleteCommandTest {
 
     private EvcDeleteCommand evcDeleteCommand;
@@ -49,7 +50,9 @@ public class EvcDeleteCommandTest {
     @SuppressWarnings("unchecked")
     @Before
     public void setUp(){
-        PowerMockito.mockStatic(UnimgrUtils.class);
+        PowerMockito.mockStatic(MdsalUtils.class);
+        PowerMockito.mockStatic(EvcUtils.class);
+        PowerMockito.mockStatic(OvsdbUtils.class);
         PowerMockito.mockStatic(UnimgrMapper.class);
         changes = mock(AsyncDataChangeEvent.class);
         dataBroker = mock(DataBroker.class);
@@ -79,22 +82,22 @@ public class EvcDeleteCommandTest {
         when(evcAugmentation.getUniDest()).thenReturn(unisDest);
         when(uniSource.getUni()).thenReturn(instanceOfNode);
         when(uniDest.getUni()).thenReturn(instanceOfNode);
-        when(UnimgrUtils.extractRemoved(any(AsyncDataChangeEvent.class), any(Class.class)))
+        when(OvsdbUtils.extractRemoved(any(AsyncDataChangeEvent.class), any(Class.class)))
                 .thenReturn(removedEvcs);
-        when(UnimgrUtils.read(any(DataBroker.class), any(LogicalDatastoreType.class),
+        when(MdsalUtils.read(any(DataBroker.class), any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class))).thenReturn(evcAugmentation);
-        when(UnimgrUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class),
+        when(MdsalUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class))).thenReturn(optionalNode);
-        PowerMockito.doNothing().when(UnimgrUtils.class, "deleteEvcData",
+        PowerMockito.doNothing().when(EvcUtils.class, "deleteEvcData",
                 any(DataBroker.class), any(Optional.class));
-        when(UnimgrUtils.deleteNode(any(DataBroker.class), any(InstanceIdentifier.class),
+        when(MdsalUtils.deleteNode(any(DataBroker.class), any(InstanceIdentifier.class),
                 any(LogicalDatastoreType.class))).thenReturn(true);
 
         evcDeleteCommand.execute();
         PowerMockito.verifyStatic(times(2));
-        UnimgrUtils.deleteEvcData(any(DataBroker.class), any(Optional.class));
+        EvcUtils.deleteEvcData(any(DataBroker.class), any(Optional.class));
         PowerMockito.verifyStatic(times(1));
-        UnimgrUtils.deleteNode(any(DataBroker.class), any(InstanceIdentifier.class),
+        MdsalUtils.deleteNode(any(DataBroker.class), any(InstanceIdentifier.class),
                 any(LogicalDatastoreType.class));
     }
 

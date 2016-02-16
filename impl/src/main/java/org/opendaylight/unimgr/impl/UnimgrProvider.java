@@ -18,6 +18,10 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
 import org.opendaylight.unimgr.command.TransactionInvoker;
+import org.opendaylight.unimgr.utils.EvcUtils;
+import org.opendaylight.unimgr.utils.MdsalUtils;
+import org.opendaylight.unimgr.utils.OvsdbUtils;
+import org.opendaylight.unimgr.utils.UniUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Evc;
@@ -138,7 +142,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
         if ((uniAug == null) || (uniAug.getIpAddress() == null) || (uniAug.getMacAddress() == null)) {
             return false;
         }
-        return UnimgrUtils.createUniNode(dataBroker, uniAug);
+        return UniUtils.createUniNode(dataBroker, uniAug);
     }
 
     @Override
@@ -148,17 +152,17 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
             return false;
         }
 
-        return UnimgrUtils.deleteNode(dataBroker, iidUni, LogicalDatastoreType.CONFIGURATION);
+        return MdsalUtils.deleteNode(dataBroker, iidUni, LogicalDatastoreType.CONFIGURATION);
     }
 
     @Override
     public List<UniAugmentation> listUnis(LogicalDatastoreType dataStoreType) {
-        return UnimgrUtils.getUnis(dataBroker, dataStoreType);
+        return UniUtils.getUnis(dataBroker, dataStoreType);
     }
 
     @Override
     public UniAugmentation getUni(IpAddress ipAddress) {
-        return UnimgrUtils.getUni(dataBroker, LogicalDatastoreType.OPERATIONAL, ipAddress);
+        return UniUtils.getUni(dataBroker, LogicalDatastoreType.OPERATIONAL, ipAddress);
     }
 
 
@@ -170,11 +174,8 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
 
     @Override
     public boolean addEvc(EvcAugmentation evc) {
-        if((evc == null) || evc.getUniDest().isEmpty() || evc.getUniSource().isEmpty()) {
-            return false;
-        } else {
-            return UnimgrUtils.createEvc(dataBroker, evc);
-        }
+        // TODO Auto-generated method stub
+        return false;
     }
 
     @Override
@@ -188,7 +189,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
             UniDest uniDest) {
         final InstanceIdentifier<?> sourceUniIid = uniSource.getUni();
         final InstanceIdentifier<?> destinationUniIid = uniDest.getUni();
-        return UnimgrUtils.updateEvcNode(LogicalDatastoreType.CONFIGURATION, evcKey, evc, sourceUniIid,
+        return EvcUtils.updateEvcNode(LogicalDatastoreType.CONFIGURATION, evcKey, evc, sourceUniIid,
                 destinationUniIid, dataBroker);
     }
 
@@ -202,18 +203,18 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
             Node ovsdbNode;
             if (uni.getOvsdbNodeRef() != null) {
                 final OvsdbNodeRef ovsdbNodeRef = uni.getOvsdbNodeRef();
-                ovsdbNode= UnimgrUtils.readNode(dataBroker,
+                ovsdbNode= MdsalUtils.readNode(dataBroker,
                         LogicalDatastoreType.OPERATIONAL, ovsdbNodeRef.getValue()).get();
 
-                UnimgrUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniIID, uni, ovsdbNode, dataBroker);
+                UniUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniIID, uni, ovsdbNode, dataBroker);
                 LOG.trace("UNI updated {}.", uni.getIpAddress().getIpv4Address());
             } else {
-                final Optional<Node> optionalOvsdbNode = UnimgrUtils.findOvsdbNode(dataBroker, uni);
+                final Optional<Node> optionalOvsdbNode = OvsdbUtils.findOvsdbNode(dataBroker, uni);
                 ovsdbNode = optionalOvsdbNode.get();
             }
-            UnimgrUtils.deleteNode(dataBroker, uniIID, LogicalDatastoreType.OPERATIONAL);
-            return (UnimgrUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION, uniIID,
-                    uni, ovsdbNode, dataBroker) && UnimgrUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniIID,
+            MdsalUtils.deleteNode(dataBroker, uniIID, LogicalDatastoreType.OPERATIONAL);
+            return (UniUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION, uniIID,
+                    uni, ovsdbNode, dataBroker) && UniUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniIID,
                     uni, ovsdbNode, dataBroker));
         }
         return false;

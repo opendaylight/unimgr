@@ -26,7 +26,10 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
-import org.opendaylight.unimgr.impl.UnimgrUtils;
+import org.opendaylight.unimgr.utils.EvcUtils;
+import org.opendaylight.unimgr.utils.MdsalUtils;
+import org.opendaylight.unimgr.utils.OvsdbUtils;
+import org.opendaylight.unimgr.utils.UniUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
@@ -49,8 +52,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.google.common.base.Optional;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({UnimgrUtils.class,
-        UnimgrMapper.class})
+@PrepareForTest({EvcUtils.class, MdsalUtils.class, OvsdbUtils.class, UnimgrMapper.class})
 public class EvcCreateCommandTest {
 
     private static final NodeId OVSDB_NODE_ID = new NodeId("ovsdb://7011db35-f44b-4aab-90f6-d89088caf9d8");
@@ -62,7 +64,9 @@ public class EvcCreateCommandTest {
     @SuppressWarnings("unchecked")
     @Before
     public void setUp(){
-        PowerMockito.mockStatic(UnimgrUtils.class);
+        PowerMockito.mockStatic(MdsalUtils.class);
+        PowerMockito.mockStatic(EvcUtils.class);
+        PowerMockito.mockStatic(OvsdbUtils.class);
         PowerMockito.mockStatic(UnimgrMapper.class);
         changes = mock(Map.class);
         dataBroker = mock(DataBroker.class);
@@ -121,15 +125,15 @@ public class EvcCreateCommandTest {
         when(node.getAugmentation(any(Class.class))).thenReturn(uniAugmentation);
         when(ovsNodedRef.getValue()).thenReturn(evcKey);
 
-        when(UnimgrUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class),
+        when(MdsalUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class))).thenReturn(optionalOvsdbNode);
-        PowerMockito.doNothing().when(UnimgrUtils.class, "updateMaxRate", dataBroker, uniAugmentation,
+        PowerMockito.doNothing().when(OvsdbUtils.class, "updateMaxRate", dataBroker, uniAugmentation,
                 uniAugmentation, evcAugmentation);
-        PowerMockito.doNothing().when(UnimgrUtils.class, "createTerminationPointNode", dataBroker,
+        PowerMockito.doNothing().when(OvsdbUtils.class, "createTerminationPointNode", dataBroker,
                 uniAugmentation, node, UnimgrConstants.DEFAULT_BRIDGE_NAME, UnimgrConstants.DEFAULT_TUNNEL_IFACE);
-        PowerMockito.doNothing().when(UnimgrUtils.class, "createGreTunnel", dataBroker, uniAugmentation,
+        PowerMockito.doNothing().when(OvsdbUtils.class, "createGreTunnel", dataBroker, uniAugmentation,
                 uniAugmentation, node, UnimgrConstants.DEFAULT_BRIDGE_NAME, UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
-        when(UnimgrUtils.createOvsdbNode(any(DataBroker.class), any(UniAugmentation.class)))
+        when(OvsdbUtils.createOvsdbNode(any(DataBroker.class), any(UniAugmentation.class)))
         .thenReturn(node);
         when(UnimgrMapper.getOvsdbNodeIid(any(NodeId.class))).thenReturn(evcKey);
         when(UnimgrMapper.getUniIid(any(DataBroker.class), any(IpAddress.class),
@@ -137,13 +141,13 @@ public class EvcCreateCommandTest {
 
         evcCreateCommand.execute();
         PowerMockito.verifyStatic(times(2));
-        UnimgrUtils.createTerminationPointNode(any(DataBroker.class), any(UniAugmentation.class),
+        OvsdbUtils.createTerminationPointNode(any(DataBroker.class), any(UniAugmentation.class),
                 any(Node.class), any(String.class), any(String.class));
         PowerMockito.verifyStatic(times(2));
-        UnimgrUtils.createGreTunnel(any(DataBroker.class), any(UniAugmentation.class),
+        OvsdbUtils.createGreTunnel(any(DataBroker.class), any(UniAugmentation.class),
                 any(UniAugmentation.class), any(Node.class), any(String.class), any(String.class));
         PowerMockito.verifyStatic(times(2));
-        UnimgrUtils.updateEvcNode(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+        EvcUtils.updateEvcNode(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                 any(EvcAugmentation.class), any(InstanceIdentifier.class),
                 any(InstanceIdentifier.class), any(DataBroker.class));
 
