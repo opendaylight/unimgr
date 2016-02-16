@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.unimgr.utils.UniUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
@@ -222,7 +223,7 @@ public class UnimgrMapper {
      */
     public static InstanceIdentifier<Node> getUniIid(DataBroker dataBroker,
                                                      IpAddress ip) {
-        List<Node> uniNodes = UnimgrUtils.getUniNodes(dataBroker,
+        List<Node> uniNodes = UniUtils.getUniNodes(dataBroker,
                                                       LogicalDatastoreType.OPERATIONAL);
         for (Node node : uniNodes) {
             UniAugmentation uniAugmentation = node.getAugmentation(UniAugmentation.class);
@@ -250,7 +251,7 @@ public class UnimgrMapper {
     public static InstanceIdentifier<Node> getUniIid(DataBroker dataBroker,
                                                      IpAddress ip,
                                                      LogicalDatastoreType store) {
-        List<Node> uniNodes = UnimgrUtils.getUniNodes(dataBroker,
+        List<Node> uniNodes = UniUtils.getUniNodes(dataBroker,
                                                       store);
         for (Node node : uniNodes) {
             UniAugmentation uniAugmentation = node.getAugmentation(UniAugmentation.class);
