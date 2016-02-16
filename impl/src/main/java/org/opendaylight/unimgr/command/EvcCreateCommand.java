@@ -14,7 +14,9 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
-import org.opendaylight.unimgr.impl.UnimgrUtils;
+import org.opendaylight.unimgr.utils.EvcUtils;
+import org.opendaylight.unimgr.utils.MdsalUtils;
+import org.opendaylight.unimgr.utils.OvsdbUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -73,10 +75,10 @@ public class EvcCreateCommand extends AbstractCreateCommand {
                                                                evc.getUniDest().iterator().next().getIpAddress(),
                                                                LogicalDatastoreType.OPERATIONAL);
                 }
-                Optional<Node> optionalUniSource = UnimgrUtils.readNode(dataBroker,
+                Optional<Node> optionalUniSource = MdsalUtils.readNode(dataBroker,
                                                                         LogicalDatastoreType.OPERATIONAL,
                                                                         sourceUniIid);
-                Optional<Node> optionalUniDestination = UnimgrUtils.readNode(dataBroker,
+                Optional<Node> optionalUniDestination = MdsalUtils.readNode(dataBroker,
                                                                              LogicalDatastoreType.OPERATIONAL,
                                                                              destinationUniIid);
                 Node uniSource;
@@ -91,13 +93,13 @@ public class EvcCreateCommand extends AbstractCreateCommand {
                     UniAugmentation destinationUniAugmentation =
                                         uniDestination.getAugmentation(UniAugmentation.class);
                     Optional<Node> optionalSourceOvsdbNode =
-                                       UnimgrUtils.readNode(dataBroker,
+                            MdsalUtils.readNode(dataBroker,
                                                             LogicalDatastoreType.OPERATIONAL,
                                                             sourceUniAugmentation
                                                                 .getOvsdbNodeRef()
                                                                 .getValue());
                     Optional<Node> optionalDestinationOvsdbNode =
-                                       UnimgrUtils.readNode(dataBroker,
+                            MdsalUtils.readNode(dataBroker,
                                                             LogicalDatastoreType.OPERATIONAL,
                                                             destinationUniAugmentation
                                                                 .getOvsdbNodeRef()
@@ -105,49 +107,49 @@ public class EvcCreateCommand extends AbstractCreateCommand {
                     if (optionalSourceOvsdbNode.isPresent() && optionalDestinationOvsdbNode.isPresent()) {
                         InstanceIdentifier<Node> sourceBridgeIid =
                                 UnimgrMapper.getOvsdbBridgeNodeIid(optionalSourceOvsdbNode.get());
-                        Optional<Node> optionalSourceBr = UnimgrUtils.readNode(dataBroker,
+                        Optional<Node> optionalSourceBr = MdsalUtils.readNode(dataBroker,
                                                                                LogicalDatastoreType.OPERATIONAL,
                                                                                sourceBridgeIid);
                         InstanceIdentifier<Node> destinationBridgeIid =
                                 UnimgrMapper.getOvsdbBridgeNodeIid(optionalDestinationOvsdbNode.get());
-                        Optional<Node> optionalDestinationBr = UnimgrUtils.readNode(dataBroker,
+                        Optional<Node> optionalDestinationBr = MdsalUtils.readNode(dataBroker,
                                                                                     LogicalDatastoreType.OPERATIONAL,
                                                                                     destinationBridgeIid);
                         //update ovsdb qos-entry and queues with max-rate to match evc ingress BW
-                        UnimgrUtils.updateMaxRate(dataBroker, sourceUniAugmentation, destinationUniAugmentation, evc);
+                        OvsdbUtils.updateMaxRate(dataBroker, sourceUniAugmentation, destinationUniAugmentation, evc);
                         Node sourceBr;
                         Node destinationBr;
                         if (optionalSourceBr.isPresent() && optionalDestinationBr.isPresent()) {
                             sourceBr = optionalSourceBr.get();
                             destinationBr = optionalDestinationBr.get();
-                            UnimgrUtils.createTerminationPointNode(dataBroker,
+                            OvsdbUtils.createTerminationPointNode(dataBroker,
                                                                    uniSource.getAugmentation(UniAugmentation.class),
                                                                    sourceBr,
                                                                    UnimgrConstants.DEFAULT_BRIDGE_NAME,
                                                                    UnimgrConstants.DEFAULT_TUNNEL_IFACE);
-                            UnimgrUtils.createGreTunnel(dataBroker,
+                            OvsdbUtils.createGreTunnel(dataBroker,
                                                         uniSource.getAugmentation(UniAugmentation.class),
                                                         uniDestination.getAugmentation(UniAugmentation.class),
                                                         sourceBr,
                                                         UnimgrConstants.DEFAULT_BRIDGE_NAME,
                                                         UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
-                            UnimgrUtils.createTerminationPointNode(dataBroker,
+                            OvsdbUtils.createTerminationPointNode(dataBroker,
                                                                    uniDestination.getAugmentation(UniAugmentation.class),
                                                                    destinationBr,
                                                                    UnimgrConstants.DEFAULT_BRIDGE_NAME,
                                                                    UnimgrConstants.DEFAULT_TUNNEL_IFACE);
-                            UnimgrUtils.createGreTunnel(dataBroker,
+                            OvsdbUtils.createGreTunnel(dataBroker,
                                                         uniDestination.getAugmentation(UniAugmentation.class),
                                                         uniSource.getAugmentation(UniAugmentation.class), destinationBr,
                                                         UnimgrConstants.DEFAULT_BRIDGE_NAME,
                                                         UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
-                            UnimgrUtils.updateEvcNode(LogicalDatastoreType.CONFIGURATION,
+                            EvcUtils.updateEvcNode(LogicalDatastoreType.CONFIGURATION,
                                                       evcKey,
                                                       evc,
                                                       sourceUniIid,
                                                       destinationUniIid,
                                                       dataBroker);
-                            UnimgrUtils.updateEvcNode(LogicalDatastoreType.OPERATIONAL,
+                            EvcUtils.updateEvcNode(LogicalDatastoreType.OPERATIONAL,
                                                       evcKey,
                                                       evc,
                                                       sourceUniIid,

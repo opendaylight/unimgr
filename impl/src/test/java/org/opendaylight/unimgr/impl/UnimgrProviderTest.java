@@ -34,6 +34,9 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
 import org.opendaylight.unimgr.command.TransactionInvoker;
+import org.opendaylight.unimgr.utils.MdsalUtils;
+import org.opendaylight.unimgr.utils.OvsdbUtils;
+import org.opendaylight.unimgr.utils.UniUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
@@ -68,7 +71,9 @@ import com.google.common.util.concurrent.CheckedFuture;
                  InstanceIdentifier.class,
                  LogicalDatastoreType.class,
                  FrameworkUtil.class,
-                 UnimgrUtils.class,
+                 UniUtils.class,
+                 MdsalUtils.class,
+                 OvsdbUtils.class,
                  UnimgrMapper.class})
 public class UnimgrProviderTest {
 
@@ -192,7 +197,7 @@ public class UnimgrProviderTest {
 
     @Test
     public void testAddUni() throws Exception {
-        PowerMockito.mockStatic(UnimgrUtils.class);
+        PowerMockito.mockStatic(UniUtils.class);
         assertEquals(unimgrProvider.addUni(null), false);
         final UniAugmentation mockUniAug = mock(UniAugmentation.class);
         // false case
@@ -206,7 +211,7 @@ public class UnimgrProviderTest {
         final UniAugmentationBuilder uniAugBuilder = new UniAugmentationBuilder()
                                                     .setIpAddress(mock(IpAddress.class))
                                                     .setMacAddress(mock(MacAddress.class));
-        when(UnimgrUtils.createUniNode(any(DataBroker.class),
+        when(UniUtils.createUniNode(any(DataBroker.class),
                                        any(UniAugmentation.class)))
                         .thenReturn(true);
         assertEquals(true, unimgrProvider.addUni(uniAugBuilder.build()));
@@ -215,7 +220,7 @@ public class UnimgrProviderTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testRemoveUni() throws Exception {
-        PowerMockito.mockStatic(UnimgrUtils.class);
+        PowerMockito.mockStatic(MdsalUtils.class);
         PowerMockito.mockStatic(UnimgrMapper.class);
         PowerMockito.mockStatic(InstanceIdentifier.class);
 
@@ -234,7 +239,7 @@ public class UnimgrProviderTest {
                                                  any(IpAddress.class),
                                                  any(LogicalDatastoreType.class)))
                                       .thenReturn(iid);
-        PowerMockito.when(UnimgrUtils.deleteNode(any(DataBroker.class),
+        PowerMockito.when(MdsalUtils.deleteNode(any(DataBroker.class),
                                                  any(InstanceIdentifier.class),
                                                  any(LogicalDatastoreType.class)))
                                      .thenReturn(true);
@@ -244,9 +249,9 @@ public class UnimgrProviderTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testlistUnis() throws Exception {
-        PowerMockito.mockStatic(UnimgrUtils.class);
+        PowerMockito.mockStatic(UniUtils.class);
         final List<UniAugmentation> mockUniList = mock(List.class);
-        when(UnimgrUtils.getUnis(any(DataBroker.class),
+        when(UniUtils.getUnis(any(DataBroker.class),
                                  any(LogicalDatastoreType.class)))
                         .thenReturn(mockUniList);
         assertEquals(mockUniList,
@@ -255,9 +260,9 @@ public class UnimgrProviderTest {
 
     @Test
     public void testgetUni() throws Exception {
-        PowerMockito.mockStatic(UnimgrUtils.class);
+        PowerMockito.mockStatic(UniUtils.class);
         final UniAugmentation mockUniAug = mock(UniAugmentation.class);
-        when(UnimgrUtils.getUni(any(DataBroker.class),
+        when(UniUtils.getUni(any(DataBroker.class),
                                 any(LogicalDatastoreType.class),
                                 any(IpAddress.class)))
                         .thenReturn(mockUniAug);
