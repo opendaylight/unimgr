@@ -16,7 +16,9 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
-import org.opendaylight.unimgr.impl.UnimgrUtils;
+import org.opendaylight.unimgr.utils.EvcUtils;
+import org.opendaylight.unimgr.utils.MdsalUtils;
+import org.opendaylight.unimgr.utils.OvsdbUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
@@ -40,6 +42,7 @@ public class EvcUpdateCommand extends AbstractUpdateCommand {
         super.changes = changes;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void execute() {
         for (final Entry<InstanceIdentifier<?>, DataObject> updated : changes.entrySet()) {
@@ -78,8 +81,8 @@ public class EvcUpdateCommand extends AbstractUpdateCommand {
                     } else {
                         LOG.info("{} is not part of the EVC, removing configuration", formerUni1ip);
                         final InstanceIdentifier<?> formerUniIID = UnimgrMapper.getUniIid(dataBroker, new IpAddress(formerUni1ip), LogicalDatastoreType.OPERATIONAL);
-                        final Optional<Node> formerUni = UnimgrUtils.readNode(dataBroker, LogicalDatastoreType.OPERATIONAL, formerUniIID);
-                        UnimgrUtils.deleteEvcData(dataBroker, formerUni);
+                        final Optional<Node> formerUni = MdsalUtils.readNode(dataBroker, LogicalDatastoreType.OPERATIONAL, formerUniIID);
+                        EvcUtils.deleteEvcData(dataBroker, formerUni);
                     }
                     if (formerUni2ip.equals(laterUni1Ip)) {
                         // do nothing
@@ -88,8 +91,8 @@ public class EvcUpdateCommand extends AbstractUpdateCommand {
                     } else {
                         LOG.info("{} is not part of the EVC, removing configuration", formerUni2ip);
                         final InstanceIdentifier<?> formerUniIID = UnimgrMapper.getUniIid(dataBroker, new IpAddress(formerUni2ip), LogicalDatastoreType.OPERATIONAL);
-                        final Optional<Node> formerUni = UnimgrUtils.readNode(dataBroker, LogicalDatastoreType.OPERATIONAL, formerUniIID);
-                        UnimgrUtils.deleteEvcData(dataBroker, formerUni);
+                        final Optional<Node> formerUni = MdsalUtils.readNode(dataBroker, LogicalDatastoreType.OPERATIONAL, formerUniIID);
+                        EvcUtils.deleteEvcData(dataBroker, formerUni);
                     }
                 } catch (final ReadFailedException e) {
                     LOG.error("Failed to retrieve former EVC {}", evcKey, e);
@@ -116,10 +119,10 @@ public class EvcUpdateCommand extends AbstractUpdateCommand {
                 }
 
                 // Retrieve the source and destination UNIs
-                final Optional<Node> optionalUniSource = UnimgrUtils.readNode(dataBroker,
+                final Optional<Node> optionalUniSource = MdsalUtils.readNode(dataBroker,
                         LogicalDatastoreType.OPERATIONAL,
                         sourceUniIid);
-                final Optional<Node> optionalUniDestination = UnimgrUtils.readNode(dataBroker,
+                final Optional<Node> optionalUniDestination = MdsalUtils.readNode(dataBroker,
                         LogicalDatastoreType.OPERATIONAL,
                         destinationUniIid);
 
@@ -136,13 +139,13 @@ public class EvcUpdateCommand extends AbstractUpdateCommand {
                     final UniAugmentation destinationUniAugmentation =
                             uniDestination.getAugmentation(UniAugmentation.class);
                     final Optional<Node> optionalSourceOvsdbNode =
-                            UnimgrUtils.readNode(dataBroker,
+                            MdsalUtils.readNode(dataBroker,
                                     LogicalDatastoreType.OPERATIONAL,
                                     sourceUniAugmentation
                                     .getOvsdbNodeRef()
                                     .getValue());
                     final Optional<Node> optionalDestinationOvsdbNode =
-                            UnimgrUtils.readNode(dataBroker,
+                            MdsalUtils.readNode(dataBroker,
                                     LogicalDatastoreType.OPERATIONAL,
                                     destinationUniAugmentation
                                     .getOvsdbNodeRef()
@@ -151,16 +154,16 @@ public class EvcUpdateCommand extends AbstractUpdateCommand {
                         // Retrieve the source and/or destination bridge
                         final InstanceIdentifier<Node> sourceBridgeIid =
                                 UnimgrMapper.getOvsdbBridgeNodeIid(optionalSourceOvsdbNode.get());
-                        final Optional<Node> optionalSourceBr = UnimgrUtils.readNode(dataBroker,
+                        final Optional<Node> optionalSourceBr = MdsalUtils.readNode(dataBroker,
                                 LogicalDatastoreType.OPERATIONAL,
                                 sourceBridgeIid);
                         final InstanceIdentifier<Node> destinationBridgeIid =
                                 UnimgrMapper.getOvsdbBridgeNodeIid(optionalDestinationOvsdbNode.get());
-                        final Optional<Node> optionalDestinationBr = UnimgrUtils.readNode(dataBroker,
+                        final Optional<Node> optionalDestinationBr = MdsalUtils.readNode(dataBroker,
                                 LogicalDatastoreType.OPERATIONAL,
                                 destinationBridgeIid);
                         //update ovsdb qos-entry and queues with max-rate to match evc ingress BW
-                        UnimgrUtils.updateMaxRate(dataBroker, sourceUniAugmentation, destinationUniAugmentation, evc);
+                        OvsdbUtils.updateMaxRate(dataBroker, sourceUniAugmentation, destinationUniAugmentation, evc);
                         Node sourceBr = null;
                         Node destinationBr = null;
                         if (optionalSourceBr.isPresent() && optionalDestinationBr.isPresent()) {
@@ -169,14 +172,14 @@ public class EvcUpdateCommand extends AbstractUpdateCommand {
 
                             // Creating termination points (OVSDB CONFIG
                             // datastore)
-                            UnimgrUtils.createTerminationPointNode(dataBroker,
+                            OvsdbUtils.createTerminationPointNode(dataBroker,
                                     uniSource.getAugmentation(UniAugmentation.class),
                                     sourceBr,
                                     UnimgrConstants.DEFAULT_BRIDGE_NAME,
                                     UnimgrConstants.DEFAULT_TUNNEL_IFACE);
 
                             // Create GRE tunnel (OVSDB CONFIG datastore)
-                            UnimgrUtils.createGreTunnel(dataBroker,
+                            OvsdbUtils.createGreTunnel(dataBroker,
                                     uniSource.getAugmentation(UniAugmentation.class),
                                     uniDestination.getAugmentation(UniAugmentation.class),
                                     sourceBr,
@@ -184,27 +187,27 @@ public class EvcUpdateCommand extends AbstractUpdateCommand {
                                     UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
 
                             // Create termination points (CONFIG datastore)
-                            UnimgrUtils.createTerminationPointNode(dataBroker,
+                            OvsdbUtils.createTerminationPointNode(dataBroker,
                                     uniSource.getAugmentation(UniAugmentation.class),
                                     destinationBr,
                                     UnimgrConstants.DEFAULT_BRIDGE_NAME,
                                     UnimgrConstants.DEFAULT_TUNNEL_IFACE);
 
                             // Create GRE tunnel (OVSDB CONFIG datastore)
-                            UnimgrUtils.createGreTunnel(dataBroker,
+                            OvsdbUtils.createGreTunnel(dataBroker,
                                     uniDestination.getAugmentation(UniAugmentation.class),
                                     uniSource.getAugmentation(UniAugmentation.class), destinationBr,
                                     UnimgrConstants.DEFAULT_BRIDGE_NAME,
                                     UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
 
                             // Update EVC
-                            UnimgrUtils.updateEvcNode(LogicalDatastoreType.CONFIGURATION,
+                            EvcUtils.updateEvcNode(LogicalDatastoreType.CONFIGURATION,
                                     evcKey,
                                     evc,
                                     sourceUniIid,
                                     destinationUniIid,
                                     dataBroker);
-                            UnimgrUtils.updateEvcNode(LogicalDatastoreType.OPERATIONAL,
+                            EvcUtils.updateEvcNode(LogicalDatastoreType.OPERATIONAL,
                                     evcKey,
                                     evc,
                                     sourceUniIid,
