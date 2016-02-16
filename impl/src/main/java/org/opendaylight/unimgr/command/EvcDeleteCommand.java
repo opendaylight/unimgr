@@ -13,7 +13,9 @@ import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.unimgr.impl.UnimgrUtils;
+import org.opendaylight.unimgr.utils.EvcUtils;
+import org.opendaylight.unimgr.utils.MdsalUtils;
+import org.opendaylight.unimgr.utils.OvsdbUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.EvcAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniDest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSource;
@@ -33,11 +35,11 @@ public class EvcDeleteCommand extends AbstractDeleteCommand {
 
     @Override
     public void execute() {
-        Set<InstanceIdentifier<EvcAugmentation>> removedEvcs = UnimgrUtils.extractRemoved(changes,
+        Set<InstanceIdentifier<EvcAugmentation>> removedEvcs = OvsdbUtils.extractRemoved(changes,
                                                                                          EvcAugmentation.class);
         if (!removedEvcs.isEmpty()) {
             for (InstanceIdentifier<EvcAugmentation> removedEvcIid: removedEvcs) {
-                EvcAugmentation evcAugmentation = UnimgrUtils.read(dataBroker,
+                EvcAugmentation evcAugmentation = MdsalUtils.read(dataBroker,
                                                                    LogicalDatastoreType.OPERATIONAL,
                                                                    removedEvcIid);
                 if (evcAugmentation != null) {
@@ -47,10 +49,10 @@ public class EvcDeleteCommand extends AbstractDeleteCommand {
                         for (UniSource source: unisSource) {
                             if (source != null) {
                                 Optional<Node> optionalSourceUniNode =
-                                                   UnimgrUtils.readNode(dataBroker,
+                                        MdsalUtils.readNode(dataBroker,
                                                                         LogicalDatastoreType.OPERATIONAL,
                                                                         source.getUni());
-                                UnimgrUtils.deleteEvcData(dataBroker, optionalSourceUniNode);
+                                EvcUtils.deleteEvcData(dataBroker, optionalSourceUniNode);
                             }
                         }
                     }
@@ -58,15 +60,15 @@ public class EvcDeleteCommand extends AbstractDeleteCommand {
                         for (UniDest dest : unisDest) {
                             if (dest != null) {
                                 Optional<Node> optionalDestUniNode =
-                                                   UnimgrUtils.readNode(dataBroker,
+                                        MdsalUtils.readNode(dataBroker,
                                                                         LogicalDatastoreType.OPERATIONAL,
                                                                         dest.getUni());
-                                UnimgrUtils.deleteEvcData(dataBroker, optionalDestUniNode);
+                                EvcUtils.deleteEvcData(dataBroker, optionalDestUniNode);
                             }
                         }
                     }
                 }
-                UnimgrUtils.deleteNode(dataBroker, removedEvcIid, LogicalDatastoreType.OPERATIONAL);
+                MdsalUtils.deleteNode(dataBroker, removedEvcIid, LogicalDatastoreType.OPERATIONAL);
             }
         }
     }
