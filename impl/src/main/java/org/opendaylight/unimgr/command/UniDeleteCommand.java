@@ -7,6 +7,7 @@
  */
 package org.opendaylight.unimgr.command;
 
+import java.util.List;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -16,7 +17,12 @@ import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
 import org.opendaylight.unimgr.utils.MdsalUtils;
 import org.opendaylight.unimgr.utils.OvsdbUtils;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -53,8 +59,29 @@ public class UniDeleteCommand extends AbstractDeleteCommand {
                                                                        LogicalDatastoreType.OPERATIONAL,
                                                                        ovsdbNodeIid);
                     if (optionalNode.isPresent()) {
-                        LOG.info("Delete bride node");
                         Node ovsdbNode = optionalNode.get();
+                        LOG.info("Delete QoS and Queues entries");
+                        List<QosEntries> qosList = ovsdbNode
+                                .getAugmentation(OvsdbNodeAugmentation.class)
+                                .getQosEntries();
+                        QosEntriesKey qosEntryKey = null;
+                        for (final QosEntries qosEntry : qosList) {
+                            qosEntryKey = qosEntry.getKey();
+                            InstanceIdentifier<QosEntries> qosIid = UnimgrMapper.getOvsdbQoSEntriesIid(ovsdbNode, qosEntryKey);
+                            MdsalUtils.deleteNode(dataBroker, qosIid, LogicalDatastoreType.CONFIGURATION);
+                        }
+
+                        List<Queues> queuesList = ovsdbNode
+                                .getAugmentation(OvsdbNodeAugmentation.class)
+                                .getQueues();
+                        QueuesKey queuesKey = null;
+                        for (final Queues queue : queuesList) {
+                            queuesKey = queue.getKey();
+                            InstanceIdentifier<Queues> queuesIid = UnimgrMapper.getOvsdbQueuesIid(ovsdbNode, queuesKey);
+                            MdsalUtils.deleteNode(dataBroker, queuesIid, LogicalDatastoreType.CONFIGURATION);
+                        }
+
+                        LOG.info("Delete bridge node");
                         InstanceIdentifier<Node> bridgeIid = UnimgrMapper.getOvsdbBridgeNodeIid(ovsdbNode);
                         Optional<Node> optBridgeNode = MdsalUtils.readNode(dataBroker, bridgeIid);
                         if (optBridgeNode.isPresent()) {
