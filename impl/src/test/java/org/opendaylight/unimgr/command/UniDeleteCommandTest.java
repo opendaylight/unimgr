@@ -16,7 +16,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
@@ -33,7 +35,12 @@ import org.opendaylight.unimgr.utils.OvsdbUtils;
 import org.opendaylight.unimgr.utils.UniUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -81,7 +88,7 @@ public class UniDeleteCommandTest {
     /**
      * Test method for {@link org.opendaylight.unimgr.command.UniDeleteCommand#execute()}.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
+    @SuppressWarnings({ "unchecked", "rawtypes"})
     @Test
     public void testExecute() {
         final Set<InstanceIdentifier<UniAugmentation>> removedUnis =
@@ -95,12 +102,25 @@ public class UniDeleteCommandTest {
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(UnimgrConstants.UNI_TOPOLOGY_ID))
                 .child(Node.class,  new NodeKey(OVSDB_NODE_ID));
+        final Node ovsdbNode = mock(Node.class);
+        final OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
+        final QosEntries qosEntries = mock(QosEntries.class);
+        final Queues queues = mock(Queues.class);
 
         when(uniAugmentation.getIpAddress()).thenReturn(mock(IpAddress.class));
         when(uniAugmentation.getOvsdbNodeRef()).thenReturn(ovsNodedRef);
         when(ovsNodedRef.getValue()).thenReturn(uniKey);
         when(optionalNode.isPresent()).thenReturn(true);
-        when(optionalNode.get()).thenReturn(mock(Node.class));
+        when(optionalNode.get()).thenReturn(ovsdbNode);
+        when(ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
+        List<QosEntries> qosEntriesList = new ArrayList<>();
+        when(qosEntries.getKey()).thenReturn(mock(QosEntriesKey.class));
+        qosEntriesList.add(qosEntries);
+        when(ovsdbNodeAugmentation.getQosEntries()).thenReturn(qosEntriesList);
+        List<Queues> queuesList = new ArrayList<>();
+        when(queues.getKey()).thenReturn(mock(QueuesKey.class));
+        queuesList.add(queues);
+        when(ovsdbNodeAugmentation.getQueues()).thenReturn(queuesList);
         when(OvsdbUtils.extractRemoved(any(AsyncDataChangeEvent.class), any(Class.class)))
                 .thenReturn(removedUnis);
         when(MdsalUtils.read(any(DataBroker.class), any(LogicalDatastoreType.class),
@@ -114,11 +134,13 @@ public class UniDeleteCommandTest {
                 .thenReturn(instanceOfNode);
         when(UnimgrMapper.getUniIid(any(DataBroker.class), any(IpAddress.class),
                 any(LogicalDatastoreType.class))).thenReturn(instanceOfNode);
+        when(UnimgrMapper.getOvsdbQoSEntriesIid(any(Node.class), any(QosEntriesKey.class))).thenReturn(instanceOfNode);
+        when(UnimgrMapper.getOvsdbQueuesIid(any(Node.class), any(QueuesKey.class))).thenReturn(instanceOfNode);
         when(MdsalUtils.deleteNode(any(DataBroker.class), any(InstanceIdentifier.class),
                 any(LogicalDatastoreType.class))).thenReturn(true);
         uniDeleteCommand.execute();
 
-        PowerMockito.verifyStatic(times(3));
+        PowerMockito.verifyStatic(times(5));
         MdsalUtils.deleteNode(any(DataBroker.class), any(InstanceIdentifier.class),
                 any(LogicalDatastoreType.class));
     }
