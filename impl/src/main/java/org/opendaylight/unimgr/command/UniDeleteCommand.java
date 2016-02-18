@@ -17,6 +17,8 @@ import org.opendaylight.unimgr.impl.UnimgrMapper;
 import org.opendaylight.unimgr.utils.MdsalUtils;
 import org.opendaylight.unimgr.utils.OvsdbUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -53,7 +55,7 @@ public class UniDeleteCommand extends AbstractDeleteCommand {
                                                                        LogicalDatastoreType.OPERATIONAL,
                                                                        ovsdbNodeIid);
                     if (optionalNode.isPresent()) {
-                        LOG.info("Delete bride node");
+                        LOG.info("Delete bridge node");
                         Node ovsdbNode = optionalNode.get();
                         InstanceIdentifier<Node> bridgeIid = UnimgrMapper.getOvsdbBridgeNodeIid(ovsdbNode);
                         Optional<Node> optBridgeNode = MdsalUtils.readNode(dataBroker, bridgeIid);
@@ -64,6 +66,13 @@ public class UniDeleteCommand extends AbstractDeleteCommand {
                             MdsalUtils.deleteNode(dataBroker, iidTermPoint, LogicalDatastoreType.CONFIGURATION);
                         }
                         MdsalUtils.deleteNode(dataBroker, bridgeIid, LogicalDatastoreType.CONFIGURATION);
+
+                        LOG.info("Delete QoS and Queues entries");
+                        InstanceIdentifier<QosEntries> qosIid = UnimgrMapper.getOvsdbQoSEntriesIid(ovsdbNode);
+                        MdsalUtils.deleteNode(dataBroker, qosIid, LogicalDatastoreType.CONFIGURATION);
+
+                        InstanceIdentifier<Queues> queuesIid = UnimgrMapper.getOvsdbQueuesIid(ovsdbNode);
+                        MdsalUtils.deleteNode(dataBroker, queuesIid, LogicalDatastoreType.CONFIGURATION);
                     }
                     InstanceIdentifier<Node> iidUni = UnimgrMapper.getUniIid(dataBroker, uniAugmentation.getIpAddress(),
                                                                              LogicalDatastoreType.OPERATIONAL);

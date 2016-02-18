@@ -345,4 +345,24 @@ public class UnimgrMapper {
                 .child(QueuesOtherConfig.class, new QueuesOtherConfigKey(UnimgrConstants.QOS_MAX_RATE));
         return queuesOtherConfig;
     }
+
+    public static InstanceIdentifier<QosEntries> getOvsdbQoSEntriesIid(Node ovsdbNode) {
+        InstanceIdentifier<QosEntries> qosEntriesIid = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class, new NodeKey(ovsdbNode.getNodeId()))
+                .augmentation(OvsdbNodeAugmentation.class)
+                .child(QosEntries.class);
+        return qosEntriesIid;
+    }
+
+    public static InstanceIdentifier<Queues> getOvsdbQueuesIid(Node ovsdbNode) {
+        InstanceIdentifier<Queues> queuesIid = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(UnimgrConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class, new NodeKey(ovsdbNode.getNodeId()))
+                .augmentation(OvsdbNodeAugmentation.class)
+                .child(Queues.class);
+        return queuesIid;
+    }
 }
