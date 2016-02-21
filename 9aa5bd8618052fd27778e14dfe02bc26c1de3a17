@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_4f565e07",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/api/IUnimgrDataTreeChangeListener.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-02-21T16:26:35Z",
+      "side": 1,
+      "message": "It would make more sense having this as an abstract class, container the DataBroker and the ListenerRegistration as protected variables.",
+      "range": {
+        "startLine": 19,
+        "startChar": 7,
+        "endLine": 19,
+        "endChar": 16
+      },
+      "revId": "9aa5bd8618052fd27778e14dfe02bc26c1de3a17",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_2f5b1a2f",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/api/IUnimgrDataTreeChangeListener.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-02-21T16:26:35Z",
+      "side": 1,
+      "message": "you could implements de onDataTreeChanged function here, something like that\n\n    @Override\n    public void onDataTreeChanged(Collection\u003cDataTreeModification\u003cT\u003e\u003e changes) {\n        for (DataTreeModification\u003cT\u003e change : changes) {\n            DataObjectModification\u003cT\u003e rootNode \u003d change.getRootNode();\n            InstanceIdentifier\u003cT\u003e rootIdentifier \u003d change.getRootPath().getRootIdentifier();\n            switch (rootNode.getModificationType()) {\n            case WRITE:\n                onWrite(rootNode, rootIdentifier);\n                break;\n            case DELETE:\n                onDelete(rootNode, rootIdentifier);\n                break;\n            case SUBTREE_MODIFIED:\n                onSubtreeModified(rootNode, rootIdentifier);\n                break;\n            }\n        }\n    }",
+      "revId": "9aa5bd8618052fd27778e14dfe02bc26c1de3a17",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_ef549200",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/api/IUnimgrDataTreeChangeListener.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-02-21T16:26:35Z",
+      "side": 1,
+      "message": "those 3 can be defined as abstract with slightly different parameters",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 60
+      },
+      "revId": "9aa5bd8618052fd27778e14dfe02bc26c1de3a17",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
