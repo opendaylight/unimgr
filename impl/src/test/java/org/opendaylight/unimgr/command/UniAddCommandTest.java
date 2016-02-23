@@ -13,16 +13,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.unimgr.impl.UnimgrMapper;
@@ -42,7 +38,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -52,13 +47,15 @@ import com.google.common.base.Optional;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({UniUtils.class, OvsdbUtils.class, MdsalUtils.class, UnimgrMapper.class})
-public class UniCreateCommandTest {
+public class UniAddCommandTest {
 
     private static final NodeId OVSDB_NODE_ID = new NodeId("ovsdb://7011db35-f44b-4aab-90f6-d89088caf9d8");
 
-    private UniCreateCommand uniCreateCommand;
-    private Map<InstanceIdentifier<?>, DataObject> changes;
+    private UniAddCommand uniAddCommand;
+    private DataTreeModification<Node> uni;
     private DataBroker dataBroker;
+    private Node uniNode;
+    private Optional<Node> optUniNode;
 
     @SuppressWarnings("unchecked")
     @Before
@@ -67,13 +64,15 @@ public class UniCreateCommandTest {
         PowerMockito.mockStatic(OvsdbUtils.class);
         PowerMockito.mockStatic(MdsalUtils.class);
         PowerMockito.mockStatic(UnimgrMapper.class);
-        changes = mock(Map.class);
         dataBroker = mock(DataBroker.class);
-        uniCreateCommand = new UniCreateCommand(dataBroker, changes);
+        uniNode = mock(Node.class);
+        optUniNode = mock(Optional.class);
+        uni = DataTreeModificationHelper.getUniNode(uniNode);
+        uniAddCommand = new UniAddCommand(dataBroker, uni);
     }
 
     /**
-     * Test method for {@link org.opendaylight.unimgr.command.UniCreateCommand#execute()}.
+     * Test method for {@link org.opendaylight.unimgr.command.uniAddCommandTest#execute()}.
      * @throws Exception
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -93,20 +92,13 @@ public class UniCreateCommandTest {
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(UnimgrConstants.UNI_TOPOLOGY_ID))
                 .child(Node.class, new NodeKey(OVSDB_NODE_ID));
-        final Set<Entry<InstanceIdentifier<?>, DataObject>> setCreated = new HashSet<Map.Entry<InstanceIdentifier<?>,DataObject>>();
-        Entry<InstanceIdentifier<?>, DataObject> created = new Entry<InstanceIdentifier<?>, DataObject>() {
-            @Override
-            public DataObject setValue(DataObject value) { return null; }
-            @Override
-            public DataObject getValue() { return uniAugmentation; }
-            @Override
-            public InstanceIdentifier getKey() { return uniKey; }
-        };
         nodes.add(node);
-        setCreated.add(created);
 
         // Case UNI1 : uni.getOvsdbNodeRef() != null, !optionalNode.isPresent()
-        when(changes.entrySet()).thenReturn(setCreated);
+        when(uniNode.getAugmentation(UniAugmentation.class)).thenReturn(uniAugmentation);
+        when(optUniNode.isPresent()).thenReturn(false);
+        when(MdsalUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class),
+                any(InstanceIdentifier.class))).thenReturn(optUniNode).thenReturn(optionalOvsdbNode);
         when(optionalOvsdbNode.isPresent()).thenReturn(false).thenReturn(true);
         when(optionalOvsdbNode.get()).thenReturn(node);
         when(uniAugmentation.getIpAddress()).thenReturn(ipAddress);
@@ -121,8 +113,6 @@ public class UniCreateCommandTest {
         when(node.getAugmentation(any(Class.class))).thenReturn(uniAugmentation);
         when(node.getNodeId()).thenReturn(nodeId);
         when(nodeId.toString()).thenReturn("ovsdbNodeId_test");
-        when(MdsalUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class),
-                any(InstanceIdentifier.class))).thenReturn(optionalOvsdbNode);
         when(OvsdbUtils.findOvsdbNode(any(DataBroker.class), any(UniAugmentation.class)))
                 .thenReturn(optionalOvsdbNode);
         when(OvsdbUtils.createQoSForOvsdbNode(any(DataBroker.class), any(UniAugmentation.class)))
@@ -150,52 +140,19 @@ public class UniCreateCommandTest {
 
         // Case UNI3 : uni.getOvsdbNodeRef() == null, optionalNode.isPresent()
         when(uniAugmentation.getOvsdbNodeRef()).thenReturn(null);
+        when(optionalOvsdbNode.isPresent()).thenReturn(true);
+        when(MdsalUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class),
+                any(InstanceIdentifier.class))).thenReturn(optUniNode).thenReturn(optionalOvsdbNode);
         verifyExecute(2, 1, 3, 0);
 
         // Case UNI4 : uni.getOvsdbNodeRef() == null, !optionalNode.isPresent()
         when(optionalOvsdbNode.isPresent()).thenReturn(false);
         verifyExecute(2, 1, 4, 0);
-
-        // Case OVSDB0 ovsdbNodeAugmentation == null
-        created = new Entry<InstanceIdentifier<?>, DataObject>() {
-            @Override
-            public DataObject setValue(DataObject value) { return null; }
-            @Override
-            public DataObject getValue() { return null; }
-            @Override
-            public InstanceIdentifier getKey() { return uniKey; }
-        };
-        setCreated.clear();
-        setCreated.add(created);
-        verifyExecute(2, 1, 4, 0);
-
-        // Case OVSDB1 : uniNodes != null && !uniNodes.isEmpty(),
-        //               uniAugmentation.getOvsdbNodeRef() != null &&
-        //               uniAugmentation.getOvsdbNodeRef().getValue() != null
-        created = new Entry<InstanceIdentifier<?>, DataObject>() {
-            @Override
-            public DataObject setValue(DataObject value) { return null; }
-            @Override
-            public DataObject getValue() { return ovsdbNodeAugmentation; }
-            @Override
-            public InstanceIdentifier getKey() { return uniKey; }
-        };
-        setCreated.clear();
-        setCreated.add(created);
-
-        when(uniAugmentation.getOvsdbNodeRef()).thenReturn(ovsNodedRef);
-        when(optionalOvsdbNode.isPresent()).thenReturn(true);
-        verifyExecute(3, 2, 4, 1);
-
-        // Case OVSDB2 : uniNodes != null && !uniNodes.isEmpty(),
-        //               ovsdbNodeAugmentation.getConnectionInfo().getRemoteIp()
-        //                      .equals(uniAugmentation.getIpAddress())
-        when(uniAugmentation.getOvsdbNodeRef()).thenReturn(null);
-        verifyExecute(3, 3, 4, 2);
     }
 
+    @SuppressWarnings("unchecked")
     private void verifyExecute(int qosTimes, int bridgeTimes, int updateNodeTime, int updateIIDTimes){
-        uniCreateCommand.execute();
+        uniAddCommand.execute();
         PowerMockito.verifyStatic(times(qosTimes));
         OvsdbUtils.createQoSForOvsdbNode(any(DataBroker.class), any(UniAugmentation.class));
         PowerMockito.verifyStatic(times(bridgeTimes));
@@ -208,5 +165,4 @@ public class UniCreateCommandTest {
         UniUtils.updateUniNode(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                 any(UniAugmentation.class), any(InstanceIdentifier.class), any(DataBroker.class));
     }
-
 }
