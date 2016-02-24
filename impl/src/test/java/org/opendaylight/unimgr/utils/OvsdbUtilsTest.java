@@ -422,7 +422,7 @@ public class OvsdbUtilsTest {
 
         OvsdbUtils.deleteTerminationPoint(dataBroker, terminationPoint, ovsdbNode);
         verify(transaction,times(2)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(transaction,times(2)).submit();
+        verify(transaction,times(1)).submit();
         CheckedFuture<Void, TransactionCommitFailedException> mockCheckedFuture = mock(CheckedFuture.class);
         when(transaction.submit()).thenReturn(mockCheckedFuture);
         assertEquals(mockCheckedFuture, OvsdbUtils.deleteTerminationPoint(dataBroker, terminationPoint, ovsdbNode));

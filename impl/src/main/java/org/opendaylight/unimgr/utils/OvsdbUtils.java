@@ -295,7 +295,7 @@ public class OvsdbUtils {
             transaction.submit();
             LOG.info("Created and submitted a new OVSDB node {}", nodeData.getNodeId());
         } catch (final Exception e) {
-            LOG.error("Exception while creating OvsdbNodeAugmentation, " + "Uni is null. Node Id: {}", ovsdbNodeId);
+            LOG.error("Exception while creating OvsdbNodeAugmentation, Uni is null. Node Id: {}, {}", ovsdbNodeId, e);
         }
     }
 
@@ -324,7 +324,7 @@ public class OvsdbUtils {
             LOG.info("Created and submitted a new OVSDB node {}", nodeData.getNodeId());
             return nodeData;
         } catch (final Exception e) {
-            LOG.error("Exception while creating OvsdbNodeAugmentation, " + "Uni is null. Node Id: {}", ovsdbNodeId);
+            LOG.error("Exception while creating OvsdbNodeAugmentation, Uni is null. Node Id: {}, {}", ovsdbNodeId, e);
         }
         return null;
     }
@@ -556,7 +556,7 @@ public class OvsdbUtils {
             future.checkedGet();
             LOG.info("Update qos-entries max-rate to ovsdb for node {} {}", ovsdbNodeId, qosOtherConfigIid);;
         } catch (final TransactionCommitFailedException e) {
-            LOG.warn("Failed to put {} ", qosOtherConfigIid, e);
+            LOG.warn("Failed to put {}, {}", qosOtherConfigIid, e);
         }
     }
 
@@ -756,9 +756,7 @@ public class OvsdbUtils {
         final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
         transaction.delete(LogicalDatastoreType.CONFIGURATION, terminationPointPath);
         transaction.delete(LogicalDatastoreType.OPERATIONAL, terminationPointPath);
-        transaction.submit();
-        final CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-        return future;
+        return transaction.submit();
     }
 
 
@@ -867,8 +865,7 @@ public class OvsdbUtils {
             final Node ovsdbNode = node.get();
             final OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode
                     .getAugmentation(OvsdbNodeAugmentation.class);
-            final ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
-            return connectionInfo;
+            return ovsdbNodeAugmentation.getConnectionInfo();
         } else {
             return null;
         }
@@ -883,10 +880,9 @@ public class OvsdbUtils {
         try {
             ip = InetAddress.getLocalHost().getHostAddress();
             final Ipv4Address ipv4 = new Ipv4Address(ip);
-            final IpAddress ipAddress = new IpAddress(ipv4);
-            return ipAddress;
+            return new IpAddress(ipv4);
         } catch (final UnknownHostException e) {
-            LOG.info("Unable to retrieve controller's ip address, using loopback.");
+            LOG.info("Unable to retrieve controller's ip address, using loopback. {}", e);
         }
         return new IpAddress(UnimgrConstants.LOCAL_IP);
     }
