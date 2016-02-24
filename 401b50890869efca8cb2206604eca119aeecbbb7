@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_39f07666",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/utils/OvsdbUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-02-24T18:12:44Z",
+      "side": 1,
+      "message": "you shouldn\u0027t remove those",
+      "revId": "401b50890869efca8cb2206604eca119aeecbbb7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_19f5b256",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/utils/OvsdbUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-02-24T18:12:44Z",
+      "side": 1,
+      "message": "you shouldn\u0027t remove those",
+      "revId": "401b50890869efca8cb2206604eca119aeecbbb7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
