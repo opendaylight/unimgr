@@ -79,7 +79,7 @@ public class MdsalUtils {
         try {
             return nodeFuture.checkedGet();
         } catch (final ReadFailedException e) {
-            LOG.info("Unable to read node with Iid {}", nodeIid);
+            LOG.error("Unable to read node with Iid {}", nodeIid, e);
         }
         return Optional.absent();
     }
@@ -101,7 +101,7 @@ public class MdsalUtils {
             transaction.submit().checkedGet();
             result = true;
         } catch (final TransactionCommitFailedException e) {
-            LOG.error("Unable to remove node with Iid {} from store {}.", genericNode, store);
+            LOG.error("Unable to remove node with Iid {} from store {}", genericNode, store, e);
         }
         return result;
     }
@@ -122,7 +122,7 @@ public class MdsalUtils {
         try {
             return linkFuture.checkedGet();
         } catch (final ReadFailedException e) {
-            LOG.info("Unable to read node with Iid {}", linkIid);
+            LOG.info("Unable to read node with Iid {}", linkIid, e);
         }
         return Optional.absent();
     }
@@ -144,7 +144,7 @@ public class MdsalUtils {
         try {
             return nodeFuture.checkedGet();
         } catch (final ReadFailedException e) {
-            LOG.info("Unable to read node with Iid {}", nodeIid);
+            LOG.info("Unable to read node with Iid {}", nodeIid, e);
         }
         return Optional.absent();
     }
