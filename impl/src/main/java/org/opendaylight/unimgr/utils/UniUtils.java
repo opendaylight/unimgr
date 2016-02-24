@@ -74,7 +74,7 @@ public class UniUtils {
             result = true;
             LOG.info("Created and submitted a new Uni node {}", nodeData.getNodeId());
         } catch (final Exception e) {
-            LOG.error("Exception while creating Uni Node" + "Uni Node Id: {}", uniNodeId);
+            LOG.error("Exception while creating Uni Node, Uni Node Id: {}, {}", uniNodeId, e.getMessage());
         }
         return result;
     }
