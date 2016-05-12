@@ -11,7 +11,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-parent</artifactId>
-    <version>0.4.2-SNAPSHOT</version>
+    <version>0.4.2-Beryllium-SR2</version>
     <relativePath/>
   </parent>
 
@@ -22,7 +22,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>unimgr-cli</artifactId>
-  <version>0.0.3-SNAPSHOT</version>
+  <version>0.0.3-Beryllium-SR2</version>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
