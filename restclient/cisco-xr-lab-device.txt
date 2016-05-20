@@ -1,0 +1,65 @@
+# -*- restclient -*-
+
+# Settings
+:node = asr-101
+:addr = 50.196.141.39
+:host = http://localhost:8181
+:basic-auth := (format "Basic %s" (base64-encode-string (format "%s:%s" "admin" "admin")))
+
+# Create ASR 101
+POST :host/restconf/config/network-topology:network-topology/topology/topology-netconf/node/controller-config/yang-ext:mount/config:modules
+Authorization: :basic-auth
+Content-Type: application/xml
+<module xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+   <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">prefix:sal-netconf-connector</type>
+   <name>:node
+   </name>
+   <address xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">:addr
+   </address>
+   <port xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">830</port>
+   <username xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">cisco</username>
+   <password xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">GEN15hackathon</password>
+   <tcp-only xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">false</tcp-only>
+   <event-executor xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
+     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netty">prefix:netty-event-executor</type>
+     <name>global-event-executor</name>
+   </event-executor>
+   <binding-registry xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
+     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-broker-osgi-registry</type>
+     <name>binding-osgi-broker</name>
+   </binding-registry>
+   <dom-registry xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
+     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">prefix:dom-broker-osgi-registry</type>
+     <name>dom-broker</name>
+   </dom-registry>
+   <client-dispatcher xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
+     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:netconf">prefix:netconf-client-dispatcher</type>
+     <name>global-netconf-dispatcher</name>
+   </client-dispatcher>
+   <processing-executor xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
+     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:threadpool">prefix:threadpool</type>
+     <name>global-netconf-processing-executor</name>
+   </processing-executor>
+ </module>
+
+# Get node operational status
+GET :host/restconf/operational/network-topology:network-topology/topology/topology-netconf/node/:node/
+Authorization: :basic-auth
+
+# Get interface configuration
+GET :host/restconf/operational/network-topology:network-topology/topology/topology-netconf/node/:node/yang-ext:mount/Cisco-IOS-XR-ifmgr-cfg:interface-configurations/
+Authorization: :basic-auth
+Accept: application/xml
+
+# Get operational l2vpn xconnect groups
+GET :host/restconf/operational/network-topology:network-topology/topology/topology-netconf/node/:node/yang-ext:mount/Cisco-IOS-XR-l2vpn-cfg:l2vpn/database/xconnect-groups/xconnect-group/local
+Authorization: :basic-auth
+Accept: application/xml
+
+# Show
+GET :host/restconf/config/network-topology:network-topology/topology/topology-netconf/node/controller-config/yang-ext:mount/config:modules/module/odl-sal-netconf-connector-cfg:sal-netconf-connector/:node
+Authorization: :basic-auth
+
+# Delete
+DELETE :host/restconf/config/network-topology:network-topology/topology/topology-netconf/node/controller-config/yang-ext:mount/config:modules/module/odl-sal-netconf-connector-cfg:sal-netconf-connector/:node
+Authorization: :basic-auth

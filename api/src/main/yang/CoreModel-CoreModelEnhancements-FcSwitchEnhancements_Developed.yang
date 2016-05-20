@@ -1,0 +1,62 @@
+module CoreModel-CoreModelEnhancements-FcSwitchEnhancements_Developed {
+    namespace "uri:onf:CoreModel-CoreModelEnhancements-FcSwitchEnhancements_Developed";
+    prefix CoreModel-CoreModelEnhancements-FcSwitchEnhancements_Developed;
+    import CoreModel-CoreNetworkModule-TypeDefinitions {
+        prefix CoreModel-CoreNetworkModule-TypeDefinitions;
+    }
+    revision 2016-04-13{}
+    list ProfileProxy {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_ProfileProxy;
+    }
+    grouping G_ProfileProxy {
+        status deprecated;
+        leaf profileProxyMode {
+            type string;
+            description "A parameter profile may be used in a number of different ways:
+- Forces the values on the target with no opportunity to see or override the values in the target
+- Sets the values on the target that can be seen on the target
+- Sets the values on the target and supports override on the target so the target can be set away from the value in the profile
+- etc";
+        }
+        container _controlParameters {
+            description "The control parameters that can be set int the profile and applied to the target.
+Not all parameters need be selected and applied.";
+            config true;
+            uses G_ControlParameters;
+        }
+        leaf id {
+            type string;
+        }
+    }
+    list ControlParameters {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_ControlParameters;
+    }
+    grouping G_ControlParameters {
+        status deprecated;
+        leaf operType {
+            type CoreModel-CoreNetworkModule-TypeDefinitions:OperType;
+            description "This attribute whether or not the protection scheme is revertive or non-revertive. ";
+        }
+        leaf waitToRestoreTime {
+            type uint64;
+            description "If the protection system is revertive, this attribute specifies the amount of time, in seconds, to wait after a fault clears before restoring traffic to the protected protectionUnit that initiated the switching. Valid values for this attribute are integers.";
+        }
+        leaf protType {
+            type CoreModel-CoreNetworkModule-TypeDefinitions:ProtectionType;
+            description "Indicates the protection scheme that is used for the ProtectionGroup.";
+        }
+        leaf holdOffTime {
+            type uint64;
+            description "This attribute indicates the time, in seconds, between declaration of signal degrade or signal fail, and the initialization of the protection switching algorithm. Valid values are integers in units of seconds.";
+        }
+        leaf id {
+            type string;
+        }
+    }
+}
