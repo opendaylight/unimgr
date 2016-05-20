@@ -1,0 +1,85 @@
+module CoreModel-CoreModelEnhancements-InformationArchitectureAndPatterns {
+    namespace "uri:onf:CoreModel-CoreModelEnhancements-InformationArchitectureAndPatterns";
+    prefix CoreModel-CoreModelEnhancements-InformationArchitectureAndPatterns;
+    revision 2016-04-13{}
+    list Component {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_Component;
+    }
+    grouping G_Component {
+        status deprecated;
+        list _port {
+            key 'id';
+            config true;
+            ordered-by system;
+            uses G_Port;
+            min-elements 1;
+        }
+        list _attributePackageList {
+            key 'id';
+            config true;
+            ordered-by system;
+            uses G_AttributePackage;
+        }
+        leaf _boundComponent {
+            type leafref {
+                path '/Component/id';
+            }
+        }
+        leaf _encapsulatedSystem {
+            type leafref {
+                path '/CoreModel-CoreModelEnhancements-InformationArchitectureAndPatterns:System/CoreModel-CoreModelEnhancements-InformationArchitectureAndPatterns:id';
+            }
+        }
+        leaf id {
+            type string;
+        }
+    }
+    list Port {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_Port;
+    }
+    grouping G_Port {
+        status deprecated;
+        leaf Role {
+            type string;
+            default true;
+        }
+        leaf _boundPort {
+            type leafref {
+                path '/Port/id';
+            }
+        }
+        leaf id {
+            type string;
+        }
+    }
+    list System {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_System;
+    }
+    grouping G_System {
+        status deprecated;
+        leaf id {
+            type string;
+        }
+    }
+    list AttributePackage {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_AttributePackage;
+    }
+    grouping G_AttributePackage {
+        status deprecated;
+        leaf id {
+            type string;
+        }
+    }
+}
