@@ -1,0 +1,461 @@
+module NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage {
+    namespace "uri:onf:NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage";
+    prefix NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage;
+    import NRP_Interface-TypeDefinitions-NRP_Types {
+        prefix NRP_Interface-TypeDefinitions-NRP_Types;
+    }
+    revision 2016-04-13{}
+    grouping G_NRP_PcpCosId {
+        leaf nrp_vlanTag {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_VlanTag;
+            description "Which vlan tag pcp to be used for cos identier, S tag or C tag. S tag is not valid for EvcEndPoint. ";
+        }
+        leaf-list nrp_pcpValue {
+            description "List of PCP values that map to the cos name.";
+            ordered-by system;
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            min-elements 1;
+        }
+        leaf nrp_cosName {
+            type string;
+            description "Class of Service name.";
+        }
+    }
+    list NRP_DscpCosId {
+        key 'nrp_cosName';
+        config true;
+        ordered-by system;
+        uses G_NRP_DscpCosId;
+    }
+    grouping G_NRP_DscpCosId {
+        leaf nrp_ipVersion {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_IpVersion;
+            description "IPv4, or IPv6, or both IPv4 and IPv6.";
+        }
+        leaf-list nrp_dscpValue {
+            description "List DSCP values map to the same cos name.";
+            ordered-by system;
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            min-elements 1;
+        }
+        leaf nrp_cosName {
+            type string;
+            description "Class of Service name.";
+        }
+    }
+    list NRP_PcpEecId {
+        key 'nrp_eecName';
+        config true;
+        ordered-by system;
+        uses G_NRP_PcpEecId;
+    }
+    grouping G_NRP_PcpEecId {
+        leaf nrp_vlanTag {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_VlanTag;
+            description "Which vlan tag pcp to be used for ceec identier, S tag or C tag. S tag is not valid for EvcEndPoint. ";
+        }
+        leaf-list nrp_pcpValue {
+            description "List of PCP values that map to the eec name.";
+            ordered-by system;
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            min-elements 1;
+        }
+        leaf nrp_eecName {
+            type string;
+            description "Egress Equivelance Class name.";
+        }
+    }
+    list NRP_DscpEecId {
+        key 'nrp_eecName';
+        config true;
+        ordered-by system;
+        uses G_NRP_DscpEecId;
+    }
+    grouping G_NRP_DscpEecId {
+        leaf nrp_ipVersion {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_IpVersion;
+            description "IPv4, or IPv6, or both IPv4 and IPv6.";
+        }
+        leaf-list nrp_dscpValue {
+            description "List DSCP values map to the same eec name.";
+            ordered-by system;
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            min-elements 1;
+        }
+        leaf nrp_eecName {
+            type string;
+            description "Egress Equivalence Class name.";
+        }
+    }
+    grouping G_NRP_ServiceAccessPointEecId {
+        leaf nrp_eecName {
+            type string;
+            description "Egress Equivalence Class name.";
+        }
+    }
+    list NRP_EecIdentifier {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_NRP_EecIdentifier;
+    }
+    grouping G_NRP_EecIdentifier {
+        container nrp_pcpeecid {
+            config true;
+            uses G_NRP_PcpEecId;
+        }
+        container nrp_dscpeecid {
+            config true;
+            uses G_NRP_DscpEecId;
+        }
+        container nrp_serviceaccesspointeecid {
+            config true;
+            uses G_NRP_ServiceAccessPointEecId;
+        }
+        leaf id {
+            type string;
+        }
+    }
+    list NRP_PcpForColorEgressMap {
+        key 'nrp_vlanTag';
+        config true;
+        ordered-by system;
+        uses G_NRP_PcpForColorEgressMap;
+    }
+    grouping G_NRP_PcpForColorEgressMap {
+        leaf nrp_vlanTag {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_VlanTag;
+            description "S tag or C tag for OvcEndPoint and C tag for EvcEndPoint.";
+        }
+        leaf nrp_ingressCosName {
+            type string;
+            description "Ingress CoS name.";
+        }
+        leaf nrp_ingressColor {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_FrameColor;
+            description "The ingress color may be considered as part of the egress mapping. ";
+        }
+        leaf nrp_pcpValue {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_PcpOrDiscard;
+            description "Egress frame PCP value (S tag ot C tag is from vlanTag attribute), mapping from ingress CoS name and ingress frame color. ";
+        }
+    }
+    list NRP_EgressMap {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_NRP_EgressMap;
+    }
+    grouping G_NRP_EgressMap {
+        container nrp_deiforcoloregressmap {
+            config true;
+            uses G_NRP_DeiForColorEgressMap;
+        }
+        container nrp_pcpforcoloregressmap {
+            config true;
+            uses G_NRP_PcpForColorEgressMap;
+        }
+        leaf id {
+            type string;
+        }
+    }
+    list NRP_DeiForColorEgressMap {
+        key 'nrp_vlanTag';
+        config true;
+        ordered-by system;
+        uses G_NRP_DeiForColorEgressMap;
+    }
+    grouping G_NRP_DeiForColorEgressMap {
+        leaf nrp_vlanTag {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_VlanTag;
+            description "S tag or C tag for OvcEndPoint and C tag for EvcEndPoint.";
+        }
+        leaf nrp_ingressCosName {
+            type string;
+            description "Ingress CoS name.";
+        }
+        leaf nrp_ingressColor {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_FrameColor;
+            description "The ingress color may be considered as part of the egress mapping. ";
+        }
+        leaf nrp_deiValue {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_DeiOrDiscard;
+            description "Egress frame DEI value (S tag ot C tag is from vlanTag attribute), including the ingress color indication.";
+        }
+    }
+    list NRP_BwpFlow {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_NRP_BwpFlow;
+    }
+    grouping G_NRP_BwpFlow {
+        leaf nrp_bwpFlowIndex {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_PositiveInteger;
+            description "The index i=1,2,…,n is used to index the Bandwidth Profile Flow among all Bandwidth Profile Flows that are mapped to a given Envelope";
+        }
+        leaf nrp_cir {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "Committed Information Rate that limits the average rate of frames that will be declared Green. In bits per second.";
+        }
+        leaf nrp_cirMax {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "Maximum Committed Information Rate that limits the rate of tokens added to the committed token bucket. In bits per second.";
+        }
+        leaf nrp_cbs {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "Committed Burst Size that limits the maximum number of bytes available for a burst of frames that will be declared Green, in bytes,";
+        }
+        leaf nrp_eir {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "Excess Information Rate that limits the average rate of frames that will be declared Yellow, in bits per second.";
+        }
+        leaf nrp_eirMax {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "Maximum Excess Infor-mation Rate that Limits the rate of tokens added to the excess token bucket, in bits per second.";
+        }
+        leaf nrp_ebs {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "Excessive Burst Size that limits the maximum number of bytes available for a burst of frames that will be declared Yellow, in bytes.";
+        }
+        leaf nrp_couplingFlag {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "Coupling Flag that Determines if overflow Green tokens can be used as Yellow tokens. Value 0 for NO and value 1 for YES.";
+        }
+        leaf nrp_colorMode {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_ColorMode;
+            description "Color Mode that Indicates whether the Color Identifier of the frame is considered by the Bandwidth Profile Algorithm.";
+        }
+        leaf nrp_rank {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_PositiveInteger;
+            description "Bandwidth prorile flow rank in an associated Envelope.";
+        }
+        leaf nrp_tokenRequestOffset {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "Adjusts the number of tokens requested for each external interface frame.";
+        }
+        leaf-list nrp_bwpflowrank {
+            ordered-by system;
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:NRP_BwpFlowRank/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:id';
+            }
+        }
+        leaf id {
+            type string;
+        }
+    }
+    list NRP_IngressBwpPerCosName {
+        key 'nrp_cosName';
+        config true;
+        ordered-by system;
+        uses G_NRP_IngressBwpPerCosName;
+    }
+    grouping G_NRP_IngressBwpPerCosName {
+        leaf nrp_cosName {
+            type string;
+            description "Class of Service name.";
+        }
+        container nrp_bwpflow {
+            config true;
+            uses G_NRP_BwpFlow;
+        }
+    }
+    list NRP_EgressBwpPerEecName {
+        key 'nrp_eecName';
+        config true;
+        ordered-by system;
+        uses G_NRP_EgressBwpPerEecName;
+    }
+    grouping G_NRP_EgressBwpPerEecName {
+        leaf nrp_eecName {
+            type string;
+            description "Egress Equivelance Class name.";
+        }
+    }
+    grouping G_NRP_ServiceAccessPointColorId {
+        leaf nrp_color {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_FrameColor;
+            description "Green or Yellow.";
+        }
+    }
+    grouping G_NRP_PcpColorId {
+        leaf nrp_vlanTag {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_VlanTag;
+            description "Which vlan tag pcp to be used for color identier, S tag or C tag. S-tag is not valid for EvcEndPoint. ";
+        }
+        leaf-list nrp_pcpValue {
+            description "List PCP values map to the same color.";
+            ordered-by system;
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            min-elements 1;
+        }
+        leaf nrp_color {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_FrameColor;
+            description "Green or Yellow.";
+        }
+    }
+    grouping G_NRP_DeiColorId {
+        leaf nrp_vlanTag {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_VlanTag;
+            description "Which vlan tag pcp to be used for color identier, S tag or C tag. S-tag is not valid for EvcEndPoint. ";
+        }
+        leaf-list nrp_deiValue {
+            description "DEI=0 or DEI=1";
+            ordered-by system;
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            max-elements 2;
+            min-elements 1;
+        }
+        leaf nrp_color {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_FrameColor;
+            description "Green or Yellow";
+        }
+    }
+    grouping G_NRP_DespColorId {
+        leaf nrp_ipVersion {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_IpVersion;
+            description "IPv4, or IPv6, or both IPv4 and IPv6.";
+        }
+        leaf-list nrp_dscpValue {
+            description "List DSCP values map to the same color.";
+            ordered-by system;
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+        }
+        leaf nrp_color {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_FrameColor;
+            description "Green or Yellow";
+        }
+    }
+    grouping G_NRP_ColorIdentifier {
+        container nrp_endPointColorId {
+            description "A choice that maps EVC End Point or OVC End Point to Color.";
+            config true;
+            uses G_NRP_ServiceAccessPointColorId;
+        }
+        container nrp_pcpColorId {
+            description "A choice that maps Vlan tag PCPs to Color.";
+            config true;
+            uses G_NRP_PcpColorId;
+        }
+        container nrp_deiColorId {
+            description "A choice that maps Vlan tag DEI to Color.";
+            config true;
+            uses G_NRP_DeiColorId;
+        }
+        container nrp_despColorId {
+            description "A choice that maps DSCP values to Color.";
+            config true;
+            uses G_NRP_DespColorId;
+        }
+    }
+    list NRP_BwpFlowRank {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_NRP_BwpFlowRank;
+    }
+    grouping G_NRP_BwpFlowRank {
+        leaf nrp_bwpFlowRankInEnvelope {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+        }
+        leaf nrp_bwpflow {
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:NRP_BwpFlow/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:id';
+            }
+        }
+        leaf id {
+            type string;
+        }
+    }
+    list NRP_Envelope {
+        key 'nrp_envelopeId';
+        config true;
+        ordered-by system;
+        uses G_NRP_Envelope;
+    }
+    grouping G_NRP_Envelope {
+        leaf nrp_envelopeId {
+            type string;
+        }
+        leaf nrp_couplingFlagForIndexZero {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "Coupling flag for index zero. 0 for NO and 1 for YES (overflow Green tokens can be used as Yellow tokens)";
+        }
+        leaf-list nrp_bwpflowrank {
+            ordered-by system;
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:NRP_BwpFlowRank/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:id';
+            }
+        }
+    }
+    grouping G_NRP_EtherTypeL2cpId {
+        leaf nrp_etherTypeValue {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "EtherType, e.g., 0x8809";
+        }
+        leaf-list nrp_subType {
+            description "List of sub types. Can be NULL.";
+            ordered-by system;
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+        }
+    }
+    grouping G_NRP_LlcAddressL2cpId {
+        leaf nrp_llcAddress {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "LLC Address";
+        }
+    }
+    grouping G_NRP_L2cpProtocolIdentifier {
+        container nrp_llcAddressL2cpId {
+            description "Choice of L2CP Protocol Identifier based on LLC Address.";
+            config true;
+            uses G_NRP_LlcAddressL2cpId;
+        }
+        container nrp_etherTypeL2cpId {
+            description "Choice of L2CP Protocol Identifier based on EtherType w/o SubTypes";
+            config true;
+            uses G_NRP_EtherTypeL2cpId;
+        }
+        leaf id {
+            type string;
+        }
+    }
+    grouping G_NRP_ServiceAccessPointCosId {
+        leaf nrp_cosName {
+            type string;
+            description "Class of Service name.";
+        }
+        list nrp_l2cpprotocolidentifier {
+            description "List of L2CP Protocol Identifiers that map to the CoS Name.";
+            key 'id';
+            config true;
+            ordered-by system;
+            uses G_NRP_L2cpProtocolIdentifier;
+        }
+    }
+    grouping G_NRP_DataFrameCosIdentifier {
+        container nrp_endPointCosId {
+            description "This is one choice of the CosProfile, for the EVC based CoS Identifier.";
+            config true;
+            uses G_NRP_ServiceAccessPointCosId;
+        }
+        list nrp_pcpCosId {
+            description "This is one choice of the CosProfile, for the PCP based CoS Identifier.";
+            key 'nrp_cosName';
+            config true;
+            ordered-by system;
+            uses G_NRP_PcpCosId;
+            max-elements 8;
+            min-elements 1;
+        }
+        list nrp_dscpCosId {
+            description "This is one choice of the CosProfile, for the DSCP based CoS Identifier.";
+            key 'nrp_cosName';
+            config true;
+            ordered-by system;
+            uses G_NRP_DscpCosId;
+            max-elements 64;
+            min-elements 1;
+        }
+    }
+}
