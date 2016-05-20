@@ -59,8 +59,8 @@ public class EvcDataTreeChangeListenerTest {
         verify(evcDataTreeChangeListener, times(1)).update(any(DataTreeModification.class));
     }
 
-    private DataTreeModification<Link> getDataTreeLink(ModificationType modificationType) {
-        DataObjectModification<Link> evcDataObjModification = new DataObjectModification<Link>() {
+    private DataTreeModification<Link> getDataTreeLink(final ModificationType modificationType) {
+        final DataObjectModification<Link> evcDataObjModification = new DataObjectModification<Link>() {
             @Override
             public Collection<DataObjectModification<? extends DataObject>> getModifiedChildren() {
                 // TODO Auto-generated method stub
