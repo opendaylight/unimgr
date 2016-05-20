@@ -23,6 +23,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </prerequisites>
   <properties>
     <karaf.localFeature>odl-unimgr-ui</karaf.localFeature>
+    <karaf.version>3.0.3</karaf.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -43,7 +44,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <artifactId>framework</artifactId>
       <type>kar</type>
     </dependency>
-
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>unimgr-features</artifactId>

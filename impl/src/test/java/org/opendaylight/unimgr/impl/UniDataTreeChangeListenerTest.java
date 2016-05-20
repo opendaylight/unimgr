@@ -60,8 +60,8 @@ public class UniDataTreeChangeListenerTest {
         verify(uniDataTreeChangeListener, times(1)).update(any(DataTreeModification.class));
     }
 
-    private DataTreeModification<Node> getDataTreeNode(ModificationType modificationType) {
-        DataObjectModification<Node> uniDataObjModification = new DataObjectModification<Node>() {
+    private DataTreeModification<Node> getDataTreeNode(final ModificationType modificationType) {
+        final DataObjectModification<Node> uniDataObjModification = new DataObjectModification<Node>() {
             @Override
             public Collection<DataObjectModification<? extends DataObject>> getModifiedChildren() {
                 // TODO Auto-generated method stub

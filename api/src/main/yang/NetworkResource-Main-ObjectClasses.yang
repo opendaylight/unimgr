@@ -1,0 +1,197 @@
+module NetworkResource-Main-ObjectClasses {
+    namespace "uri:onf:NetworkResource-Main-ObjectClasses";
+    prefix NetworkResource-Main-ObjectClasses;
+    import CoreModel-CoreModelEnhancements-ProfilesTemplatesAndSpecificationsModule {
+        prefix CoreModel-CoreModelEnhancements-ProfilesTemplatesAndSpecificationsModule;
+    }
+    revision 2016-04-13{}
+    grouping G_CeLPSpec {
+        uses CoreModel-CoreModelEnhancements-ProfilesTemplatesAndSpecificationsModule:G_LpSpec;
+    }
+    grouping G_CeTerminSpec {
+        uses CoreModel-CoreModelEnhancements-ProfilesTemplatesAndSpecificationsModule:G_TerminationSpec;
+    }
+    grouping G_CeConnPtAndAdaptSpec {
+        uses CoreModel-CoreModelEnhancements-ProfilesTemplatesAndSpecificationsModule:G_ConnectionPointAndAdapterSpec;
+    }
+    list CeLtpSpec {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_CeLtpSpec;
+    }
+    grouping G_CeLtpSpec {
+        uses CoreModel-CoreModelEnhancements-ProfilesTemplatesAndSpecificationsModule:G_LtpSpec;
+    }
+    grouping G_CeEndPointLpSpec {
+        uses G_CeLPSpec;
+    }
+    list CeSpUniLpSpec {
+        key 'id';
+        config true;
+        uses G_CeUniLpSpec;
+    }
+    list CeEvcEndPointLpSpec {
+        key 'id';
+        config true;
+        uses G_CeEndPointLpSpec;
+    }
+    list CeEnniOvcEndPointLpSpec {
+        key 'id';
+        config true;
+        uses G_CeEndPointLpSpec;
+    }
+    list CeUniOvcEndPoint {
+        key 'id';
+        config true;
+        uses G_CeEndPointLpSpec;
+    }
+    grouping G_CeUniTerminSpec {
+        uses G_CeTerminSpec;
+    }
+    list CeSpUniTerminSpec {
+        key 'id';
+        config true;
+        uses G_CeUniTerminSpec;
+    }
+    list CeOpUniTerminSpec {
+        key 'id';
+        config true;
+        uses G_CeUniTerminSpec;
+    }
+    grouping G_CeUniConnPtAndAdaptSpec {
+        uses G_CeConnPtAndAdaptSpec;
+    }
+    list CeSpUniConnPtAndAdaptSpec {
+        key 'id';
+        config true;
+        uses G_CeUniConnPtAndAdaptSpec;
+    }
+    list CeOpUniConnPtAndAdaptSpec {
+        key 'id';
+        config true;
+        uses G_CeUniConnPtAndAdaptSpec;
+    }
+    list CeEvcEndPointConnPtAndAdaptSpec {
+        key 'id';
+        config true;
+        uses G_CeEndPointConnPtAndAdaptSpec;
+    }
+    grouping G_CeEndPointConnPtAndAdaptSpec {
+        uses G_CeConnPtAndAdaptSpec;
+    }
+    list CeEnniLpSpec {
+        key 'id';
+        config true;
+        uses G_CeLPSpec;
+    }
+    list CeInniLpSpec {
+        key 'id';
+        config true;
+        uses G_CeLPSpec;
+    }
+    list CeUniOvcEndPointConnPtAndAdaptSpec {
+        key 'id';
+        config true;
+        uses G_CeEndPointConnPtAndAdaptSpec;
+    }
+    list CeEnniOvcEndPointConnPtAndAdaptSpec {
+        key 'id';
+        config true;
+        uses G_CeEndPointConnPtAndAdaptSpec;
+    }
+    grouping G_CeUniLpSpec {
+        uses G_CeLPSpec;
+    }
+    list CeOpUniLpSpec {
+        key 'id';
+        config true;
+        uses G_CeUniLpSpec;
+    }
+    list CeEtyLpSpec {
+        key 'id';
+        config true;
+        uses G_CeLPSpec;
+    }
+    list CeEvcFcPortSetSpec {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_CeEvcFcPortSetSpec;
+    }
+    grouping G_CeEvcFcPortSetSpec {
+        uses G_CeFcPortSetSpec;
+    }
+    list CeFcSpec {
+        key 'uuid';
+        config true;
+        ordered-by system;
+        uses G_CeFcSpec;
+    }
+    grouping G_CeFcSpec {
+        uses CoreModel-CoreModelEnhancements-ProfilesTemplatesAndSpecificationsModule:G_FcSpec;
+    }
+    list CeFcPortSetSpec {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_CeFcPortSetSpec;
+    }
+    grouping G_CeFcPortSetSpec {
+        uses CoreModel-CoreModelEnhancements-ProfilesTemplatesAndSpecificationsModule:G_FcPortSetSpec;
+    }
+    list CeEvcFcSpec {
+        key 'uuid';
+        config true;
+        uses G_CeFcSpec;
+    }
+    list CeOvcSpec {
+        key 'uuid';
+        config true;
+        uses G_CeFcSpec;
+    }
+    list CeOvcFcPortSetSpec {
+        key 'id';
+        config true;
+        uses G_CeFcPortSetSpec;
+    }
+    list CeEthFrameAggregateLpSpec {
+        key 'id';
+        config true;
+        uses G_CeLPSpec;
+    }
+    list CeEthFrameFlowLpSpec {
+        key 'id';
+        config true;
+        uses G_CeLPSpec;
+    }
+    list CeEthFrameAggregateTerminSpec {
+        key 'id';
+        config true;
+        uses G_CeTerminSpec;
+    }
+    list CeEthFrameAggregateConnPtAndAdaptSpec {
+        key 'id';
+        config true;
+        uses G_CeConnPtAndAdaptSpec;
+    }
+    list CeEthFrameFlowConnPtAndAdaptLpSpec {
+        key 'id';
+        config true;
+        uses G_CeConnPtAndAdaptSpec;
+    }
+    list CeEthFc {
+        key 'uuid';
+        config true;
+        uses G_CeFcSpec;
+    }
+    list CeEthFcPortSetSpec {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_CeEthFcPortSetSpec;
+    }
+    grouping G_CeEthFcPortSetSpec {
+        uses G_CeFcPortSetSpec;
+    }
+}

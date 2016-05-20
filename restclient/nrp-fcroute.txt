@@ -1,0 +1,122 @@
+# -*- restclient -*-
+# Settings
+:host = http://localhost:8181
+:basic-auth := (format "Basic %s" (base64-encode-string (format "%s:%s" "admin" "admin")))
+
+# Create FcRoute
+POST :host/restconf/config/CoreModel-CoreNetworkModule-ObjectClasses:FcRouteList
+Authorization: :basic-auth
+Content-Type: application/json
+{
+   "FcRoute": {
+       "id" : "new-route",
+       "ForwardingConstruct": [
+       {
+          "uuid": "an-original-name",
+          "FcPort": [ {
+                     "id": "a-end",
+                     "_ltpRefList": [ "host-a:a-end-ltp" ]
+                     }, {
+                     "id": "z-end",
+                     "_ltpRefList": [ "host-z:z-end-ltp" ]
+                     } ],
+          "forwardingDirection": "BIDIRECTIONAL",
+          "layerProtocolName": "funky-layer-protocol",
+          "_fcSpecRef": "nonexistent-fcspec"
+       }
+   ] }
+}
+
+# Delete FcRoute
+DELETE :host/restconf/config/CoreModel-CoreNetworkModule-ObjectClasses:FcRouteList/FcRoute/new-route
+Authentication: :basic-auth
+
+# List FcRoute
+GET :host/restconf/config/CoreModel-CoreNetworkModule-ObjectClasses:FcRouteList
+Authorization: :basic-auth
+
+# Create single-host FcRoute
+POST :host/restconf/config/CoreModel-CoreNetworkModule-ObjectClasses:FcRouteList
+Authorization: :basic-auth
+Content-Type: application/json
+{
+   "FcRoute": {
+       "id" : "single-host",
+       "ForwardingConstruct": [
+       {
+          "uuid": "single-host",
+          "FcPort": [ {
+                     "id": "a-end",
+                     "_ltpRefList": [ "asr-101:GigabitEthernet0/0/1/19" ]
+                     }, {
+                     "id": "z-end",
+                     "_ltpRefList": [ "asr-101:GigabitEthernet0/0/1/17" ]
+                     } ],
+          "forwardingDirection": "BIDIRECTIONAL",
+          "layerProtocolName": "funky-layer-protocol",
+          "_fcSpecRef": "nonexistent-fcspec"
+       }
+   ] }
+}
+
+# Delete FcRoute
+DELETE :host/restconf/config/CoreModel-CoreNetworkModule-ObjectClasses:FcRouteList/FcRoute/single-host
+Authentication: :basic-auth
+
+# Create two host FcRoute
+POST :host/restconf/config/CoreModel-CoreNetworkModule-ObjectClasses:FcRouteList
+Authorization: :basic-auth
+Content-Type: application/json
+{
+   "FcRoute": {
+       "id" : "two-host-pw",
+       "ForwardingConstruct": [
+       {
+          "uuid": "two-host",
+          "FcPort": [ {
+                     "id": "a-end",
+                     "_ltpRefList": [ "asr-102:GigabitEthernet0/0/1/17" ]
+                     }, {
+                     "id": "z-end",
+                     "_ltpRefList": [ "asr-103:GigabitEthernet0/0/0/19" ]
+                     } ],
+          "forwardingDirection": "BIDIRECTIONAL",
+          "layerProtocolName": "funky-layer-protocol",
+          "_fcSpecRef": "nonexistent-fcspec"
+       },
+       {
+          "uuid": "single-host",
+          "FcPort": [ {
+                     "id": "a-end",
+                     "_ltpRefList": [ "asr-101:GigabitEthernet0/0/1/19" ]
+                     }, {
+                     "id": "z-end",
+                     "_ltpRefList": [ "asr-101:GigabitEthernet0/0/1/17" ]
+                     } ],
+          "forwardingDirection": "BIDIRECTIONAL",
+          "layerProtocolName": "funky-layer-protocol",
+          "_fcSpecRef": "nonexistent-fcspec"
+       }
+   ] }
+}
+
+# Delete FcRoute
+DELETE :host/restconf/config/CoreModel-CoreNetworkModule-ObjectClasses:FcRouteList/FcRoute/two-host-pw
+Authentication: :basic-auth
+
+# Get all FcRoute
+GET :host/restconf/config/CoreModel-CoreNetworkModule-ObjectClasses:FcRouteList/
+Authentication: :basic-auth
+
+# Get l2vpn
+:node = asr-102
+GET :host/restconf/config/network-topology:network-topology/topology/topology-netconf/node/:node/yang-ext:mount/Cisco-IOS-XR-l2vpn-cfg:l2vpn/database/xconnect-groups/
+Authorization: :basic-auth
+Accept: application/xml
+
+# Delete p2p xconnect
+:group = EUR16-two-host
+:name = EUR16-p2p-two-host
+DELETE :host/restconf/config/network-topology:network-topology/topology/topology-netconf/node/:node/yang-ext:mount/Cisco-IOS-XR-l2vpn-cfg:l2vpn/database/xconnect-groups/xconnect-group/:group/p2p-xconnects/p2p-xconnect/:name
+Authorization: :basic-auth
+Accept: application/xml

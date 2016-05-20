@@ -15,6 +15,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <relativePath/>
   </parent>
 
+  <properties>
+    <powermock.version>1.6.4</powermock.version>
+  </properties>
+
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>unimgr-cli</artifactId>
