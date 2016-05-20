@@ -1,0 +1,18 @@
+# -*- restclient -*-
+# Settings
+:host = http://localhost:8181
+:basic-auth := (format "Basic %s" (base64-encode-string (format "%s:%s" "admin" "admin")))
+
+# Create FcSoec
+POST :host/restconf/config/CoreModel-CoreModelEnhancements-ProfilesTemplatesAndSpecificationsModule:FcSpecList
+Authorization: :basic-auth
+Content-Type: application/json
+{
+   "FcSpec" : {
+      "uuid": "an-original-name"
+   }
+}
+
+# Delete FcSpec
+
+# List FcSpec

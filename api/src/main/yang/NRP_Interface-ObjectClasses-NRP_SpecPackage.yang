@@ -1,0 +1,658 @@
+module NRP_Interface-ObjectClasses-NRP_SpecPackage {
+    namespace "uri:onf:NRP_Interface-ObjectClasses-NRP_SpecPackage";
+    prefix NRP_Interface-ObjectClasses-NRP_SpecPackage;
+    import NetworkResource-Main-ObjectClasses {
+        prefix NetworkResource-Main-ObjectClasses;
+    }
+    import NRP_Interface-TypeDefinitions-NRP_Types {
+        prefix NRP_Interface-TypeDefinitions-NRP_Types;
+    }
+    import NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage {
+        prefix NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage;
+    }
+    revision 2016-04-13{}
+    list NRP_TerminationSpec {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_NRP_TerminationSpec;
+    }
+    grouping G_NRP_TerminationSpec {
+        uses NetworkResource-Main-ObjectClasses:G_CeTerminSpec;
+        leaf nrp_physicalLayer {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_PhysicalLayer;
+            description "This attribute is a list of physical layers, one for each physical link implementing the UNI or ENNI. Different physical links can use different physical layers. The Physical Layer for each physical link implementing the UNI or ENNI MUST be one of the PHYs listed in IEEE Std 802.3 – 2012 but excluding 1000BASE-PX-D and 1000BASE-PX-U.
+Reference MEF 10.3, Section 9.2.";
+        }
+        list nrp_syncMode {
+            description "The Synchronous Mode Service Attribute is a list with one item for each of the physical links. When the value of an item is “Enabled,” the bits transmitted from the CEN to the CE on the physical link corresponding to the item can be used by the CE as a bit clock reference.
+Reference MEF 10.3, Section 9.3.";
+            key 'linkId';
+            config true;
+            ordered-by system;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_SyncModePerLink;
+            min-elements 1;
+        }
+        leaf nrp_numberOfLinks {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "This attribute specifies the number of links at the Ethernet Service Interface (UNI or ENNI).
+MEF 10.3, Section 9.4.";
+        }
+        leaf nrp_resiliency {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_InterfaceResiliency;
+            description "This attribute value is one of None, 2-Link Active/Standby, All Active, or Other.
+MEF 10.3, Section 9.5.  MEF 10.3.2, MEF 26.2
+";
+        }
+        container nrp_portConvsIdToAggLinkMap {
+            description "The Port Conversation ID to Aggregation Link Map Attribute is applicable only when the EthernetServiceInterface resiliency attribute has the value of All Active. Its value is a Port Conversation ID to Aggregation Link Map as defined in IEEE Std 802.1AX – 2014.
+MEF 10.3.2";
+            config true;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_ConversationIdToAggrgationLinkMap;
+        }
+        leaf nrp_maxFrameSize {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "This value limits the length of frames carried by an EVC/OVC that associates an EVC/OVC End Point. The minimum of this maxinum number for UNI and ENNI are different.
+MEF 10.3, Section 9.7.";
+        }
+        leaf nrp_linkOamEnabled {
+            type boolean;
+            description "When the value of the Link OAM attribute is Enabled, Link OAM musd tbe run on all physical links in the UNI/ENNI.
+MEF 10.3, Section 9.16.";
+        }
+        leaf nrp_tokenShareEnabled {
+            type boolean;
+            description "When the value of the Token Share Service attribute is Enabled, at least one Envelope at the UNI/ENNI MUST be able to have two or more Bandwidth Profiles mapped to it.
+MEF 6.2, Section 8.2.1. ";
+        }
+        leaf-list nrp_CeServiceAccessPoint {
+            description "The Network Interface relationship to supporting zero to many Logical Interface flow points.";
+            ordered-by system;
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_SpecPackage:NRP_ConnAdaptSpec/NRP_Interface-ObjectClasses-NRP_SpecPackage:id';
+            }
+        }
+        leaf-list nrp_envelope {
+            description "MEF 10.3, Section 12.1.
+MEF 6.2, Section 8.2.2.";
+            ordered-by system;
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:NRP_Envelope/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:nrp_envelopeId';
+            }
+        }
+        leaf nrp_serviceProviderUniId {
+            type string;
+            description "MEF 10.3, Section 9.1.";
+        }
+    }
+    list NRP_ENNI_TerminationSpec {
+        key 'id';
+        config true;
+        uses G_NRP_TerminationSpec;
+        leaf nrp_linkAggLinkMegEnabled {
+            type string;
+            description " When the value of the Operator UNI LAG Link MEG Service Attribute is Enabled, the Operator CEN MUST operate the LAG Link MEG on each link in the UNI. This may be a candidate for UNI service attribute.
+MEF 26.2";
+        }
+    }
+    list NRP_INNI_TerminationSpec {
+        key 'id';
+        config true;
+        uses G_NRP_TerminationSpec;
+    }
+    list NRP_UNI_TerminationSpec {
+        key 'id';
+        config true;
+        uses G_NRP_TerminationSpec;
+        container nrp_defaultCeVlanId {
+            description "This is the CE-VLAN ID value assigned to Untagged Service Frames and Priority Tagged Service Frames. In MEF 10.3, it is called CE Vlan ID for untagged and priority tagged service frames.
+MEF 10.3, Section 9.9.";
+            config true;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_VlanId;
+        }
+        leaf nrp_uniMegEnabled {
+            type boolean;
+            description "When the value of the UNI MEG Service Attribute is Enabled, the CEN MUST meet the mandatory requirements in MEF 30.1 that apply to the UNI MEG
+MEF 10.3, Section 9.17.";
+        }
+        leaf nrp_elmiEnabled {
+            type boolean;
+            description "When the value of the E-LMI Service Attribute is Enabled, the CEN MUST meet the mandatory requirements in MEF 16 that apply to the UNI-N.
+MEF 10.3, Section 9.18";
+        }
+        leaf nrp_serviceprovideruniprofile {
+            type string;
+        }
+        leaf nrp_operatoruniprofile {
+            type string;
+        }
+        leaf nrp_ingressBwpUni {
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:NRP_BwpFlow/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:id';
+            }
+            description "MEF 10.3, Section 9.14";
+        }
+        leaf nrp_egressBwpUni {
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:NRP_BwpFlow/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:id';
+            }
+            description "MEF 10.3, Section 9.15";
+        }
+    }
+    list NRP_EvcEndpoint_ConnAdaptSpec {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_NRP_EvcEndpoint_ConnAdaptSpec;
+        min-elements 2;
+    }
+    grouping G_NRP_EvcEndpoint_ConnAdaptSpec {
+        uses G_NRP_ConnAdaptSpec;
+        leaf nrp_evcEndPointId {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_Identifier45;
+            description "The EVC End Point Identification. This attribute is adapted from MEF 26.2. MEF 10.3 uses \"EVC per UNI\" for EVC End Point, therefore there is no identificaiton attribute. ";
+        }
+        leaf nrp_testMegEnabled {
+            type boolean;
+            description "When the value of the Test MEG Service Attribute is Enabled, the CEN MUST meet the mandatory requirements in Section 7.5 of MEF 30.1.
+that apply to the Test MEG";
+        }
+        leaf nrp_evcEndPointRole {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_EvcEndPointRole;
+            description "The EVC End Point Role is ROOF or LEAF.";
+        }
+        list nrp_evcEndPointMap {
+            description "This attribute provides the list of CE-VLAN IDs that maps to the EVC. MEF 10.3 and MEF 6.2 list this attriubte (CE-VLAN ID/EVC map) as UNI service attribute while MEF 26.2 decided to move this on as endpoint service attribute, just as MEF 10.1 and MEF 6.1 did. Decided to move this one to endpoint to be consistent. To be consitent, changing its name to EvcEntPointMap (MEF 26.2 lists as OVC Endpoint Map).
+";
+            key 'vid';
+            config true;
+            ordered-by system;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_VlanId;
+            min-elements 1;
+        }
+        leaf nrp_subscriberMegMipEbabled {
+            type boolean;
+            description "When the value of the Subscriber MEG MIP Service Attribute is Enabled, the CEN MUST instantiate a Subscriber Level MIP.";
+        }
+        container nrp_elasticserviceconstraintprofile {
+            config true;
+            uses G_NRP_ElasticServiceConstraintProfile;
+        }
+        leaf nrp_evc {
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_SpecPackage:NRP_EdgeCeFcSpec/NRP_Interface-ObjectClasses-NRP_SpecPackage:uuid';
+            }
+        }
+    }
+    list NRP_IvcEndpoint_ConnAdaptSpec {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_NRP_IvcEndpoint_ConnAdaptSpec;
+    }
+    grouping G_NRP_IvcEndpoint_ConnAdaptSpec {
+        uses G_NRP_ConnAdaptSpec;
+        leaf nrp_ivcEndPointId {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_Identifier45;
+            description "The EVC End Point Identification. This attribute is adapted from MEF 26.2. MEF 10.3 uses \"EVC per UNI\" for EVC End Point, therefore there is no identificaiton attribute. ";
+        }
+        leaf nrp_testMegEnabled {
+            type boolean;
+            description "When the value of the Test MEG Service Attribute is Enabled, the CEN MUST meet the mandatory requirements in Section 7.5 of MEF 30.1.
+that apply to the Test MEG";
+        }
+        leaf nrp_ivcEndPointRole {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_EndPointRole;
+            description "The EVC End Point Role is ROOF or LEAF.";
+        }
+        leaf-list nrp_ivcEndPointMap {
+            description "This attribute provides the list of CE-VLAN IDs that maps to the EVC. MEF 10.3 and MEF 6.2 list this attriubte (CE-VLAN ID/EVC map) as UNI service attribute while MEF 26.2 decided to move this on as endpoint service attribute, just as MEF 10.1 and MEF 6.1 did. Decided to move this one to endpoint to be consistent. To be consitent, changing its name to EvcEntPointMap (MEF 26.2 lists as OVC Endpoint Map).
+";
+            ordered-by system;
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_SpecPackage:NRP_EndPointMap/NRP_Interface-ObjectClasses-NRP_SpecPackage:id';
+            }
+            min-elements 1;
+        }
+        leaf nrp_subscriberMegMipEbabled {
+            type boolean;
+            description "When the value of the Subscriber MEG MIP Service Attribute is Enabled, the CEN MUST instantiate a Subscriber Level MIP.";
+        }
+    }
+    list NRP_ConnAdaptSpec {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_NRP_ConnAdaptSpec;
+    }
+    grouping G_NRP_ConnAdaptSpec {
+        uses NetworkResource-Main-ObjectClasses:G_CeConnPtAndAdaptSpec;
+        container nrp_sourceMacAddressLimit {
+            description "MEF 10.3, Section 10.9";
+            config true;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_SourceMacAddressLimit;
+        }
+        leaf nrp_CeExternalInterface {
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_SpecPackage:NRP_TerminationSpec/NRP_Interface-ObjectClasses-NRP_SpecPackage:id';
+            }
+        }
+        container nrp_egressMap {
+            description "MEF 7.3";
+            config true;
+            uses NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:G_NRP_EgressMap;
+        }
+        container nrp_eecIdentifier {
+            config true;
+            uses NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:G_NRP_EecIdentifier;
+        }
+        container nrp_coloridentifier {
+            config true;
+            uses NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:G_NRP_ColorIdentifier;
+        }
+        leaf nrp_ingressBwpFlow {
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:NRP_BwpFlow/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:id';
+            }
+        }
+        leaf nrp_egressBwpFlow {
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:NRP_BwpFlow/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:id';
+            }
+        }
+        container nrp_cosidentifier {
+            config true;
+            uses NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:G_NRP_DataFrameCosIdentifier;
+        }
+        container nrp_ingressbwppercosname {
+            config true;
+            uses NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:G_NRP_IngressBwpPerCosName;
+        }
+        container nrp_egressbwppereecname {
+            config true;
+            uses NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:G_NRP_EgressBwpPerEecName;
+        }
+        leaf nrp_l2cpAddressSet {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_L2cpAddressSet;
+        }
+        list nrp_l2cpPeering {
+            description "The L2CP Peering service attribute value MUST be an empty list, or a list
+of entries identifying protocols to be Peered where each entry consists of
+{Destination Address, Protocol Identifier} or {Destination Address, Protocol
+Identifier, Link Identifier}.
+MEF 45, Section 8.2";
+            key 'protocolId';
+            config true;
+            ordered-by system;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_L2cpPeering;
+        }
+    }
+    list NRP_EdgeCeFcSpec {
+        key 'uuid';
+        config true;
+        ordered-by system;
+        uses G_NRP_EdgeCeFcSpec;
+    }
+    grouping G_NRP_EdgeCeFcSpec {
+        uses G_NRP_CeFcSpec;
+        list nrp_evcEndpoint {
+            key 'id';
+            config true;
+            ordered-by system;
+            uses G_NRP_EvcEndpoint_ConnAdaptSpec;
+            min-elements 1;
+        }
+        leaf-list nrp_ovcEndpoint {
+            ordered-by system;
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_SpecPackage:NRP_OvcEndpoint_ConnAdaptSpec/NRP_Interface-ObjectClasses-NRP_SpecPackage:id';
+            }
+        }
+        leaf-list nrp_ivcEndpoint {
+            ordered-by system;
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_SpecPackage:NRP_IvcEndpoint_ConnAdaptSpec/NRP_Interface-ObjectClasses-NRP_SpecPackage:id';
+            }
+        }
+        leaf nrp_ceVlanIdPreservation {
+            type boolean;
+            description "The CE-VLAN ID preserved represents the CE-VLAN ID relationship between the ingress Service Frame and its corresponding egress Service Frame(s). Reference MEF 10.3, Section 8.6.1.";
+        }
+        leaf nrp_ceVlanCosPreservation {
+            type boolean;
+            description "The CE-VLAN CoS preservation represents the PCP value relationship between the ingress Service Frame and its corresponding egress Service Frame(s). Reference MEF 10.3, Section 8.6.2.";
+        }
+        leaf nrp_CeEvcFcPortSetSpec {
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_SpecPackage:NRP_CeEvcFcPortSetSpec/NRP_Interface-ObjectClasses-NRP_SpecPackage:id';
+            }
+        }
+    }
+    list NRP_ElasticServiceConstraintProfile {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_NRP_ElasticServiceConstraintProfile;
+    }
+    grouping G_NRP_ElasticServiceConstraintProfile {
+        leaf nrp_cirUpperBound {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "This attribute sets the elastic CIR upper bound.";
+        }
+        leaf nrp_cirEirLowerBound {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "This attribute sets the elastic CIR and EIR lower bound.";
+        }
+        leaf nrp_cirEirUpperBound {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "This attribute sets the elastic CIR and EIR upper bound.";
+        }
+        leaf nrp_modReqLimit {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "This attribute sets the modification request limit.";
+        }
+        leaf nrp_modIntervalLimit {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "This attributes sets the modification interval limit. ";
+        }
+        leaf nrp_currentCir {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "This attribute reflects the current CIR.";
+        }
+        leaf nrp_currentCbs {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "This attribute reflects the current CBS.";
+        }
+        leaf nrp_currentEir {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "This attribute reflects the current EIR.";
+        }
+        leaf nrp_currentEbs {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "This attribute reflects the current EBS.";
+        }
+        list nrp_currentCeVlanIdList {
+            description "This attribute reflects the current CE-VLAN ID list.";
+            key 'vid';
+            config true;
+            ordered-by system;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_VlanId;
+            min-elements 1;
+        }
+        container nrp_currentUniACeVlanId {
+            description "This attribute reflects the current UNI A CE-VLAN ID.";
+            config true;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_VlanId;
+        }
+        container nrp_currentUniZCeVlanId {
+            description "This attribute reflects the current UNI Z CE-VLAN ID.";
+            config true;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_VlanId;
+        }
+        leaf id {
+            type string;
+        }
+    }
+    list NRP_TransitCeFcSpec {
+        key 'uuid';
+        config true;
+        uses G_NRP_CeFcSpec;
+        leaf nrp_sVlanIdPreservation {
+            type boolean;
+            description "The OVC S-VLAN ID Preservation Service Attribute describes a relationship between the S-VLAN ID value of a frame at one ENNI and the S-VLAN ID value of the corresponding frame at another ENNI supported by the Operator CEN where each ENNI has an OVC End Point that is associated by the OVC";
+        }
+        leaf nrp_sVlanPcpPreservation {
+            type boolean;
+            description "The OVC S-VLAN PCP Preservation Service Attribute describes a relationship between the S-VLAN PCP value of a frame at one ENNI and the S-VLAN PCP of the corresponding frame at another ENNI supported by the Operator CEN where each ENNI has an OVC End Point that is associated by the OVC";
+        }
+        leaf-list nrp_ListOfCosNames {
+            description "The value of the List of Class of Service Names Service Attribute is a list of Class of Service Names. Each ingress ENNI Frame or ingress Service Frame is assigned a Class of Service Name via the frame’s Class of Service Identifier. The Class of Service Name that is assigned to a frame indicates the performance objectives that apply to frame under appropriate conditions.";
+            ordered-by system;
+            type string;
+        }
+        leaf-list nrp_ovcEndpoint {
+            ordered-by system;
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_SpecPackage:NRP_OvcEndpoint_ConnAdaptSpec/NRP_Interface-ObjectClasses-NRP_SpecPackage:id';
+            }
+        }
+        leaf-list nrp_ivcEndpoint {
+            ordered-by system;
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_SpecPackage:NRP_IvcEndpoint_ConnAdaptSpec/NRP_Interface-ObjectClasses-NRP_SpecPackage:id';
+            }
+        }
+        leaf nrp_CeEthFcPortSetSpec {
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_SpecPackage:NRP_CeEthFcPortSetSpec/NRP_Interface-ObjectClasses-NRP_SpecPackage:id';
+            }
+        }
+    }
+    list NRP_CeFcSpec {
+        key 'uuid';
+        config true;
+        ordered-by system;
+        uses G_NRP_CeFcSpec;
+    }
+    grouping G_NRP_CeFcSpec {
+        uses NetworkResource-Main-ObjectClasses:G_CeFcSpec;
+        leaf nrp_connectionType {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_ConnectionType;
+            description "Virtual connection (EVC or OVC).";
+        }
+        leaf nrp_unicastFrameDelivery {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_ServiceFrameDelivery;
+            description "A Data Service Frame with a unicast Destination MAC Address is defined to be a Multicast Data Service Frame. Reference MEF 10.3, Section 8.5.2.";
+        }
+        leaf nrp_multicastFrameDelivery {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_ServiceFrameDelivery;
+        }
+        leaf nrp_broadcastFrameDelivery {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_ServiceFrameDelivery;
+            description "A Data Service Frame with a broadcast Destination MAC Address is defined to be a Broadcast Data Service Frame. Reference MEF 10.3, Section 8.5.2 for EVC and MEF 26.1, Section x.y for OVC.";
+        }
+        leaf nrp_vcMaxServiceFrame {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_PositiveInteger;
+            description "The value for the EVC or OVC Maximum Service Frame Size is a positive integer in bytes. Reference MEF 10.3, Section 8.9 for EVC and MEF 26.1 Section x.y for OVC.";
+        }
+        leaf nrp_vcId {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_Identifier45;
+            description "The EVC ID is an arbitrary string administered by the Service Provider that is used to identify an EVC within the CEN.
+MEF 10.3, Section 8.2.";
+        }
+    }
+    list NRP_EndPointMap {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_NRP_EndPointMap;
+    }
+    grouping G_NRP_EndPointMap {
+        container nrp_endPointMapFormE {
+            description "Form E (E for ENNI).";
+            config true;
+            uses G_NRP_EndPointMapFormE;
+        }
+        container nrp_endPointMapFormT {
+            description "Form T (T for Trunk) ";
+            config true;
+            uses G_NRP_EndPointMapFormT;
+        }
+        container nrp_endPointMapFormV {
+            description "Form V (V for VUNI).";
+            config true;
+            uses G_NRP_EndPointMapFormV;
+        }
+        container nrp_endPointMapFormU {
+            description "Form U (U for UNI) .";
+            config true;
+            uses G_NRP_EndPointMapFormU;
+        }
+        leaf id {
+            type string;
+        }
+    }
+    grouping G_NRP_EndPointMapFormE {
+        list nrp_sVid {
+            description "List of S-VLAN IDs";
+            key 'vid';
+            config true;
+            ordered-by system;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_VlanId;
+            min-elements 1;
+        }
+    }
+    grouping G_NRP_EndPointMapFormT {
+        container nrp_rootSVid {
+            description "Root S-VLAN ID";
+            config true;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_VlanId;
+        }
+        container nrp_leafSVid {
+            description "Leaf S-VLAN ID";
+            config true;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_VlanId;
+        }
+    }
+    grouping G_NRP_EndPointMapFormV {
+        container nrp_sVid {
+            description "S-VLAN ID";
+            config true;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_VlanId;
+        }
+        list nrp_enniCeVid {
+            description "List of ENNI CE-CLAN IDs";
+            key 'vid';
+            config true;
+            ordered-by system;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_VlanId;
+            min-elements 1;
+        }
+    }
+    grouping G_NRP_EndPointMapFormU {
+        list nrp_cVid {
+            description "List of CE-VLAN IDs";
+            key 'vid';
+            config true;
+            ordered-by system;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_VlanId;
+            min-elements 1;
+        }
+    }
+    list NRP_OvcEndpoint_ConnAdaptSpec {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_NRP_OvcEndpoint_ConnAdaptSpec;
+    }
+    grouping G_NRP_OvcEndpoint_ConnAdaptSpec {
+        uses G_NRP_ConnAdaptSpec;
+        leaf nrp_ovcEndPointId {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_Identifier45;
+            description "OVC End Point Identifier (MEF 26.2).";
+        }
+        leaf nrp_ovcEndPointRole {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_EndPointRole;
+            description "OVC End Point Role is ROOF, LEAF, or TRUNK.";
+        }
+        leaf nrp_mipEnabled {
+            type boolean;
+            description "When the value is Enabled, several parameter values, including the MEG Level, need to be determined as described in MEF 30.1. This Service Attribute is only applicable when the OVC End Point is at an ENNI and not in a VUNI.";
+        }
+        list nrp_enniMepList {
+            description "The value of the OVC End Point Maintenance End Point List Service Attribute is a list of pairs, one for each MEP that is instantiated. Each pair is of the form <l,d> where l equals the MEG Level, and d is the direction for the MEP, either Up or Down. ";
+            key 'nrp_megId';
+            config true;
+            ordered-by system;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_MepLevelAndDirection;
+        }
+        leaf nrp_enniTaggedL2cp801dotCompliant {
+            type boolean;
+            description "This attribute reflects the capability of the ENNI to process S-VLAN-tagged L2CP Frames in an 802.1 compliant manner.";
+        }
+        container nrp_endPointMap {
+            config true;
+            uses G_NRP_EndPointMap;
+        }
+        list nrp_aggregationLinkDepth {
+            description "This attribute only applies to OVC End Points at an ENNI and the ENNI linkAggregation has the value ALL_ACTIVE, or EVC/OVC End Points at UNI and the UNI linkAggregation has the value ALL_ACTIVE. The attribute value is a list of pairs of the form (s,n) where s is an VLAN ID value that is contained in the value of the OVC End Point Map Service Attribute and n is an integer in the range 1 to the value of the ENNI Number of Links. n specifies the number of links in the ENNI Port Conversation ID to Aggregation Link Map for the S-VLAN ID value s.";
+            key 'nrp_linkNumber';
+            config true;
+            ordered-by system;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_AggLinkDepth;
+        }
+    }
+    list NRP_VUNI {
+        key 'id';
+        config true;
+        uses G_NRP_OvcEndpoint_ConnAdaptSpec;
+        leaf nrp_vuniIdentifier {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_Identifier45;
+            description "This allows the SP/SO and the Operator to uniquely identify a VUNI for operations purposes";
+        }
+        container nrp_sVid {
+            description "The value of this attribute uniquely identifies the VUNI at the ENNI.";
+            config true;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_VlanId;
+        }
+        container nrp_defaultCeVid {
+            description "This attribute is needed for the definition of the ENNI CE-VLAN ID for an ENNI Frame. The ENNI CE-VLAN ID is used in Form V of the OVC End Point Map Service Attribute at an ENNI.  0 for no C-TAG";
+            config true;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_VlanId;
+        }
+        leaf nrp_maxNumOvcEndpoint {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "This attribute defines the maximum number of OVC End Points that the ENNI can support.";
+        }
+        leaf nrp_maxNumEnniCeVlanIdPerOvcEndPoint {
+            type NRP_Interface-TypeDefinitions-NRP_Types:NRP_NaturalNumber;
+            description "This attribute value is the largest number of ENNI CE-VLAN ID values that can map to an OVC End Point in a value of the OVC End Point Map Service Attribute for an OVC End Point that is in the VUNI.";
+        }
+        list nrp_vuniEndPointMepList {
+            description "This attribute provides a list of pairs, one for each MEP that is instantiated. Each pair is of the form <l,d> where 𝑙 equals the MEG Level, and 𝑑 is the direction for the MEP, either Up or Down.";
+            key 'nrp_megId';
+            config true;
+            ordered-by system;
+            uses NRP_Interface-TypeDefinitions-NRP_Types:G_NRP_MepLevelAndDirection;
+        }
+        leaf nrp_ingressbwp {
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:NRP_BwpFlow/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:id';
+            }
+        }
+        leaf nrp_egressbwp {
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:NRP_BwpFlow/NRP_Interface-ObjectClasses-NRP_BandwidthProfilePackage:id';
+            }
+        }
+        leaf-list nrp_ovcendpoint {
+            ordered-by system;
+            type leafref {
+                path '/NRP_Interface-ObjectClasses-NRP_SpecPackage:NRP_OvcEndpoint_ConnAdaptSpec/NRP_Interface-ObjectClasses-NRP_SpecPackage:id';
+            }
+        }
+    }
+    list NRP_CeEvcFcPortSetSpec {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_NRP_CeEvcFcPortSetSpec;
+    }
+    grouping G_NRP_CeEvcFcPortSetSpec {
+        uses NetworkResource-Main-ObjectClasses:G_CeEvcFcPortSetSpec;
+    }
+    list NRP_CeEthFcPortSetSpec {
+        key 'id';
+        config true;
+        ordered-by system;
+        uses G_NRP_CeEthFcPortSetSpec;
+    }
+    grouping G_NRP_CeEthFcPortSetSpec {
+        uses NetworkResource-Main-ObjectClasses:G_CeEthFcPortSetSpec;
+    }
+    list NRP_CeLtpSpec {
+        key 'id';
+        config true;
+        uses NetworkResource-Main-ObjectClasses:G_CeLtpSpec;
+    }
+}

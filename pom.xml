@@ -24,15 +24,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <prerequisites>
     <maven>3.1.1</maven>
   </prerequisites>
-  <modules>
-    <module>api</module>
-    <module>impl</module>
-    <module>cli</module>
-    <module>karaf</module>
-    <module>features</module>
-    <module>artifacts</module>
-    <module>it</module>
-  </modules>
+
   <!-- DO NOT install or deploy the repo root pom as it's only needed to initiate a build -->
   <build>
     <plugins>
@@ -52,6 +44,37 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>models</id>
+      <modules>
+        <module>cisco-xrmodels</module>
+        <module>edgeassure-1000</module>
+      </modules>
+      <activation><activeByDefault>true</activeByDefault></activation>
+    </profile>
+    <profile>
+      <id>main</id>
+      <modules>
+        <module>api</module>
+        <module>impl</module>
+        <module>cisco-xr-driver</module>
+        <module>cli</module>
+        <module>karaf</module>
+        <module>features</module>
+        <module>artifacts</module>
+      </modules>
+      <activation><activeByDefault>true</activeByDefault></activation>
+    </profile>
+    <profile>
+      <id>test</id>
+      <modules>
+        <module>it</module>
+      </modules>
+      <activation><activeByDefault>true</activeByDefault></activation>
+    </profile>
+  </profiles>
 
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/unimgr.git</connection>

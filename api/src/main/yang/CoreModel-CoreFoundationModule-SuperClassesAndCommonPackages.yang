@@ -1,0 +1,129 @@
+module CoreModel-CoreFoundationModule-SuperClassesAndCommonPackages {
+    namespace "uri:onf:CoreModel-CoreFoundationModule-SuperClassesAndCommonPackages";
+    prefix CoreModel-CoreFoundationModule-SuperClassesAndCommonPackages;
+    import CoreModel-CoreFoundationModule-StateModel {
+        prefix CoreModel-CoreFoundationModule-StateModel;
+    }
+    revision 2016-04-13{}
+    grouping G_Name {
+        list nameList {
+            description "List of names.";
+            key 'theValue';
+            config true;
+            ordered-by system;
+            uses G_NameAndValue;
+            min-elements 1;
+        }
+    }
+    list GlobalClass {
+        key 'uuid';
+        config true;
+        ordered-by system;
+        uses G_GlobalClass;
+    }
+    grouping G_GlobalClass {
+        uses G_Name;
+        uses G_Label;
+        uses G_Extension;
+        uses CoreModel-CoreFoundationModule-StateModel:G_State_Pac;
+        list localIdList {
+            description "An identifier that is unique in the context of some scope that is less than the global scope.
+
+(consider in the context of Identifier: A property of an entity/role with a value that is unique within an identifier space, where the identifier space is itself unique, and immutable. The identifier therefore represents the identity of the entity/role. An identifier carries no semantics with respect to the purpose of the entity.)";
+            key 'theValue';
+            config true;
+            ordered-by system;
+            uses G_NameAndValue;
+        }
+        leaf uuid {
+            type UniversalId;
+            description "UUID: An identifier that is universally unique
+
+(consider in the context of Identifier: A property of an entity/role with a value that is unique within an identifier space, where the identifier space is itself globally unique, and immutable. An identifier carries no semantics with respect to the purpose or state of the entity)";
+        }
+    }
+    grouping G_LocalClass {
+        uses G_Name;
+        uses G_Label;
+        uses G_Extension;
+        uses CoreModel-CoreFoundationModule-StateModel:G_State_Pac;
+        list localIdList {
+            description "An identifier that is unique in the context of some scope that is less than the global scope.
+
+(consider in the context of Identifier: A property of an entity/role with a value that is unique within an identifier space, where the identifier space is itself unique, and immutable. The identifier therefore represents the identity of the entity/role. An identifier carries no semantics with respect to the purpose of the entity.)";
+            key 'theValue';
+            config true;
+            ordered-by system;
+            uses G_NameAndValue;
+            min-elements 1;
+        }
+    }
+    grouping G_Label {
+        list labelList {
+            description "List of labels.";
+            key 'theValue';
+            config true;
+            ordered-by system;
+            uses G_NameAndValue;
+        }
+    }
+    grouping G_Extension {
+        list extensionList {
+            description "List of simple name-value extentions";
+            key 'theValue';
+            config true;
+            ordered-by system;
+            uses G_NameAndValue;
+        }
+    }
+    grouping G_UniversalIdAuthority {
+        status current;
+        leaf uuid {
+            type UniversalId;
+            description "The UUID for the UUID authority.";
+        }
+    }
+    list NameAndValueAuthority {
+        key 'uuid';
+        config true;
+        ordered-by system;
+        uses G_NameAndValueAuthority;
+    }
+    grouping G_NameAndValueAuthority {
+        status current;
+        leaf uuid {
+            type UniversalId;
+            description "The UUID for the NameValueAuthority.";
+        }
+    }
+    grouping G_ConditionalPackage {
+        status deprecated;
+        uses G_Extension;
+        uses G_Label;
+    }
+    grouping G_NameAndValue {
+        leaf valueName {
+            type string;
+            description "The name of the value. The value need not have a name.";
+        }
+        leaf theValue {
+            type string;
+            description "The value";
+        }
+        leaf _nameAndValueAuthorityRef {
+            type leafref {
+                path '/CoreModel-CoreFoundationModule-SuperClassesAndCommonPackages:NameAndValueAuthority/CoreModel-CoreFoundationModule-SuperClassesAndCommonPackages:uuid';
+            }
+            description "The authority that defines the named value.";
+        }
+        leaf _globalClassRef {
+            type leafref {
+                path '/CoreModel-CoreFoundationModule-SuperClassesAndCommonPackages:GlobalClass/CoreModel-CoreFoundationModule-SuperClassesAndCommonPackages:uuid';
+            }
+            description "The scope of the name uniqueness";
+        }
+    }
+    typedef UniversalId {
+        type string;
+    }
+}

@@ -1,0 +1,29 @@
+# -*- restclient -*-
+
+# Settings
+:node = asr-101
+:addr = 50.196.141.39
+:host = http://localhost:8181
+:basic-auth := (format "Basic %s" (base64-encode-string (format "%s:%s" "admin" "admin")))
+
+# Create ASR 101
+POST :host/restconf/config/network-topology:network-topology/
+Authorization: :basic-auth
+Content-Type: application/json
+{
+    "topology" : {
+        "topology-id" : "experiment"
+    }
+}
+
+# Get
+GET :host/restconf/config/network-topology:network-topology/
+Authorization: :basic-auth
+
+# Patch
+PATCH :host/restconf/config/network-topology:network-topology/topology/experiment
+Authorization: :basic-auth
+Content-Type: application/json
+{
+    "node" : []
+}
