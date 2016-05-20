@@ -1,0 +1,61 @@
+# -*- restclient -*-
+# Settings
+:host = http://localhost:8181
+:basic-auth := (format "Basic %s" (base64-encode-string (format "%s:%s" "admin" "admin")))
+
+# Modules
+GET :host/restconf/modules
+Authorization: :basic-auth
+
+# Operational Network Topology
+GET :host/restconf/operational/network-topology:network-topology/
+Authorization: :basic-auth
+Accept: application/xml
+
+# Config Network Topology
+GET :host/restconf/config/network-topology:network-topology/
+Authorization: :basic-auth
+Accept: application/xml
+
+# Delete UNI
+DELETE :host/restconf/config/network-topology:network-topology/topology/unimgr:uni/node/uni:%2F%2F192.168.2.10
+Authorization: :basic-auth
+
+# Delete ovsdb:1
+DELETE :host/restconf/config/network-topology:network-topology/topology/ovsdb:1/
+Authorization: :basic-auth
+
+# New UNI
+POST :host/restconf/config/network-topology:network-topology/topology/unimgr:uni/
+Content-type: application/json
+Authorization: :basic-auth
+{
+  "node": [
+    {
+      "node-id": "uni://192.168.2.12",
+      "cl-unimgr-mef:type": "",
+      "cl-unimgr-mef:mtu-size": 0,
+      "cl-unimgr-mef:physical-medium": "UNI TypeFull Duplex 2 Physical Interface",
+      "cl-unimgr-mef:ip-address": "192.168.2.12",
+      "cl-unimgr-mef:mode": "Full Duplex",
+      "cl-unimgr-mef:speed": {
+        "speed-1G": 1
+      },
+      "cl-unimgr-mef:mac-layer": "IEEE 802.3-2005",
+      "cl-unimgr-mef:mac-address": "68:5b:35:bb:f8:3c"
+    }
+  ]
+}
+
+# Delete UNI
+DELETE :host/restconf/config/network-topology:network-topology/topology/unimgr:uni/node/uni:%2f%2f192.168.2.12
+Authorization: :basic-auth
+
+
+# OVSDB
+GET :host/restconf/ovsdb:ovsdb/
+Authorization: :basic-auth
+
+# Cisco ASR 101
+GET :host/restconf/operational/network-topology:network-topology/topology/topology-netconf/node/asr-101
+Authorization: :basic-auth

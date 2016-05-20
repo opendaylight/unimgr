@@ -38,9 +38,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
  */
 public final class DataTreeModificationHelper {
 
-    public static final DataTreeModification<Node> getUniNode(Node node) {
-        DataTreeIdentifier<Node> uniDataTreeIid = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getUniIid("10.10.1.3"));
-        DataObjectModification<Node> uniDataTreeObj = new DataObjectModification<Node>() {
+    public static final DataTreeModification<Node> getUniNode(final Node node) {
+        final DataTreeIdentifier<Node> uniDataTreeIid = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getUniIid("10.10.1.3"));
+        final DataObjectModification<Node> uniDataTreeObj = new DataObjectModification<Node>() {
             @Override
             public Collection<DataObjectModification<? extends DataObject>> getModifiedChildren() {
                 // TODO Auto-generated method stub
@@ -114,9 +114,9 @@ public final class DataTreeModificationHelper {
         return uniNodeIid;
     }
 
-    public static final DataTreeModification<Link> getEvcLink(Link link) {
-        DataTreeIdentifier<Link> evcDataTreeIid = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getEvcLinkIid("1"));
-        DataObjectModification<Link> evcDataTreeObj = new DataObjectModification<Link>() {
+    public static final DataTreeModification<Link> getEvcLink(final Link link) {
+        final DataTreeIdentifier<Link> evcDataTreeIid = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getEvcLinkIid("1"));
+        final DataObjectModification<Link> evcDataTreeObj = new DataObjectModification<Link>() {
             @Override
             public Collection<DataObjectModification<? extends DataObject>> getModifiedChildren() {
                 // TODO Auto-generated method stub
@@ -169,12 +169,11 @@ public final class DataTreeModificationHelper {
             }
         };
         DataTreeModification<Link> evcLink = new DataTreeModification<Link>() {
-            
             @Override
             public DataTreeIdentifier<Link> getRootPath() {
                 return evcDataTreeIid;
             }
-            
+
             @Override
             public DataObjectModification<Link> getRootNode() {
                 return evcDataTreeObj;

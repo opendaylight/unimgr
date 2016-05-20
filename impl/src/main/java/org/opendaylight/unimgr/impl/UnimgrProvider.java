@@ -9,6 +9,8 @@ package org.opendaylight.unimgr.impl;
 
 import java.util.List;
 
+import org.mef.nrp.impl.ActivationDriverRepoService;
+import org.mef.nrp.impl.ActivationDriverRepoServiceImpl;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -53,6 +55,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
     private OvsNodeDataTreeChangeListener ovsListener;
     private UniDataTreeChangeListener uniListener;
     private ServiceRegistration<IUnimgrConsoleProvider> unimgrConsoleRegistration;
+    private FCRouteChangeListener fwConstructListener;
 
     public UnimgrProvider() {
         LOG.info("Unimgr provider initialized");
@@ -79,6 +82,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
         uniListener.close();
         evcListener.close();
         ovsListener.close();
+        fwConstructListener.close();
     }
 
     @Override
@@ -129,7 +133,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
                 transaction.cancel();
             }
         } catch (final Exception e) {
-            LOG.error("Error initializing unimgr topology {}",e);
+            LOG.error("Error initializing unimgr topology {}", e);
         }
     }
 
@@ -143,25 +147,31 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
         LOG.info("UnimgrProvider Session Initiated");
 
         // Retrieve the data broker to create transactions
-        dataBroker =  session.getSALService(DataBroker.class);
+        dataBroker = session.getSALService(DataBroker.class);
         // Register the unimgr OSGi CLI
         final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-        unimgrConsoleRegistration = context.registerService(IUnimgrConsoleProvider.class,this, null);
+        unimgrConsoleRegistration = context.registerService(IUnimgrConsoleProvider.class, this, null);
 
         // Register the data trees change listener
         uniListener = new UniDataTreeChangeListener(dataBroker);
         evcListener = new EvcDataTreeChangeListener(dataBroker);
         ovsListener = new OvsNodeDataTreeChangeListener(dataBroker);
 
+        ActivationDriverRepoService activationDriverRepoService = new ActivationDriverRepoServiceImpl();
+        context.registerService(ActivationDriverRepoService.class, activationDriverRepoService, null);
+
+        fwConstructListener = new FCRouteChangeListener(dataBroker);
+        fwConstructListener.setActivationDriverRepoService(activationDriverRepoService);
+
         // Initialize operational and default config data in MD-SAL data store
         initDatastore(LogicalDatastoreType.CONFIGURATION,
-                      UnimgrConstants.UNI_TOPOLOGY_ID);
+                UnimgrConstants.UNI_TOPOLOGY_ID);
         initDatastore(LogicalDatastoreType.OPERATIONAL,
-                      UnimgrConstants.UNI_TOPOLOGY_ID);
+                UnimgrConstants.UNI_TOPOLOGY_ID);
         initDatastore(LogicalDatastoreType.CONFIGURATION,
-                      UnimgrConstants.EVC_TOPOLOGY_ID);
+                UnimgrConstants.EVC_TOPOLOGY_ID);
         initDatastore(LogicalDatastoreType.OPERATIONAL,
-                      UnimgrConstants.EVC_TOPOLOGY_ID);
+                UnimgrConstants.EVC_TOPOLOGY_ID);
     }
 
     @Override
@@ -181,7 +191,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
 
     @Override
     public boolean updateEvc(final InstanceIdentifier<Link> evcKey, final EvcAugmentation evc, final UniSource uniSource,
-            final UniDest uniDest) {
+                             final UniDest uniDest) {
         final InstanceIdentifier<?> sourceUniIid = uniSource.getUni();
         final InstanceIdentifier<?> destinationUniIid = uniDest.getUni();
         return EvcUtils.updateEvcNode(LogicalDatastoreType.CONFIGURATION, evcKey, evc, sourceUniIid,
@@ -198,7 +208,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
             Node ovsdbNode;
             if (uni.getOvsdbNodeRef() != null) {
                 final OvsdbNodeRef ovsdbNodeRef = uni.getOvsdbNodeRef();
-                ovsdbNode= MdsalUtils.readNode(dataBroker,
+                ovsdbNode = MdsalUtils.readNode(dataBroker,
                         LogicalDatastoreType.OPERATIONAL, ovsdbNodeRef.getValue()).get();
 
                 UniUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniIID, uni, ovsdbNode, dataBroker);
