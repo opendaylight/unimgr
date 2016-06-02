@@ -170,16 +170,6 @@ public class UnimgrIT extends AbstractMdsalTestBase {
     @Test
     public void createAndDeleteUNITest() {
         LOG.info("Test for create and delete UNI");
-        UniAugmentation uni = new UniAugmentationBuilder()
-                .setMacAddress(new MacAddress(MAC_ADDRESS_1))
-                .setMacLayer(MAC_LAYER)
-                .setMode(MODE)
-                .setMtuSize(BigInteger.valueOf(Long.valueOf(MTU_SIZE)))
-                .setPhysicalMedium(PHY_MEDIUM)
-                .setSpeed(null)
-                .setType(TYPE)
-                .setIpAddress(new IpAddress(IP_1.toCharArray()))
-                .build();
 
         InstanceIdentifier<Node> nodePath = createUniNode(MAC_ADDRESS_1, IP_1);
         Assert.assertNotNull(nodePath);

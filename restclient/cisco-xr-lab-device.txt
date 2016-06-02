@@ -4,7 +4,7 @@
 :node = asr-101
 :addr = 50.196.141.39
 :deviceusername = <username>
-"devicepassword = <password>
+:devicepassword = <password>
 :host = http://localhost:8181
 :basic-auth := (format "Basic %s" (base64-encode-string (format "%s:%s" "admin" "admin")))
 

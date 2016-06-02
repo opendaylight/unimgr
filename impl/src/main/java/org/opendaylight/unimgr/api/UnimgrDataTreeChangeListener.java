@@ -13,7 +13,6 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 
 /**
@@ -21,7 +20,8 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
  * @author mohamed el-serngawy
  * @param <D> extended data object
  */
-public abstract class UnimgrDataTreeChangeListener<D extends DataObject> implements DataTreeChangeListener<D>, AutoCloseable {
+public abstract class UnimgrDataTreeChangeListener<D extends DataObject>
+        implements DataTreeChangeListener<D>, AutoCloseable {
 
     protected DataBroker dataBroker;
 
@@ -47,25 +47,27 @@ public abstract class UnimgrDataTreeChangeListener<D extends DataObject> impleme
                 case DELETE:
                     remove(change);
                     break;
+                default:
+                    break;
             }
         }
     }
 
     /**
-     * method should implements the added data object command
-     * @param newDataObject
+     * Method should implements the added data object command.
+     * @param newDataObject newly added object
      */
     public abstract void add(DataTreeModification<D> newDataObject);
 
     /**
-     * method should implements the removed data object command
-     * @param removedDataObject
+     * Method should implements the removed data object command.
+     * @param removedDataObject existing object being removed
      */
     public abstract void remove(DataTreeModification<D> removedDataObject);
 
     /**
-     * method should implements the updated data object command
-     * @param modifiedDataObject
+     * Method should implements the updated data object command.
+     * @param modifiedDataObject existing object being modified
      */
     public abstract void update(DataTreeModification<D> modifiedDataObject);
 }

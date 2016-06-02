@@ -58,7 +58,6 @@ public class UniUpdateCommandTest {
     private DataBroker dataBroker;
     private Node uniNode;
 
-    @SuppressWarnings("unchecked")
     @Before
     public void setUp(){
         PowerMockito.mockStatic(UniUtils.class);

@@ -60,7 +60,6 @@ public class EvcUpdateCommandTest {
     private DataTreeModification<Link> evcLink;
     private DataBroker dataBroker;
 
-    @SuppressWarnings("unchecked")
     @Before
     public void setUp(){
         PowerMockito.mockStatic(UniUtils.class);

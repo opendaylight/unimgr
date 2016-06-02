@@ -41,7 +41,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
                 <configuration>
                     <instructions>
                         <Import-Package>*</Import-Package>
-                        <Export-Package>org.mef.nrp.impl, org.opendaylight.unimgr.api
+                        <Export-Package>
+                            org.opendaylight.unimgr.mef.nrp.common,
+                            org.opendaylight.unimgr.mef.nrp.api,
+                            org.opendaylight.unimgr.api
                         </Export-Package>
                     </instructions>
                 </configuration>
@@ -61,12 +64,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
             <groupId>org.opendaylight.ovsdb</groupId>
             <artifactId>southbound-impl</artifactId>
             <version>${ovsdb.version}</version>
-        </dependency>
-
-        <dependency>
-                <groupId>org.opendaylight.unimgr</groupId>
-                <artifactId>edgeassure-1000</artifactId>
-                <version>${project.version}</version>
         </dependency>
 
         <dependency>

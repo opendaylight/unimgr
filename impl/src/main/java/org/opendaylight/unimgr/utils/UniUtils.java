@@ -51,7 +51,7 @@ public class UniUtils {
     }
 
     /**
-     * Creates and submit an UNI Node by using the Data contained in the UniAugmentation
+     * Creates and submit an UNI Node by using the Data contained in the UniAugmentation.
      * @param dataBroker The instance of the DataBroker to create transactions
      * @param uni The UNI's data
      * @return true if uni created
@@ -89,7 +89,7 @@ public class UniUtils {
     }
 
     /**
-     * Search the Operation DataStore for a specific UNI
+     * Search the Operation DataStore for a specific UNI.
      * @param dataBroker The dataBroker instance to create transactions
      * @param ipAddress The IP address of the UNI
      * @return An Optional UNI Node
@@ -110,7 +110,7 @@ public class UniUtils {
     }
 
     /**
-     * Retrieve a list of Uni Nodes from the Configuration DataStore
+     * Retrieve a list of Uni Nodes from the Configuration DataStore.
      * @param dataBroker The dataBroker instance to create transactions
      * @return A list of Uni Nodes from the Config dataStore
      */
@@ -195,7 +195,9 @@ public class UniUtils {
         if ((topology != null) && (topology.getNode() != null)) {
             for (final Node node : topology.getNode()) {
                 final UniAugmentation uniAugmentation = node.getAugmentation(UniAugmentation.class);
-                if ((uniAugmentation != null) && uniAugmentation.getIpAddress().getIpv4Address().getValue().equals(ipAddress.getIpv4Address().getValue())) {
+                if ((uniAugmentation != null)
+                        && uniAugmentation.getIpAddress().getIpv4Address().getValue().equals(
+                                ipAddress.getIpv4Address().getValue())) {
                     return uniAugmentation;
                 }
             }
@@ -204,7 +206,7 @@ public class UniUtils {
     }
 
     /**
-     * Updates a specific Uni Node on a specific DataStore type
+     * Updates a specific Uni Node on a specific DataStore type.
      * @param dataStore The datastore type
      * @param uniIID The UNI InstanceIdentifier
      * @param uni The Uni's data
@@ -241,7 +243,7 @@ public class UniUtils {
     }
 
     /**
-     * Update a specific UNI node on a specific datastore type
+     * Update a specific UNI node on a specific datastore type.
      * @param dataStore The datastore type
      * @param uniKey The UNI key
      * @param uni The Uni's data
@@ -276,42 +278,46 @@ public class UniUtils {
         return false;
     }
 
+    /**
+     * Convert Speed to string.
+     * @param speedObject schema defined speed object
+     * @return string representation
+     */
     public static String getSpeed(Speed speedObject) {
         String speed = null;
         if (speedObject instanceof Speed10M) {
             // map to 10MB
             speed = "10000000";
-        }
-        else if (speedObject instanceof Speed100M) {
+        } else if (speedObject instanceof Speed100M) {
             // map to 20MB
             speed = "20000000";
-        }
-        else if (speedObject instanceof Speed1G) {
+        } else if (speedObject instanceof Speed1G) {
             // map to 30MB
             speed = "30000000";
-        }
-        else if (speedObject instanceof Speed10G) {
+        } else if (speedObject instanceof Speed10G) {
             // map to 40MB
             speed = "40000000";
         }
         return speed;
     }
 
+    /**
+     * Convert string to Speed.
+     * @param speed string representation of speed
+     * @return schema defined speed object
+     */
     public static Speed getSpeed(final String speed) {
         Speed speedObject = null;
         if (speed.equals("10M")) {
             speedObject = new Speed10MBuilder().setSpeed10M(true)
                                                .build();
-        }
-        else if (speed.equals("100M")) {
+        } else if (speed.equals("100M")) {
             speedObject = new Speed100MBuilder().setSpeed100M(true)
                                                 .build();
-        }
-        else if (speed.equals("1G")) {
+        } else if (speed.equals("1G")) {
             speedObject = new Speed1GBuilder().setSpeed1G(true)
                                               .build();
-        }
-        else if (speed.equals("10G")) {
+        } else if (speed.equals("10G")) {
             speedObject = new Speed10GBuilder().setSpeed10G(true)
                                                .build();
         }
