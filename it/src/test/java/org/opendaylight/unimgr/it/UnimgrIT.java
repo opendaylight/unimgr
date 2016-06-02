@@ -168,6 +168,7 @@ public class UnimgrIT extends AbstractMdsalTestBase {
 
     @Test
     public void createAndDeleteUNITest() {
+        LOG.info("Test for create and delete UNI");
         UniAugmentation uni = new UniAugmentationBuilder()
                 .setMacAddress(new MacAddress(MAC_ADDRESS_1))
                 .setMacLayer(MAC_LAYER)
@@ -180,9 +181,11 @@ public class UnimgrIT extends AbstractMdsalTestBase {
                 .build();
 
         InstanceIdentifier<Node> nodePath = createUniNode(MAC_ADDRESS_1, IP_1);
+        Assert.assertNotNull(nodePath);
         Assert.assertTrue(validateUni(true, nodePath));
 
         InstanceIdentifier<Node> deletedNodePath = deleteNode(MAC_ADDRESS_1, IP_1);
+        Assert.assertNotNull(deletedNodePath);
         Assert.assertTrue(validateUni(false, deletedNodePath));
     }
 
@@ -230,24 +233,29 @@ public class UnimgrIT extends AbstractMdsalTestBase {
 
         NodeId uniNodeId = new NodeId(new NodeId("uni://" + uni.getIpAddress().getIpv4Address().getValue().toString()));
         InstanceIdentifier<Node> uniNodeIid = null;
-        try {
-            uniNodeIid = getUniIid("uni://" + uni.getIpAddress().getIpv4Address().getValue().toString());
-            NodeKey uniNodeKey = new NodeKey(uniNodeId);
-            Node nodeData = new NodeBuilder()
+        uniNodeIid = getUniIid("uni://" + uni.getIpAddress().getIpv4Address().getValue().toString());
+        NodeKey uniNodeKey = new NodeKey(uniNodeId);
+        Node nodeData = new NodeBuilder()
                                     .setNodeId(uniNodeId)
                                     .setKey(uniNodeKey)
                                     .addAugmentation(UniAugmentation.class, uni)
                                     .build();
-            WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-            transaction.put(LogicalDatastoreType.CONFIGURATION, uniNodeIid, nodeData);
-            CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-            future.checkedGet();
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        try {
+            writeUNI(uniNodeIid, nodeData, transaction);
             LOG.info("Created and submitted a new Uni node {}", nodeData.getNodeId());
+            return uniNodeIid;
         } catch (Exception e) {
-            LOG.error("Exception while creating Uni Node" + "Uni Node Id: {}, {}", uniNodeId, e);
-            return null;
+            transaction.cancel();
+            LOG.error("Could not create Uni Node - Id: {}, {}", uniNodeId, e);
         }
-        return uniNodeIid;
+        return null;
+    }
+
+    private void writeUNI(InstanceIdentifier<Node> uniNodeIid, Node nodeData, WriteTransaction transaction) throws TransactionCommitFailedException {
+        transaction.put(LogicalDatastoreType.CONFIGURATION, uniNodeIid, nodeData);
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        future.checkedGet();
     }
 
     private InstanceIdentifier<Link> deleteEvc(String evcId) {
