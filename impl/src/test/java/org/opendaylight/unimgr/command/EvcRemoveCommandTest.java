@@ -45,7 +45,6 @@ public class EvcRemoveCommandTest {
     private Link link;
     private DataBroker dataBroker;
 
-    @SuppressWarnings("unchecked")
     @Before
     public void setUp(){
         PowerMockito.mockStatic(MdsalUtils.class);

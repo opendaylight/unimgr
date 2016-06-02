@@ -1,0 +1,21 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+  odl:use-default-for-reference-types="true">
+
+  <reference id="dataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker" />
+  <reference id="mountPointService" interface="org.opendaylight.controller.md.sal.binding.api.MountPointService" />
+
+  <service id="bridgeDriverService" interface="org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder">
+    <bean class="org.opendaylight.unimgr.mef.nrp.cisco.xr.L2vpnBridgeDriverBuilder">
+      <argument ref="dataBroker" />
+      <argument ref="mountPointService" />
+    </bean>
+  </service>
+
+  <service id="xconnectDriverService" interface="org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder">
+    <bean class="org.opendaylight.unimgr.mef.nrp.cisco.xr.L2vpnXconnectDriverBuilder">
+      <argument ref="dataBroker" />
+      <argument ref="mountPointService" />
+    </bean>
+  </service>
+
+</blueprint>

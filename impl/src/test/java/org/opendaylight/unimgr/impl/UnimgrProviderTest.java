@@ -9,8 +9,6 @@ package org.opendaylight.unimgr.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -18,7 +16,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Dictionary;
 import java.util.List;
 
 import org.junit.Before;
@@ -30,7 +27,6 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
 import org.opendaylight.unimgr.utils.MdsalUtils;
 import org.opendaylight.unimgr.utils.OvsdbUtils;
@@ -50,8 +46,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.powermock.api.mockito.PowerMockito;
@@ -231,25 +225,13 @@ public class UnimgrProviderTest {
                      unimgrProvider.listUnis(any(LogicalDatastoreType.class)));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
-    public void testOnSessionInitiated() throws Exception {
-        final ProviderContext session = mock(ProviderContext.class);
-        when(session.getSALService(DataBroker.class)).thenReturn(dataBroker);
-        final BundleContext context = mock(BundleContext.class);
-        PowerMockito.mockStatic(FrameworkUtil.class);
-        final Bundle bundle = mock(Bundle.class);
-        when(bundle.getBundleContext()).thenReturn(context);
-        PowerMockito.when(FrameworkUtil.getBundle(unimgrProvider.getClass())).thenReturn(bundle);
-        mockUnimgrConsoleRegistration = mock(ServiceRegistration.class);
-        when(context.registerService(eq(IUnimgrConsoleProvider.class),
-                                     any(IUnimgrConsoleProvider.class),
-                                     isNull(Dictionary.class))).thenReturn(mockUnimgrConsoleRegistration);
+    public void testInit() throws Exception {
         PowerMockito.whenNew(UniDataTreeChangeListener.class).withArguments(any(DataBroker.class)).thenReturn(uniListener);
         PowerMockito.whenNew(EvcDataTreeChangeListener.class).withArguments(any(DataBroker.class)).thenReturn(evcListener);
         PowerMockito.whenNew(OvsNodeDataTreeChangeListener.class).withArguments(any(DataBroker.class)).thenReturn(ovsListener);
         MemberModifier.suppress(MemberMatcher.method(UnimgrProvider.class, "initDatastore"));
-        unimgrProvider.onSessionInitiated(session);
+        unimgrProvider.init();
         verify(unimgrProvider, atLeast(4)).initDatastore(any(LogicalDatastoreType.class), any(TopologyId.class));
     }
 

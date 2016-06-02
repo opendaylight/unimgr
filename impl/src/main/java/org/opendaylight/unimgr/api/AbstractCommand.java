@@ -18,7 +18,7 @@ public abstract class AbstractCommand<D extends DataObject> {
     protected DataTreeModification<D> dataObject;
 
     /**
-     * Abstract command basic constructor
+     * Abstract command basic constructor.
      * @param dataBroker
      * @param dataObject
      */
@@ -28,7 +28,7 @@ public abstract class AbstractCommand<D extends DataObject> {
     }
 
     /**
-     * Abstract execute method
+     * Abstract execute method.
      */
     public abstract void execute();
 

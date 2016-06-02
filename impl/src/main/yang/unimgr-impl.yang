@@ -16,7 +16,7 @@ module unimgr-impl {
     description
         "Service definition for unimgr project";
 
-    revision "2015-10-12" {
+    revision "2016-05-25" {
         description
             "Updated revision.";
     }
