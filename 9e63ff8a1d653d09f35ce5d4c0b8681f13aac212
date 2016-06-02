@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_9b25ddad",
+        "filename": "it/src/test/java/org/opendaylight/unimgr/it/UnimgrIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-02T19:53:18Z",
+      "side": 1,
+      "message": "please remove tabs",
+      "range": {
+        "startLine": 251,
+        "startChar": 0,
+        "endLine": 263,
+        "endChar": 2
+      },
+      "revId": "9e63ff8a1d653d09f35ce5d4c0b8681f13aac212",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
