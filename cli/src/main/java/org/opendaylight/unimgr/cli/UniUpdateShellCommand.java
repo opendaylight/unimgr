@@ -8,6 +8,7 @@
 package org.opendaylight.unimgr.cli;
 
 import java.math.BigInteger;
+
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
@@ -19,9 +20,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.r
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.uni.SpeedBuilder;
 
 @Command(name = "uni-update",
-scope = "uni",
-description = "Updates an uni to the controller.")
-public class UniUpdateShellCommand extends OsgiCommandSupport{
+    scope = "uni",
+    description = "Updates an uni to the controller.")
+public class UniUpdateShellCommand extends OsgiCommandSupport {
     @Option(name = "-ip",
             aliases = { "--ipAddress" },
             description = "IpAddress of the Uni",
@@ -97,7 +98,7 @@ public class UniUpdateShellCommand extends OsgiCommandSupport{
                 .setIpAddress(new IpAddress(ipAddress.toCharArray()))
                 .build();
         if (provider.updateUni(uniAug)) {
-            return new String("Uni with ip " +ipAddress+" updated");
+            return new String("Uni with ip " + ipAddress + " updated");
         } else {
             return new String("Error updating new Uni");
         }

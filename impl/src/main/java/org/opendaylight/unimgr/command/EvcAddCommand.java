@@ -123,26 +123,26 @@ public class EvcAddCommand extends AbstractCommand<Link> {
                             sourceBr = optionalSourceBr.get();
                             destinationBr = optionalDestinationBr.get();
                             OvsdbUtils.createTerminationPointNode(dataBroker,
-                                                                   uniSource.getAugmentation(UniAugmentation.class),
-                                                                   sourceBr,
-                                                                   UnimgrConstants.DEFAULT_BRIDGE_NAME,
-                                                                   UnimgrConstants.DEFAULT_TUNNEL_IFACE);
+                                    uniSource.getAugmentation(UniAugmentation.class),
+                                    sourceBr,
+                                    UnimgrConstants.DEFAULT_BRIDGE_NAME,
+                                    UnimgrConstants.DEFAULT_TUNNEL_IFACE);
                             OvsdbUtils.createGreTunnel(dataBroker,
-                                                        uniSource.getAugmentation(UniAugmentation.class),
-                                                        uniDestination.getAugmentation(UniAugmentation.class),
-                                                        sourceBr,
-                                                        UnimgrConstants.DEFAULT_BRIDGE_NAME,
-                                                        UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
+                                    uniSource.getAugmentation(UniAugmentation.class),
+                                    uniDestination.getAugmentation(UniAugmentation.class),
+                                    sourceBr,
+                                    UnimgrConstants.DEFAULT_BRIDGE_NAME,
+                                    UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
                             OvsdbUtils.createTerminationPointNode(dataBroker,
-                                                                   uniDestination.getAugmentation(UniAugmentation.class),
-                                                                   destinationBr,
-                                                                   UnimgrConstants.DEFAULT_BRIDGE_NAME,
-                                                                   UnimgrConstants.DEFAULT_TUNNEL_IFACE);
+                                    uniDestination.getAugmentation(UniAugmentation.class),
+                                    destinationBr,
+                                    UnimgrConstants.DEFAULT_BRIDGE_NAME,
+                                    UnimgrConstants.DEFAULT_TUNNEL_IFACE);
                             OvsdbUtils.createGreTunnel(dataBroker,
-                                                        uniDestination.getAugmentation(UniAugmentation.class),
-                                                        uniSource.getAugmentation(UniAugmentation.class), destinationBr,
-                                                        UnimgrConstants.DEFAULT_BRIDGE_NAME,
-                                                        UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
+                                    uniDestination.getAugmentation(UniAugmentation.class),
+                                    uniSource.getAugmentation(UniAugmentation.class), destinationBr,
+                                    UnimgrConstants.DEFAULT_BRIDGE_NAME,
+                                    UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
                             EvcUtils.updateEvcNode(LogicalDatastoreType.CONFIGURATION,
                                     evcKey,
                                     evc,
@@ -150,11 +150,11 @@ public class EvcAddCommand extends AbstractCommand<Link> {
                                     destinationUniIid,
                                     dataBroker);
                             EvcUtils.updateEvcNode(LogicalDatastoreType.OPERATIONAL,
-                                                      evcKey,
-                                                      evc,
-                                                      sourceUniIid,
-                                                      destinationUniIid,
-                                                      dataBroker);
+                                    evcKey,
+                                    evc,
+                                    sourceUniIid,
+                                    destinationUniIid,
+                                    dataBroker);
                         } else {
                             LOG.info("Unable to retrieve the source and/or destination bridge.");
                         }

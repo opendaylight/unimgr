@@ -34,7 +34,8 @@ public class UniDataTreeChangeListener extends UnimgrDataTreeChangeListener<Node
     public UniDataTreeChangeListener(final DataBroker dataBroker) {
         super(dataBroker);
         final InstanceIdentifier<Node> uniPath = getUniTopologyPath();
-        final DataTreeIdentifier<Node> dataTreeIid = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, uniPath);
+        final DataTreeIdentifier<Node> dataTreeIid =
+                new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, uniPath);
         listener = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
         LOG.info("UniDataTreeChangeListener created and registered");
     }
@@ -50,7 +51,7 @@ public class UniDataTreeChangeListener extends UnimgrDataTreeChangeListener<Node
 
     @Override
     public void close() throws Exception {
-         listener.close();
+        listener.close();
     }
 
     private InstanceIdentifier<Node> getUniTopologyPath() {

@@ -32,14 +32,15 @@ public class EvcDataTreeChangeListener extends UnimgrDataTreeChangeListener<Link
 
     public EvcDataTreeChangeListener(final DataBroker dataBroker) {
         super(dataBroker);
-        final DataTreeIdentifier<Link> dataTreeIid = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getEvcTopologyPath());
+        final DataTreeIdentifier<Link> dataTreeIid =
+                new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getEvcTopologyPath());
         listener = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
         LOG.info("EvcDataTreeChangeListener created and registered");
     }
 
     @Override
     public void add(final DataTreeModification<Link> newDataObject) {
-        if(newDataObject.getRootPath() != null && newDataObject.getRootNode() != null) {
+        if (newDataObject.getRootPath() != null && newDataObject.getRootNode() != null) {
             LOG.info("evc link {} created", newDataObject.getRootNode().getIdentifier());
             final EvcAddCommand evcAddCmd = new EvcAddCommand(dataBroker, newDataObject);
             evcAddCmd.execute();
@@ -53,15 +54,15 @@ public class EvcDataTreeChangeListener extends UnimgrDataTreeChangeListener<Link
 
     private InstanceIdentifier<Link> getEvcTopologyPath() {
         final InstanceIdentifier<Link> evcPath = InstanceIdentifier
-                                                   .create(NetworkTopology.class)
-                                                   .child(Topology.class, new TopologyKey(UnimgrConstants.EVC_TOPOLOGY_ID))
-                                                   .child(Link.class);
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(UnimgrConstants.EVC_TOPOLOGY_ID))
+                .child(Link.class);
         return evcPath;
     }
 
     @Override
     public void remove(final DataTreeModification<Link> removedDataObject) {
-        if(removedDataObject.getRootPath() != null && removedDataObject.getRootNode() != null) {
+        if (removedDataObject.getRootPath() != null && removedDataObject.getRootNode() != null) {
             LOG.info("evc link {} deleted", removedDataObject.getRootNode().getIdentifier());
             final EvcRemoveCommand evcRemovedCmd = new EvcRemoveCommand(dataBroker, removedDataObject);
             evcRemovedCmd.execute();
@@ -70,7 +71,7 @@ public class EvcDataTreeChangeListener extends UnimgrDataTreeChangeListener<Link
 
     @Override
     public void update(final DataTreeModification<Link> modifiedDataObject) {
-        if(modifiedDataObject.getRootPath() != null && modifiedDataObject.getRootNode() != null) {
+        if (modifiedDataObject.getRootPath() != null && modifiedDataObject.getRootNode() != null) {
             LOG.info("evc link {} updated", modifiedDataObject.getRootNode().getIdentifier());
             final EvcUpdateCommand evcUpdateCmd = new EvcUpdateCommand(dataBroker, modifiedDataObject);
             evcUpdateCmd.execute();

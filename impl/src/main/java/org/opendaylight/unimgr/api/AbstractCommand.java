@@ -19,8 +19,8 @@ public abstract class AbstractCommand<D extends DataObject> {
 
     /**
      * Abstract command basic constructor.
-     * @param dataBroker
-     * @param dataObject
+     * @param dataBroker the data broker
+     * @param dataObject the object change to process
      */
     public AbstractCommand(final DataBroker dataBroker, final DataTreeModification<D> dataObject) {
         this.dataBroker = dataBroker;

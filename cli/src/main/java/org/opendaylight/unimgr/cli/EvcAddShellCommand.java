@@ -9,9 +9,8 @@
 package org.opendaylight.unimgr.cli;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
+
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
@@ -28,16 +27,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.r
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSource;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSourceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.evc.UniSourceKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Command(name = "evc-add",
-scope = "uni",
-description = "Add evc to the controller.")
-
+    scope = "uni",
+    description = "Add evc to the controller.")
 public class EvcAddShellCommand extends OsgiCommandSupport {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EvcAddShellCommand.class);
     protected IUnimgrConsoleProvider provider;
 
     @Option(name = "-IPs",
@@ -45,14 +40,14 @@ public class EvcAddShellCommand extends OsgiCommandSupport {
             description = "The IP address of the source UNI.\n-IPs / --IP Address source uni",
             required = true,
             multiValued = false)
-    private String IPs = "";
+    private String ipSource = "";
 
     @Option(name = "-IPd",
             aliases = { "--IP-Address-destenation-uni" },
             description = "The IP address of the destenation UNI.\n-IPs / --IP Address destenation uni",
             required = true,
             multiValued = false)
-    private String IPd = "";
+    private String ipDestination = "";
 
     @Option(name = "-egress",
             aliases = { "--egress-speed" },
@@ -75,7 +70,7 @@ public class EvcAddShellCommand extends OsgiCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
         Short order = new Short("0");
-        IpAddress ipAddreSource = new IpAddress(IPs.toCharArray());
+        IpAddress ipAddreSource = new IpAddress(ipSource.toCharArray());
         UniSource uniSource = new UniSourceBuilder()
                                   .setIpAddress(ipAddreSource)
                                   .setKey(new UniSourceKey(order))
@@ -83,7 +78,7 @@ public class EvcAddShellCommand extends OsgiCommandSupport {
                                   .build();
         List<UniSource> uniSourceList = new ArrayList<UniSource>();
         uniSourceList.add(uniSource);
-        IpAddress ipAddreDest = new IpAddress(IPd.toCharArray());
+        IpAddress ipAddreDest = new IpAddress(ipDestination.toCharArray());
         UniDest uniDest = new UniDestBuilder()
                           .setOrder(order)
                           .setKey(new UniDestKey(order))
@@ -99,7 +94,7 @@ public class EvcAddShellCommand extends OsgiCommandSupport {
                                      .setUniSource(uniSourceList)
                                      .build();
         if (provider.addEvc(evcAug)) {
-            return new String("Evc with Source Uni " +IPs+" and destenation Uni " +IPd+" created");
+            return new String("Evc with Source Uni " + ipSource + " and destenation Uni " + ipDestination + " created");
         } else {
             return new String("Error creating new Evc");
         }

@@ -15,7 +15,6 @@ import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.api.IUnimgrConsoleProvider;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.Uni;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 
 @Command(name = "uni-list", scope = "uni", description = "Lists all uni in the controller.")
@@ -37,7 +36,8 @@ public class UniListShellCommand extends OsgiCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
 
-        LogicalDatastoreType storeType = isConfigurationData ? LogicalDatastoreType.CONFIGURATION : LogicalDatastoreType.OPERATIONAL; 
+        LogicalDatastoreType storeType =
+                isConfigurationData ? LogicalDatastoreType.CONFIGURATION : LogicalDatastoreType.OPERATIONAL;
         List<UniAugmentation> listUnis = provider.listUnis(storeType);
 
         if (listUnis.size() > 0) {
@@ -45,7 +45,8 @@ public class UniListShellCommand extends OsgiCommandSupport {
             Integer counter = 1;
             for (UniAugmentation uni : listUnis) {
                 // TODO
-                sb.append(String.format("#%d - IpAddress: %s\n", counter, uni.getIpAddress().getIpv4Address().getValue()));
+                sb.append(String.format("#%d - IpAddress: %s\n", counter,
+                        uni.getIpAddress().getIpv4Address().getValue()));
                 counter++;
             }
             return sb.toString();

@@ -44,7 +44,7 @@ public class EvcUtils {
     private static final Logger LOG = LoggerFactory.getLogger(EvcUtils.class);
 
     /**
-     * Delete EVC data from configuration datastore
+     * Delete EVC data from configuration datastore.
      * @param dataBroker The dataBroker instance to create transactions
      * @param optionalUni Optional Uni Node
      */
@@ -65,7 +65,8 @@ public class EvcUtils {
                                          ovsdbNodeIid);
             if (optionalOvsdNode.isPresent()) {
                 final Node ovsdbNode = optionalOvsdNode.get();
-                final OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+                final OvsdbNodeAugmentation ovsdbNodeAugmentation =
+                        ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
                 for (final ManagedNodeEntry managedNodeEntry: ovsdbNodeAugmentation.getManagedNodeEntry()) {
                     final InstanceIdentifier<Node> bridgeIid = managedNodeEntry
                                                              .getBridgeRef()
@@ -74,10 +75,12 @@ public class EvcUtils {
                     final Optional<Node> optBridgeNode = MdsalUtils.readNode(dataBroker, bridgeIid);
                     if (optBridgeNode.isPresent()) {
                         final Node bridgeNode = optBridgeNode.get();
-                        final InstanceIdentifier<TerminationPoint> iidGreTermPoint = UnimgrMapper.getTerminationPointIid(bridgeNode,
-                                                                                        UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
-                        final InstanceIdentifier<TerminationPoint> iidEthTermPoint = UnimgrMapper.getTerminationPointIid(bridgeNode,
-                                                                                        UnimgrConstants.DEFAULT_TUNNEL_IFACE);
+                        final InstanceIdentifier<TerminationPoint> iidGreTermPoint =
+                                UnimgrMapper.getTerminationPointIid(bridgeNode,
+                                        UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
+                        final InstanceIdentifier<TerminationPoint> iidEthTermPoint =
+                                UnimgrMapper.getTerminationPointIid(bridgeNode,
+                                        UnimgrConstants.DEFAULT_TUNNEL_IFACE);
                         MdsalUtils.deleteNode(dataBroker, iidGreTermPoint, LogicalDatastoreType.CONFIGURATION);
                         MdsalUtils.deleteNode(dataBroker, iidEthTermPoint, LogicalDatastoreType.CONFIGURATION);
                     }
@@ -89,7 +92,7 @@ public class EvcUtils {
     }
 
     /**
-     * Retrieve the list of links in the Operational DataStore
+     * Retrieve the list of links in the Operational DataStore.
      * @param dataBroker The dataBroker instance to create transactions
      * @return A list of Links retrieved from the Operational DataStore
      */
@@ -111,7 +114,7 @@ public class EvcUtils {
     }
 
     /**
-     * Updates a specific EVC into a specific DataStore type
+     * Updates a specific EVC into a specific DataStore type.
      * @param dataStore The datastore type
      * @param evcKey The EVC key
      * @param evcAugmentation The EVC's data

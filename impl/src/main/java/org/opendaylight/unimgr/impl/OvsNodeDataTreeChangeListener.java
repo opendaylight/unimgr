@@ -31,7 +31,8 @@ public class OvsNodeDataTreeChangeListener extends UnimgrDataTreeChangeListener<
     public OvsNodeDataTreeChangeListener(final DataBroker dataBroker) {
         super(dataBroker);
         final InstanceIdentifier<Node> nodePath = getOvsNodeTopologyPath();
-        final DataTreeIdentifier<Node> dataTreeIid = new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, nodePath);
+        final DataTreeIdentifier<Node> dataTreeIid =
+                new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, nodePath);
         listener = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
         LOG.info("ovsNodeDataTreeChangeListener created and registered");
     }

@@ -13,7 +13,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.r
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed10GBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed10MBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.service.speed.speed.Speed1GBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.uni.SpeedBuilder;
 
 public final class Utils {
 
@@ -21,21 +20,23 @@ public final class Utils {
 
     }
 
+    /**
+     * Convert string to Speed.
+     * @param speed string representation of speed
+     * @return schema defined speed object
+     */
     public static final Speed getSpeed(final String speed) {
         Speed speedObject = null;
         if (speed.equals("10M")) {
             speedObject = new Speed10MBuilder().setSpeed10M(true)
                                                .build();
-        }
-        else if (speed.equals("100M")) {
+        } else if (speed.equals("100M")) {
             speedObject = new Speed100MBuilder().setSpeed100M(true)
                                                 .build();
-        }
-        else if (speed.equals("1G")) {
+        } else if (speed.equals("1G")) {
             speedObject = new Speed1GBuilder().setSpeed1G(true)
                                               .build();
-        }
-        else if (speed.equals("10G")) {
+        } else if (speed.equals("10G")) {
             speedObject = new Speed10GBuilder().setSpeed10G(true)
                                                .build();
         }

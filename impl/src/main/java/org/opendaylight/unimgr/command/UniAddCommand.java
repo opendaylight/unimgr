@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
-public class UniAddCommand extends AbstractCommand<Node>{
+public class UniAddCommand extends AbstractCommand<Node> {
 
     private static final Logger LOG = LoggerFactory.getLogger(UniAddCommand.class);
 
@@ -38,7 +38,7 @@ public class UniAddCommand extends AbstractCommand<Node>{
     public void execute() {
         final InstanceIdentifier<?> uniKey = dataObject.getRootPath().getRootIdentifier();
         final Optional<Node> optNode = MdsalUtils.readNode(dataBroker, LogicalDatastoreType.OPERATIONAL, uniKey);
-        if(!optNode.isPresent()) {
+        if (!optNode.isPresent()) {
             final Node uniNode = dataObject.getRootNode().getDataAfter();
             final UniAugmentation uni = uniNode.getAugmentation(UniAugmentation.class);
             if (uni != null) {
@@ -120,5 +120,4 @@ public class UniAddCommand extends AbstractCommand<Node>{
             }
         }
     }
-
 }

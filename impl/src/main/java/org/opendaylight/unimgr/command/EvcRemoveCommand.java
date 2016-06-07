@@ -65,8 +65,7 @@ public class EvcRemoveCommand extends AbstractCommand<Link> {
                     }
                 }
             }
-        }
-        else {
+        } else {
             LOG.info("EvcAugmentation is null");
         }
         MdsalUtils.deleteNode(dataBroker, removedEvcIid, LogicalDatastoreType.OPERATIONAL);

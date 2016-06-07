@@ -8,6 +8,7 @@
 package org.opendaylight.unimgr.cli;
 
 import java.math.BigInteger;
+
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
@@ -17,15 +18,12 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.UniAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.uni.SpeedBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Command(name = "uni-add",
          scope = "uni",
          description = "Adds an uni to the controller.")
 public class UniAddShellCommand extends OsgiCommandSupport {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UniAddShellCommand.class);
     protected IUnimgrConsoleProvider provider;
 
     @Option(name = "-pm",
@@ -101,7 +99,7 @@ public class UniAddShellCommand extends OsgiCommandSupport {
                         .setIpAddress(new IpAddress(ipAddress.toCharArray()))
                         .build();
         if (provider.addUni(uni)) {
-            return new String("Uni with ip " +ipAddress+" created");
+            return new String("Uni with ip " + ipAddress + " created");
         } else {
             return new String("Error creating new Uni");
         }

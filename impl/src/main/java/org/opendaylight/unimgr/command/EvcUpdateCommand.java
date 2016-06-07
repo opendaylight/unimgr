@@ -64,35 +64,44 @@ public class EvcUpdateCommand extends AbstractCommand<Link> {
             LOG.trace("New EVC created, source IP: {} destination IP {}.", laterUni1Ip, laterUni2Ip);
 
             final ReadTransaction readTransac = dataBroker.newReadOnlyTransaction();
-            final CheckedFuture<Optional<Link>, ReadFailedException> retFormerEvc = readTransac.read(LogicalDatastoreType.OPERATIONAL, evcKey);
+            final CheckedFuture<Optional<Link>, ReadFailedException> retFormerEvc =
+                    readTransac.read(LogicalDatastoreType.OPERATIONAL, evcKey);
             EvcAugmentation formerEvc;
             try {
                 Optional<Link> optLinks = retFormerEvc.get();
-                if(optLinks != null && optLinks.isPresent()) {
-                formerEvc = optLinks.get().getAugmentation(EvcAugmentation.class);
-                final Ipv4Address formerUni1ip = formerEvc.getUniSource().iterator().next().getIpAddress().getIpv4Address();
-                final Ipv4Address formerUni2ip = formerEvc.getUniDest().iterator().next().getIpAddress().getIpv4Address();
+                if (optLinks != null && optLinks.isPresent()) {
+                    formerEvc = optLinks.get().getAugmentation(EvcAugmentation.class);
+                    final Ipv4Address formerUni1ip =
+                            formerEvc.getUniSource().iterator().next().getIpAddress().getIpv4Address();
+                    final Ipv4Address formerUni2ip =
+                            formerEvc.getUniDest().iterator().next().getIpAddress().getIpv4Address();
 
-                if (formerUni1ip.equals(laterUni1Ip)) {
-                    // do nothing
-                } else if (formerUni1ip.equals(laterUni2Ip)) {
-                    // do nothing
-                } else {
-                    LOG.info("{} is not part of the EVC, removing configuration", formerUni1ip);
-                    final InstanceIdentifier<?> formerUniIID = UnimgrMapper.getUniIid(dataBroker, new IpAddress(formerUni1ip), LogicalDatastoreType.OPERATIONAL);
-                    final Optional<Node> formerUni = MdsalUtils.readNode(dataBroker, LogicalDatastoreType.OPERATIONAL, formerUniIID);
-                    EvcUtils.deleteEvcData(dataBroker, formerUni);
-                }
-                if (formerUni2ip.equals(laterUni1Ip)) {
-                    // do nothing
-                } else if (formerUni2ip.equals(laterUni2Ip)) {
-                    // do nothing
-                } else {
-                    LOG.info("{} is not part of the EVC, removing configuration", formerUni2ip);
-                    final InstanceIdentifier<?> formerUniIID = UnimgrMapper.getUniIid(dataBroker, new IpAddress(formerUni2ip), LogicalDatastoreType.OPERATIONAL);
-                    final Optional<Node> formerUni = MdsalUtils.readNode(dataBroker, LogicalDatastoreType.OPERATIONAL, formerUniIID);
-                    EvcUtils.deleteEvcData(dataBroker, formerUni);
-                }
+                    if (formerUni1ip.equals(laterUni1Ip)) {
+                        // do nothing
+                    } else if (formerUni1ip.equals(laterUni2Ip)) {
+                        // do nothing
+                    } else {
+                        LOG.info("{} is not part of the EVC, removing configuration", formerUni1ip);
+                        final InstanceIdentifier<?> formerUniIID =
+                                UnimgrMapper.getUniIid(dataBroker, new IpAddress(formerUni1ip),
+                                        LogicalDatastoreType.OPERATIONAL);
+                        final Optional<Node> formerUni =
+                                MdsalUtils.readNode(dataBroker, LogicalDatastoreType.OPERATIONAL, formerUniIID);
+                        EvcUtils.deleteEvcData(dataBroker, formerUni);
+                    }
+                    if (formerUni2ip.equals(laterUni1Ip)) {
+                        // do nothing
+                    } else if (formerUni2ip.equals(laterUni2Ip)) {
+                        // do nothing
+                    } else {
+                        LOG.info("{} is not part of the EVC, removing configuration", formerUni2ip);
+                        final InstanceIdentifier<?> formerUniIID =
+                                UnimgrMapper.getUniIid(dataBroker, new IpAddress(formerUni2ip),
+                                        LogicalDatastoreType.OPERATIONAL);
+                        final Optional<Node> formerUni =
+                                MdsalUtils.readNode(dataBroker, LogicalDatastoreType.OPERATIONAL, formerUniIID);
+                        EvcUtils.deleteEvcData(dataBroker, formerUni);
+                    }
                 }
             } catch (final InterruptedException | ExecutionException e) {
                 LOG.error("Failed to retrieve former EVC {}", evcKey, e);

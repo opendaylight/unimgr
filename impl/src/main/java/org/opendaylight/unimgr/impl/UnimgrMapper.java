@@ -108,7 +108,7 @@ public class UnimgrMapper {
      * Generates an Instance Identifier for an OvsdbBridgeNode by retrieving the Iid
      * via the OvsdbNodeAugmentation's BridgeRef.
      * the same as createOvsdbBridgeNodeIid.
-     * @param ovsdbNode
+     * @param ovsdbNode the ovsdb node
      * @return An Instance Identifier for a bridge associated with an OVSDB node.
      */
     public static InstanceIdentifier<Node> getOvsdbBridgeNodeIid(Node ovsdbNode) {
@@ -160,7 +160,7 @@ public class UnimgrMapper {
     }
 
     /**
-     * Generates an Instance Identifier for the OVSDB topology ovsdb:1
+     * Generates an Instance Identifier for the OVSDB topology ovsdb:1.
      * @return An Instance Identifier for the OVSDB topology ovsdb:1
      */
     public static InstanceIdentifier<Topology> getOvsdbTopologyIid() {
@@ -176,7 +176,7 @@ public class UnimgrMapper {
      * the Bridge Node and the Port Name.
      * @param bridgeNode The bridge where the port resides.
      * @param portName The name of the port, example: eth0
-     * @return
+     * @return instance identifier
      */
     public static InstanceIdentifier<TerminationPoint> getTerminationPointIid(
                                                            Node bridgeNode,
@@ -217,7 +217,7 @@ public class UnimgrMapper {
     /**
      * Generates an Instance Identifier for a UNI by querying the datastore.
      * Query will ask the Operational store by default.
-     * @param dataBroker
+     * @param dataBroker the data broker
      * @param ip The IP of the UNI
      * @return An Instance Identifier of a UNI by using its IP address.
      */
@@ -243,7 +243,7 @@ public class UnimgrMapper {
     /**
      * Generates an Instance Identifier for a UNI by querying the datastore
      * with the IP address of the UNI.
-     * @param dataBroker
+     * @param dataBroker the data broker
      * @param ip The IP of the UNI
      * @param store The store where the query should be sent
      * @return An Instance Identifier of a UNI by using its IP address.
@@ -269,7 +269,7 @@ public class UnimgrMapper {
     }
 
     /**
-     * Generates an Instance Identifier for the UNI topology: unimgr:uni
+     * Generates an Instance Identifier for the UNI topology: unimgr:uni.
      * @return An Instance Identifier for the UNI topology
      */
     public static InstanceIdentifier<Topology> getUniTopologyIid() {
@@ -300,16 +300,23 @@ public class UnimgrMapper {
      * @return An Instance Identifier for a specific UNI node.
      */
     public static InstanceIdentifier<Node> getUniNodeIid(NodeId nodeId) {
-    InstanceIdentifier<Node> nodePath = InstanceIdentifier
+        InstanceIdentifier<Node> nodePath = InstanceIdentifier
                                             .create(NetworkTopology.class)
                                             .child(Topology.class,
                                                     new TopologyKey(UnimgrConstants.UNI_TOPOLOGY_ID))
                                             .child(Node.class,
                                                     new NodeKey(nodeId));
-    return nodePath;
-}
+        return nodePath;
+    }
 
-    public static InstanceIdentifier<QueueList> getOvsdbQueueListIid (NodeId ovsdbNodeId,
+    /**
+     * Generates an Instance Identifier for an OVSDB QoS queue list entry.
+     * @param ovsdbNodeId the desired node id
+     * @param qosEntryKey the key of the desired QoS entry
+     * @param queueNumber the key of the desired queue entry
+     * @return instance identifier
+     */
+    public static InstanceIdentifier<QueueList> getOvsdbQueueListIid(NodeId ovsdbNodeId,
             QosEntriesKey qosEntryKey,
             Long queueNumber) {
         InstanceIdentifier<QueueList> queueIid = InstanceIdentifier
@@ -322,7 +329,13 @@ public class UnimgrMapper {
         return queueIid;
     }
 
-    public static InstanceIdentifier<QosOtherConfig> getQosOtherConfigIid (NodeId ovsdbNodeId,
+    /**
+     * Generates an Instance Identifier for an OVSDB QoS other config entry.
+     * @param ovsdbNodeId the desired node id
+     * @param qosEntryKey the key of the desired QoS entry
+     * @return instance identifier
+     */
+    public static InstanceIdentifier<QosOtherConfig> getQosOtherConfigIid(NodeId ovsdbNodeId,
             QosEntriesKey qosEntryKey) {
         InstanceIdentifier<QosOtherConfig> qosOtherConfigIid = InstanceIdentifier
                 .create(NetworkTopology.class)
@@ -334,7 +347,13 @@ public class UnimgrMapper {
         return qosOtherConfigIid;
     }
 
-    public static InstanceIdentifier<QueuesOtherConfig> getQueuesOtherConfigIid (NodeId ovsdbNodeId,
+    /**
+     * Generates an Instance Identifier for an OVSDB queue other config entry.
+     * @param ovsdbNodeId the desired node id
+     * @param queuesKey the key of the desired queue entry
+     * @return instance identifier
+     */
+    public static InstanceIdentifier<QueuesOtherConfig> getQueuesOtherConfigIid(NodeId ovsdbNodeId,
             QueuesKey queuesKey) {
         InstanceIdentifier<QueuesOtherConfig> queuesOtherConfig = InstanceIdentifier
                 .create(NetworkTopology.class)
@@ -346,6 +365,12 @@ public class UnimgrMapper {
         return queuesOtherConfig;
     }
 
+    /**
+     * Generates an Instance Identifier for an OVSDB QoS entries list.
+     * @param ovsdbNode the desired node
+     * @param qosEntryKey the key of the desired QoS entry
+     * @return instance identifier
+     */
     public static InstanceIdentifier<QosEntries> getOvsdbQoSEntriesIid(Node ovsdbNode, QosEntriesKey qosEntryKey) {
         InstanceIdentifier<QosEntries> qosEntriesIid = InstanceIdentifier
                 .create(NetworkTopology.class)
@@ -356,6 +381,12 @@ public class UnimgrMapper {
         return qosEntriesIid;
     }
 
+    /**
+     * Generates an Instance Identifier for an OVSDB QoS queue list entry.
+     * @param ovsdbNode the desired node
+     * @param queuesKey the key of the desired queue list
+     * @return instance identifier
+     */
     public static InstanceIdentifier<Queues> getOvsdbQueuesIid(Node ovsdbNode, QueuesKey queuesKey) {
         InstanceIdentifier<Queues> queuesIid = InstanceIdentifier
                 .create(NetworkTopology.class)

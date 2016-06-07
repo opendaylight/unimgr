@@ -35,8 +35,10 @@ public class UniUpdateCommand extends AbstractCommand<Node> {
 
     @Override
     public void execute() {
-        final UniAugmentation updatedUni = dataObject.getRootNode().getDataAfter().getAugmentation(UniAugmentation.class);
-        final UniAugmentation formerUni = dataObject.getRootNode().getDataBefore().getAugmentation(UniAugmentation.class);
+        final UniAugmentation updatedUni =
+                dataObject.getRootNode().getDataAfter().getAugmentation(UniAugmentation.class);
+        final UniAugmentation formerUni =
+                dataObject.getRootNode().getDataBefore().getAugmentation(UniAugmentation.class);
         if (formerUni != null) {
             final String formerUniIp = formerUni.getIpAddress().getIpv4Address().getValue();
             final String updatedUniIp = updatedUni.getIpAddress().getIpv4Address().getValue();
@@ -50,9 +52,10 @@ public class UniUpdateCommand extends AbstractCommand<Node> {
             if (updatedUni.getOvsdbNodeRef() != null) {
                 LOG.info("OVSDB NODE ref retreive for updated UNI {}", updatedUni.getOvsdbNodeRef());
                 final OvsdbNodeRef ovsdbNodeRef = updatedUni.getOvsdbNodeRef();
-                final Optional<Node> optOvsdbNode = MdsalUtils.readNode(dataBroker,LogicalDatastoreType.OPERATIONAL, ovsdbNodeRef.getValue());
-                if(optOvsdbNode.isPresent()) {
-                    ovsdbNode= optOvsdbNode.get();
+                final Optional<Node> optOvsdbNode =
+                        MdsalUtils.readNode(dataBroker,LogicalDatastoreType.OPERATIONAL, ovsdbNodeRef.getValue());
+                if (optOvsdbNode.isPresent()) {
+                    ovsdbNode = optOvsdbNode.get();
                     LOG.info("Retrieved the OVSDB node {}", ovsdbNode.getNodeId());
                     // Update QoS entries to ovsdb if speed is configured to UNI node
                     if (updatedUni.getSpeed() != null) {
@@ -63,7 +66,8 @@ public class UniUpdateCommand extends AbstractCommand<Node> {
                 }  else {
                     // This should never happen, because on creation,
                     // the UNI is assigned and OVSDB node
-                    LOG.error("OVSDB node not found for UNI {}, but got OVSDB ref", uniKey, updatedUni.getOvsdbNodeRef());
+                    LOG.error("OVSDB node not found for UNI {}, but got OVSDB ref {}", uniKey,
+                            updatedUni.getOvsdbNodeRef());
                     return;
                 }
             } else {

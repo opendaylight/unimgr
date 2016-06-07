@@ -158,7 +158,8 @@ public class OvsdbUtils {
                         + UnimgrConstants.DEFAULT_BRIDGE_NODE_ID_SUFFIX
                         + bridgeName);
                 bridgeNodeBuilder.setNodeId(bridgeNodeId);
-                final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
+                final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder =
+                        new OvsdbBridgeAugmentationBuilder();
                 ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
                 ovsdbBridgeAugmentationBuilder.setProtocolEntry(OvsdbUtils.createMdsalProtocols());
                 final OvsdbNodeRef ovsdbNodeRef = new OvsdbNodeRef(ovsdbNodeIid);
@@ -243,8 +244,8 @@ public class OvsdbUtils {
         final List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
         final ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
                 SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
-        protocolList.add(new ProtocolEntryBuilder().
-                setProtocol((Class<? extends OvsdbBridgeProtocolBase>) mapper.get("OpenFlow13")).build());
+        protocolList.add(new ProtocolEntryBuilder().setProtocol(
+                (Class<? extends OvsdbBridgeProtocolBase>) mapper.get("OpenFlow13")).build());
         return protocolList;
     }
 
@@ -300,7 +301,7 @@ public class OvsdbUtils {
     }
 
     /**
-     * Creates and submit an OvsdbNode by using the Data contained in the UniAugmentation
+     * Creates and submit an OvsdbNode by using the Data contained in the UniAugmentation.
      * @param dataBroker The instance of the DataBroker to create transactions
      * @param uni The UNI's data
      * @return The instance of the Node
@@ -344,6 +345,12 @@ public class OvsdbUtils {
         return ovsdbNode;
     }
 
+    /**
+     * Create and build an OvsdbNodeAugmentation.
+     * @param uni the UNI data
+     * @param remotePort port number
+     * @return OvsdbNodeAugmentation
+     */
     public static OvsdbNodeAugmentation createOvsdbNodeAugmentation(UniAugmentation uni,
             PortNumber remotePort) {
         final ConnectionInfo connectionInfos = new ConnectionInfoBuilder()
@@ -358,7 +365,13 @@ public class OvsdbUtils {
         return ovsdbNode;
     }
 
-    public static Node createQoSForOvsdbNode (DataBroker dataBroker, UniAugmentation uni) {
+    /**
+     * Create and write QoS forn an OVSDB node, copying from UNI entry.
+     * @param dataBroker the data broker
+     * @param uni the UNI to copy data from
+     * @return null
+     */
+    public static Node createQoSForOvsdbNode(DataBroker dataBroker, UniAugmentation uni) {
         final Optional<Node> optionalNode = findOvsdbNode(dataBroker, uni);
         if (optionalNode.isPresent()) {
             final NodeId ovsdbNodeId = optionalNode.get().getNodeId();
@@ -378,7 +391,7 @@ public class OvsdbUtils {
             }
             try {
                 future.checkedGet();
-              LOG.trace("Update qos and queues to ovsdb for node {} {}", ovsdbNodeId, ovsdbNodeAugmentationIid);
+                LOG.trace("Update qos and queues to ovsdb for node {} {}", ovsdbNodeId, ovsdbNodeAugmentationIid);
             } catch (final TransactionCommitFailedException e) {
                 LOG.warn("Failed to put {} ", ovsdbNodeAugmentationIid, e);
             }
@@ -402,19 +415,19 @@ public class OvsdbUtils {
     private static List<QosEntries> createQosEntries(Uni uni) {
         // Configure queue for best-effort dscp and max rate
         final List<QosOtherConfig> otherConfig = new ArrayList<>();
-        QosOtherConfig qOtherConfig = new QosOtherConfigBuilder()
+        QosOtherConfig qosOtherConfig = new QosOtherConfigBuilder()
                 .setKey(new QosOtherConfigKey(UnimgrConstants.QOS_DSCP_ATTRIBUTE))
                 .setOtherConfigKey(UnimgrConstants.QOS_DSCP_ATTRIBUTE)
                 .setOtherConfigValue(UnimgrConstants.QOS_DSCP_ATTRIBUTE_VALUE)
                 .build();
-        otherConfig.add(qOtherConfig);
+        otherConfig.add(qosOtherConfig);
 
-        qOtherConfig = new QosOtherConfigBuilder()
+        qosOtherConfig = new QosOtherConfigBuilder()
                 .setKey(new QosOtherConfigKey(UnimgrConstants.QOS_MAX_RATE))
                 .setOtherConfigKey(UnimgrConstants.QOS_MAX_RATE)
                 .setOtherConfigValue(UniUtils.getSpeed(uni.getSpeed().getSpeed()))
                 .build();
-        otherConfig.add(qOtherConfig);
+        otherConfig.add(qosOtherConfig);
 
         final Uuid qosUuid = new Uuid(UUID.randomUUID().toString());
         final QosEntries qosEntry = new QosEntriesBuilder()
@@ -493,14 +506,21 @@ public class OvsdbUtils {
             final CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
             try {
                 future.checkedGet();
-              LOG.info("Update qos-entries to ovsdb for node {} {}", ovsdbNodeId, queueIid);
+                LOG.info("Update qos-entries to ovsdb for node {} {}", ovsdbNodeId, queueIid);
             } catch (final TransactionCommitFailedException e) {
                 LOG.warn("Failed to put {} ", queueIid, e);
             }
         }
     }
 
-    public static void updateMaxRate (DataBroker dataBroker,
+    /**
+     * Write a new max rate into an EVC's objects.
+     * @param dataBroker the data broker
+     * @param sourceUniAugmentation source UNI
+     * @param destinationUniAugmentation destination UNI
+     * @param evc EVC link
+     */
+    public static void updateMaxRate(DataBroker dataBroker,
             UniAugmentation sourceUniAugmentation,
             UniAugmentation destinationUniAugmentation,
             EvcAugmentation evc) {
@@ -554,7 +574,7 @@ public class OvsdbUtils {
         final CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
         try {
             future.checkedGet();
-          LOG.info("Update qos-entries max-rate to ovsdb for node {} {}", ovsdbNodeId, qosOtherConfigIid);;
+            LOG.info("Update qos-entries max-rate to ovsdb for node {} {}", ovsdbNodeId, qosOtherConfigIid);
         } catch (final TransactionCommitFailedException e) {
             LOG.warn("Failed to put {}", qosOtherConfigIid, e);
         }
@@ -583,7 +603,7 @@ public class OvsdbUtils {
         final CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
         try {
             future.checkedGet();
-          LOG.info("Update queues max-rate to ovsdb for node {} {}", ovsdbNodeId, queuesOtherConfigIid);;
+            LOG.info("Update queues max-rate to ovsdb for node {} {}", ovsdbNodeId, queuesOtherConfigIid);
         } catch (final TransactionCommitFailedException e) {
             LOG.warn("Failed to put {} ", queuesOtherConfigIid, e);
         }
@@ -603,7 +623,7 @@ public class OvsdbUtils {
     }
 
     /**
-     * Creates a built OvsdbTerminationAugmentation with data
+     * Creates a built OvsdbTerminationAugmentation with data.
      * @param uni The UNI's data
      * @return A Built OvsdbTerminationPointAugmentation with data
      */
@@ -626,7 +646,7 @@ public class OvsdbUtils {
      * @param bridgeName The Bridge name (example: br0)
      * @param portName The Port name (example: eth0)
      * @param type The type of termination (example: gre) Refer to OVSDB_INTERFACE_TYPE_MAP
-     * to review the list of available Interface Types.
+     *     to review the list of available Interface Types.
      */
     public static void createTerminationPointNode(DataBroker dataBroker,
             Uni uni,
@@ -711,7 +731,7 @@ public class OvsdbUtils {
     }
 
     /**
-     * Deletes a generic node
+     * Deletes a generic node.
      * @param dataBroker The instance of the data broker to create transactions
      * @param store The DataStore where the delete
      * @param path The path to delete
@@ -773,13 +793,11 @@ public class OvsdbUtils {
             for (final Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
                 if (klazz.isInstance(created.getValue())) {
                     @SuppressWarnings("unchecked")
-                    final
-                    T value = (T) created.getValue();
+                    final T value = (T) created.getValue();
                     final Class<?> type = created.getKey().getTargetType();
                     if (type.equals(klazz)) {
                         @SuppressWarnings("unchecked") // Actually checked above
-                        final
-                        InstanceIdentifier<T> iid = (InstanceIdentifier<T>) created.getKey();
+                        final InstanceIdentifier<T> iid = (InstanceIdentifier<T>) created.getKey();
                         result.put(iid, value);
                     }
                 }
@@ -800,7 +818,7 @@ public class OvsdbUtils {
     }
 
     /**
-     * Extracts the removed nodes
+     * Extracts the removed nodes.
      * @param changes he dataChange object
      * @param klazz The class type
      * @return A set to removed nodes as DataObject casted as the class type
@@ -812,8 +830,7 @@ public class OvsdbUtils {
             for (final InstanceIdentifier<?> iid : changes.getRemovedPaths()) {
                 if (iid.getTargetType().equals(klazz)) {
                     @SuppressWarnings("unchecked") // Actually checked above
-                    final
-                    InstanceIdentifier<T> iidn = (InstanceIdentifier<T>)iid;
+                    final InstanceIdentifier<T> iidn = (InstanceIdentifier<T>)iid;
                     result.add(iidn);
                 }
             }
@@ -850,7 +867,7 @@ public class OvsdbUtils {
 
     /**
      * Retrieves the connection information from an Ovsdb Connection by
-     * using the Ovsdb Node Id
+     * using the Ovsdb Node Id.
      * @param dataBroker The dataBroker instance to create transactions
      * @param ovsdbNodeId The NodeId of the OVSDB node
      * @return The ConnectionInfo object
@@ -872,7 +889,7 @@ public class OvsdbUtils {
     }
 
     /**
-     * Retrieve the Local IP of the controller
+     * Retrieve the Local IP of the controller.
      * @return The LocalIp object of the Controller
      */
     public static IpAddress getLocalIp() {
@@ -888,7 +905,7 @@ public class OvsdbUtils {
     }
 
     /**
-     * Retrieve a list of Ovsdb Nodes from the Operational DataStore
+     * Retrieve a list of Ovsdb Nodes from the Operational DataStore.
      * @param dataBroker The dataBroker instance to create transactions
      * @return The Ovsdb Node retrieved from the Operational DataStore
      */
@@ -909,7 +926,8 @@ public class OvsdbUtils {
             topology = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, ovsdbTopoIdentifier);
             if ((topology != null) && (topology.getNode() != null)) {
                 for (final Node node : topology.getNode()) {
-                    final OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
+                    final OvsdbNodeAugmentation ovsdbNodeAugmentation =
+                            node.getAugmentation(OvsdbNodeAugmentation.class);
                     if (ovsdbNodeAugmentation != null) {
                         ovsdbNodes.add(node);
                     }

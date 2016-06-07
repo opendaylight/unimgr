@@ -85,6 +85,28 @@ public class MdsalUtils {
     }
 
     /**
+     * Read a specific node from a specific data store type.
+     * @param dataBroker The dataBroker instance to create transactions
+     * @param store The data store type
+     * @param genericNode The Instance Identifier of a specific Node
+     * @return An Optional Node instance
+     */
+    public static final Optional<Node> readNode(DataBroker dataBroker,
+                                                LogicalDatastoreType store,
+                                                InstanceIdentifier<?> genericNode) {
+        final ReadTransaction read = dataBroker.newReadOnlyTransaction();
+        final InstanceIdentifier<Node> nodeIid = genericNode.firstIdentifierOf(Node.class);
+        final CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture = read
+                .read(store, nodeIid);
+        try {
+            return nodeFuture.checkedGet();
+        } catch (final ReadFailedException e) {
+            LOG.info("Unable to read node with Iid {}", nodeIid, e);
+        }
+        return Optional.absent();
+    }
+
+    /**
      * Generic function to delete a node on a specific dataStore
      * @param dataBroker The instance of the data broker to create transactions.
      * @param genericNode The instance identifier of a generic node
@@ -123,28 +145,6 @@ public class MdsalUtils {
             return linkFuture.checkedGet();
         } catch (final ReadFailedException e) {
             LOG.info("Unable to read node with Iid {}", linkIid, e);
-        }
-        return Optional.absent();
-    }
-
-    /**
-     * Read a specific node from a specific data store type.
-     * @param dataBroker The dataBroker instance to create transactions
-     * @param store The data store type
-     * @param genericNode The Instance Identifier of a specific Node
-     * @return An Optional Node instance
-     */
-    public static final Optional<Node> readNode(DataBroker dataBroker,
-                                                LogicalDatastoreType store,
-                                                InstanceIdentifier<?> genericNode) {
-        final ReadTransaction read = dataBroker.newReadOnlyTransaction();
-        final InstanceIdentifier<Node> nodeIid = genericNode.firstIdentifierOf(Node.class);
-        final CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture = read
-                .read(store, nodeIid);
-        try {
-            return nodeFuture.checkedGet();
-        } catch (final ReadFailedException e) {
-            LOG.info("Unable to read node with Iid {}", nodeIid, e);
         }
         return Optional.absent();
     }
