@@ -46,44 +46,48 @@ public class UniRemoveCommand extends AbstractCommand<Node> {
                                                                     .firstIdentifierOf(UniAugmentation.class);
         if (uniAugmentation != null) {
             final OvsdbNodeRef ovsNodedRef = uniAugmentation.getOvsdbNodeRef();
-            final InstanceIdentifier<Node> ovsdbNodeIid = ovsNodedRef.getValue().firstIdentifierOf(Node.class);
-            final Optional<Node> optionalNode = MdsalUtils.readNode(dataBroker,
-                                                               LogicalDatastoreType.OPERATIONAL,
-                                                               ovsdbNodeIid);
-            if (optionalNode.isPresent()) {
-                final Node ovsdbNode = optionalNode.get();
-                LOG.info("Delete QoS and Queues entries");
-                List<QosEntries> qosList = ovsdbNode
-                        .getAugmentation(OvsdbNodeAugmentation.class)
-                        .getQosEntries();
-                QosEntriesKey qosEntryKey = null;
-                for (final QosEntries qosEntry : qosList) {
-                    qosEntryKey = qosEntry.getKey();
-                    InstanceIdentifier<QosEntries> qosIid = UnimgrMapper.getOvsdbQoSEntriesIid(ovsdbNode, qosEntryKey);
-                    MdsalUtils.deleteNode(dataBroker, qosIid, LogicalDatastoreType.CONFIGURATION);
+            if (ovsNodedRef != null) {
+                final InstanceIdentifier<Node> ovsdbNodeIid = ovsNodedRef.getValue().firstIdentifierOf(Node.class);
+                final Optional<Node> optionalNode = MdsalUtils.readNode(dataBroker,
+                        LogicalDatastoreType.OPERATIONAL,
+                        ovsdbNodeIid);
+                if (optionalNode.isPresent()) {
+                    final Node ovsdbNode = optionalNode.get();
+                    LOG.info("Delete QoS and Queues entries");
+                    List<QosEntries> qosList = ovsdbNode
+                            .getAugmentation(OvsdbNodeAugmentation.class)
+                            .getQosEntries();
+                    QosEntriesKey qosEntryKey = null;
+                    for (final QosEntries qosEntry : qosList) {
+                        qosEntryKey = qosEntry.getKey();
+                        InstanceIdentifier<QosEntries> qosIid =
+                                UnimgrMapper.getOvsdbQoSEntriesIid(ovsdbNode, qosEntryKey);
+                        MdsalUtils.deleteNode(dataBroker, qosIid, LogicalDatastoreType.CONFIGURATION);
+                    }
+                    List<Queues> queuesList = ovsdbNode
+                            .getAugmentation(OvsdbNodeAugmentation.class)
+                            .getQueues();
+                    QueuesKey queuesKey = null;
+                    for (final Queues queue : queuesList) {
+                        queuesKey = queue.getKey();
+                        InstanceIdentifier<Queues> queuesIid = UnimgrMapper.getOvsdbQueuesIid(ovsdbNode, queuesKey);
+                        MdsalUtils.deleteNode(dataBroker, queuesIid, LogicalDatastoreType.CONFIGURATION);
+                    }
+                    LOG.info("Delete bride node");
+                    final InstanceIdentifier<Node> bridgeIid = UnimgrMapper.getOvsdbBridgeNodeIid(ovsdbNode);
+                    MdsalUtils.deleteNode(dataBroker, bridgeIid, LogicalDatastoreType.CONFIGURATION);
                 }
-                List<Queues> queuesList = ovsdbNode
-                        .getAugmentation(OvsdbNodeAugmentation.class)
-                        .getQueues();
-                QueuesKey queuesKey = null;
-                for (final Queues queue : queuesList) {
-                    queuesKey = queue.getKey();
-                    InstanceIdentifier<Queues> queuesIid = UnimgrMapper.getOvsdbQueuesIid(ovsdbNode, queuesKey);
-                    MdsalUtils.deleteNode(dataBroker, queuesIid, LogicalDatastoreType.CONFIGURATION);
+                final InstanceIdentifier<Node> iidUni = UnimgrMapper.getUniIid(dataBroker,
+                        uniAugmentation.getIpAddress(),
+                        LogicalDatastoreType.OPERATIONAL);
+                if (iidUni != null) {
+                    MdsalUtils.deleteNode(dataBroker, iidUni, LogicalDatastoreType.OPERATIONAL);
                 }
-                LOG.info("Delete bride node");
-                final InstanceIdentifier<Node> bridgeIid = UnimgrMapper.getOvsdbBridgeNodeIid(ovsdbNode);
-                MdsalUtils.deleteNode(dataBroker, bridgeIid, LogicalDatastoreType.CONFIGURATION);
+            } else {
+                LOG.info("Received Uni Augmentation has null ovsdb node ref: {}", removedUniIid);
             }
-            final InstanceIdentifier<Node> iidUni = UnimgrMapper.getUniIid(dataBroker, uniAugmentation.getIpAddress(),
-                                                                     LogicalDatastoreType.OPERATIONAL);
-            if (iidUni != null) {
-                MdsalUtils.deleteNode(dataBroker, iidUni, LogicalDatastoreType.OPERATIONAL);
-            }
-        }
-        else {
-            LOG.info("Received Uni Augmentation is null", removedUniIid);
+        } else {
+            LOG.info("Received Uni Augmentation is null: {}", removedUniIid);
         }
     }
-
 }
