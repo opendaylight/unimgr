@@ -42,7 +42,13 @@ public abstract class UnimgrDataTreeChangeListener<D extends DataObject>
                     update(change);
                     break;
                 case WRITE:
-                    add(change);
+                    // Treat an overwrite as an update
+                    boolean update = change.getRootNode().getDataBefore() != null;
+                    if (update) {
+                        update(change);
+                    } else {
+                        add(change);
+                    }
                     break;
                 case DELETE:
                     remove(change);

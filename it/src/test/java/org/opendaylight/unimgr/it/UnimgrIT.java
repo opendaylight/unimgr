@@ -83,7 +83,6 @@ public class UnimgrIT extends AbstractMdsalTestBase {
     private static final String IP_1 = "10.0.0.1";
     private static final String IP_2 = "10.0.0.2";
     private static final String EVC_ID_1 = "1";
-    private static final int MAX_RETRIES = 5;
 
     @Override
     public void setup() throws Exception {
@@ -224,25 +223,22 @@ public class UnimgrIT extends AbstractMdsalTestBase {
 
         NodeId uniNodeId = new NodeId(new NodeId("uni://" + uni.getIpAddress().getIpv4Address().getValue().toString()));
         InstanceIdentifier<Node> uniNodeIid = null;
-            uniNodeIid = getUniIid("uni://" + uni.getIpAddress().getIpv4Address().getValue().toString());
-            NodeKey uniNodeKey = new NodeKey(uniNodeId);
-            Node nodeData = new NodeBuilder()
+        uniNodeIid = getUniIid("uni://" + uni.getIpAddress().getIpv4Address().getValue().toString());
+        NodeKey uniNodeKey = new NodeKey(uniNodeId);
+        Node nodeData = new NodeBuilder()
                                     .setNodeId(uniNodeId)
                                     .setKey(uniNodeKey)
                                     .addAugmentation(UniAugmentation.class, uni)
                                     .build();
-        for (int i = 0; i < MAX_RETRIES; i++) {
-            WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-            try {
-                writeUNI(uniNodeIid, nodeData, transaction);
-                LOG.info("Created and submitted a new Uni node {}", nodeData.getNodeId());
-                return uniNodeIid;
-            } catch (Exception e) {
-                transaction.cancel();
-                LOG.warn("Exception while creating Uni Node" + "Uni Node Id: {}, {} retrying", uniNodeId, e);
-            }
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        try {
+            writeUNI(uniNodeIid, nodeData, transaction);
+            LOG.info("Created and submitted a new Uni node {}", nodeData.getNodeId());
+            return uniNodeIid;
+        } catch (Exception e) {
+            transaction.cancel();
+            LOG.error("Could not create Uni Node - Id: {}, {}", uniNodeId, e);
         }
-        LOG.error("Couldn't create Uni Node" + "Uni Node Id: {}", uniNodeId);
         return null;
     }
 

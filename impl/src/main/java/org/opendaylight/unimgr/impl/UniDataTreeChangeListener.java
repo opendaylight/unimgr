@@ -74,7 +74,7 @@ public class UniDataTreeChangeListener extends UnimgrDataTreeChangeListener<Node
     @Override
     public void update(final DataTreeModification<Node> modifiedDataObject) {
         if (modifiedDataObject.getRootPath() != null && modifiedDataObject.getRootNode() != null) {
-            LOG.info("uni node {} created", modifiedDataObject.getRootNode().getIdentifier());
+            LOG.info("uni node {} updated", modifiedDataObject.getRootNode().getIdentifier());
             final UniUpdateCommand uniUpdateCmd = new UniUpdateCommand(dataBroker, modifiedDataObject);
             uniUpdateCmd.execute();
         }
