@@ -58,6 +58,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <id>main</id>
       <modules>
         <module>api</module>
+        <module>legato-api</module>
         <module>impl</module>
         <module>cisco-xr-driver</module>
         <module>cli</module>
