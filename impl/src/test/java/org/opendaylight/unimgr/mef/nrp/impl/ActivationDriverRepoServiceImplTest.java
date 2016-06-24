@@ -21,7 +21,7 @@ import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectcl
 public class ActivationDriverRepoServiceImplTest {
 
     @Test(expected = ActivationDriverNotFoundException.class)
-    public void testEmpty() throws Exception {
+    public void testEmptyBuilderList() throws Exception {
 
         ActivationDriverRepoService driverRepo = new ActivationDriverRepoServiceImpl(Collections.emptyList());
         final FcPort port = new FcPortBuilder().setId("a").build();
@@ -30,7 +30,7 @@ public class ActivationDriverRepoServiceImplTest {
 
 
     @Test(expected = ActivationDriverAmbiguousException.class)
-    public void testConflict() throws Exception {
+    public void testConflictingBuilders() throws Exception {
 
         final ActivationDriver driver = mock(ActivationDriver.class);
 
@@ -43,7 +43,7 @@ public class ActivationDriverRepoServiceImplTest {
     }
 
     @Test
-    public void testMatching() throws Exception {
+    public void testMatchingWithSinglePort() throws Exception {
 
         final ActivationDriver driver = mock(ActivationDriver.class);
 
@@ -54,5 +54,21 @@ public class ActivationDriverRepoServiceImplTest {
         final FcPort port = new FcPortBuilder().setId("a").build();
         final ActivationDriver driverFromRepo = driverRepo.getDriver(port, null);
         assertEquals(driver, driverFromRepo);
+    }
+
+    @Test
+    public void testMatchingWithDualPort() throws Exception {
+
+        final ActivationDriver d1 = mock(ActivationDriver.class);
+        final ActivationDriver d2 = mock(ActivationDriver.class);
+
+        ActivationDriverRepoService driverRepo = new ActivationDriverRepoServiceImpl(Arrays.asList(
+                prepareDriver(p -> d1), prepareDriver((a,b) -> d2)
+        ));
+
+        final FcPort portA = new FcPortBuilder().setId("a").build();
+        final FcPort portB = new FcPortBuilder().setId("b").build();
+        final ActivationDriver driverFromRepo = driverRepo.getDriver(portA, portB, null);
+        assertEquals(d2, driverFromRepo);
     }
 }
