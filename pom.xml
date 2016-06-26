@@ -61,6 +61,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <module>legato-api</module>
         <module>presto-api</module>
         <module>impl</module>
+        <module>netvirt</module>
         <module>cisco-xr-driver</module>
         <module>cli</module>
         <module>karaf</module>
