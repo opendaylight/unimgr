@@ -1,0 +1,55 @@
+module onf-core-network-types {
+  namespace "urn:onf:core-network-types";
+  prefix onf-cnt;
+
+  revision 2016-06-21 {
+  }
+
+  typedef OperType {
+    type enumeration {
+      enum REVERTIVE;
+      enum NON-REVERTIVE;
+    }
+  }
+
+  typedef LayerProtocolName {
+    type string;
+  }
+
+  typedef ForwardingDirection {
+    type enumeration {
+      enum BIDIRECTIONAL;
+      enum UNIDIRECTIONAL;
+      enum UNDEFINED_OR_UNKNOWN;
+    }
+  }
+
+  typedef PortRole {
+    status current;
+    type string;
+  }
+
+  typedef PortDirection {
+    type enumeration {
+      enum BIDIRECTIONAL;
+      enum INPUT;
+      enum OUTPUT;
+      enum UNIDENTIFIED_OR_UNKNOWN;
+    }
+  }
+
+  typedef ProtectionType {
+    status deprecated;
+    type string;
+  }
+
+  typedef TerminationDirection {
+    type enumeration {
+      enum BIDIRECTIONAL;
+      enum SINK;
+      enum SOURCE;
+      enum UNDEFINED_OR_UNKNOWN;
+    }
+  }
+
+}
