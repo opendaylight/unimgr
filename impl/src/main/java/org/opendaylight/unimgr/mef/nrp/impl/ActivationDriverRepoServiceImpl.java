@@ -20,7 +20,7 @@ import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverAmbiguousException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverNotFoundException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.GFcPort;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,11 +59,11 @@ public class ActivationDriverRepoServiceImpl implements ActivationDriverRepoServ
         return drivers.get(0);
     }
 
-    public ActivationDriver getDriver(GFcPort portA, GFcPort portZ, ActivationDriverBuilder.BuilderContext context) {
+    public ActivationDriver getDriver(FcPort portA, FcPort portZ, ActivationDriverBuilder.BuilderContext context) {
         return getDriver(x -> x.driverFor(portA, portZ, context));
     }
 
-    public ActivationDriver getDriver(GFcPort port, ActivationDriverBuilder.BuilderContext context) {
+    public ActivationDriver getDriver(FcPort port, ActivationDriverBuilder.BuilderContext context) {
         return getDriver(x -> x.driverFor(port, context));
     }
 

@@ -16,8 +16,8 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.FcRouteList;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.fcroutelist.FcRoute;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.ForwardingConstructs;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.forwarding.constructs.ForwardingConstruct;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -27,23 +27,23 @@ import org.slf4j.LoggerFactory;
  * NRP top level change model listener
  * @author bartosz.michalik@amartus.com
  */
-public class FcRouteChangeListener implements DataTreeChangeListener<FcRoute>, AutoCloseable {
-    private static final Logger LOG = LoggerFactory.getLogger(FcRouteChangeListener.class);
-    private final ListenerRegistration<FcRouteChangeListener> listener;
-    private final FcRouteActivatorService routeActivator;
+public class ForwardingConstructChangeListener implements DataTreeChangeListener<ForwardingConstruct>, AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(ForwardingConstructChangeListener.class);
+    private final ListenerRegistration<ForwardingConstructChangeListener> listener;
+    private final ForwardingConstructActivatorService routeActivator;
 
     private final ActivationDriverRepoService activationRepoService;
 
-    public FcRouteChangeListener(DataBroker dataBroker, ActivationDriverRepoService activationRepoService) {
+    public ForwardingConstructChangeListener(DataBroker dataBroker, ActivationDriverRepoService activationRepoService) {
         this.activationRepoService = activationRepoService;
-        routeActivator = new FcRouteActivatorService(activationRepoService);
+        routeActivator = new ForwardingConstructActivatorService(activationRepoService);
 
-        final InstanceIdentifier<FcRoute> fwPath = getFwConstructsPath();
-        final DataTreeIdentifier<FcRoute> dataTreeIid =
+        final InstanceIdentifier<ForwardingConstruct> fwPath = getFwConstructsPath();
+        final DataTreeIdentifier<ForwardingConstruct> dataTreeIid =
                 new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, fwPath);
         listener = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
 
-        LOG.info("FcRouteChangeListener created and registered");
+        LOG.info("ForwardingConstructChangeListener created and registered");
     }
 
     /**
@@ -51,14 +51,14 @@ public class FcRouteChangeListener implements DataTreeChangeListener<FcRoute>, A
      * based on the data object modification type.
      */
     @Override
-    public void onDataTreeChanged(Collection<DataTreeModification<FcRoute>> collection) {
+    public void onDataTreeChanged(Collection<DataTreeModification<ForwardingConstruct>> collection) {
         //TODO add lock for concurrency support
         if (activationRepoService == null) {
             LOG.warn("ActivationDriverRepoService is not ready yet - ignoring request");
             return;
         }
-        for (final DataTreeModification<FcRoute> change : collection) {
-            final DataObjectModification<FcRoute> root = change.getRootNode();
+        for (final DataTreeModification<ForwardingConstruct> change : collection) {
+            final DataObjectModification<ForwardingConstruct> root = change.getRootNode();
             switch (root.getModificationType()) {
                 case SUBTREE_MODIFIED:
                     update(change);
@@ -83,21 +83,21 @@ public class FcRouteChangeListener implements DataTreeChangeListener<FcRoute>, A
         }
     }
 
-    protected void add(DataTreeModification<FcRoute> newDataObject) {
+    protected void add(DataTreeModification<ForwardingConstruct> newDataObject) {
         //TODO: Refine the logged addition
         LOG.debug("FcRoute add event received {}", newDataObject);
         routeActivator.activate(newDataObject.getRootNode().getDataAfter());
 
     }
 
-    protected void remove(DataTreeModification<FcRoute> removedDataObject) {
+    protected void remove(DataTreeModification<ForwardingConstruct> removedDataObject) {
         //TODO: Refine the logged removal
         LOG.debug("FcRoute remove event received {}", removedDataObject);
         routeActivator.deactivate(removedDataObject.getRootNode().getDataBefore());
 
     }
 
-    protected void update(DataTreeModification<FcRoute> modifiedDataObject) {
+    protected void update(DataTreeModification<ForwardingConstruct> modifiedDataObject) {
         //TODO: Refine the logged modification
         LOG.debug("FcRoute update event received {}", modifiedDataObject);
 
@@ -111,11 +111,9 @@ public class FcRouteChangeListener implements DataTreeChangeListener<FcRoute>, A
         listener.close();
     }
 
-    private InstanceIdentifier<FcRoute> getFwConstructsPath() {
-        final InstanceIdentifier<FcRoute> path = InstanceIdentifier
-                .builder(FcRouteList.class)
-                .child(FcRoute.class).build();
 
-        return path;
+    private InstanceIdentifier<ForwardingConstruct> getFwConstructsPath() {
+        return InstanceIdentifier
+                .builder(ForwardingConstructs.class).child(ForwardingConstruct.class).build();
     }
 }

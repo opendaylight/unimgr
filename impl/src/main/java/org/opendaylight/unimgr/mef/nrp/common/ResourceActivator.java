@@ -8,7 +8,7 @@
 
 package org.opendaylight.unimgr.mef.nrp.common;
 
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.GFcPort;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 
 /**
  * Device facing SPI for activating or deactivating a fragment of an NRP
@@ -32,7 +32,7 @@ public interface ResourceActivator {
      * @param mtu
      *            the desired MTU for this forwarding construct
      */
-    public void activate(String nodeName, String outerName, String innerName, GFcPort flowPoint, GFcPort neighbor,
+    public void activate(String nodeName, String outerName, String innerName, FcPort flowPoint, FcPort neighbor,
             long mtu);
 
     /**
@@ -51,6 +51,6 @@ public interface ResourceActivator {
      * @param mtu
      *            the desired MTU for this forwarding construct
      */
-    public void deactivate(String nodeName, String outerName, String innerName, GFcPort flowPoint, GFcPort neighbor,
+    public void deactivate(String nodeName, String outerName, String innerName, FcPort flowPoint, FcPort neighbor,
             long mtu);
 }

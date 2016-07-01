@@ -23,7 +23,7 @@ import org.opendaylight.yang.gen.v1.http.www.microsemi.com.microsemi.edge.assure
 import org.opendaylight.yang.gen.v1.http.www.microsemi.com.microsemi.edge.assure.msea.uni.evc.service.rev160317.mef.services.uni.Evc;
 import org.opendaylight.yang.gen.v1.http.www.microsemi.com.microsemi.edge.assure.msea.uni.evc.service.rev160317.mef.services.uni.EvcBuilder;
 import org.opendaylight.yang.gen.v1.http.www.microsemi.com.microsemi.edge.assure.msea.uni.evc.service.rev160317.mef.services.uni.EvcKey;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.GFcPort;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,14 +42,9 @@ public class EdgeAssureActivator implements ResourceActivator {
     }
 
     @Override
-    public void activate(String nodeName, String outerName, String innerName, GFcPort port, GFcPort neighbor,
+    public void activate(String nodeName, String outerName, String innerName, FcPort port, FcPort neighbor,
             long mtu) {
         log.info("Activation called on EdgeAssureActivator");
-
-        String portLtpId = port.getLtpRefList().get(0).getValue();
-        String neighborLtpId = neighbor.getLtpRefList().get(0).getValue();
-
-        String neighborHostname = neighborLtpId.split(":")[0];
 
         long evcId = 1;
 
@@ -72,7 +67,7 @@ public class EdgeAssureActivator implements ResourceActivator {
     }
 
     @Override
-    public void deactivate(String nodeName, String outerName, String innerName, GFcPort port, GFcPort neighbor,
+    public void deactivate(String nodeName, String outerName, String innerName, FcPort port, FcPort neighbor,
             long mtu) {
         log.info("Deactivation called on EdgeAssureActivator. Not yet implemented.");
 

@@ -22,7 +22,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <argument ref="driverBuilders" />
     </bean>
 
-    <bean id="fcRouteListener" class="org.opendaylight.unimgr.impl.FcRouteChangeListener">
+    <bean id="fcRouteListener" class="org.opendaylight.unimgr.impl.ForwardingConstructChangeListener">
         <argument ref="dataBroker" />
         <argument ref="activationDriver" />
     </bean>

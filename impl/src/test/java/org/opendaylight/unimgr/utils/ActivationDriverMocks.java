@@ -2,7 +2,7 @@ package org.opendaylight.unimgr.utils;
 
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.GFcPort;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -23,16 +23,16 @@ public class ActivationDriverMocks {
      * @param producer to build driver
      * @return driver builder mock
      */
-    public static ActivationDriverBuilder prepareDriver(Function<GFcPort, ActivationDriver> producer) {
+    public static ActivationDriverBuilder prepareDriver(Function<FcPort, ActivationDriver> producer) {
         final ActivationDriverBuilder mock = mock(ActivationDriverBuilder.class);
 
         doAnswer(inv -> {
-            GFcPort port = (GFcPort) inv.getArguments()[0];
+            FcPort port = (FcPort) inv.getArguments()[0];
             return Optional.ofNullable(producer.apply(port));
-        }).when(mock).driverFor(any(GFcPort.class), any(ActivationDriverBuilder.BuilderContext.class));
+        }).when(mock).driverFor(any(FcPort.class), any(ActivationDriverBuilder.BuilderContext.class));
 
         doReturn(Optional.empty()).when(mock)
-                .driverFor(any(GFcPort.class), any(GFcPort.class), any(ActivationDriverBuilder.BuilderContext.class));
+                .driverFor(any(FcPort.class), any(FcPort.class), any(ActivationDriverBuilder.BuilderContext.class));
 
         return mock;
     }
@@ -43,17 +43,17 @@ public class ActivationDriverMocks {
      * @param producer to build driver
      * @return driver builder mock
      */
-    public static ActivationDriverBuilder prepareDriver(BiFunction<GFcPort, GFcPort, ActivationDriver> producer) {
+    public static ActivationDriverBuilder prepareDriver(BiFunction<FcPort, FcPort, ActivationDriver> producer) {
         final ActivationDriverBuilder mock = mock(ActivationDriverBuilder.class);
 
         doAnswer(inv -> {
-            GFcPort port1 = (GFcPort) inv.getArguments()[0];
-            GFcPort port2 = (GFcPort) inv.getArguments()[1];
+            FcPort port1 = (FcPort) inv.getArguments()[0];
+            FcPort port2 = (FcPort) inv.getArguments()[1];
             return Optional.ofNullable(producer.apply(port1, port2));
-        }).when(mock).driverFor(any(GFcPort.class), any(GFcPort.class), any(ActivationDriverBuilder.BuilderContext.class));
+        }).when(mock).driverFor(any(FcPort.class), any(FcPort.class), any(ActivationDriverBuilder.BuilderContext.class));
 
         doReturn(Optional.empty()).when(mock)
-                .driverFor(any(GFcPort.class), any(ActivationDriverBuilder.BuilderContext.class));
+                .driverFor(any(FcPort.class), any(ActivationDriverBuilder.BuilderContext.class));
         return mock;
     }
 }

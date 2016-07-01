@@ -24,10 +24,16 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <bundle>mvn:org.opendaylight.unimgr/unimgr-api/{{VERSION}}</bundle>
   </feature>
 
+  <feature name='odl-unimgr-presto-api' version='${project.version}' description='OpenDaylight :: UniMgr :: NRP Presto API'>
+    <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
+    <bundle>mvn:org.opendaylight.unimgr/unimgr-presto-api/{{VERSION}}</bundle>
+  </feature>
+
   <feature name='odl-unimgr' version='${project.version}' description='OpenDaylight :: UniMgr'>
     <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${ovsdb.version}'>odl-ovsdb-southbound-impl</feature>
     <feature version='${project.version}'>odl-unimgr-api</feature>
+    <feature version='${project.version}'>odl-unimgr-presto-api</feature>
     <!-- TODO these features should be dependencies of drivers not unimgr itself -->
     <feature version='${netconf.version}'>odl-netconf-connector</feature>
     <feature version='${netconf.version}'>odl-netconf-connector-ssh</feature>

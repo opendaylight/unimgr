@@ -60,7 +60,7 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.pseudowires.pseudowire.pseudowire.content.MplsStaticLabelsBuilder;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.CiscoIosXrString;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.InterfaceName;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.GFcPort;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4AddressNoZone;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -82,11 +82,10 @@ public class L2vpnXconnectActivator implements ResourceActivator {
     }
 
     @Override
-    public void activate(String nodeName, String outerName, String innerName, GFcPort port, GFcPort neighbor, long mtu) {
+    public void activate(String nodeName, String outerName, String innerName, FcPort port, FcPort neighbor, long mtu) {
 
-        String portLtpId = port.getLtpRefList().get(0).getValue();
-        String neighborLtpId = neighbor.getLtpRefList().get(0).getValue();
-
+        String portLtpId = port.getTp().getValue();
+        String neighborLtpId = neighbor.getTp().getValue();
         String neighborHostname = neighborLtpId.split(":")[0];
         InterfaceName interfaceName = new InterfaceName(portLtpId.split(":")[1]);
 
@@ -202,10 +201,10 @@ public class L2vpnXconnectActivator implements ResourceActivator {
     }
 
     @Override
-    public void deactivate(String nodeName, String outerName, String innerName, GFcPort port, GFcPort neighbor,
+    public void deactivate(String nodeName, String outerName, String innerName, FcPort port, FcPort neighbor,
             long mtu) {
-        String portLtpId = port.getLtpRefList().get(0).getValue();
-        String neighborLtpId = neighbor.getLtpRefList().get(0).getValue();
+        String portLtpId = port.getTp().getValue();
+        String neighborLtpId = neighbor.getTp().getValue();
 
         String neighborHostname = neighborLtpId.split(":")[0];
         InterfaceName interfaceName = new InterfaceName(portLtpId.split(":")[1]);

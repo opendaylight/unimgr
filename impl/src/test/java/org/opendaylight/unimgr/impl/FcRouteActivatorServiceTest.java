@@ -15,23 +15,32 @@ import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.impl.ActivationDriverRepoServiceImpl;
 import org.opendaylight.unimgr.utils.ActivationDriverMocks;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corefoundationmodule.superclassesandcommonpackages.rev160413.UniversalId;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.GFcPort;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.GForwardingConstruct;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.fcroutelist.FcRoute;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.fcroutelist.FcRouteBuilder;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.g_fcroute.ForwardingConstruct;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.g_fcroute.ForwardingConstructBuilder;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.g_forwardingconstruct.FcPort;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.g_forwardingconstruct.FcPortBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.forwarding.constructs.ForwardingConstruct;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.forwarding.constructs.ForwardingConstructBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPortBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
+
+
+class TestBusinessEx extends RuntimeException {
+    public TestBusinessEx() {
+        super("expected exception");
+    }
+}
 
 /**
  * @author bartosz.michalik@amartus.com
  */
 public class FcRouteActivatorServiceTest {
 
-    public FcRouteActivatorService createService(List<ActivationDriverBuilder> builders) {
-        return new FcRouteActivatorService(new ActivationDriverRepoServiceImpl(builders));
+
+    private static final TopologyId topoA = new TopologyId("a");
+    private static final TopologyId topoZ = new TopologyId("z");
+
+    public ForwardingConstructActivatorService createService(List<ActivationDriverBuilder> builders) {
+        return new ForwardingConstructActivatorService(new ActivationDriverRepoServiceImpl(builders));
     }
 
     @Test
@@ -40,13 +49,13 @@ public class FcRouteActivatorServiceTest {
         //having
         final ActivationDriver d1 = mock(ActivationDriver.class);
 
-        FcRouteActivatorService service = createService(Arrays.asList(
-                ActivationDriverMocks.prepareDriver((port1, port2) -> "a".equals(port1.getId()) ? d1 : null),
+        ForwardingConstructActivatorService service = createService(Arrays.asList(
+                ActivationDriverMocks.prepareDriver((port1, port2) -> topoA.equals(port1.getTopology()) ? d1 : null),
                 ActivationDriverMocks.prepareDriver((port1, port2) -> null)
         ));
 
         //when
-        service.activate(buildFor(singleNode()));
+        service.activate(singleNode());
 
         //then
         verify(d1).activate();
@@ -58,12 +67,12 @@ public class FcRouteActivatorServiceTest {
         //having
         final ActivationDriver d1 = mock(ActivationDriver.class);
 
-        FcRouteActivatorService service = createService(Collections.singletonList(
+        ForwardingConstructActivatorService service = createService(Collections.singletonList(
                 ActivationDriverMocks.prepareDriver(port -> d1)
         ));
 
         //when
-        service.activate(buildFor(twoNodes()));
+        service.activate(twoNodes());
 
         //then
         verify(d1, times(2)).activate();
@@ -77,13 +86,13 @@ public class FcRouteActivatorServiceTest {
         final ActivationDriver d1 = mock(ActivationDriver.class);
         final ActivationDriver d2 = mock(ActivationDriver.class);
 
-        FcRouteActivatorService service = createService(Arrays.asList(
-                ActivationDriverMocks.prepareDriver(port -> "a".equals(port.getId()) ? d1 : null),
-                ActivationDriverMocks.prepareDriver(port -> "z".equals(port.getId()) ? d2 : null)
+        ForwardingConstructActivatorService service = createService(Arrays.asList(
+                ActivationDriverMocks.prepareDriver(port -> topoA.equals(port.getTopology()) ? d1 : null),
+                ActivationDriverMocks.prepareDriver(port -> topoZ.equals(port.getTopology()) ? d2 : null)
         ));
 
         //when
-        service.activate(buildFor(twoNodes()));
+        service.activate(twoNodes());
 
         //then
         verify(d1).activate();
@@ -96,14 +105,14 @@ public class FcRouteActivatorServiceTest {
     public void testActivateSingleNodeFailure() throws Exception {
 
         //having
-        final ActivationDriver d1 = spy(new FailingActivationDriver(p -> { if(p.getId().equals("a")) throw new NullPointerException();}));
+        final ActivationDriver d1 = spy(new FailingActivationDriver(p -> { if(p.getTopology().equals(topoA)) throw new TestBusinessEx();}));
 
-        FcRouteActivatorService service = createService(Collections.singletonList(
+        ForwardingConstructActivatorService service = createService(Collections.singletonList(
                 ActivationDriverMocks.prepareDriver((p1,p2) -> d1)
         ));
 
         //when
-        service.activate(buildFor(singleNode()));
+        service.activate(singleNode());
 
         //then
         verify(d1, times(1)).rollback();
@@ -113,14 +122,14 @@ public class FcRouteActivatorServiceTest {
     public void testActivateMultiNodeFailure() throws Exception {
 
         //having
-        final ActivationDriver d1 = spy(new FailingActivationDriver(p -> { if(p.getId().equals("a")) throw new NullPointerException();}));
+        final ActivationDriver d1 = spy(new FailingActivationDriver(p -> { if(p.getTopology().equals(topoA)) throw new TestBusinessEx();}));
 
-        FcRouteActivatorService service = createService(Collections.singletonList(
+        ForwardingConstructActivatorService service = createService(Collections.singletonList(
                 ActivationDriverMocks.prepareDriver(p1 -> d1)
         ));
 
         //when
-        service.activate(buildFor(twoNodes()));
+        service.activate(twoNodes());
 
         //then
         verify(d1, times(1)).activate();
@@ -131,15 +140,15 @@ public class FcRouteActivatorServiceTest {
     public void testDeactivateSingleNodeFailure() throws Exception {
 
         //having
-        final ActivationDriver d1 = spy(new FailingActivationDriver(p -> { if(p.getId().equals("a")) throw new NullPointerException();}));
+        final ActivationDriver d1 = spy(new FailingActivationDriver(p -> { if(p.getTopology().equals(topoA)) throw new TestBusinessEx();}));
 
-        FcRouteActivatorService service = createService(Arrays.asList(
+        ForwardingConstructActivatorService service = createService(Arrays.asList(
                 ActivationDriverMocks.prepareDriver((p1,p2) -> null),
                 ActivationDriverMocks.prepareDriver((p1,p2) -> d1)
         ));
 
         //when
-        service.deactivate(buildFor(singleNode()));
+        service.deactivate(singleNode());
 
         //then
         verify(d1, times(1)).deactivate();
@@ -151,12 +160,12 @@ public class FcRouteActivatorServiceTest {
         //having
         final ActivationDriver d1 = mock(ActivationDriver.class);
 
-        FcRouteActivatorService service = createService(Collections.singletonList(
+        ForwardingConstructActivatorService service = createService(Collections.singletonList(
                 ActivationDriverMocks.prepareDriver(port -> d1)
         ));
 
         //when
-        service.deactivate(buildFor(twoNodes()));
+        service.deactivate(twoNodes());
 
         //then
         verify(d1, times(2)).deactivate();
@@ -183,25 +192,20 @@ public class FcRouteActivatorServiceTest {
                 .build();
     }
 
-    private FcRoute buildFor(ForwardingConstruct fc) {
-        return new FcRouteBuilder()
-                .setForwardingConstruct(Collections.singletonList(fc))
-                .build();
-    }
-
-    FcPort port(String id, String host, String port) {
+    FcPort port(String topo, String host, String port) {
         return new FcPortBuilder()
-                .setId(id)
-                .setLtpRefList(Arrays.asList(new UniversalId(host + ":" + port)))
+                .setTopology(new TopologyId(topo))
+                .setNode(new NodeId(host))
+                .setTp(new TpId(port))
                 .build();
     }
 
     private static class FailingActivationDriver implements ActivationDriver {
 
-        private final Consumer<GFcPort> consumer;
-        private GFcPort from;
+        private final Consumer<FcPort> consumer;
+        private FcPort from;
 
-        FailingActivationDriver(Consumer<GFcPort> portConsumer) {
+        FailingActivationDriver(Consumer<FcPort> portConsumer) {
             this.consumer  = portConsumer;
         }
 
@@ -216,7 +220,7 @@ public class FcRouteActivatorServiceTest {
         }
 
         @Override
-        public void initialize(GFcPort from, GFcPort to, GForwardingConstruct context) {
+        public void initialize(FcPort from, FcPort to, ForwardingConstruct context) {
             if(this.from == null)
                 this.from = from;
         }
