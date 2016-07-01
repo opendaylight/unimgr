@@ -8,7 +8,7 @@
 
 package org.opendaylight.unimgr.mef.nrp.api;
 
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.GFcPort;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 
 /**
  * This interface is used to request an ActivationDriver for a given MEF service fragment.
@@ -23,7 +23,7 @@ public interface ActivationDriverRepoService {
      * @throws ActivationDriverAmbiguousException when multiple drivers declare they can configure port
      * @throws ActivationDriverNotFoundException when no driver found for port
      */
-    ActivationDriver getDriver(GFcPort port, ActivationDriverBuilder.BuilderContext context);
+    ActivationDriver getDriver(FcPort port, ActivationDriverBuilder.BuilderContext context);
 
     /**
      * Get driver for two ports on a single device.
@@ -34,5 +34,5 @@ public interface ActivationDriverRepoService {
      * @throws ActivationDriverAmbiguousException when multiple drivers declare they can configure ports
      * @throws ActivationDriverNotFoundException when no driver found for ports
      */
-    ActivationDriver getDriver(GFcPort portA, GFcPort portZ, ActivationDriverBuilder.BuilderContext context);
+    ActivationDriver getDriver(FcPort portA, FcPort portZ, ActivationDriverBuilder.BuilderContext context);
 }

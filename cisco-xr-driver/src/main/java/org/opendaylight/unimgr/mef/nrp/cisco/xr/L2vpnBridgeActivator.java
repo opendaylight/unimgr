@@ -49,7 +49,7 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.pseudowires.Pseudowire;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.CiscoIosXrString;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.InterfaceName;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.GFcPort;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,13 +66,10 @@ public class L2vpnBridgeActivator implements ResourceActivator {
     }
 
     @Override
-    public void activate(String nodeName, String outerName, String innerName, GFcPort port, GFcPort neighbor, long mtu) {
+    public void activate(String nodeName, String outerName, String innerName, FcPort port, FcPort neighbor, long mtu) {
 
-        String aEndLtpId = port.getLtpRefList().get(0).getValue();
-        String zEndLtpId = neighbor.getLtpRefList().get(0).getValue();
-
-        InterfaceName aEndIfName = new InterfaceName(aEndLtpId.split(":")[1]);
-        InterfaceName zEndIfName = new InterfaceName(zEndLtpId.split(":")[1]);
+        InterfaceName aEndIfName = new InterfaceName(port.getTp().getValue());
+        InterfaceName zEndIfName = new InterfaceName(neighbor.getTp().getValue());
         InterfaceName[] both = new InterfaceName[] { aEndIfName, zEndIfName };
 
         List<InterfaceConfiguration> intConfigs = new LinkedList<>();
@@ -161,9 +158,9 @@ public class L2vpnBridgeActivator implements ResourceActivator {
     }
 
     @Override
-    public void deactivate(String nodeName, String outerName, String innerName, GFcPort port, GFcPort neighbor,
+    public void deactivate(String nodeName, String outerName, String innerName, FcPort port, FcPort neighbor,
             long mtu) {
-        String portLtpId = port.getLtpRefList().get(0).getValue();
+        String portLtpId = port.getTp().getValue();
         InterfaceName interfaceName = new InterfaceName(portLtpId.split(":")[1]);
 
         InterfaceActive intActive = new InterfaceActive("act");

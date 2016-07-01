@@ -20,68 +20,67 @@ import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverNotFoundException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
 import org.opendaylight.unimgr.mef.nrp.impl.ActivationTransaction;
-import org.opendaylight.unimgr.mef.nrp.impl.ForwardingConstructHelper;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.GFcPort;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.GForwardingConstruct;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.fcroutelist.FcRoute;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.g_forwardingconstruct.FcPort;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.forwarding.constructs.ForwardingConstruct;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author bartosz.michalik@amartus.com
  */
-public class FcRouteActivatorService {
-    private static final Logger LOG = LoggerFactory.getLogger(FcRouteActivatorService.class);
+public class ForwardingConstructActivatorService {
+    private static final Logger LOG = LoggerFactory.getLogger(ForwardingConstructActivatorService.class);
     private ActivationDriverRepoService activationRepoService;
     private final ReentrantReadWriteLock lock;
 
-    public FcRouteActivatorService(ActivationDriverRepoService activationRepoService) {
+    public ForwardingConstructActivatorService(ActivationDriverRepoService activationRepoService) {
         this.activationRepoService = activationRepoService;
         lock = new ReentrantReadWriteLock();
     }
 
     /**
-     * Activate a MEF FcRoute.
-     * @param route the new route to activate
+     * Activate a MEF ForwardingConstruct.
+     * @param forwardingConstruct the new route to activate
      */
-    public void activate(@Nonnull FcRoute route) {
-        for (GForwardingConstruct fwdC : route.getForwardingConstruct()) {
-            Optional<ActivationTransaction> tx = prepareTransaction(fwdC);
-            if (tx.isPresent()) {
-                tx.get().activate();
-            } else {
-                LOG.warn("No transaction for this activation request {}", fwdC);
-            }
+    public void activate(@Nonnull ForwardingConstruct forwardingConstruct) {
+        Optional<ActivationTransaction> tx = prepareTransaction(forwardingConstruct);
+        if (tx.isPresent()) {
+            tx.get().activate();
+        } else {
+            LOG.warn("No transaction for this activation request {}", forwardingConstruct);
         }
     }
 
     /**
-     * Deactivate a MEF FcRoute.
-     * @param route the existing route to deactivate
+     * Deactivate a MEF ForwardingConstruct.
+     * @param forwardingConstruct the existing route to deactivate
      */
-    public void deactivate(@Nonnull FcRoute route) {
-        for (GForwardingConstruct fwdC : route.getForwardingConstruct()) {
-            Optional<ActivationTransaction> tx = prepareTransaction(fwdC);
-            if (tx.isPresent()) {
-                tx.get().deactivate();
-            } else {
-                LOG.warn("No transaction for this deactivation request {}", fwdC);
-            }
+    public void deactivate(@Nonnull ForwardingConstruct forwardingConstruct) {
+        Optional<ActivationTransaction> tx = prepareTransaction(forwardingConstruct);
+        if (tx.isPresent()) {
+            tx.get().deactivate();
+        } else {
+            LOG.warn("No transaction for this activation request {}", forwardingConstruct);
         }
     }
 
-    private Optional<ActivationTransaction> prepareTransaction(GForwardingConstruct fwdC) {
+    private Optional<ActivationTransaction> prepareTransaction(ForwardingConstruct fwdC) {
         final List<FcPort> list = fwdC.getFcPort();
         //TODO validate pre-condition
-        final GFcPort a = list.get(0);
-        final GFcPort z = list.get(1);
+        final FcPort a = list.get(0);
+        final FcPort z = list.get(1);
 
-        return ForwardingConstructHelper.isTheSameNode(fwdC)
+        return isTheSameNode(fwdC)
                 ? getTxForNode(a,z, fwdC) : getTxForMultiNode(a,z, fwdC);
     }
 
-    private Optional<ActivationTransaction> getTxForNode(GFcPort portA, GFcPort portZ, GForwardingConstruct fwdC) {
+    private boolean isTheSameNode(ForwardingConstruct forwardingConstruct) {
+        final FcPort p1 = forwardingConstruct.getFcPort().get(0);
+        final FcPort p2 = forwardingConstruct.getFcPort().get(1);
+        return p1.getNode().equals(p2.getNode());
+    }
+
+    private Optional<ActivationTransaction> getTxForNode(FcPort portA, FcPort portZ, ForwardingConstruct fwdC) {
         lock.readLock().lock();
         try {
             final ActivationDriverBuilder.BuilderContext ctx = new ActivationDriverBuilder.BuilderContext();
@@ -105,13 +104,13 @@ public class FcRouteActivatorService {
         }
     }
 
-    private Optional<ActivationTransaction> getTxForMultiNode(GFcPort portA, GFcPort portZ, GForwardingConstruct fwdC) {
+    private Optional<ActivationTransaction> getTxForMultiNode(FcPort portA, FcPort portZ, ForwardingConstruct fwdC) {
         //1. find and initialize drivers
         lock.readLock().lock();
         try {
 
             final ActivationDriverBuilder.BuilderContext ctx = new ActivationDriverBuilder.BuilderContext();
-            ctx.put(GForwardingConstruct.class.getName(), fwdC);
+            ctx.put(ForwardingConstruct.class.getName(), fwdC);
 
             Optional<ActivationDriver> aendActivator = findDriver(portA, ctx);
             Optional<ActivationDriver> zendActivator = findDriver(portZ, ctx);
@@ -139,7 +138,7 @@ public class FcRouteActivatorService {
         }
     }
 
-    protected Optional<ActivationDriver> findDriver(GFcPort port, ActivationDriverBuilder.BuilderContext fwdC) {
+    protected Optional<ActivationDriver> findDriver(FcPort port, ActivationDriverBuilder.BuilderContext fwdC) {
         if (activationRepoService == null)  {
             LOG.warn("Activation Driver repo is not initialized");
             return Optional.empty();
@@ -177,11 +176,11 @@ public class FcRouteActivatorService {
     }
 
     static final class Context {
-        final GFcPort portA;
-        final GFcPort portZ;
-        final GForwardingConstruct fwC;
+        final FcPort portA;
+        final FcPort portZ;
+        final ForwardingConstruct fwC;
 
-        public Context(GFcPort portA, GFcPort portZ, GForwardingConstruct fwC) {
+        public Context(FcPort portA, FcPort portZ, ForwardingConstruct fwC) {
             this.portA = portA;
             this.portZ = portZ;
             this.fwC = fwC;

@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.GFcPort;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 
 /**
  * Driver builder that can provide stateful driver that are used in NRP forwarding construct transaction.
@@ -27,7 +27,7 @@ public interface ActivationDriverBuilder {
      * @param context (de)activation context
      * @return {@link Optional#empty()} in case it cannot be instantiated for a port, driver otherwise
      */
-    Optional<ActivationDriver> driverFor(GFcPort port, BuilderContext context);
+    Optional<ActivationDriver> driverFor(FcPort port, BuilderContext context);
 
     /**
      * Get driver for two ports.
@@ -36,7 +36,7 @@ public interface ActivationDriverBuilder {
      * @param context blackboard for recording state during driver selection
      * @return {@link Optional#empty()} in case it cannot be instantiated for a port, driver otherwise
      */
-    Optional<ActivationDriver> driverFor(GFcPort portA, GFcPort portZ, BuilderContext context);
+    Optional<ActivationDriver> driverFor(FcPort portA, FcPort portZ, BuilderContext context);
 
     /**
      * Blackboard pattern that allows for passing the context information between

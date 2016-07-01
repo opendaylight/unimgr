@@ -7,8 +7,8 @@
  */
 package org.opendaylight.unimgr.mef.nrp.api;
 
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.GFcPort;
-import org.opendaylight.yang.gen.v1.uri.onf.coremodel.corenetworkmodule.objectclasses.rev160413.GForwardingConstruct;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.forwarding.constructs.ForwardingConstruct;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 
 /**
  * Interface of a driver that maps NRP concepts to the configuration of underlying infrastructure.
@@ -40,7 +40,7 @@ public interface ActivationDriver {
      * @param to far end
      * @param context context
      */
-    void initialize(GFcPort from, GFcPort to, GForwardingConstruct context);
+    void initialize(FcPort from, FcPort to, ForwardingConstruct context);
 
     /**
      * Performs the activation action.
