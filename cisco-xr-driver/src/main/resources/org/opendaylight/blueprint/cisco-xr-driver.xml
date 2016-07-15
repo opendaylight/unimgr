@@ -13,14 +13,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <reference id="mountPointService" interface="org.opendaylight.controller.md.sal.binding.api.MountPointService" />
 
   <service id="bridgeDriverService" interface="org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder">
-    <bean class="org.opendaylight.unimgr.mef.nrp.cisco.xr.L2vpnBridgeDriverBuilder">
+    <bean class="org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.driver.L2vpnBridgeDriverBuilder">
       <argument ref="dataBroker" />
       <argument ref="mountPointService" />
     </bean>
   </service>
 
   <service id="xconnectDriverService" interface="org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder">
-    <bean class="org.opendaylight.unimgr.mef.nrp.cisco.xr.L2vpnXconnectDriverBuilder">
+    <bean class="org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.driver.L2vpnXconnectDriverBuilder">
       <argument ref="dataBroker" />
       <argument ref="mountPointService" />
     </bean>
