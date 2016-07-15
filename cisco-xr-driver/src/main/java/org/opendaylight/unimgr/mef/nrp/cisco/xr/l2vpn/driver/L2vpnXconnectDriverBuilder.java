@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.unimgr.mef.nrp.cisco.xr;
+package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.driver;
 
 import java.util.Optional;
 
@@ -14,35 +14,38 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnXconnectActivator;
+import org.opendaylight.unimgr.mef.nrp.common.FixedServiceNaming;
 import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.forwarding.constructs.ForwardingConstruct;
 import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 
 /**
- * Provides drivers for binding two ports on the same node.
+ * Xconnect builder (FIXME no decision logic yet)
  * @author bartosz.michalik@amartus.com
  */
-public class L2vpnBridgeDriverBuilder implements ActivationDriverBuilder {
+public class L2vpnXconnectDriverBuilder implements ActivationDriverBuilder {
 
-    private L2vpnBridgeActivator activator;
+    private final FixedServiceNaming namingProvider;
+    private L2vpnXconnectActivator xconnectActivator;
 
-    private static final String GROUP_NAME = "local";
-
-    public L2vpnBridgeDriverBuilder(DataBroker dataBroker, MountPointService mountPointService) {
-        activator = new L2vpnBridgeActivator(dataBroker, mountPointService);
+    public L2vpnXconnectDriverBuilder(DataBroker dataBroker, MountPointService mountPointService) {
+        xconnectActivator = new L2vpnXconnectActivator(dataBroker, mountPointService);
+        namingProvider = new FixedServiceNaming();
     }
 
     @Override
-    public Optional<ActivationDriver> driverFor(FcPort port, BuilderContext _ctx) {
-        return Optional.empty();
+    public Optional<ActivationDriver> driverFor(FcPort port,BuilderContext _ctx) {
+        return Optional.of(getDriver());
     }
 
     @Override
     public Optional<ActivationDriver> driverFor(FcPort aPort, FcPort zPort, BuilderContext context) {
-        return Optional.of(getDriver());
+        return Optional.empty();
     }
 
     protected ActivationDriver getDriver() {
         final ActivationDriver driver = new ActivationDriver() {
+            public ForwardingConstruct ctx;
             public FcPort aEnd;
             public FcPort zEnd;
 
@@ -60,22 +63,30 @@ public class L2vpnBridgeDriverBuilder implements ActivationDriverBuilder {
             public void initialize(FcPort from, FcPort to, ForwardingConstruct ctx) {
                 this.zEnd = to;
                 this.aEnd = from;
+                this.ctx = ctx;
             }
 
             @Override
             public void activate() {
+                String id = ctx.getUuid();
                 long mtu = 1500;
+                String outerName = namingProvider.getOuterName(id);
+                String innerName = namingProvider.getInnerName(id);
 
                 String aEndNodeName = aEnd.getNode().getValue();
-                activator.activate(aEndNodeName, GROUP_NAME, GROUP_NAME, aEnd, zEnd, mtu);
+                xconnectActivator.activate(aEndNodeName, outerName, innerName, aEnd, zEnd, mtu);
+
             }
 
             @Override
             public void deactivate() {
+                String id = ctx.getUuid();
                 long mtu = 1500;
+                String outerName = namingProvider.getOuterName(id);
+                String innerName = namingProvider.getInnerName(id);
 
                 String aEndNodeName = aEnd.getNode().getValue();
-                activator.deactivate(aEndNodeName, GROUP_NAME, GROUP_NAME, aEnd, zEnd, mtu);
+                xconnectActivator.deactivate(aEndNodeName, outerName, innerName, aEnd, zEnd, mtu);
             }
 
             @Override
@@ -83,6 +94,7 @@ public class L2vpnBridgeDriverBuilder implements ActivationDriverBuilder {
                 return 0;
             }
         };
+
         return driver;
     }
 }
