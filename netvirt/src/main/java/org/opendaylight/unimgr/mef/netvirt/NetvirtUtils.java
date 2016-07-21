@@ -115,9 +115,29 @@ public class NetvirtUtils {
         MdsalUtils.delete(dataBroker, LogicalDatastoreType.CONFIGURATION,
                 getElanInterfaceInstanceIdentifier(interfaceName));
     }
+    
+    public static Interface createTrunkInterface(String interfaceName, String parentIfaceName) {
+        IfL2vlanBuilder ifL2vlanBuilder = new IfL2vlanBuilder();
+        ifL2vlanBuilder.setL2vlanMode(IfL2vlan.L2vlanMode.Trunk);
+        return createInterface(interfaceName, parentIfaceName, ifL2vlanBuilder.build());
+    }
+
+    public static Interface createTrunkMemberInterface(String interfaceName, String parentIfaceName, int vlanId) {
+        IfL2vlanBuilder ifL2vlanBuilder = new IfL2vlanBuilder();
+        ifL2vlanBuilder.setL2vlanMode(IfL2vlan.L2vlanMode.TrunkMember).setVlanId(new VlanId(vlanId));
+        return createInterface(interfaceName, parentIfaceName, ifL2vlanBuilder.build());
+    }
+
+    private static Interface createInterface(String interfaceName, String parentIfaceName, IfL2vlan ifL2vlan) {
+        InterfaceBuilder interfaceBuilder = new InterfaceBuilder();
+        ParentRefsBuilder parentRefsBuilder = new ParentRefsBuilder().setParentInterface(parentIfaceName);
+        interfaceBuilder.setEnabled(true).setName(interfaceName).setType(L2vlan.class).addAugmentation(IfL2vlan
+                .class, ifL2vlan).addAugmentation(ParentRefs.class, parentRefsBuilder.build());
+        return interfaceBuilder.build();
+    }    
 
     public static String getInterfaceNameForVlan(String uniId, String vlanId) {
-        return uniId + "#" + vlanId;
+        return uniId + "#" + vlanId;              
     }
 
     private static ElanInstanceBuilder createElanInstance(String instanceName) {
@@ -147,5 +167,5 @@ public class NetvirtUtils {
     private static InstanceIdentifier getUniInterfaceInstanceIdentifier(String interfaceName) {
         return InstanceIdentifier.builder(MefInterfaces.class).child(Unis.class)
                 .child(Uni.class, new UniKey(new Identifier45(interfaceName))).build();
-    }
+    }    
 }
