@@ -51,7 +51,7 @@
     <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${project.version}'>odl-unimgr</feature>
     <feature version='${genius.version}'>odl-genius-api</feature>
-    <feature version='${vpnservice.version}'>odl-netvirt-vpnservice-impl</feature>
+    <feature version='${vpnservice.version}'>odl-netvirt-impl</feature>
     <bundle>mvn:org.opendaylight.unimgr/unimgr-netvirt/{{VERSION}}</bundle>
   </feature>
 
