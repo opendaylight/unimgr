@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_dbc22c33",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/EvcUniListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-07-27T14:04:38Z",
+      "side": 1,
+      "message": "Is this always the vlan trunk?",
+      "revId": "e400b6203a9e5d04dc5e9521e0d1cb97d8bafd50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_5bfd7c6d",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/EvcUniListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-07-27T14:04:38Z",
+      "side": 1,
+      "message": "i think genius fixed this.",
+      "revId": "e400b6203a9e5d04dc5e9521e0d1cb97d8bafd50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_3b39a841",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/MefUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-07-27T14:04:38Z",
+      "side": 1,
+      "message": "what is the difference between the helper methods here, and those in NetvirtUtils",
+      "revId": "e400b6203a9e5d04dc5e9521e0d1cb97d8bafd50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_bbedb8b9",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/MefUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-07-27T14:04:38Z",
+      "side": 1,
+      "message": "This method is not a MEF Utility, it should be in a different class.",
+      "revId": "e400b6203a9e5d04dc5e9521e0d1cb97d8bafd50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_fb19f0d7",
+        "filename": "netvirt/src/test/java/org/opendaylight/unimgr/mef/netvirt/UniListenerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-07-27T14:04:38Z",
+      "side": 1,
+      "message": "remove spaces",
+      "revId": "e400b6203a9e5d04dc5e9521e0d1cb97d8bafd50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
