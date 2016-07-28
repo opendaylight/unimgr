@@ -34,6 +34,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 /**
@@ -116,10 +118,16 @@ public class L2vpnBridgeActivatorTest extends AbstractDataBrokerTest{
            P2pXconnect p2pXconnect = xconnectGroup.getP2pXconnects().getP2pXconnect().get(0);
            L2vpnActivatorTestUtils.checkP2pXconnect(p2pXconnect,innerName);
 
-           AttachmentCircuit attachmentCircuit = p2pXconnect.getAttachmentCircuits().getAttachmentCircuit().get(0);
-           L2vpnActivatorTestUtils.checkAttachmentCircuit(attachmentCircuit,portNo2);
-           attachmentCircuit = p2pXconnect.getAttachmentCircuits().getAttachmentCircuit().get(1);
-           L2vpnActivatorTestUtils.checkAttachmentCircuit(attachmentCircuit,portNo1);
+           List<AttachmentCircuit> attachmentCircuits = p2pXconnect.getAttachmentCircuits().getAttachmentCircuit();
+           assertNotNull(attachmentCircuits);
+           assertEquals(2, attachmentCircuits.size());
+
+           attachmentCircuits.sort(
+                   (AttachmentCircuit ac1, AttachmentCircuit ac2)
+                           -> ac1.getName().getValue().compareTo(ac2.getName().getValue()));
+
+           L2vpnActivatorTestUtils.checkAttachmentCircuit(attachmentCircuits.get(0), portNo1);
+           L2vpnActivatorTestUtils.checkAttachmentCircuit(attachmentCircuits.get(1), portNo2);
        } else {
            fail("L2vpn was not found.");
        }
