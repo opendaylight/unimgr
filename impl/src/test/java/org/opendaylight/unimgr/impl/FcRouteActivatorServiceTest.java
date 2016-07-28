@@ -7,29 +7,25 @@
  */
 package org.opendaylight.unimgr.impl;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
+import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
+import org.opendaylight.unimgr.mef.nrp.impl.ActivationDriverRepoServiceImpl;
+import org.opendaylight.unimgr.utils.ActivationDriverMocks;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.forwarding.constructs.ForwardingConstruct;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.junit.Test;
-import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
-import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
-import org.opendaylight.unimgr.mef.nrp.impl.ActivationDriverRepoServiceImpl;
-import org.opendaylight.unimgr.utils.ActivationDriverMocks;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.forwarding.constructs.ForwardingConstruct;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.forwarding.constructs.ForwardingConstructBuilder;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPortBuilder;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
-
+import static org.mockito.Mockito.*;
+import static org.opendaylight.unimgr.impl.ForwardingConstructTestUtils.fcSingleNode;
+import static org.opendaylight.unimgr.impl.ForwardingConstructTestUtils.fcTwoNodes;
 
 class TestBusinessEx extends RuntimeException {
     public TestBusinessEx() {
@@ -39,20 +35,29 @@ class TestBusinessEx extends RuntimeException {
 
 /**
  * @author bartosz.michalik@amartus.com
+ * @author krzysztof.bijakowski@amartus.com [modifications]
  */
 public class FcRouteActivatorServiceTest {
 
-
     private static final TopologyId topoA = new TopologyId("a");
+
     private static final TopologyId topoZ = new TopologyId("z");
+
+    private ForwardingConstructActivationStateTracker stateTracker;
 
     public ForwardingConstructActivatorService createService(List<ActivationDriverBuilder> builders) {
         return new ForwardingConstructActivatorService(new ActivationDriverRepoServiceImpl(builders));
     }
 
+    @Before
+    public void setup() {
+        stateTracker = Mockito.mock(ForwardingConstructActivationStateTracker.class);
+        when(stateTracker.isActivatable()).thenReturn(true);
+        when(stateTracker.isDeactivatable()).thenReturn(true);
+    }
+
     @Test
     public void testActivateSingleNode() throws Exception {
-
         //having
         final ActivationDriver d1 = mock(ActivationDriver.class);
 
@@ -62,11 +67,13 @@ public class FcRouteActivatorServiceTest {
         ));
 
         //when
-        service.activate(singleNode());
+        service.activate(fcSingleNode(), stateTracker);
 
         //then
         verify(d1).activate();
         verify(d1).commit();
+        verify(stateTracker).isActivatable();
+        verify(stateTracker).activated(Mockito.any());
     }
 
     @Test
@@ -79,16 +86,17 @@ public class FcRouteActivatorServiceTest {
         ));
 
         //when
-        service.activate(twoNodes());
+        service.activate(fcTwoNodes(), stateTracker);
 
         //then
         verify(d1, times(2)).activate();
         verify(d1, times(2)).commit();
+        verify(stateTracker).isActivatable();
+        verify(stateTracker).activated(Mockito.any());
     }
 
     @Test
     public void testActivateTwoNodesMultiVendor() throws Exception {
-
         //having
         final ActivationDriver d1 = mock(ActivationDriver.class);
         final ActivationDriver d2 = mock(ActivationDriver.class);
@@ -99,18 +107,18 @@ public class FcRouteActivatorServiceTest {
         ));
 
         //when
-        service.activate(twoNodes());
-
+        service.activate(fcTwoNodes(), stateTracker);
         //then
         verify(d1).activate();
         verify(d1).commit();
         verify(d2).activate();
         verify(d2).commit();
+        verify(stateTracker).isActivatable();
+        verify(stateTracker).activated(Mockito.any());
     }
 
     @Test
     public void testActivateSingleNodeFailure() throws Exception {
-
         //having
         final ActivationDriver d1 = spy(new FailingActivationDriver(p -> { if(p.getTopology().equals(topoA)) throw new TestBusinessEx();}));
 
@@ -119,15 +127,40 @@ public class FcRouteActivatorServiceTest {
         ));
 
         //when
-        service.activate(singleNode());
+        service.activate(fcSingleNode(), stateTracker);
 
         //then
         verify(d1, times(1)).rollback();
+        verify(stateTracker).isActivatable();
+        verify(stateTracker).activationFailed(Mockito.any());
+    }
+
+    @Test
+    public void testActivateFcExists() throws Exception {
+        //having
+        ForwardingConstructActivationStateTracker stateTrackerFcExists = Mockito.mock(ForwardingConstructActivationStateTracker.class);
+        when(stateTrackerFcExists.isActivatable()).thenReturn(false);
+
+        final ActivationDriver d1 = mock(ActivationDriver.class);
+
+        ForwardingConstructActivatorService service = createService(Arrays.asList(
+                ActivationDriverMocks.prepareDriver((port1, port2) -> topoA.equals(port1.getTopology()) ? d1 : null),
+                ActivationDriverMocks.prepareDriver((port1, port2) -> null)
+        ));
+
+        //when
+        service.activate(fcSingleNode(), stateTrackerFcExists);
+
+        //then
+        verify(d1, never()).activate();
+        verify(d1, never()).commit();
+        verify(stateTrackerFcExists).isActivatable();
+        verify(stateTrackerFcExists, never()).activated(Mockito.any());
+        verify(stateTrackerFcExists, never()).activationFailed(Mockito.any());
     }
 
     @Test
     public void testActivateMultiNodeFailure() throws Exception {
-
         //having
         final ActivationDriver d1 = spy(new FailingActivationDriver(p -> { if(p.getTopology().equals(topoA)) throw new TestBusinessEx();}));
 
@@ -136,16 +169,17 @@ public class FcRouteActivatorServiceTest {
         ));
 
         //when
-        service.activate(twoNodes());
+        service.activate(fcTwoNodes(), stateTracker);
 
         //then
         verify(d1, times(1)).activate();
         verify(d1, times(2)).rollback();
+        verify(stateTracker).isActivatable();
+        verify(stateTracker).activationFailed(Mockito.any());
     }
 
     @Test
     public void testDeactivateSingleNodeFailure() throws Exception {
-
         //having
         final ActivationDriver d1 = spy(new FailingActivationDriver(p -> { if(p.getTopology().equals(topoA)) throw new TestBusinessEx();}));
 
@@ -155,11 +189,13 @@ public class FcRouteActivatorServiceTest {
         ));
 
         //when
-        service.deactivate(singleNode());
+        service.deactivate(fcSingleNode(), stateTracker);
 
         //then
         verify(d1, times(1)).deactivate();
         verify(d1, times(1)).rollback();
+        verify(stateTracker).isDeactivatable();
+        verify(stateTracker).deactivationFailed();
     }
 
     @Test
@@ -172,44 +208,42 @@ public class FcRouteActivatorServiceTest {
         ));
 
         //when
-        service.deactivate(twoNodes());
+        service.deactivate(fcTwoNodes(), stateTracker);
 
         //then
         verify(d1, times(2)).deactivate();
         verify(d1, times(2)).commit();
+        verify(stateTracker).isDeactivatable();
+        verify(stateTracker).deactivated();
     }
 
-    private ForwardingConstruct singleNode() {
-        return fc(
-                port("a", "localhost", "80"),
-                port("z", "localhost", "8080")
-        );
-    }
+    @Test
+    public void testDeactivateFcNotExists() throws Exception {
+        //having
+        ForwardingConstructActivationStateTracker stateTrackerFcNotExists = Mockito.mock(ForwardingConstructActivationStateTracker.class);
+        when(stateTrackerFcNotExists.isDeactivatable()).thenReturn(false);
 
-    private ForwardingConstruct twoNodes() {
-        return fc(
-                port("a", "192.168.1.1", "80"),
-                port("z", "192.168.1.2", "80")
-        );
-    }
+        final ActivationDriver d1 = mock(ActivationDriver.class);
 
-    private ForwardingConstruct fc(FcPort... ports) {
-        return new ForwardingConstructBuilder()
-                .setFcPort(Arrays.asList(ports))
-                .build();
-    }
+        ForwardingConstructActivatorService service = createService(Collections.singletonList(
+                ActivationDriverMocks.prepareDriver(port -> d1)
+        ));
 
-    FcPort port(String topo, String host, String port) {
-        return new FcPortBuilder()
-                .setTopology(new TopologyId(topo))
-                .setNode(new NodeId(host))
-                .setTp(new TpId(port))
-                .build();
+        //when
+        service.deactivate(fcTwoNodes(), stateTrackerFcNotExists);
+
+        //then
+        verify(d1, never()).deactivate();
+        verify(d1, never()).commit();
+        verify(stateTrackerFcNotExists).isDeactivatable();
+        verify(stateTrackerFcNotExists, never()).deactivated();
+        verify(stateTrackerFcNotExists, never()).deactivationFailed();
     }
 
     private static class FailingActivationDriver implements ActivationDriver {
 
         private final Consumer<FcPort> consumer;
+
         private FcPort from;
 
         FailingActivationDriver(Consumer<FcPort> portConsumer) {

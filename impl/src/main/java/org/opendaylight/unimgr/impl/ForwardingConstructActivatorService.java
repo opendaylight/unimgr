@@ -25,8 +25,11 @@ import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forw
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.opendaylight.unimgr.mef.nrp.impl.ActivationTransaction.Result;
+
 /**
  * @author bartosz.michalik@amartus.com
+ * @author krzysztof.bijakowski@amartus.com [modifications]
  */
 public class ForwardingConstructActivatorService {
     private static final Logger LOG = LoggerFactory.getLogger(ForwardingConstructActivatorService.class);
@@ -42,12 +45,22 @@ public class ForwardingConstructActivatorService {
      * Activate a MEF ForwardingConstruct.
      * @param forwardingConstruct the new route to activate
      */
-    public void activate(@Nonnull ForwardingConstruct forwardingConstruct) {
-        Optional<ActivationTransaction> tx = prepareTransaction(forwardingConstruct);
-        if (tx.isPresent()) {
-            tx.get().activate();
-        } else {
-            LOG.warn("No transaction for this activation request {}", forwardingConstruct);
+    public void activate(@Nonnull ForwardingConstruct forwardingConstruct, @Nonnull ForwardingConstructActivationStateTracker stateTracker) {
+        if(stateTracker.isActivatable()) {
+            Optional<ActivationTransaction> tx = prepareTransaction(forwardingConstruct);
+            if (tx.isPresent()) {
+                Result result = tx.get().activate();
+
+                if(result.isSuccessful()) {
+                    stateTracker.activated(forwardingConstruct);
+                    LOG.info("Forwarding construct activated successfully, request = {} ", forwardingConstruct);
+                } else {
+                    stateTracker.activationFailed(forwardingConstruct);
+                    LOG.warn("Forwarding construct activation failed, reason = {}, request = {}", result.getMessage(), forwardingConstruct);
+                }
+            } else {
+                LOG.warn("No transaction for this activation request {}", forwardingConstruct);
+            }
         }
     }
 
@@ -55,12 +68,22 @@ public class ForwardingConstructActivatorService {
      * Deactivate a MEF ForwardingConstruct.
      * @param forwardingConstruct the existing route to deactivate
      */
-    public void deactivate(@Nonnull ForwardingConstruct forwardingConstruct) {
-        Optional<ActivationTransaction> tx = prepareTransaction(forwardingConstruct);
-        if (tx.isPresent()) {
-            tx.get().deactivate();
-        } else {
-            LOG.warn("No transaction for this activation request {}", forwardingConstruct);
+    public void deactivate(@Nonnull ForwardingConstruct forwardingConstruct, @Nonnull ForwardingConstructActivationStateTracker stateTracker) {
+        if(stateTracker.isDeactivatable()) {
+            Optional<ActivationTransaction> tx = prepareTransaction(forwardingConstruct);
+            if (tx.isPresent()) {
+                Result result = tx.get().deactivate();
+
+                if(result.isSuccessful()) {
+                    stateTracker.deactivated();
+                    LOG.info("Forwarding construct deactivated successfully, request = {}", forwardingConstruct);
+                } else {
+                    stateTracker.deactivationFailed();
+                    LOG.warn("Forwarding construct deactivation failed, reason = {}, request = {}", result.getMessage(), forwardingConstruct);
+                }
+            } else {
+                LOG.warn("No transaction for this deactivation request {}", forwardingConstruct);
+            }
         }
     }
 

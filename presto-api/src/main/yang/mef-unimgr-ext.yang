@@ -1,0 +1,29 @@
+module mef-unimgr-ext {
+  namespace "urn:mef:unimgr-ext";
+  prefix mef-unimgr-ext;
+
+  import onf-core-network-module {
+    prefix onf-cn;
+  }
+
+  revision 2016-07-25 {
+  }
+
+  typedef ActivationStatus {
+    type enumeration {
+      enum INACTIVE;
+      enum ACTIVE;
+      enum FAILED;
+    }
+  }
+
+  augment "/onf-cn:forwarding-constructs/onf-cn:forwarding-construct" {
+    container unimgr-attrs {
+      leaf status {
+        type ActivationStatus;
+        config false;
+        default INACTIVE;
+      }
+    }
+  }
+}
