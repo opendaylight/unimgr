@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_56a47056",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/EvcUniUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-08-18T13:26:12Z",
+      "side": 1,
+      "message": "add return after this, otherwise exception will occur",
+      "revId": "577bbb54c7ac500d083a491875092d38b43e3065",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_b68a24bd",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/EvcUniUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-08-18T13:26:12Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "577bbb54c7ac500d083a491875092d38b43e3065",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
