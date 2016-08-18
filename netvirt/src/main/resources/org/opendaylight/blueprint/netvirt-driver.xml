@@ -13,10 +13,6 @@
     <argument index="0" ref="dataBroker" />
   </bean>
 
-  <bean class="org.opendaylight.unimgr.mef.netvirt.EvcUniListener">
-    <argument index="0" ref="dataBroker" />
-  </bean>
-
   <bean class="org.opendaylight.unimgr.mef.netvirt.NodeConnectorListener">
     <argument index="0" ref="dataBroker" />
   </bean>
