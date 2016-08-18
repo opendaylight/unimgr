@@ -10,11 +10,6 @@ package org.opendaylight.unimgr.mef.netvirt;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.MefInterfaces;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.Unis;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.Uni;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.UniKey;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.Identifier45;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.iana._if.type.rev140508.L2vlan;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.rev140508.interfaces.Interface;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.rev140508.interfaces.InterfaceBuilder;
@@ -33,61 +28,20 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan.interfaces.ElanInterfaceKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import com.google.common.util.concurrent.CheckedFuture;
-
 public class NetvirtUtils {
-    public static void createElanInstanceSync(DataBroker dataBroker, String instanceName) {
+    public final static String VLAN_SEPARATOR = ".";
 
+    public static void createElanInstance(DataBroker dataBroker, String instanceName) {
         ElanInstanceBuilder einstBuilder = createElanInstance(instanceName);
 
         MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                getElanInstanceInstanceIdentifier(instanceName), einstBuilder.build());
-    }
-
-    public static void createElanInterfaceSync(DataBroker dataBroker, String instanceName, String interfaceName) {
-        ElanInterfaceBuilder einterfaceBuilder = createElanInterface(instanceName, interfaceName);
-
-        MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                getElanInterfaceInstanceIdentifier(interfaceName), einterfaceBuilder.build());
-    }
-
-    public static void updateElanInstanceSync(DataBroker dataBroker, String instanceName) {
-
-        ElanInstanceBuilder einstBuilder = createElanInstance(instanceName);
-
-        MdsalUtils.syncUpdate(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                getElanInstanceInstanceIdentifier(instanceName), einstBuilder.build());
-    }
-
-    public static void updateElanInterfaceSync(DataBroker dataBroker, String instanceName, String interfaceName) {
-        ElanInterfaceBuilder einterfaceBuilder = createElanInterface(instanceName, interfaceName);
-
-        MdsalUtils.syncUpdate(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                getElanInterfaceInstanceIdentifier(interfaceName), einterfaceBuilder.build());
-    }
-
-    public static void deleteElanInstanceSync(DataBroker dataBroker, String instanceName) {
-        MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                getElanInstanceInstanceIdentifier(instanceName));
-    }
-
-    public static void deleteElanInterfaceSync(DataBroker dataBroker, String instanceName, String interfaceName) {
-        MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                getElanInterfaceInstanceIdentifier(interfaceName));
-    }
-
-    public static CheckedFuture createElanInstance(DataBroker dataBroker, String instanceName) {
-
-        ElanInstanceBuilder einstBuilder = createElanInstance(instanceName);
-
-        return MdsalUtils.write(dataBroker, LogicalDatastoreType.CONFIGURATION,
                 getElanInstanceInstanceIdentifier(instanceName), einstBuilder.build());
     }
 
     public static void createElanInterface(DataBroker dataBroker, String instanceName, String interfaceName) {
         ElanInterfaceBuilder einterfaceBuilder = createElanInterface(instanceName, interfaceName);
 
-        MdsalUtils.write(dataBroker, LogicalDatastoreType.CONFIGURATION,
+        MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION,
                 getElanInterfaceInstanceIdentifier(interfaceName), einterfaceBuilder.build());
     }
 
@@ -95,27 +49,27 @@ public class NetvirtUtils {
 
         ElanInstanceBuilder einstBuilder = createElanInstance(instanceName);
 
-        MdsalUtils.update(dataBroker, LogicalDatastoreType.CONFIGURATION,
+        MdsalUtils.syncUpdate(dataBroker, LogicalDatastoreType.CONFIGURATION,
                 getElanInstanceInstanceIdentifier(instanceName), einstBuilder.build());
     }
 
     public static void updateElanInterface(DataBroker dataBroker, String instanceName, String interfaceName) {
         ElanInterfaceBuilder einterfaceBuilder = createElanInterface(instanceName, interfaceName);
 
-        MdsalUtils.update(dataBroker, LogicalDatastoreType.CONFIGURATION,
+        MdsalUtils.syncUpdate(dataBroker, LogicalDatastoreType.CONFIGURATION,
                 getElanInterfaceInstanceIdentifier(interfaceName), einterfaceBuilder.build());
     }
 
     public static void deleteElanInstance(DataBroker dataBroker, String instanceName) {
-        MdsalUtils.delete(dataBroker, LogicalDatastoreType.CONFIGURATION,
+        MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.CONFIGURATION,
                 getElanInstanceInstanceIdentifier(instanceName));
     }
 
     public static void deleteElanInterface(DataBroker dataBroker, String instanceName, String interfaceName) {
-        MdsalUtils.delete(dataBroker, LogicalDatastoreType.CONFIGURATION,
+        MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.CONFIGURATION,
                 getElanInterfaceInstanceIdentifier(interfaceName));
     }
-    
+
     public static Interface createTrunkInterface(String interfaceName, String parentIfaceName) {
         IfL2vlanBuilder ifL2vlanBuilder = new IfL2vlanBuilder();
         ifL2vlanBuilder.setL2vlanMode(IfL2vlan.L2vlanMode.Trunk);
@@ -131,13 +85,13 @@ public class NetvirtUtils {
     private static Interface createInterface(String interfaceName, String parentIfaceName, IfL2vlan ifL2vlan) {
         InterfaceBuilder interfaceBuilder = new InterfaceBuilder();
         ParentRefsBuilder parentRefsBuilder = new ParentRefsBuilder().setParentInterface(parentIfaceName);
-        interfaceBuilder.setEnabled(true).setName(interfaceName).setType(L2vlan.class).addAugmentation(IfL2vlan
-                .class, ifL2vlan).addAugmentation(ParentRefs.class, parentRefsBuilder.build());
+        interfaceBuilder.setEnabled(true).setName(interfaceName).setType(L2vlan.class)
+                .addAugmentation(IfL2vlan.class, ifL2vlan).addAugmentation(ParentRefs.class, parentRefsBuilder.build());
         return interfaceBuilder.build();
-    }    
+    }
 
     public static String getInterfaceNameForVlan(String uniId, String vlanId) {
-        return uniId + "." + vlanId;              
+        return uniId + VLAN_SEPARATOR + vlanId;
     }
 
     private static ElanInstanceBuilder createElanInstance(String instanceName) {
@@ -154,18 +108,13 @@ public class NetvirtUtils {
         return einterfaceBuilder;
     }
 
-    private static InstanceIdentifier getElanInstanceInstanceIdentifier(String instanceName) {
+    private static InstanceIdentifier<ElanInstance> getElanInstanceInstanceIdentifier(String instanceName) {
         return InstanceIdentifier.builder(ElanInstances.class)
                 .child(ElanInstance.class, new ElanInstanceKey(instanceName)).build();
     }
 
-    private static InstanceIdentifier getElanInterfaceInstanceIdentifier(String interfaceName) {
+    private static InstanceIdentifier<ElanInterface> getElanInterfaceInstanceIdentifier(String interfaceName) {
         return InstanceIdentifier.builder(ElanInterfaces.class)
                 .child(ElanInterface.class, new ElanInterfaceKey(interfaceName)).build();
     }
-
-    private static InstanceIdentifier getUniInterfaceInstanceIdentifier(String interfaceName) {
-        return InstanceIdentifier.builder(MefInterfaces.class).child(Unis.class)
-                .child(Uni.class, new UniKey(new Identifier45(interfaceName))).build();
-    }    
 }
