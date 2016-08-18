@@ -15,6 +15,7 @@
   <repository>mvn:org.opendaylight.netconf/features-netconf-connector/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.genius/genius-features/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.netvirt/vpnservice-features/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.tenantutil/tenantutil-features/{{VERSION}}/xml/features</repository>
 
   <feature name='odl-unimgr-api' version='${project.version}'
     description='OpenDaylight :: UniMgr :: api'>
