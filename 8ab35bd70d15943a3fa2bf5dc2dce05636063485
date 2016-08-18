@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_b642243c",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/EvcListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-08-18T12:09:06Z",
+      "side": 1,
+      "message": "delete tab and empty lines",
+      "revId": "8ab35bd70d15943a3fa2bf5dc2dce05636063485",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_963d68be",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/EvcListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-08-18T12:09:06Z",
+      "side": 1,
+      "message": "delete empty spaces",
+      "revId": "8ab35bd70d15943a3fa2bf5dc2dce05636063485",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_f64c9c72",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/EvcUniUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-08-18T12:09:06Z",
+      "side": 1,
+      "message": "why is the cast needed?",
+      "revId": "8ab35bd70d15943a3fa2bf5dc2dce05636063485",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_d647e049",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/EvcUniUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-08-18T12:09:06Z",
+      "side": 1,
+      "message": "delete tab",
+      "revId": "8ab35bd70d15943a3fa2bf5dc2dce05636063485",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_367614a5",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/MefUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-08-18T12:09:06Z",
+      "side": 1,
+      "message": "why the new line?",
+      "revId": "8ab35bd70d15943a3fa2bf5dc2dce05636063485",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_16795893",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/NodeConnectorListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-08-18T12:09:06Z",
+      "side": 1,
+      "message": "delete empty spaces",
+      "revId": "8ab35bd70d15943a3fa2bf5dc2dce05636063485",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_76708ca5",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/NodeConnectorListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-08-18T12:09:06Z",
+      "side": 1,
+      "message": "delete empty spaces",
+      "revId": "8ab35bd70d15943a3fa2bf5dc2dce05636063485",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_b66984c0",
+        "filename": "netvirt/src/test/java/org/opendaylight/unimgr/mef/netvirt/EvcUniListenerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-08-18T12:09:06Z",
+      "side": 1,
+      "message": "delete this file",
+      "revId": "8ab35bd70d15943a3fa2bf5dc2dce05636063485",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
