@@ -18,6 +18,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.genius.interfacemanager.globals.IfmConstants;
 import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.UniBuilder;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.PhysicalLayersBuilder;
@@ -43,7 +44,6 @@ import com.google.common.util.concurrent.CheckedFuture;
 
 public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapableNodeConnector> {
 
-    private static final String OF_URI_SEPARATOR = ":";
     private static final Logger log = LoggerFactory.getLogger(NodeConnectorListener.class);
     private static final Logger logger = LoggerFactory.getLogger(NodeConnectorListener.class);
     private static boolean handleRemovedNodeConnectors = false;
@@ -129,10 +129,10 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
         try {
             FlowCapableNodeConnector original = modifiedDataObject.getRootNode().getDataBefore();
             FlowCapableNodeConnector update = modifiedDataObject.getRootNode().getDataAfter();
-            
+
             String dpnFromNodeConnectorId = getDpnIdFromNodeConnector(modifiedDataObject);
 
-            handleNodeConnectorUpdated(dataBroker, dpnFromNodeConnectorId, original,update);
+            handleNodeConnectorUpdated(dataBroker, dpnFromNodeConnectorId, original, update);
         } catch (final Exception e) {
             log.error("Update node connector failed !", e);
         }
@@ -150,16 +150,18 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
         /*
          * NodeConnectorId is of form 'openflow:dpnid:portnum'
          */
-        String[] split = portId.getValue().split(OF_URI_SEPARATOR);
+        String[] split = portId.getValue().split(IfmConstants.OF_URI_SEPARATOR);
         return split[1];
     }
-    
-    private void handleNodeConnectorAdded(DataBroker dataBroker, String dpnId,
-            FlowCapableNodeConnector nodeConnector) {
+
+    private void handleNodeConnectorAdded(DataBroker dataBroker, String dpnId, FlowCapableNodeConnector nodeConnector) {
 
         WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
 
-        InstanceIdentifier interfacePath = MefUtils.getDeviceInterfaceInstanceIdentifier(dpnId, nodeConnector.getName());
+        logger.info("Adding mef uni/device interface {} with device {}", nodeConnector.getName(), dpnId);
+
+        InstanceIdentifier interfacePath = MefUtils.getDeviceInterfaceInstanceIdentifier(dpnId,
+                nodeConnector.getName());
         InterfaceBuilder interfaceBuilder = new InterfaceBuilder();
         interfaceBuilder.setPhy(new Identifier45(nodeConnector.getName()));
         DataObject deviceInterface = interfaceBuilder.build();
