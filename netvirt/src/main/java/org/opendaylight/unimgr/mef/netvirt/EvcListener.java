@@ -23,10 +23,15 @@ import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.serv
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.Uni;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.uni.EvcUniCeVlans;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.uni.evc.uni.ce.vlans.EvcUniCeVlan;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcType;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcUniRoleType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInterface.EtreeInterfaceType;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import scala.collection.parallel.ParSeqLike.Updated;
 
 public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
 
@@ -85,12 +90,14 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
             Evc data = newDataObject.getRootNode().getDataAfter();
             String instanceName = data.getEvcId().getValue();
 
-            log.info("Adding elan instance: " + instanceName);
-            NetvirtUtils.createElanInstance(dataBroker, instanceName);
+            boolean isEtree = data.getEvcType() == EvcType.RootedMultipoint;
 
-            // Create elan interfaces
+            log.info("Adding {} instance: {}", isEtree ? "etree" : "elan", instanceName);
+            NetvirtUtils.createElanInstance(dataBroker, instanceName, isEtree);
+
+            // Create interfaces
             for (Uni uni : data.getUnis().getUni()) {
-                createElanInterface(instanceName, uni);
+                createInterface(instanceName, uni, isEtree);
             }
         } catch (final Exception e) {
             log.error("Add evc failed !", e);
@@ -103,8 +110,9 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
             Evc update = modifiedDataObject.getRootNode().getDataAfter();
 
             String instanceName = original.getEvcId().getValue();
+            boolean isEtree = update.getEvcType() == EvcType.RootedMultipoint;
 
-            log.info("Updating elan instance: " + instanceName);
+            log.info("Updating {} instance: {}", isEtree ? "etree" : "elan", instanceName);
 
             List<Uni> originalUni = original.getUnis().getUni();
             List<Uni> updateUni = update.getUnis().getUni();
@@ -124,7 +132,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
                 // Adding the new Uni which are presented in the updated List
                 if (updateUni.size() > 0) {
                     for (Uni uni : updateUni) {
-                        createElanInterface(instanceName, uni);
+                        createInterface(instanceName, uni, isEtree);
                     }
                 }
             } else if (originalUni != null && !originalUni.isEmpty()) {
@@ -154,14 +162,16 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
         }
     }
 
-    private void createElanInterface(String instanceName, Uni uni) {
+    private void createInterface(String instanceName, Uni uni, boolean isEtree) {
         EvcUniUtils.addUni(dataBroker, uni);
 
         String uniId = uni.getUniId().getValue();
 
         Link link = EvcUniUtils.getLink(dataBroker, uni);
         String interfaceName = EvcUniUtils.getInterfaceName(link, uniId);
-
+        
+        EvcUniRoleType role = uni.getRole();
+        
         EvcUniCeVlans evcUniCeVlans = uni.getEvcUniCeVlans();
 
         if (evcUniCeVlans != null && !evcUniCeVlans.getEvcUniCeVlan().isEmpty()) {
@@ -169,13 +179,33 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
 
                 interfaceName = NetvirtUtils.getInterfaceNameForVlan(interfaceName, x.getVid().toString());
 
-                log.info("Adding elan interface: " + interfaceName);
-                NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName);
+                log.info("Adding {} interface: {}", isEtree ? "etree" : "elan", interfaceName);
+                
+                if (isEtree)
+                {                    
+                    NetvirtUtils.createEtreeInterface(dataBroker, instanceName, interfaceName, RoleToInterfaceType(role));
+                }
+                else
+                {
+                    NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName);
+                }
+
             }
         } else {
-            log.info("Adding elan interface: " + interfaceName);
-            NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName);
+            log.info("Adding {} interface: {}", isEtree ? "etree" : "elan", interfaceName);
+            NetvirtUtils.createEtreeInterface(dataBroker, instanceName, interfaceName, RoleToInterfaceType(role));
         }
+    }
+
+    private static EtreeInterfaceType RoleToInterfaceType(EvcUniRoleType role) {
+        if (role == EvcUniRoleType.Root)
+        {
+            return EtreeInterfaceType.Root;
+        }
+        else
+        {
+            return EtreeInterfaceType.Leaf;
+        }            
     }
 
     private void removeElanInterface(String instanceName, Uni uni) {

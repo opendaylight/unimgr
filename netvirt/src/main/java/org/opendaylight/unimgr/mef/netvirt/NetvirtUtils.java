@@ -18,6 +18,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rev
 import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rev160406.ParentRefs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rev160406.ParentRefsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInstance;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInstanceBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInterface;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInterfaceBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInterface.EtreeInterfaceType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.ElanInstances;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.ElanInterfaces;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan.instances.ElanInstance;
@@ -26,13 +31,19 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan.interfaces.ElanInterface;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan.interfaces.ElanInterfaceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan.interfaces.ElanInterfaceKey;
+import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class NetvirtUtils {
     public final static String VLAN_SEPARATOR = ".";
 
-    public static void createElanInstance(DataBroker dataBroker, String instanceName) {
+    public static void createElanInstance(DataBroker dataBroker, String instanceName, boolean isEtree) {
         ElanInstanceBuilder einstBuilder = createElanInstance(instanceName);
+
+        if (isEtree) {
+            EtreeInstance etreeInstance = new EtreeInstanceBuilder().build();
+            einstBuilder.addAugmentation(EtreeInstance.class, etreeInstance).build();
+        }
 
         MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION,
                 getElanInstanceInstanceIdentifier(instanceName), einstBuilder.build());
@@ -40,6 +51,14 @@ public class NetvirtUtils {
 
     public static void createElanInterface(DataBroker dataBroker, String instanceName, String interfaceName) {
         ElanInterfaceBuilder einterfaceBuilder = createElanInterface(instanceName, interfaceName);
+
+        MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION,
+                getElanInterfaceInstanceIdentifier(interfaceName), einterfaceBuilder.build());
+    }
+
+    public static void createEtreeInterface(DataBroker dataBroker, String instanceName, String interfaceName,
+            EtreeInterfaceType type) {
+        ElanInterfaceBuilder einterfaceBuilder = createEtreeInterface(instanceName, interfaceName, type);
 
         MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION,
                 getElanInterfaceInstanceIdentifier(interfaceName), einterfaceBuilder.build());
@@ -105,6 +124,16 @@ public class NetvirtUtils {
         ElanInterfaceBuilder einterfaceBuilder = new ElanInterfaceBuilder();
         einterfaceBuilder.setElanInstanceName(instanceName);
         einterfaceBuilder.setName(interfaceName);
+        return einterfaceBuilder;
+    }
+
+    private static ElanInterfaceBuilder createEtreeInterface(String instanceName, String interfaceName,
+            EtreeInterfaceType interfaceType) {
+        ElanInterfaceBuilder einterfaceBuilder = new ElanInterfaceBuilder();
+        einterfaceBuilder.setElanInstanceName(instanceName);
+        einterfaceBuilder.setName(interfaceName);
+        EtreeInterface etreeInterface = new EtreeInterfaceBuilder().setEtreeInterfaceType(interfaceType).build();
+        einterfaceBuilder.addAugmentation(EtreeInterface.class, etreeInterface);
         return einterfaceBuilder;
     }
 
