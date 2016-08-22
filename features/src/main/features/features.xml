@@ -47,7 +47,7 @@
   </feature>
 
   <feature name='odl-unimgr-netvirt' version='${project.version}'
-    description='OpenDaylight :: UniMgr - NetVirt'>
+    description='OpenDaylight :: UniMgr :: NetVirt'>
     <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${project.version}'>odl-unimgr</feature>
     <feature version='${genius.version}'>odl-genius-api</feature>
