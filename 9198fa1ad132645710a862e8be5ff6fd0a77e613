@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_7b4cd3c8",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/EvcListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-08-28T14:01:59Z",
+      "side": 1,
+      "message": "why don\u0027t we always pass this param?",
+      "revId": "9198fa1ad132645710a862e8be5ff6fd0a77e613",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_db5d277b",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/EvcListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-08-28T14:01:59Z",
+      "side": 1,
+      "message": "rename for something like waitForGeniusToUpdateInterface",
+      "revId": "9198fa1ad132645710a862e8be5ff6fd0a77e613",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_1b531f6c",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/EvcListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-08-28T14:01:59Z",
+      "side": 1,
+      "message": "can you make this configurable? and the wait time",
+      "revId": "9198fa1ad132645710a862e8be5ff6fd0a77e613",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_3b56db5c",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/EvcListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-08-28T14:01:59Z",
+      "side": 1,
+      "message": "call a method with a name like workaround bugfix for genious bug",
+      "revId": "9198fa1ad132645710a862e8be5ff6fd0a77e613",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_fb58e38b",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/EvcListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-08-28T14:01:59Z",
+      "side": 1,
+      "message": "remove whitespaces",
+      "revId": "9198fa1ad132645710a862e8be5ff6fd0a77e613",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_5b4917b6",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/NetvirtUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-08-28T14:01:59Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "9198fa1ad132645710a862e8be5ff6fd0a77e613",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_bbc94b28",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/NetvirtUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-08-28T14:01:59Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "9198fa1ad132645710a862e8be5ff6fd0a77e613",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
