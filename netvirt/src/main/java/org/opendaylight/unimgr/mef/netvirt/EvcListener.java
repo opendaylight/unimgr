@@ -9,12 +9,12 @@
 package org.opendaylight.unimgr.mef.netvirt;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.physical.layers.links.Link;
@@ -88,15 +88,20 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
         try {
             Evc data = newDataObject.getRootNode().getDataAfter();
             String instanceName = data.getEvcId().getValue();
-
             boolean isEtree = data.getEvcType() == EvcType.RootedMultipoint;
-
-            log.info("Adding {} instance: {}", isEtree ? "etree" : "elan", instanceName);
-            NetvirtUtils.createElanInstance(dataBroker, instanceName, isEtree);
-
+            if (!data.isAdminStateEnabled()) {
+                log.info("add - evc {} AdminStateEnabled false", data.getEvcId().getValue());
+            } else {
+                log.info("Adding {} instance: {}", isEtree ? "etree" : "elan", instanceName);
+                NetvirtUtils.createElanInstance(dataBroker, instanceName, isEtree);
+            }
             // Create interfaces
             for (Uni uni : data.getUnis().getUni()) {
-                createInterface(instanceName, uni, isEtree);
+                if (!uni.isAdminStateEnabled()) {
+                    log.info("uni {} AdminStateEnabled false", uni.getUniId().getValue());
+                } else {
+                    createInterface(instanceName, uni, isEtree);
+                }
             }
         } catch (final Exception e) {
             log.error("Add evc failed !", e);
@@ -111,9 +116,15 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
             String instanceName = original.getEvcId().getValue();
             boolean isEtree = update.getEvcType() == EvcType.RootedMultipoint;
 
+            if (!update.isAdminStateEnabled()) {
+                log.info("update - evc {} AdminStateEnabled false", update.getEvcId().getValue());
+            }
             log.info("Updating {} instance: {}", isEtree ? "etree" : "elan", instanceName);
 
-            List<Uni> originalUni = original.getUnis().getUni();
+            List<Uni> originalUni = original.getUnis() != null ? original.getUnis().getUni() : Collections.emptyList();
+            if (update == null || update.getUnis() == null) {
+                log.info("update uni is null");
+            }
             List<Uni> updateUni = update.getUnis().getUni();
             if (updateUni != null && !updateUni.isEmpty()) {
                 List<Uni> existingClonedUni = new ArrayList<>();
@@ -124,19 +135,31 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
                     // removing the Uni which are not presented in the updated
                     // List
                     for (Uni uni : originalUni) {
-                        removeElanInterface(instanceName, uni);
+                        if (!uni.isAdminStateEnabled()) {
+                            log.info("uni {} AdminStateEnabled false", uni.getUniId().getValue());
+                        } else {
+                            removeElanInterface(instanceName, uni);
+                        }
                     }
                 }
 
                 // Adding the new Uni which are presented in the updated List
                 if (updateUni.size() > 0) {
                     for (Uni uni : updateUni) {
-                        createInterface(instanceName, uni, isEtree);
+                        if (!uni.isAdminStateEnabled()) {
+                            log.info("uni {} AdminStateEnabled false", uni.getUniId().getValue());
+                        } else {
+                            createInterface(instanceName, uni, isEtree);
+                        }
                     }
                 }
             } else if (originalUni != null && !originalUni.isEmpty()) {
                 for (Uni uni : originalUni) {
-                    removeElanInterface(instanceName, uni);
+                    if (!uni.isAdminStateEnabled()) {
+                        log.info("uni {} AdminStateEnabled false", uni.getUniId().getValue());
+                    } else {
+                        removeElanInterface(instanceName, uni);
+                    }
                 }
             }
         } catch (final Exception e) {
@@ -147,11 +170,19 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
     private void removeEvc(DataTreeModification<Evc> removedDataObject) {
         try {
             Evc data = removedDataObject.getRootNode().getDataBefore();
+            if (!data.isAdminStateEnabled()) {
+                log.info("remove - evc {} AdminStateEnabled false", data.getEvcId().getValue());
+            }
 
             String instanceName = data.getEvcId().getValue();
 
             for (Uni uni : data.getUnis().getUni()) {
-                removeElanInterface(instanceName, uni);
+                if (!uni.isAdminStateEnabled()) {
+                    log.info("uni {} AdminStateEnabled false", uni.getUniId().getValue());
+                } else {
+
+                    removeElanInterface(instanceName, uni);
+                }
             }
 
             log.info("Removing elan instance: " + instanceName);
@@ -171,7 +202,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
 
         boolean result = waitForGeniusToUpdateInterface(interfaceName);
         if (!result) {
-            log.error("State interface {} is missing ifIndex", interfaceName);
+            log.error("State interface {} is not configured (missing ifIndex)", interfaceName);
             return;
         }
 
@@ -179,7 +210,8 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
 
         EvcUniCeVlans evcUniCeVlans = uni.getEvcUniCeVlans();
 
-        if (evcUniCeVlans != null && !evcUniCeVlans.getEvcUniCeVlan().isEmpty()) {
+        if (evcUniCeVlans != null && evcUniCeVlans.getEvcUniCeVlan() != null
+                && !evcUniCeVlans.getEvcUniCeVlan().isEmpty()) {
             for (EvcUniCeVlan x : evcUniCeVlans.getEvcUniCeVlan()) {
 
                 interfaceName = NetvirtUtils.getInterfaceNameForVlan(interfaceName, x.getVid().toString());
@@ -192,11 +224,14 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
                 } else {
                     NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName);
                 }
-
             }
         } else {
             log.info("Adding {} interface: {}", isEtree ? "etree" : "elan", interfaceName);
-            NetvirtUtils.createEtreeInterface(dataBroker, instanceName, interfaceName, RoleToInterfaceType(role));
+            if (isEtree) {
+                NetvirtUtils.createEtreeInterface(dataBroker, instanceName, interfaceName, RoleToInterfaceType(role));
+            } else {
+                NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName);
+            }
         }
     }
 
@@ -207,9 +242,14 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
             Optional<Interface> optional = MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL,
                     NetvirtUtils.getStateInterfaceIdentifier(interfaceName));
 
+            if (optional.isPresent()) {
+                log.info("State interface {} doesn't exist", interfaceName);
+                return false;
+            }
+
             Interface stateInterface = optional.get();
 
-            if (stateInterface != null && stateInterface.getIfIndex() != null) {
+            if (stateInterface.getIfIndex() != null) {
                 log.info("State interface configured with ifIndex {}", stateInterface.getIfIndex());
 
                 // Wait a bit, because if we continue too soon this will not
