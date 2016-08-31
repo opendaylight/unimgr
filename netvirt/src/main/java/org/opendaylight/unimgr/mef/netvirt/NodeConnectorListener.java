@@ -160,24 +160,24 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
 
         logger.info("Adding mef uni/device interface {} with device {}", nodeConnector.getName(), dpnId);
 
-        InstanceIdentifier interfacePath = MefUtils.getDeviceInterfaceInstanceIdentifier(dpnId,
-                nodeConnector.getName());
+        String uniName = EvcUniUtils.getDeviceInterfaceName(dpnId, nodeConnector.getName());
+        InstanceIdentifier interfacePath = MefUtils.getDeviceInterfaceInstanceIdentifier(dpnId, uniName);
         InterfaceBuilder interfaceBuilder = new InterfaceBuilder();
-        interfaceBuilder.setPhy(new Identifier45(nodeConnector.getName()));
+        interfaceBuilder.setPhy(new Identifier45(uniName));
         DataObject deviceInterface = interfaceBuilder.build();
 
         tx.merge(LogicalDatastoreType.CONFIGURATION, interfacePath, deviceInterface, true);
 
-        InstanceIdentifier uniPath = MefUtils.getUniInstanceIdentifier(nodeConnector.getName());
+        InstanceIdentifier uniPath = MefUtils.getUniInstanceIdentifier(uniName);
         UniBuilder uniBuilder = new UniBuilder();
-        uniBuilder.setUniId(new Identifier45(nodeConnector.getName()));
+        uniBuilder.setUniId(new Identifier45(uniName));
 
         PhysicalLayersBuilder physicalLayersBuilder = new PhysicalLayersBuilder();
         LinksBuilder linksBuilder = new LinksBuilder();
         List<Link> links = new ArrayList();
         LinkBuilder linkBuilder = new LinkBuilder();
         linkBuilder.setDevice(new Identifier45(dpnId));
-        linkBuilder.setInterface(nodeConnector.getName());
+        linkBuilder.setInterface(uniName);
         links.add(linkBuilder.build());
         linksBuilder.setLink(links);
         physicalLayersBuilder.setLinks(linksBuilder.build());
@@ -199,15 +199,17 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
     private void handleNodeConnectorRemoved(DataBroker dataBroker, String dpnId,
             FlowCapableNodeConnector nodeConnector) {
 
+        String uniName = EvcUniUtils.getDeviceInterfaceName(dpnId, nodeConnector.getName());
+
         if (!handleRemovedNodeConnectors) {
             return;
         }
 
         MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                MefUtils.getDeviceInterfaceInstanceIdentifier(dpnId, nodeConnector.getName()));
+                MefUtils.getDeviceInterfaceInstanceIdentifier(dpnId, uniName));
 
         MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                MefUtils.getUniLinkInstanceIdentifier(nodeConnector.getName(), dpnId, nodeConnector.getName()));
+                MefUtils.getUniLinkInstanceIdentifier(nodeConnector.getName(), dpnId, uniName));
     }
 
     private void handleNodeConnectorUpdated(DataBroker dataBroker, String dpnFromNodeConnectorId,

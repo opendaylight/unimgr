@@ -70,7 +70,6 @@ public class EvcUniUtils {
             WriteTransaction tx = createTransaction(dataBroker);
 
             Link link = EvcUniUtils.getLink(dataBroker, data);
-            uniId = EvcUniUtils.getInterfaceName(link, uniId);
 
             logger.info("Removing trunk {}", uniId);
 
@@ -93,7 +92,7 @@ public class EvcUniUtils {
             String uniId = data.getUniId().getValue();
             WriteTransaction tx = createTransaction(dataBroker);
             Link link = EvcUniUtils.getLink(dataBroker, data);
-            String interfaceName = EvcUniUtils.getInterfaceName(link, uniId);
+            String interfaceName = uniId;
             addTrunkInterface(interfaceName, getTrunkParentName(link), tx);
 
             Optional<List<EvcUniCeVlan>> ceVlansOptional = getCeVlans(data);
@@ -182,7 +181,7 @@ public class EvcUniUtils {
     private static String getTrunkParentName(Link link) {
         String deviceName = link.getDevice().getValue();
         String interfaceName = link.getInterface().toString();
-        return getDeviceInterfaceName(deviceName, interfaceName);
+        return interfaceName;
     }
 
     private static Optional<List<EvcUniCeVlan>> getCeVlans(Uni uni) {
@@ -192,11 +191,6 @@ public class EvcUniUtils {
         }
 
         return Optional.fromNullable(ceVlans.getEvcUniCeVlan());
-    }
-
-    public static String getInterfaceName(Link link, String uniId) {
-        String device = link.getDevice().getValue();
-        return getDeviceInterfaceName(device, uniId);
     }
 
     public static String getDeviceInterfaceName(String deviceName, String interfaceName) {

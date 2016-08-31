@@ -52,6 +52,7 @@
     <feature version='${project.version}'>odl-unimgr</feature>
     <feature version='${genius.version}'>odl-genius-api</feature>
     <feature version='${vpnservice.version}'>odl-netvirt-impl</feature>
+    <feature version="${restconf.version}">odl-restconf</feature>
     <bundle>mvn:org.opendaylight.unimgr/unimgr-netvirt/{{VERSION}}</bundle>
   </feature>
 
