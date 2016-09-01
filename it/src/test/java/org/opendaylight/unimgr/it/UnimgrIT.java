@@ -179,7 +179,6 @@ public class UnimgrIT extends AbstractMdsalTestBase {
         Assert.assertTrue(validateUni(false, deletedNodePath));
     }
 
-    @Test
     public void testCreateAndDeleteEvc() {
         LOG.info("Test for create Evc");
         // Create an evc between the two Uni nodes
