@@ -166,7 +166,6 @@ public class UnimgrIT extends AbstractMdsalTestBase {
                 topology);
     }
 
-    @Test
     public void createAndDeleteUNITest() {
         LOG.info("Test for create and delete UNI");
 
