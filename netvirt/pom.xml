@@ -43,6 +43,7 @@
               *
             </Import-Package>
             <Export-Package>
+                org.opendaylight.unimgr.mef.netvirt
             </Export-Package>
           </instructions>
         </configuration>
