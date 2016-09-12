@@ -96,6 +96,10 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
                 NetvirtUtils.createElanInstance(dataBroker, instanceName, isEtree);
             }
             // Create interfaces
+            if (data.getUnis() == null) {
+                log.info("No UNI's in service {}, exiting", instanceName);
+                return;
+            }
             for (Uni uni : data.getUnis().getUni()) {
                 if (!uni.isAdminStateEnabled()) {
                     log.info("uni {} AdminStateEnabled false", uni.getUniId().getValue());

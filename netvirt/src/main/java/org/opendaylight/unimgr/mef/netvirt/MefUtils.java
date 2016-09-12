@@ -37,6 +37,7 @@ import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.type
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcType;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.Identifier45;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.RetailSvcIdType;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcStatusType;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +58,10 @@ public final class MefUtils {
     public static InstanceIdentifier<Uni> getUniInstanceIdentifier(String uniId) {
         return InstanceIdentifier.builder(MefInterfaces.class).child(Unis.class)
                 .child(Uni.class, new UniKey(new Identifier45(uniId))).build();
+    }
+
+    public static InstanceIdentifier<Uni> getUniListInterfaceInstanceIdentifier() {
+        return InstanceIdentifier.builder(MefInterfaces.class).child(Unis.class).child(Uni.class).build();
     }
 
     public static InstanceIdentifier<org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.Unis> getUnisInstanceIdentifier(
@@ -85,7 +90,20 @@ public final class MefUtils {
     }
 
     public static InstanceIdentifier<Evc> getEvcInstanceIdentifier() {
-        return InstanceIdentifier.create(MefServices.class).child(MefService.class).child(Evc.class);
+        return getMefServiceInstanceIdentifier().child(Evc.class);
+    }
+
+    public static InstanceIdentifier<MefService> getMefServiceInstanceIdentifier() {
+        return InstanceIdentifier.create(MefServices.class).child(MefService.class);
+    }
+
+    public static InstanceIdentifier<MefService> getMefServiceInstanceIdentifier(
+            RetailSvcIdType retailSvcIdType) {
+        return InstanceIdentifier.create(MefServices.class).child(MefService.class, new MefServiceKey(retailSvcIdType));
+    }
+
+    public static InstanceIdentifier<MefServices> getMefServicesInstanceIdentifier() {
+        return InstanceIdentifier.create(MefServices.class);
     }
 
     public static void createEvcInstance(DataBroker dataBroker, String instanceName) {
