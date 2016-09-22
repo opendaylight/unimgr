@@ -1,0 +1,81 @@
+<div class="container">
+	<h1>Admin Page</h1>
+	<div class="menu">
+		<ul id="MainTabs" class="nav nav-pills" role="tablist">
+			<li ng-class="{ active: isTabSet('admin',1)}"
+				ng-click="setTab('admin',1)"><a id="evcs-view-tab" href="#/cpeui/admin/tenants">
+				 <i class="icon-desktop"></i> Tenants</a></li>
+			<li ng-class="{ active: isTabSet('admin',2)}"
+				ng-click="setTab('admin',2)"><a id="evcs-configure-tab" href="#/cpeui/admin/cpes">
+					<i class="icon-tasks"></i> CPEs (Devices)</a></li>
+			<li ng-class="{ active: isTabSet('admin',3)}"
+				ng-click="setTab('admin',3);updateView()"><a id="dashboard-tab"  href="#/cpeui/admin/unis">
+				 <i class="icon-signal"></i> UNIs</a></li>
+			<li id="refresh_btn" class="active refresh-btn"
+				ng-click="updateView()"><button class="btn add-row"> <i class="icon-refresh"></i> Refresh</button>
+				</li>
+		</ul>
+	</div>
+	<div ng-show="isTabSet('admin',1)">
+		<div ui-view="tenants" />
+	</div>
+	<div ng-show="isTabSet('admin',2)">
+		<div class="table-header">Devices</div>
+		<table class="footable table table-striped">
+			<thead>
+				<tr>
+					<th>CPE ID</th>
+					<th>CPE name</th>
+					<th colspan="2">Tenant</th>
+				</tr>
+			</thead>
+			<tbody id="ces_table">
+				<tr ng-repeat="item in ces | orderBy: '[\'dev-id\']'">					
+					<td class="minimal-width">{{ item['dev-id'] }}</td>
+					<td>{{ item['device-name'] }}</td>
+					<td>
+					<!-- 
+					<button class="btn add-row btn-block" ng-click="assignCpeToTenant(item['dev-id'], )">SHOW OF RULES ...</button>
+					 -->
+						<md-input-container class="md-block">
+					        <label>Multiple</label>
+					        <md-select ng-change="assignCpeToTenant(item['dev-id'])" ng-model="selectedTenant[item['dev-id']]" name="selectedTenant">
+					        	<md-option value="" default>&lt;None&gt;</md-option>
+					       		<md-option ng-repeat="tenant in tenantArray" value="{{ tenant.name }}">{{ tenant.name }}</md-option>
+					        </md-select>
+		      			</md-input-container>
+					</td>
+					<td class="delete-tr"><button class="btn btn-md btn-danger" ng-click="deleteCe(curTenant,item['dev-id'])"> <i class="icon-trash"></i> </button></td>
+				</tr>
+			</tbody>
+		</table>
+		<div>
+			<a class="btn btn-info add-row" ng-click="cesDialog.show($event)">Create CPE</a>
+		</div>
+	</div>
+	<div ng-show="isTabSet('admin',3)">
+		<div class="table-header">UNIs</div>
+		<table class="footable table table-striped">
+			<thead>
+				<tr>
+					<th>Device</th>
+					<th>ID</th>
+					<th colspan="2">Tenant</th>
+				</tr>
+			</thead>
+			<tbody id="ces_table">
+				<tr ng-repeat="item in unis | orderBy: '[\'uni-id\']'">
+					<td ng-init="device = ces.filterByField('dev-id',item.device)[0]">{{ device["device-name"] ? device["device-name"] : device["dev-id"]}}</td>
+					<td>{{ item.prettyID }}</td>
+					<td ng-if="item['tenant-id'] != undefined" >
+						{{ item['tenant-id'] }} <button class="btn add-row right" ng-click="linkUniDialog.show($event, {'uni':item['uni-id'], tenants:tenantArray})">Edit</button>
+					</td>
+					<td ng-if="item['tenant-id'] == undefined" >
+						<button class="btn add-row btn-middle" ng-click="linkUniDialog.show($event, {'uni':item['uni-id'], tenants:tenantArray})"><i class="icon-link"></i> Link Tenant</button>
+					</td>
+					<td class="delete-tr"><button class="btn btn-md btn-danger" ng-click="deleteUni(item['uni-id'])"> <i class="icon-trash"></i> </button></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

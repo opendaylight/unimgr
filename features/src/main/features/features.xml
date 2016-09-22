@@ -56,6 +56,14 @@
     <bundle>mvn:org.opendaylight.unimgr/unimgr-netvirt/{{VERSION}}</bundle>
   </feature>
 
+    <feature name='odl-unimgr-dlux' version='${project.version}'
+        description='OpenDaylight :: UniMgr :: dlux'>
+        <feature version='${project.version}'>odl-unimgr-netvirt</feature>
+        <feature version='${dlux.version}'>odl-dlux-core</feature>
+        <bundle>mvn:org.opendaylight.unimgr/cpeui-bundle/{{VERSION}}</bundle>
+    </feature>
+    
+
   <feature name='odl-unimgr-console' version='${project.version}'
     description='OpenDaylight :: UniMgr :: CLI'>
     <feature version="${project.version}">odl-unimgr</feature>

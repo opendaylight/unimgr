@@ -154,6 +154,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>cpeui-bundle</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.unimgr</groupId>
       <artifactId>cisco-xrmodels</artifactId>
       <version>${project.version}</version>
