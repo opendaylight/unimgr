@@ -868,6 +868,11 @@ module mef-interfaces {
                 "[MEF45] Section 8.2. " +
                 "[MEF7.3] Section 10.2.2.";
         }
+        leaf tenant-id {
+            type leafref {
+                path "/mef-global:mef-global/mef-global:tenants-instances/mef-global:tenant-list/mef-global:name";
+            }
+        }        
       }
     }
   }

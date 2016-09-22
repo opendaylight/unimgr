@@ -122,6 +122,9 @@ module mef-topology {
           description
             "Device Identifier.";
         }
+        leaf device-name {
+            type string;
+        }
       }
     }
     container connections {

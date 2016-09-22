@@ -75,6 +75,7 @@ module mef-services {
     reference "EVC Ethernet Services Definitions YANG Modules " +
             "(MEF XX), TBD";
   }
+   
   container mef-services {
     description
       "MEF Services";
@@ -1308,7 +1309,6 @@ module mef-services {
         }
         leaf evc-status {
           type mef-types:evc-status-type;
-          default "inactive";
           config false;
           description
             "EVC Operational Status.";
@@ -1467,6 +1467,9 @@ module mef-services {
             "the max-uni-count value must be at least 3. " +
             "This value must be 2 for point-to-point mode.";
           reference "[MEF10.3] [R14]. [MEF7.3] Section 12.2.2.";
+        }
+        leaf preserved-vlan {
+            type uint32;
         }
         leaf preserve-ce-vlan-id {
           type boolean;
@@ -1950,6 +1953,11 @@ module mef-services {
           "MEF Service Entity.";
         reference "[MEF12.2] Table 3.";
       }
+      leaf tenant-id {
+          type leafref{
+              path "/mef-global:mef-global/mef-global:tenants-instances/mef-global:tenant-list/mef-global:name";
+          }
+      }      
     }
   }
 }
