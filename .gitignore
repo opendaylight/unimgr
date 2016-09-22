@@ -27,6 +27,5 @@ maven-eclipse.xml
 .DS_STORE
 .metadata
 .checkstyle
-*.html
 maven-metadata-local.xml
 \#*#
