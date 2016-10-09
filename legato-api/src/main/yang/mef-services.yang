@@ -4,6 +4,9 @@ module mef-services {
   import ietf-yang-types {
     prefix yang;
   }
+  import ietf-inet-types {
+	    prefix inet;
+	  }
   import mef-types {
     prefix mef-types;
   }
@@ -95,9 +98,74 @@ module mef-services {
       }
       key "svc-id";
       unique "evc/evc-id";
+      unique "ipvc/ipvc-id";
       description
         "Metro Ethernet Forum's Ethernet Services.";
+      choice mef-service-choice
+      {
+    	  case ipvc-choice {
+      container ipvc {
+          container unis {
+              list uni {  
+                  leaf uni-id {
+                      type leafref {
+                        path "/mef-interfaces:mef-interfaces/" +
+                                "mef-interfaces:unis/mef-interfaces:uni/" +
+                                "mef-interfaces:uni-id";
+                      }
+                  }
+                  leaf ip-uni-id {
+                      type mef-types:identifier45;
+                  }
+                  
+                  container evc-uni-ce-vlans {
+                      description
+                        "EVC Per UNI CE-VLAN IDs.";
+                      list evc-uni-ce-vlan {
+                        key "vid";
+                        description
+                          "A list of the CE-VLAN IDs mapped to this UNI " +
+                          "for this EVC.";
+                        reference "[MEF10.3] Section 8.6.1, [R24] " +
+                                "[R25], Section 9.10.2, Section 9.12, " +
+                                "[R76], [R81].";
+                        leaf vid {
+                          type leafref {
+                            path "/mef-interfaces:mef-interfaces/" +
+                                    "mef-interfaces:unis/" +
+                                    "mef-interfaces:uni" +
+                                    "[mef-interfaces:uni-id = " +
+                                    "current()/../../../uni-id]" +
+                                    "/mef-interfaces:ce-vlans/" +
+                                    "mef-interfaces:ce-vlan/" +
+                                    "mef-interfaces:vid";
+                          }
+                          description
+                            "VLAN Identifier.";
+                        }
+                      }
+                    }                  
+              }
+          }
+          
+          leaf ipvc-id {
+              type mef-types:evc-id-type;
+              mandatory true;
+            }         
+          leaf ipvc-type {
+              type mef-types:ipvc-type;
+
+              mandatory true;
+              description
+                "This IPVC attribute describes the IPVC as either " +
+                "Cloud-access, Multipoint, or " +
+                "Rooted-Multipoint.";
+            }          
+      }
+    	  }
+    	  case evc-choice {
       container evc {
+
         must "not(sls-uni-inclusions) or " +
                 "(sls-uni-inclusions and not(sls-uni-exclusions))" {
           error-message "The EVC Performance SLS Exclusions and " +
@@ -1299,8 +1367,8 @@ module mef-services {
           }
         }
         leaf evc-id {
-          type mef-types:evc-id-type;
-          mandatory true;
+         type mef-types:evc-id-type;
+         mandatory true;
           description
             "The EVC ID must be unique across all EVCs in the CEN." +
             " The EVC ID must be non-NULL.";
@@ -1405,7 +1473,7 @@ module mef-services {
               "If EVC Type is Rooted-Multipoint, the value " +
               "of max-uni-count must be at least 3.";
           }
-          mandatory true;
+         // mandatory true;
           description
             "This EVC attribute describes the EVC as either " +
             "Multipoint-To-Multipoint, Point-To-Point, or " +
@@ -1548,6 +1616,8 @@ module mef-services {
                 "[MEF6.2] Section 8.2.2 and MEF 22.1: [D2]. " +
                 "[MEF7.3] Section 12.2.2.";
         }
+      }
+    	  }
       }
       leaf svc-id {
         type mef-types:retail-svc-id-type;

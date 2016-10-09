@@ -18,10 +18,10 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.physical.layers.links.Link;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.Evc;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.Uni;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.uni.EvcUniCeVlans;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.uni.evc.uni.ce.vlans.EvcUniCeVlan;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.Evc;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.Uni;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.uni.EvcUniCeVlans;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.uni.evc.uni.ce.vlans.EvcUniCeVlan;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcType;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcUniRoleType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.rev140508.interfaces.state.Interface;
@@ -197,84 +197,21 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
     }
 
     private void createInterface(String instanceName, Uni uni, boolean isEtree) {
-
         EvcUniUtils.addUni(dataBroker, uni);
-
-        String uniId = uni.getUniId().getValue();
-
-        Link link = EvcUniUtils.getLink(dataBroker, uni);
-        String interfaceName = uniId;
-
-        boolean result = waitForGeniusToUpdateInterface(interfaceName);
-        if (!result) {
-            log.error("State interface {} is not configured (missing ifIndex)", interfaceName);
-            return;
-        }
-
+        String interfaceName = uni.getUniId().getValue();
         EvcUniRoleType role = uni.getRole();
-
         EvcUniCeVlans evcUniCeVlans = uni.getEvcUniCeVlans();
 
         if (evcUniCeVlans != null && evcUniCeVlans.getEvcUniCeVlan() != null
                 && !evcUniCeVlans.getEvcUniCeVlan().isEmpty()) {
             for (EvcUniCeVlan x : evcUniCeVlans.getEvcUniCeVlan()) {
-
                 interfaceName = NetvirtUtils.getInterfaceNameForVlan(interfaceName, x.getVid().toString());
-
-                log.info("Adding {} interface: {}", isEtree ? "etree" : "elan", interfaceName);
-
-                if (isEtree) {
-                    NetvirtUtils.createEtreeInterface(dataBroker, instanceName, interfaceName,
-                            RoleToInterfaceType(role));
-                } else {
-                    NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName);
-                }
+                
+                NetvirtUtils.createInterface(dataBroker, instanceName, interfaceName, RoleToInterfaceType(role), isEtree);               
             }
         } else {
-            log.info("Adding {} interface: {}", isEtree ? "etree" : "elan", interfaceName);
-            if (isEtree) {
-                NetvirtUtils.createEtreeInterface(dataBroker, instanceName, interfaceName, RoleToInterfaceType(role));
-            } else {
-                NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName);
-            }
+            NetvirtUtils.createInterface(dataBroker, instanceName, interfaceName, RoleToInterfaceType(role), isEtree);
         }
-    }
-
-    private boolean waitForGeniusToUpdateInterface(String interfaceName) {
-        int retries = 10;
-
-        while (retries > 0) {
-            Optional<Interface> optional = MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL,
-                    NetvirtUtils.getStateInterfaceIdentifier(interfaceName));
-
-            if (!optional.isPresent()) {
-                log.info("State interface {} doesn't exist", interfaceName);
-                return false;
-            }
-
-            Interface stateInterface = optional.get();
-
-            if (stateInterface.getIfIndex() != null) {
-                log.info("State interface configured with ifIndex {}", stateInterface.getIfIndex());
-
-                // Wait a bit, because if we continue too soon this will not
-                // work.
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                }
-
-                return true;
-            }
-
-            retries -= 1;
-            try {
-                Thread.sleep(1500);
-            } catch (InterruptedException e) {
-            }
-        }
-
-        return false;
     }
 
     private static EtreeInterfaceType RoleToInterfaceType(EvcUniRoleType role) {
@@ -287,11 +224,9 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
 
     private void removeElanInterface(String instanceName, Uni uni) {
         EvcUniUtils.removeUni(dataBroker, uni);
-
+        
         String uniId = uni.getUniId().getValue();
         EvcUniCeVlans evcUniCeVlans = uni.getEvcUniCeVlans();
-
-        Link link = EvcUniUtils.getLink(dataBroker, uni);
         String interfaceName = uniId;
 
         if (evcUniCeVlans != null && !evcUniCeVlans.getEvcUniCeVlan().isEmpty()) {

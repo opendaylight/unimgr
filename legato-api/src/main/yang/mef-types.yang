@@ -498,6 +498,24 @@ module mef-types {
       "EVC Type";
     reference "[MEF10.3] Section 8.1.";
   }
+  typedef ipvc-type {
+	    type enumeration {
+	        enum "multipoint" {
+		          description
+		            "Multipoint.";
+		        }
+	        enum "cloud-access" {
+	          description
+	            "Cloud-access.";
+	        }
+	        enum "rooted-multipoint" {
+	          description
+	            "Rooted Multipoint.";
+	        }
+	      }
+	      description
+	        "IPVC Type";
+  }
   typedef evc-status-type {
     type enumeration {
       enum "new" {
