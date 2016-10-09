@@ -14,18 +14,19 @@ import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.inte
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.Unis;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.Uni;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.UniKey;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.IpUnis;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.PhysicalLayers;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.ip.unis.IpUni;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.ip.unis.IpUniKey;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.physical.layers.Links;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.physical.layers.links.Link;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.physical.layers.links.LinkKey;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.MefServices;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.MefService;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.MefServiceKey;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.Evc;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.EvcBuilder;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.uni.EvcUniCeVlans;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.uni.evc.uni.ce.vlans.EvcUniCeVlan;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.uni.evc.uni.ce.vlans.EvcUniCeVlanBuilder;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.Evc;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.EvcBuilder;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.Ipvc;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.topology.rev150526.MefTopology;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.topology.rev150526.mef.topology.Devices;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.topology.rev150526.mef.topology.devices.Device;
@@ -37,7 +38,8 @@ import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.type
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcType;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.Identifier45;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.RetailSvcIdType;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcStatusType;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpPrefix;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,20 +66,20 @@ public final class MefUtils {
         return InstanceIdentifier.builder(MefInterfaces.class).child(Unis.class).child(Uni.class).build();
     }
 
-    public static InstanceIdentifier<org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.Unis> getUnisInstanceIdentifier(
+    public static InstanceIdentifier<org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.Unis> getUnisInstanceIdentifier(
             String evcId) {
         return InstanceIdentifier.builder(MefServices.class)
                 .child(MefService.class, new MefServiceKey(RetailSvcIdType.getDefaultInstance(evcId))).child(Evc.class)
-                .child(org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.Unis.class)
+                .child(org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.Unis.class)
                 .build();
     }
 
-    public static InstanceIdentifier<org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.Uni> getEvcUniInstanceIdentifier(
+    public static InstanceIdentifier<org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.Uni> getEvcUniInstanceIdentifier(
             String uniId) {
         return InstanceIdentifier.builder(MefServices.class).child(MefService.class).child(Evc.class)
-                .child(org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.Unis.class)
-                .child(org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.Uni.class,
-                        new org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.UniKey(
+                .child(org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.Unis.class)
+                .child(org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.Uni.class,
+                        new org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.UniKey(
                                 new Identifier45(uniId)))
                 .build();
     }
@@ -89,6 +91,12 @@ public final class MefUtils {
                 .child(Link.class, new LinkKey(new Identifier45(deviceId), interfaceId)).build();
     }
 
+    public static InstanceIdentifier<IpUni> getIpUniInstanceIdentifier(String uniId, String ipUniId) {
+        return InstanceIdentifier.builder(MefInterfaces.class).child(Unis.class)
+                .child(Uni.class, new UniKey(new Identifier45(uniId))).child(IpUnis.class)
+                .child(IpUni.class, new IpUniKey(new Identifier45(ipUniId))).build();
+    }
+
     public static InstanceIdentifier<Evc> getEvcInstanceIdentifier() {
         return getMefServiceInstanceIdentifier().child(Evc.class);
     }
@@ -97,8 +105,7 @@ public final class MefUtils {
         return InstanceIdentifier.create(MefServices.class).child(MefService.class);
     }
 
-    public static InstanceIdentifier<MefService> getMefServiceInstanceIdentifier(
-            RetailSvcIdType retailSvcIdType) {
+    public static InstanceIdentifier<MefService> getMefServiceInstanceIdentifier(RetailSvcIdType retailSvcIdType) {
         return InstanceIdentifier.create(MefServices.class).child(MefService.class, new MefServiceKey(retailSvcIdType));
     }
 
@@ -119,14 +126,14 @@ public final class MefUtils {
                 .child(Evc.class).build();
     }
 
-    private static InstanceIdentifier<org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.Uni> getEvcUniInstanceIdentifier(
+    private static InstanceIdentifier<org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.Uni> getEvcUniInstanceIdentifier(
             String serviceName, String uniId) {
         return InstanceIdentifier.builder(MefServices.class)
                 .child(MefService.class, new MefServiceKey(RetailSvcIdType.getDefaultInstance(serviceName)))
                 .child(Evc.class)
-                .child(org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.Unis.class)
-                .child(org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.Uni.class, //
-                        new org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.UniKey(
+                .child(org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.Unis.class)
+                .child(org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.Uni.class, //
+                        new org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.UniKey(
                                 Identifier45.getDefaultInstance(uniId)))
                 .build();
     }
@@ -158,7 +165,7 @@ public final class MefUtils {
 
     public static Boolean EvcUniExists(DataBroker dataBroker, String instanceName, String uniId) {
         logger.info("searching for uni id {} in service {}", uniId, instanceName);
-        Optional<org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.Uni> uni = MdsalUtils
+        Optional<org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.Uni> uni = MdsalUtils
                 .read(dataBroker, LogicalDatastoreType.CONFIGURATION, getEvcUniInstanceIdentifier(instanceName, uniId));
         if (uni.isPresent()) {
             logger.info("found uni");
@@ -166,6 +173,36 @@ public final class MefUtils {
             logger.info("no uni");
         }
         return uni.isPresent();
+    }
+
+    public static String getTrunkParentName(Link link) {
+        String interfaceName = link.getInterface().toString();
+        return interfaceName;
+    }
+
+    public static String getInterfaceName(Link link, String uniId) {
+        String device = link.getDevice().getValue();
+        return NetvirtUtils.getDeviceInterfaceName(device, uniId);
+    }
+
+    public static InstanceIdentifier<Ipvc> getIpvcInstanceIdentifier() {
+        return InstanceIdentifier.create(MefServices.class).child(MefService.class).child(Ipvc.class);
+    }
+
+    public static String ipPrefixToString(IpPrefix ipAddress) {
+        if (ipAddress.getIpv4Prefix() != null) {
+            return ipAddress.getIpv4Prefix().getValue();
+        }
+
+        return ipAddress.getIpv6Prefix().getValue();
+    }
+
+    public static String ipAddressToString(IpAddress ipAddress) {
+        if (ipAddress.getIpv4Address() != null) {
+            return ipAddress.getIpv4Address().getValue();
+        }
+
+        return ipAddress.getIpv6Address().getValue();
     }
 
 }

@@ -11,6 +11,8 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.MefService;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.MefServiceBuilder;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.EvcChoice;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.Evc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,5 +36,13 @@ public class TenantEnhancerUtils {
         builder.setTenantId(tenant);
         MdsalUtils.syncUpdate(dataBroker, LogicalDatastoreType.CONFIGURATION,
                 MefUtils.getMefServiceInstanceIdentifier(service.getSvcId()), service);
+    }
+
+    public static Evc GetEvc(MefService service) {
+        if (!(service.getMefServiceChoice() instanceof EvcChoice)) {
+            return null;
+        }
+
+        return ((EvcChoice) service.getMefServiceChoice()).getEvc();
     }
 }
