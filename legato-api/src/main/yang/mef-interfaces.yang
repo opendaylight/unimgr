@@ -1,6 +1,9 @@
 module mef-interfaces {
   namespace "http://metroethernetforum.org/ns/yang/mef-interfaces";
   prefix mef-interfaces;
+  import ietf-inet-types {
+	    prefix inet;
+  }
   import ietf-yang-types {
     prefix yang;
   }
@@ -13,6 +16,9 @@ module mef-interfaces {
   import mef-topology {
     prefix mef-topology;
   }
+  
+  import opendaylight-l2-types { prefix ethertype; } // revision-date "2013-08-27";
+  
   organization "Metro Ethernet Forum";
   contact
     "Web URL: http://metroethernetforum.org/
@@ -135,6 +141,19 @@ module mef-interfaces {
         description
           "MEF UNI List.";
         reference "[MEF6.2] Section 8.2.2.";
+        container ip-unis
+        {
+          list ip-uni {
+        	  leaf id { type mef-types:identifier45; }
+              leaf ip-address { type inet:ip-prefix; }
+              leaf vlan { type ethertype:vlan-id; }
+              list subnets
+              {
+            	leaf subnet { type inet:ip-prefix; }
+            	leaf gateway { type inet:ip-address; }
+              }
+          }
+        }
         container physical-layers {
           description
             "The Physical Layer MUST operate in a full duplex " +
