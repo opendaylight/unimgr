@@ -18,9 +18,9 @@ import org.opendaylight.genius.interfacemanager.globals.IfmConstants;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.PhysicalLayers;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.physical.layers.Links;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.physical.layers.links.Link;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.Uni;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.uni.EvcUniCeVlans;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.uni.evc.uni.ce.vlans.EvcUniCeVlan;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.Uni;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.uni.EvcUniCeVlans;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.uni.evc.uni.ce.vlans.EvcUniCeVlan;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.rev140508.Interfaces;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.rev140508.interfaces.Interface;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.rev140508.interfaces.InterfaceKey;
@@ -35,13 +35,13 @@ public class EvcUniUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(EvcUniUtils.class);
 
-    public static Link getLink(DataBroker dataBroker, Uni evcUni) {
+    public static Link getLink(DataBroker dataBroker, String uniId) {
         Optional<org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.Uni> optional = MdsalUtils
                 .read(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                        MefUtils.getUniInstanceIdentifier(evcUni.getUniId().getValue()));
+                        MefUtils.getUniInstanceIdentifier(uniId));
 
         if (!optional.isPresent()) {
-            logger.error("A matching Uni doesn't exist for EvcUni {}", evcUni.getUniId());
+            logger.error("A matching Uni doesn't exist for EvcUni {}", uniId);
             return null;
         }
 
@@ -50,13 +50,13 @@ public class EvcUniUtils {
 
         PhysicalLayers physicalLayers = uni.getPhysicalLayers();
         if (physicalLayers == null) {
-            logger.warn("Uni {} is missing PhysicalLayers", evcUni.getUniId());
+            logger.warn("Uni {} is missing PhysicalLayers", uniId);
             return null;
         }
 
         Links links = physicalLayers.getLinks();
         if (links == null || links.getLink() == null) {
-            logger.warn("Uni {} is has no links", evcUni.getUniId());
+            logger.warn("Uni {} is has no links", uniId);
             return null;
         }
 
@@ -69,11 +69,9 @@ public class EvcUniUtils {
             String uniId = data.getUniId().getValue();
             WriteTransaction tx = createTransaction(dataBroker);
 
-            Link link = EvcUniUtils.getLink(dataBroker, data);
-
             logger.info("Removing trunk {}", uniId);
 
-            delete(uniId, tx);
+            NetvirtUtils.delete(uniId, tx);
 
             Optional<List<EvcUniCeVlan>> ceVlansOptional = getCeVlans(data);
             if (!ceVlansOptional.isPresent()) {
@@ -91,9 +89,9 @@ public class EvcUniUtils {
         try {
             String uniId = data.getUniId().getValue();
             WriteTransaction tx = createTransaction(dataBroker);
-            Link link = EvcUniUtils.getLink(dataBroker, data);
+            Link link = EvcUniUtils.getLink(dataBroker, uniId);
             String interfaceName = uniId;
-            addTrunkInterface(interfaceName, getTrunkParentName(link), tx);
+            addTrunkInterface(interfaceName, MefUtils.getTrunkParentName(link), tx);
 
             Optional<List<EvcUniCeVlan>> ceVlansOptional = getCeVlans(data);
             if (ceVlansOptional.isPresent()) {
@@ -109,7 +107,7 @@ public class EvcUniUtils {
     private static void addTrunkInterface(String interfaceName, String parentInterfaceName, WriteTransaction tx) {
         logger.info("Adding VLAN trunk {} ParentRef {}", interfaceName, parentInterfaceName);
         Interface trunkInterface = NetvirtUtils.createTrunkInterface(interfaceName, parentInterfaceName);
-        write(trunkInterface, tx);
+        NetvirtUtils.write(trunkInterface, tx);
     }
 
     private static void addTrunkMemberInterfaces(String parentInterfaceName, Iterable<EvcUniCeVlan> ceVlans,
@@ -127,7 +125,7 @@ public class EvcUniUtils {
             logger.info("Adding VLAN trunk-member {} ParentRef {}", interfaceName, parentInterfaceName);
             Interface trunkMemberInterface = NetvirtUtils.createTrunkMemberInterface(interfaceName, parentInterfaceName,
                     vlanId.intValue());
-            write(trunkMemberInterface, tx);
+            NetvirtUtils.write(trunkMemberInterface, tx);
         }
     }
 
@@ -144,13 +142,8 @@ public class EvcUniUtils {
             Long vlanId = (Long) vid;
             String interfaceName = NetvirtUtils.getInterfaceNameForVlan(parentInterfaceName, vlanId.toString());
             logger.info("Removing VLAN trunk-member {}", interfaceName);
-            delete(interfaceName, tx);
+            NetvirtUtils.delete(interfaceName, tx);
         }
-    }
-
-    private static InstanceIdentifier<Interface> createInterfaceIdentifier(String interfaceName) {
-        return InstanceIdentifier.builder(Interfaces.class).child(Interface.class, new InterfaceKey(interfaceName))
-                .build();
     }
 
     private static WriteTransaction createTransaction(DataBroker dataBroker) {
@@ -165,24 +158,7 @@ public class EvcUniUtils {
         } catch (Exception e) {
             logger.error("failed to commit transaction due to exception ", e);
         }
-    }
-
-    private static void write(Interface iface, WriteTransaction tx) {
-        String interfaceName = iface.getName();
-        InstanceIdentifier<Interface> interfaceIdentifier = createInterfaceIdentifier(interfaceName);
-        tx.put(LogicalDatastoreType.CONFIGURATION, interfaceIdentifier, iface, true);
-    }
-
-    private static void delete(String interfaceName, WriteTransaction tx) {
-        InstanceIdentifier<Interface> interfaceIdentifier = createInterfaceIdentifier(interfaceName);
-        tx.delete(LogicalDatastoreType.CONFIGURATION, interfaceIdentifier);
-    }
-
-    private static String getTrunkParentName(Link link) {
-        String deviceName = link.getDevice().getValue();
-        String interfaceName = link.getInterface().toString();
-        return interfaceName;
-    }
+    }    
 
     private static Optional<List<EvcUniCeVlan>> getCeVlans(Uni uni) {
         EvcUniCeVlans ceVlans = uni.getEvcUniCeVlans();
@@ -191,9 +167,5 @@ public class EvcUniUtils {
         }
 
         return Optional.fromNullable(ceVlans.getEvcUniCeVlan());
-    }
-
-    public static String getDeviceInterfaceName(String deviceName, String interfaceName) {
-        return deviceName + IfmConstants.OF_URI_SEPARATOR + interfaceName;
     }
 }

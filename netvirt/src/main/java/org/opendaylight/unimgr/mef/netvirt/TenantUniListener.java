@@ -78,9 +78,10 @@ public class TenantUniListener extends UnimgrDataTreeChangeListener<Uni> {
         if (!optionalServices.isPresent()) {
             return;
         }
+
         for (MefService service : optionalServices.get().getMefService()) {
-            for (org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.Uni serviceUni : service
-                    .getEvc().getUnis().getUni()) {
+            for (org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.Uni serviceUni : TenantEnhancerUtils
+                    .GetEvc(service).getUnis().getUni()) {
                 if (!TenantEnhancerUtils.isServiceTenanted(service) && serviceUni.getUniId().equals(uni.getUniId())) {
                     log.info("instance identifier is {}", MefUtils.getMefServiceInstanceIdentifier(service.getSvcId()));
                     TenantEnhancerUtils.updateService(dataBroker, tenant, service);

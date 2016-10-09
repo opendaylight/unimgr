@@ -45,7 +45,6 @@ import com.google.common.util.concurrent.CheckedFuture;
 public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapableNodeConnector> {
 
     private static final Logger log = LoggerFactory.getLogger(NodeConnectorListener.class);
-    private static final Logger logger = LoggerFactory.getLogger(NodeConnectorListener.class);
     private static boolean handleRemovedNodeConnectors = false;
     private ListenerRegistration<NodeConnectorListener> evcListenerRegistration;
 
@@ -158,9 +157,9 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
 
         WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
 
-        logger.info("Adding mef uni/device interface {} with device {}", nodeConnector.getName(), dpnId);
+        log.info("Adding mef uni/device interface {} with device {}", nodeConnector.getName(), dpnId);
 
-        String uniName = EvcUniUtils.getDeviceInterfaceName(dpnId, nodeConnector.getName());
+        String uniName = NetvirtUtils.getDeviceInterfaceName(dpnId, nodeConnector.getName());
         InstanceIdentifier interfacePath = MefUtils.getDeviceInterfaceInstanceIdentifier(dpnId, uniName);
         InterfaceBuilder interfaceBuilder = new InterfaceBuilder();
         interfaceBuilder.setPhy(new Identifier45(uniName));
@@ -171,6 +170,7 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
         InstanceIdentifier uniPath = MefUtils.getUniInstanceIdentifier(uniName);
         UniBuilder uniBuilder = new UniBuilder();
         uniBuilder.setUniId(new Identifier45(uniName));
+        uniBuilder.setMacAddress(nodeConnector.getHardwareAddress());
 
         PhysicalLayersBuilder physicalLayersBuilder = new PhysicalLayersBuilder();
         LinksBuilder linksBuilder = new LinksBuilder();
@@ -190,7 +190,7 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
         try {
             futures.get();
         } catch (InterruptedException | ExecutionException e) {
-            logger.error("Error writing to datastore (path, data) : ({}, {}), ({}, {})", interfacePath, deviceInterface,
+            log.error("Error writing to datastore (path, data) : ({}, {}), ({}, {})", interfacePath, deviceInterface,
                     uniPath, uni);
             throw new RuntimeException(e.getMessage());
         }
@@ -199,7 +199,7 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
     private void handleNodeConnectorRemoved(DataBroker dataBroker, String dpnId,
             FlowCapableNodeConnector nodeConnector) {
 
-        String uniName = EvcUniUtils.getDeviceInterfaceName(dpnId, nodeConnector.getName());
+        String uniName = NetvirtUtils.getDeviceInterfaceName(dpnId, nodeConnector.getName());
 
         if (!handleRemovedNodeConnectors) {
             return;
