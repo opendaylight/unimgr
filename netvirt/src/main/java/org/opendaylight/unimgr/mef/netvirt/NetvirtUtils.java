@@ -9,7 +9,17 @@
 package org.opendaylight.unimgr.mef.netvirt;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.genius.interfacemanager.globals.IfmConstants;
+import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.VpnInstances;
+import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.VpnInterfaces;
+import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.instances.VpnInstance;
+import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.instances.VpnInstanceBuilder;
+import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.instances.VpnInstanceKey;
+import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.interfaces.VpnInterface;
+import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.interfaces.VpnInterfaceBuilder;
+import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.interfaces.VpnInterfaceKey;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.iana._if.type.rev140508.L2vlan;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.rev140508.Interfaces;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.rev140508.InterfacesState;
@@ -34,12 +44,17 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan.interfaces.ElanInterface;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan.interfaces.ElanInterfaceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan.interfaces.ElanInterfaceKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.Adjacencies;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
 public class NetvirtUtils {
+    private static final Logger logger = LoggerFactory.getLogger(MdsalUtils.class);
+    
     public final static String VLAN_SEPARATOR = ".";
 
     public static void createElanInstance(DataBroker dataBroker, String instanceName, boolean isEtree) {
@@ -181,5 +196,84 @@ public class NetvirtUtils {
 
     public static Optional<Interface> getIetfInterface(DataBroker dataBroker, String interfaceName) {
         return MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, getInterfaceIdentifier(interfaceName));
+    }
+
+    public static String getDeviceInterfaceName(String deviceName, String interfaceName) {
+        return deviceName + IfmConstants.OF_URI_SEPARATOR + interfaceName;
+    }
+
+    public static void writeInterface(Interface iface, WriteTransaction tx) {
+        String interfaceName = iface.getName();
+        InstanceIdentifier<Interface> interfaceIdentifier = createInterfaceIdentifier(interfaceName);
+        tx.put(LogicalDatastoreType.CONFIGURATION, interfaceIdentifier, iface, true);
+    }
+    
+    public static void write(Interface iface, WriteTransaction tx) {
+        String interfaceName = iface.getName();
+        InstanceIdentifier<Interface> interfaceIdentifier = createInterfaceIdentifier(interfaceName);
+        tx.put(LogicalDatastoreType.CONFIGURATION, interfaceIdentifier, iface, true);
+    }
+
+    public static void delete(String interfaceName, WriteTransaction tx) {
+        InstanceIdentifier<Interface> interfaceIdentifier = createInterfaceIdentifier(interfaceName);
+        tx.delete(LogicalDatastoreType.CONFIGURATION, interfaceIdentifier);
+    }
+    
+    public static boolean waitForGeniusToUpdateInterface(DataBroker dataBroker, String interfaceName) {
+        int retries = 10;
+
+        while (retries > 0) {
+            Optional<org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.rev140508.interfaces.state.Interface> optional = MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL,
+                    getStateInterfaceIdentifier(interfaceName));
+
+            if (!optional.isPresent()) {
+                logger.info("State interface {} doesn't exist", interfaceName);
+            } else {
+                org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.rev140508.interfaces.state.Interface stateInterface = optional.get();
+
+                if (stateInterface.getIfIndex() != null) {
+                    logger.info("State interface configured with ifIndex {}", stateInterface.getIfIndex());
+
+                    // Wait a bit, because if we continue too soon this will not
+                    // work.
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                    }
+
+                    return true;
+                }
+            }
+
+            retries -= 1;
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException e) {
+            }
+        }
+
+        return false;
+    }
+    
+    private static InstanceIdentifier<Interface> createInterfaceIdentifier(String interfaceName) {
+        return InstanceIdentifier.builder(Interfaces.class).child(Interface.class, new InterfaceKey(interfaceName))
+                .build();
+    }
+
+    public static void createInterface(DataBroker dataBroker, String instanceName, String interfaceName, EtreeInterfaceType etreeInterfaceType, boolean isEtree) {
+        boolean result = NetvirtUtils.waitForGeniusToUpdateInterface(dataBroker, interfaceName);
+        if (!result) {
+            logger.error("State interface {} is not configured (missing ifIndex)", interfaceName);
+            return;
+        }
+
+        logger.info("Adding {} interface: {}", isEtree ? "etree" : "elan", interfaceName);
+
+        if (isEtree) {
+            NetvirtUtils.createEtreeInterface(dataBroker, instanceName, interfaceName,
+                    etreeInterfaceType);
+        } else {
+            NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName);
+        }        
     }
 }
