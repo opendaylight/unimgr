@@ -23,9 +23,7 @@ import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.serv
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.MefServiceKey;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.Evc;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.EvcBuilder;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.uni.EvcUniCeVlans;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.uni.evc.uni.ce.vlans.EvcUniCeVlan;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.evc.unis.uni.evc.uni.ce.vlans.EvcUniCeVlanBuilder;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.Ipvc;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.topology.rev150526.MefTopology;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.topology.rev150526.mef.topology.Devices;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.topology.rev150526.mef.topology.devices.Device;
@@ -37,7 +35,7 @@ import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.type
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcType;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.Identifier45;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.RetailSvcIdType;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcStatusType;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,8 +95,7 @@ public final class MefUtils {
         return InstanceIdentifier.create(MefServices.class).child(MefService.class);
     }
 
-    public static InstanceIdentifier<MefService> getMefServiceInstanceIdentifier(
-            RetailSvcIdType retailSvcIdType) {
+    public static InstanceIdentifier<MefService> getMefServiceInstanceIdentifier(RetailSvcIdType retailSvcIdType) {
         return InstanceIdentifier.create(MefServices.class).child(MefService.class, new MefServiceKey(retailSvcIdType));
     }
 
@@ -168,4 +165,25 @@ public final class MefUtils {
         return uni.isPresent();
     }
 
+    public static String getTrunkParentName(Link link) {
+        String interfaceName = link.getInterface().toString();
+        return interfaceName;
+    }
+
+    public static String getInterfaceName(Link link, String uniId) {
+        String device = link.getDevice().getValue();
+        return NetvirtUtils.getDeviceInterfaceName(device, uniId);
+    }
+
+    public static InstanceIdentifier<Ipvc> getIpvcInstanceIdentifier() {
+        return InstanceIdentifier.create(MefServices.class).child(MefService.class).child(Ipvc.class);
+    }
+
+    public static String ipAddressToString(IpAddress ipAddress) {
+        if (ipAddress.getIpv4Address() != null) {
+            return ipAddress.getIpv4Address().getValue();
+        }
+
+        return ipAddress.getIpv6Address().getValue();
+    }
 }
