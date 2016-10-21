@@ -11,19 +11,19 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-parent</artifactId>
-    <version>0.4.4-SNAPSHOT</version>
+    <version>0.4.5-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
   <properties>
-  <ovsdb.version>1.2.5-SNAPSHOT</ovsdb.version>
+  <ovsdb.version>1.2.6-SNAPSHOT</ovsdb.version>
   <powermock.version>1.5.2</powermock.version>
   </properties>
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>unimgr-impl</artifactId>
-  <version>0.0.5-SNAPSHOT</version>
+  <version>0.0.6-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
