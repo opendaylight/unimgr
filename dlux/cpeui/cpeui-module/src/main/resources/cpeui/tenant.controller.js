@@ -6,20 +6,33 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
     $scope.unisTables = {};
     $scope.unis = [];
     $scope.ces = [];
+    $scope.ipvcs = []
     $scope.cesDisplayNames = {};
     $scope.unisMap = {};
+    $scope.networkNames = {};
 
 
     function init(){
       $scope.updateUnis(function(unis){
         CpeuiSvc.getCes(function(ces) {
           $scope.ces = ces.filter(function(item) {
-            return (unis.filterByField('device', item["dev-id"]).length);
+            
+            var filteredUnis = unis.filterByField('device', item["dev-id"]); 
+            filteredUnis = filteredUnis.filterByField('prettyID', 'br-int', true);
+            filteredUnis = filteredUnis.filter(function(i){return !(i.prettyID && i.prettyID.startsWith('tun'));});
+
+            return (filteredUnis.length);
           });
           ces.forEach(function(ce){
             $scope.cesDisplayNames[ce['dev-id']] = ce['device-name'] ? ce['device-name'] : ce['dev-id'];
           });
           $scope.updateEvcView();
+        });
+      });
+      
+      CpeuiSvc.getNetworkNames(function(networks){        
+        networks.forEach(function(net){
+          $scope.networkNames[net.uuid] = net.name;
         });
       });
     }
@@ -39,11 +52,17 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
     };
 
     $scope.updateEvcView = function() {
-      CpeuiSvc.getEvc($scope.curTenant, function(evcs) {
-        $scope.evcs = evcs;
+      CpeuiSvc.getServices($scope.curTenant, function(services) {
+        
+        $scope.evcs = services.filter(function(svc){ return svc.evc != undefined;});
+        $scope.ipvcs = services.filter(function(svc){ return svc.ipvc != undefined;});
 
         $scope.updateUnis();
 
+        $scope.ipvcs.forEach(function(e){
+          e.isTree = (e.ipvc['ipvc-type'] == 'rooted-multipoint');
+        });
+        
         $scope.evcs.forEach(function(e){
           e.isTree = (e.evc['evc-type'] == 'rooted-multipoint');
           e.device2unis = {};
@@ -52,6 +71,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
               if (e.device2unis[$scope.unisMap[u['uni-id']].device] == undefined){
                 e.device2unis[$scope.unisMap[u['uni-id']].device] = [];
               }
+              u.prettyID = u['uni-id'].split(":")[u['uni-id'].split(":").length - 1];              
               e.device2unis[$scope.unisMap[u['uni-id']].device].push(u);
             });
           }
@@ -60,6 +80,9 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
     };
 
     $scope.title = function(str) {
+      if (!str) {
+        return str;
+        }
       return str.split('-').map(function(s) {
         return s[0].toUpperCase() + s.slice(1);
       }).join(' ');
@@ -122,9 +145,15 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
       };
       
       $scope.filterUsedUnis = function(evc){
-        return function(u) {
-          if (evc.evc.unis.uni == undefined) {
-            evc.evc.unis.uni = [];
+        return function(u) {          
+          if (u.prettyID == 'br-int') {
+            return false;
+          }
+          if (u.prettyID && u.prettyID.startsWith('tun')) {
+            return false;
+          }
+          if (evc.evc.unis.uni == undefined){
+            evc.evc.unis.uni = [];     
           }
           return evc.evc.unis.uni.filterByField('uni-id',u['uni-id']).length == 0;
         };
@@ -171,6 +200,9 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
     $scope.sortUni = function(uni) {
       return uni['uni-id'];
     };
+    $scope.sortIpvc = function(ipvc) {
+      return ipvc['ipvc-id'];
+    };    
 
     init();
   });

@@ -20,7 +20,8 @@ define([].concat(modules).concat(services).concat(directives).concat(controllers
     var mainTabIndexs = {
       "tenants" : 1,
       "cpes" : 2,
-      "unis" : 3
+      "unis" : 3,
+      "networks" : 4
     }
 
     $scope.tab = {

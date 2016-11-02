@@ -13,15 +13,15 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
           });
         }
 
-        $scope.AddTenant = function(serviceType) {
-          CpeuiSvc.addTenant($scope.tenantId, serviceType, function() {
+        $scope.AddTenant = function() {
+          CpeuiSvc.addTenant($scope.tenantId, function() {
             $scope.updateView();
           });
         };
 
         $scope.tenantDialog = new CpeuiDialogs.Dialog('AddTenant', {},
             function(obj) {
-              CpeuiSvc.addTenant(obj.id, obj.service_type, function() {
+              CpeuiSvc.addTenant(obj.id, function() {
                 $scope.updateView();
               });
             });
@@ -75,6 +75,20 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
               });
         }
 
+        $scope.assignNetworkToTenant = function(svc) {
+          CpeuiDialogs.customConfirm("Are You Sure?",
+              "Are you sure you want to assign service "+ svc['svc-id'] +" to tenant " + $scope.selectedTenant[svc['svc-id']] +"?",
+              function() {
+                CpeuiSvc.addTenantToService(svc['svc-id'], $scope.selectedTenant[svc['svc-id']], function(){
+                  svc['tenant-id'] = $scope.selectedTenant[svc['svc-id']];
+                },function(){
+                  $scope.selectedTenant[svc['svc-id']] = undefined;
+                });
+              }, function() {
+                $scope.selectedTenant[svc['svc-id']] = undefined;
+              });
+        };
+
         function updateCpeTenants(unis) {
           // update tenant cpe tenant column
           var hasMultipleTenants = [];
@@ -111,11 +125,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
         // UNIs
         $scope.updateUniView = function() {
           CpeuiSvc.getUnis(function(unis) {
-                $scope.unis = unis;
-                $scope.unis.forEach(function(u) {
-                      u.prettyID = u['uni-id'].split(":")[u['uni-id']
-                          .split(":").length - 1];
-                    });
+                $scope.unis = unis;                
                 updateCpeTenants(unis);
               });
         };
@@ -135,8 +145,53 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
           });
         };
 
+        $scope.addCEName = function(ce){
+          ce._naming = true;
+          var input = $('#INPUT_' +ce['dev-id']);          
+          // hack to focus input after show is complete
+          setTimeout(function(){input.focus();},20);          
+          input.parent().on('blur',function(){
+            setTimeout(function(){
+              ce._naming = false;
+              delete ce._new_name;
+            },20);
+          });
+          
+          input.bind("keyup", function (eventSubmit) {
+            if(eventSubmit.which === 13) {            
+              $('#OK_' +ce['dev-id']).click();
+            } else if(eventSubmit.which === 27) {              
+              input.parent().blur();
+            }
+          });
+        }
+        
+        $scope.renameCE = function(ce){
+          CpeuiSvc.addCeName(ce, ce._new_name, function(){
+            ce['device-name'] = ce._new_name;
+            });
+          ce._naming = false;
+        }
+        
+        $scope.services = [];
+        $scope.networkNames = {};
+        
+        $scope.updateNetworksView = function() {
+          CpeuiSvc.getAllServices(function(services) {
+            $scope.services = services;
+          });
+          CpeuiSvc.getNetworkNames(function(networks){        
+            networks.forEach(function(net){
+              $scope.networkNames[net.uuid] = net.name;
+            });
+          });
+        };
+        
         // General
         $scope.updateView = function() {
+          if ($scope.isTabSet('admin',4)){
+            $scope.updateNetworksView();
+          }
           $scope.updateTenantView();
           $scope.updateCesView();
           $scope.updateUniView();

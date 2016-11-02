@@ -1505,16 +1505,6 @@ module mef-global {
             type string;
             description "Tenant Name";
         }
-        leaf service_type {
-            type enumeration {
-                enum L2 {
-                    description "Layer 2 VPN";
-                }
-                enum L3 {
-                    description "Layer 3 VPN";
-                }
-            }
-        }
     }
     
     container tenants-instances {

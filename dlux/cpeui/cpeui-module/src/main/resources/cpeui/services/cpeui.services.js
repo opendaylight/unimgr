@@ -19,13 +19,12 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
             });
         };
 
-        svc.addTenant = function(name, serviceType, callback){
+        svc.addTenant = function(name, callback){
             $http({
                 method:'POST',
                 url:baseUrl + "tenants-instances/",
                 data: {"tenant-list":[{
-                      "name": name,
-                      "service_type": serviceType
+                      "name": name
                     }]}
             }).then(function successCallback(response) {
                 if (callback != undefined) {
@@ -63,6 +62,26 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                     callback();
                 }
             });
+        };
+        
+        svc.addCeName = function(ce, new_name, callback) {
+          $http({
+            method:'POST',
+            url:"/restconf/config/mef-topology:mef-topology/devices/device/" + ce['dev-id'],
+            data: {"device-name": new_name}
+        }).then(function successCallback(response) {
+            if (callback != undefined) {
+                callback();
+            }
+          }, function errorCallback(response) {          
+            console.log(response);
+            $http({
+              method:'GET',
+              url:"/restconf/config/mef-topology:mef-topology/devices/device/" + ce['dev-id']              
+            }).then(function successCallback(response) {
+              ce["device-name"] = response.data["device"][0]["device-name"];
+            });
+          });
         };
 
         svc.getCes = function(callback) {
@@ -153,7 +172,9 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                         }
                     }
                 }
-
+                unis.forEach(function(u) {
+                  u.prettyID = u['uni-id'].split(":")[u['uni-id'].split(":").length - 1];
+                });
                 if (callback != undefined) {
                     callback(unis);
                 }
@@ -232,7 +253,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
             });
         };
 
-        svc.getEvc = function(tenantid, callback) {
+        svc.getServices = function(tenantid, callback) {
             var evcs;
             $http({
                 method:'GET',
@@ -243,8 +264,8 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                 if (evcs != undefined) {
                     evcs = evcs.filter(function(evc){return evc["tenant-id"] == tenantid;});
                     for (i=0; i < evcs.length; i++) {
-                        var unis = evcs[i].evc.unis.uni;
-                        if (unis != undefined) {
+                        if ((evcs[i].evc != undefined) && (evcs[i].evc.unis.uni != undefined)) {
+                            var unis = evcs[i].evc.unis.uni;
                             for (j=0; j < unis.length; j++) {
                                 if ((unis[j]['evc-uni-ce-vlans'] != undefined) && (unis[j]['evc-uni-ce-vlans']['evc-uni-ce-vlan'] != undefined)){
                                     unis[j].vlans = unis[j]['evc-uni-ce-vlans']['evc-uni-ce-vlan'].map(function(u){return u.vid;}).sort();
@@ -264,6 +285,38 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
 
             return evcs;
         };
+
+        svc.getAllServices = function(callback) {          
+          $http({
+              method:'GET',
+              url:"/restconf/config/mef-services:mef-services/"
+          }).then(function successCallback(response) {              
+              if (callback != undefined) {
+                  callback(response.data["mef-services"]["mef-service"]);
+              }
+          }, function errorCallback(response) {
+              console.log(response);
+          });
+        };
+        
+        svc.addTenantToService = function(svcId, tenantName, callbackSuccess, callbackFailure){
+          $http({
+            method:'POST',
+            url:"/restconf/config/mef-services:mef-services/mef-service/" + svcId,
+            data:{"tenant-id":tenantName}
+          }).then(function() {
+              if (callbackSuccess != undefined) {
+                callbackSuccess();
+              }
+          }, function() {
+            if (callbackFailure != undefined) {
+              callbackFailure();
+            } else {
+              console.log(response);
+            }
+          });
+        };
+
         svc.removeEvc = function(svcid, callback) {
              $http({
                 method:'DELETE',
@@ -351,6 +404,17 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
             });
         };
 
+        svc.getNetworkNames = function(callback){
+          $http({
+            method:'GET',
+            url:"/restconf/config/neutron:neutron/networks/"            
+        }).then(function successCallback(response) {
+            if (callback != undefined) {                
+                callback(response.data.networks.network);
+            }
+        });
+        };
+        
         return svc;
 
     });

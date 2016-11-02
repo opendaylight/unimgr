@@ -10,15 +10,15 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
       });
     }
 
-    $scope.AddTenant = function(serviceType) {
-      CpeuiSvc.addTenant($scope.tenantId, serviceType, function() {
+    $scope.AddTenant = function() {
+      CpeuiSvc.addTenant($scope.tenantId, function() {
         $scope.updateTenantView();
       });
     };
 
     $scope.tenantDialog = new CpeuiDialogs.Dialog('AddTenant', {},
         function(obj) {
-          CpeuiSvc.addTenant(obj.id, obj.service_type, function() {
+          CpeuiSvc.addTenant(obj.id, function() {
             $scope.updateTenantView();
           });
         });

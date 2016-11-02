@@ -105,6 +105,11 @@ MD-DIALOG {
 	min-width: 30% !important;
 }
 
+.no-error-spacer .md-errors-spacer {
+	display: none;
+}
+
+
 MD-TOOLBAR {
     cursor: move; /* fallback if grab cursor is unsupported */
     cursor: grab;
@@ -145,7 +150,7 @@ MD-TOOLBAR:active {
 .showmm label, .showmm input, .showmm div{
 	height:inherit;
 }
-.hidemm label, .hidemm input, .hidemm div{{
+.hidemm label, .hidemm input, .hidemm div{
 	height:0;
 }
 
