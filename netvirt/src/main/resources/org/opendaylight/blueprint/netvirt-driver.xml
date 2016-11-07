@@ -19,6 +19,7 @@
 
   <bean class="org.opendaylight.unimgr.mef.netvirt.NodeConnectorListener">
     <argument index="0" ref="dataBroker" />
+    <argument index="1" value="false" />
   </bean>
   <bean class="org.opendaylight.unimgr.mef.netvirt.ElanListener">
     <argument index="0" ref="dataBroker" />

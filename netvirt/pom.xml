@@ -67,6 +67,11 @@
       <artifactId>elanmanager-api</artifactId>
       <version>${vpnservices.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.netvirt</groupId>
+      <artifactId>elanmanager-impl</artifactId>
+      <version>${vpnservices.version}</version>
+    </dependency> 
      <dependency>
       <groupId>org.opendaylight.genius</groupId>
       <artifactId>arputil-api</artifactId>
