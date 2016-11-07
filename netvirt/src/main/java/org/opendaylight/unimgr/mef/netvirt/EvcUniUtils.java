@@ -179,7 +179,6 @@ public class EvcUniUtils {
     }
 
     private static String getTrunkParentName(Link link) {
-        String deviceName = link.getDevice().getValue();
         String interfaceName = link.getInterface().toString();
         return interfaceName;
     }
