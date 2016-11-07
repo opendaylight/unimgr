@@ -25,8 +25,6 @@ import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.inte
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.physical.layers.LinksBuilder;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.physical.layers.links.Link;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.physical.layers.links.LinkBuilder;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.topology.rev150526.mef.topology.devices.Device;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.topology.rev150526.mef.topology.devices.DeviceBuilder;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.topology.rev150526.mef.topology.devices.device.interfaces.InterfaceBuilder;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.Identifier45;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
@@ -34,6 +32,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeCon
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.config.rev150710.ElanConfig;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.config.rev150710.ElanConfigBuilder;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -45,12 +45,13 @@ import com.google.common.util.concurrent.CheckedFuture;
 public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapableNodeConnector> {
 
     private static final Logger log = LoggerFactory.getLogger(NodeConnectorListener.class);
+    private static boolean generateMac = false;
     private static boolean handleRemovedNodeConnectors = false;
     private ListenerRegistration<NodeConnectorListener> evcListenerRegistration;
 
-    public NodeConnectorListener(final DataBroker dataBroker) {
+    public NodeConnectorListener(final DataBroker dataBroker, boolean generateMac) {
         super(dataBroker);
-
+        NodeConnectorListener.generateMac = generateMac;
         registerListener();
     }
 
@@ -60,6 +61,8 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
                     LogicalDatastoreType.OPERATIONAL, getInstanceIdentifier());
             evcListenerRegistration = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
             log.info("NodeConnectorListener created and registered");
+
+            configIntegrationBridge();
         } catch (final Exception e) {
             log.error("Node connector listener registration failed !", e);
             throw new IllegalStateException("Node connector listener registration failed.", e);
@@ -215,5 +218,17 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
     private void handleNodeConnectorUpdated(DataBroker dataBroker, String dpnFromNodeConnectorId,
             FlowCapableNodeConnector original, FlowCapableNodeConnector update) {
 
+    }
+
+    private void configIntegrationBridge() {
+        if (generateMac == true) {// default for netvirt
+            return;
+        }
+
+        ElanConfigBuilder elanConfigBuilder = new ElanConfigBuilder();
+        elanConfigBuilder.setIntBridgeGenMac(false);
+        InstanceIdentifier<ElanConfig> id = InstanceIdentifier.builder(ElanConfig.class).build();
+
+        MdsalUtils.syncUpdate(dataBroker, LogicalDatastoreType.CONFIGURATION, id, elanConfigBuilder.build());
     }
 }
