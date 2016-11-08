@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a65312a_0effb868",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/NodeConnectorListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2016-11-08T08:23:38Z",
+      "side": 1,
+      "message": "delete whitespace in file",
+      "revId": "1e9c190169263ea66b6919cb3f97c160c12d49a3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
