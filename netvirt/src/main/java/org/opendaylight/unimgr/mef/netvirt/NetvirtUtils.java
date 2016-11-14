@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 
 public class NetvirtUtils {
-    private static final Logger logger = LoggerFactory.getLogger(MdsalUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(NetvirtUtils.class);
 
     public final static String VLAN_SEPARATOR = ".";
 

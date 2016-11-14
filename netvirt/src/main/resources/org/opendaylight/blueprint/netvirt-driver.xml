@@ -21,12 +21,6 @@
 		<argument index="0" ref="dataBroker" />
 		<argument index="1" value="false" />
 	</bean>
-	<bean class="org.opendaylight.unimgr.mef.netvirt.ElanListener">
-		<argument index="0" ref="dataBroker" />
-	</bean>
-	<bean class="org.opendaylight.unimgr.mef.netvirt.ElanInterfaceListener">
-		<argument index="0" ref="dataBroker" />
-	</bean>
 
 	<!-- <bean class="org.opendaylight.unimgr.mef.netvirt.TenantlessEvcListener"> -->
 	<!-- <argument index="0" ref="dataBroker" /> -->
