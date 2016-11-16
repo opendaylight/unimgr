@@ -83,7 +83,7 @@
       <version>${vpnservices.version}</version>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.opendaylight.unimgr</groupId>
       <artifactId>unimgr-legato-api</artifactId>
       <version>${project.version}</version>
     </dependency>

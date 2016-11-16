@@ -17,6 +17,7 @@ import org.apache.commons.net.util.SubnetUtils;
 import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.genius.mdsalutil.MDSALUtil;
 import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.VpnInstances;
@@ -73,6 +74,12 @@ public class NetvirtVpnUtils {
     private final static int MaxRetries = 10;
 
     public static void createVpnInstance(DataBroker dataBroker, String instanceName) {
+        WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
+        createVpnInstance(instanceName, tx);
+        MdsalUtils.commitTransaction(tx);
+    }
+
+    public static void createVpnInstance(String instanceName, WriteTransaction tx) {
         VpnInstanceBuilder builder = new VpnInstanceBuilder();
         builder.setVpnInstanceName(instanceName);
         Ipv4FamilyBuilder ipv4FamilyBuilder = new Ipv4FamilyBuilder();
@@ -83,27 +90,33 @@ public class NetvirtVpnUtils {
         ipv4FamilyBuilder.setRouteDistinguisher(rd);
         builder.setIpv4Family(ipv4FamilyBuilder.build());
 
-        MdsalUtils.syncUpdate(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                getVpnInstanceInstanceIdentifier(instanceName), builder.build());
+        tx.put(LogicalDatastoreType.CONFIGURATION, getVpnInstanceInstanceIdentifier(instanceName), builder.build());
     }
 
     public static void createUpdateVpnInterface(DataBroker dataBroker, String vpnName, String interfaceName,
             IpPrefix ifPrefix, MacAddress macAddress, boolean primary, IpPrefix gwIpAddress) {
+        WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
+        createUpdateVpnInterface(vpnName, interfaceName, ifPrefix, macAddress, primary, gwIpAddress, tx);
+        MdsalUtils.commitTransaction(tx);
+    }
+
+    public static void createUpdateVpnInterface(String vpnName, String interfaceName, IpPrefix ifPrefix,
+            MacAddress macAddress, boolean primary, IpPrefix gwIpAddress, WriteTransaction tx) {
         synchronized (interfaceName.intern()) {
             String ipAddress = null;
             String nextHopIp = null;
             if (primary) {
-                ipAddress = getPrefixFromSubnet(MefUtils.ipPrefixToString(ifPrefix));
+                ipAddress = getPrefixFromSubnet(ipPrefixToString(ifPrefix));
             } else {
-                ipAddress = MefUtils.ipPrefixToString(ifPrefix);
-                nextHopIp = getIpAddressFromPrefix(MefUtils.ipPrefixToString(gwIpAddress));
+                ipAddress = ipPrefixToString(ifPrefix);
+                nextHopIp = getIpAddressFromPrefix(ipPrefixToString(gwIpAddress));
             }
 
             Adjacencies adjancencies = buildInterfaceAdjacency(ipAddress, macAddress, primary, nextHopIp);
             VpnInterfaceBuilder einterfaceBuilder = createVpnInterface(vpnName, interfaceName, adjancencies);
 
-            MdsalUtils.syncUpdate(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                    getVpnInterfaceInstanceIdentifier(interfaceName), einterfaceBuilder.build());
+            tx.merge(LogicalDatastoreType.CONFIGURATION, getVpnInterfaceInstanceIdentifier(interfaceName),
+                    einterfaceBuilder.build());
         }
     }
 
@@ -148,26 +161,37 @@ public class NetvirtVpnUtils {
 
     public static void createVpnPortFixedIp(DataBroker dataBroker, String vpnName, String portName, IpPrefix ipAddress,
             MacAddress macAddress) {
-        String fixedIpPrefix = MefUtils.ipPrefixToString(ipAddress);
+        String fixedIpPrefix = ipPrefixToString(ipAddress);
         String fixedIp = getIpAddressFromPrefix(fixedIpPrefix);
-        createVpnPortFixedIp(dataBroker, vpnName, portName, fixedIp, macAddress);
+
+        WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
+        createVpnPortFixedIp(vpnName, portName, fixedIp, macAddress, tx);
+        MdsalUtils.commitTransaction(tx);
     }
 
-    public static void createVpnPortFixedIp(DataBroker dataBroker, String vpnName, String portName, IpAddress ipAddress,
-            MacAddress macAddress) {
-        String fixedIp = MefUtils.ipAddressToString(ipAddress);
-        createVpnPortFixedIp(dataBroker, vpnName, portName, fixedIp, macAddress);
+    /*
+     * public static void createVpnPortFixedIp(DataBroker dataBroker, String
+     * vpnName, String portName, IpAddress ipAddress, MacAddress macAddress) {
+     * String fixedIp = MefInterfaceUtils.ipAddressToString(ipAddress);
+     * createVpnPortFixedIp(dataBroker, vpnName, portName, fixedIp, macAddress);
+     * }
+     */
+    public static void createVpnPortFixedIp(String vpnName, String portName, IpPrefix ipAddress, MacAddress macAddress,
+            WriteTransaction tx) {
+        String fixedIpPrefix = ipPrefixToString(ipAddress);
+        String fixedIp = getIpAddressFromPrefix(fixedIpPrefix);
+        createVpnPortFixedIp(vpnName, portName, fixedIp, macAddress, tx);
     }
 
-    public static void createVpnPortFixedIp(DataBroker dataBroker, String vpnName, String portName, String fixedIp,
-            MacAddress macAddress) {
+    private static void createVpnPortFixedIp(String vpnName, String portName, String fixedIp, MacAddress macAddress,
+            WriteTransaction tx) {
         synchronized ((vpnName + fixedIp).intern()) {
             InstanceIdentifier<VpnPortipToPort> id = buildVpnPortipToPortIdentifier(vpnName, fixedIp);
             VpnPortipToPortBuilder builder = new VpnPortipToPortBuilder()
                     .setKey(new VpnPortipToPortKey(fixedIp, vpnName)).setVpnName(vpnName).setPortFixedip(fixedIp)
                     .setPortName(portName).setMacAddress(macAddress.getValue()).setSubnetIp(true).setConfig(true)
                     .setLearnt(false);
-            MDSALUtil.syncWrite(dataBroker, LogicalDatastoreType.OPERATIONAL, id, builder.build());
+            tx.put(LogicalDatastoreType.OPERATIONAL, id, builder.build());
             logger.debug(
                     "Interface to fixedIp added: {}, vpn {}, interface {}, mac {} added to " + "VpnPortipToPort DS",
                     fixedIp, vpnName, portName, macAddress);
@@ -225,7 +249,7 @@ public class NetvirtVpnUtils {
         logger.info("Adding subnet {} {} to elan map", subnetId);
         createSubnetToNetworkMapping(dataBroker, subnetId, subnetId);
 
-        String subnetIp = getSubnetFromPrefix(MefUtils.ipPrefixToString(subnetIpPrefix));
+        String subnetIp = getSubnetFromPrefix(ipPrefixToString(subnetIpPrefix));
         logger.info("Adding subnet {} {} to vpn {}", subnetName, subnetIp, vpnName);
         updateSubnetNode(dataBroker, new Uuid(vpnName), subnetId, subnetIp);
 
@@ -317,9 +341,14 @@ public class NetvirtVpnUtils {
         return prefix.split(IP_MUSK_SEPARATOR)[1];
     }
 
-    private static String getSubnetFromPrefix(String prefix) {
+    public static String getSubnetFromPrefix(String prefix) {
         SubnetInfo subnet = new SubnetUtils(prefix).getInfo();
         return subnet.getNetworkAddress() + IP_MUSK_SEPARATOR + getMaskFromPrefix(prefix);
+    }
+
+    public static String getSubnetFromPrefix(IpPrefix prefix) {
+        String prefixStr = ipPrefixToString(prefix);
+        return getSubnetFromPrefix(prefixStr);
     }
 
     private static String getPrefixFromSubnet(String prefix) {
@@ -331,16 +360,6 @@ public class NetvirtVpnUtils {
         return getUUidFromString(ELAN_PREFIX + portName);
     }
 
-    public static String getInterfaceNameForVlan(String interfaceName, Integer vlan) {
-        final StringBuilder s = new StringBuilder();
-        s.append(interfaceName);
-        if (vlan != null) {
-            s.append(VLAN_SEPARATOR).append(vlan);
-        }
-        s.append(TRUNK_SUFFIX);
-        return getUUidFromString(s.toString());
-    }
-
     public static String getUUidFromString(String key) {
         return java.util.UUID.nameUUIDFromBytes(key.getBytes()).toString();
     }
@@ -348,7 +367,7 @@ public class NetvirtVpnUtils {
     public static MacAddress resolveGwMac(DataBroker dataBroker, OdlArputilService arpUtilService, String vpnName,
             IpPrefix srcIpPrefix, IpAddress dstIpAddress, String interf) {
 
-        String srcTpAddressStr = getIpAddressFromPrefix(MefUtils.ipPrefixToString(srcIpPrefix));
+        String srcTpAddressStr = getIpAddressFromPrefix(ipPrefixToString(srcIpPrefix));
         IpAddress srcIpAddress = new IpAddress(srcTpAddressStr.toCharArray());
 
         if (srcIpAddress == null || dstIpAddress == null) {
@@ -389,24 +408,33 @@ public class NetvirtVpnUtils {
         while (retries > 0) {
             logger.info("Waiting for ARP reply from dstIp {} take {}", dstIpAddress, MaxRetries - retries + 1);
             InstanceIdentifier<VpnPortipToPort> optionalPortIpId = buildVpnPortipToPortIdentifier(vpnName,
-                    MefUtils.ipAddressToString(dstIpAddress));
+                    ipAddressToString(dstIpAddress));
             Optional<VpnPortipToPort> optionalPortIp = MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL,
                     optionalPortIpId);
 
             if (optionalPortIp.isPresent()) {
                 return new MacAddress(optionalPortIp.get().getMacAddress());
             } else {
-                sleep();
+                NetvirtUtils.safeSleep();
             }
             retries--;
         }
         return null;
     }
 
-    private static void sleep() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
+    private static String ipPrefixToString(IpPrefix ipAddress) {
+        if (ipAddress.getIpv4Prefix() != null) {
+            return ipAddress.getIpv4Prefix().getValue();
         }
+
+        return ipAddress.getIpv6Prefix().getValue();
+    }
+
+    private static String ipAddressToString(IpAddress ipAddress) {
+        if (ipAddress.getIpv4Address() != null) {
+            return ipAddress.getIpv4Address().getValue();
+        }
+
+        return ipAddress.getIpv6Address().getValue();
     }
 }
