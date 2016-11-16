@@ -6,6 +6,7 @@ module mef-interfaces {
   import mef-types { prefix mef-types; }
   import mef-global { prefix mef-global; }
   import mef-topology { prefix mef-topology; }
+  import yang-ext {prefix ext; revision-date "2013-07-09";}
 
   import opendaylight-l2-types { prefix ethertype; }
   // revision-date "2013-08-27";
@@ -881,4 +882,18 @@ module mef-interfaces {
       }
     }
   }
+  
+  augment "/mef-interfaces:mef-interfaces/mef-interfaces:unis/mef-interfaces:uni" {
+    ext:augment-identifier "port-vlan-mapping";
+    list vlan-to-port {
+      key "vlan";
+      leaf vlan {
+        type mef-types:vlan-id-or-none-type;
+      }
+      leaf vlan-port-id {
+        type string;
+      }
+    }
+  }
+  
 }
