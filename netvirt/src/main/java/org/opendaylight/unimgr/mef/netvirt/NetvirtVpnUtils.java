@@ -17,11 +17,13 @@ import org.apache.commons.net.util.SubnetUtils;
 import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.genius.mdsalutil.MDSALUtil;
 import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.VpnInstances;
 import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.VpnInterfaces;
 import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.af.config.VpnTargetsBuilder;
+import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.af.config.vpntargets.VpnTarget;
 import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.instances.VpnInstance;
 import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.instances.VpnInstanceBuilder;
 import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.instances.VpnInstanceKey;
@@ -45,9 +47,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.Adj
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.AdjacenciesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.Adjacency;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.AdjacencyBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.AdjacencyKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.NetworkMaps;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.NeutronVpnPortipPortData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.SubnetAddedToVpnBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.SubnetDeletedFromVpnBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.Subnetmaps;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.networkmaps.NetworkMap;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.networkmaps.NetworkMapBuilder;
@@ -66,65 +70,72 @@ import com.google.common.base.Optional;
 public class NetvirtVpnUtils {
     private static final Logger logger = LoggerFactory.getLogger(NetvirtVpnUtils.class);
     private final static String ELAN_PREFIX = "elan.";
-    private final static String TRUNK_SUFFIX = "-trunk";
-    private final static String VLAN_SEPARATOR = ".";
     private final static String IP_ADDR_SUFFIX = "/32";
     private final static String IP_MUSK_SEPARATOR = "/";
-    private final static int MaxRetries = 10;
 
     public static void createVpnInstance(DataBroker dataBroker, String instanceName) {
+        WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
+        createVpnInstance(instanceName, tx);
+        MdsalUtils.commitTransaction(tx);
+    }
+
+    public static void createVpnInstance(String instanceName, WriteTransaction tx) {
         VpnInstanceBuilder builder = new VpnInstanceBuilder();
         builder.setVpnInstanceName(instanceName);
         Ipv4FamilyBuilder ipv4FamilyBuilder = new Ipv4FamilyBuilder();
-        ipv4FamilyBuilder.setVpnTargets(new VpnTargetsBuilder().build());
+        VpnTargetsBuilder vpnTargetsB = new VpnTargetsBuilder();
+        vpnTargetsB.setVpnTarget(new ArrayList<VpnTarget>());
+        ipv4FamilyBuilder.setVpnTargets(vpnTargetsB.build());
+
         // WA till netvirt will allow creation of VPN without RD
         UUID vpnId = UUID.fromString(instanceName);
         String rd = String.valueOf(Math.abs(vpnId.getLeastSignificantBits()));
         ipv4FamilyBuilder.setRouteDistinguisher(rd);
         builder.setIpv4Family(ipv4FamilyBuilder.build());
 
-        MdsalUtils.syncUpdate(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                getVpnInstanceInstanceIdentifier(instanceName), builder.build());
+        tx.put(LogicalDatastoreType.CONFIGURATION, getVpnInstanceInstanceIdentifier(instanceName), builder.build());
+    }
+
+    public static void removeVpnInstance(String instanceName, WriteTransaction tx) {
+        tx.delete(LogicalDatastoreType.CONFIGURATION, getVpnInstanceInstanceIdentifier(instanceName));
+    }
+
+    private static InstanceIdentifier<VpnInstance> getVpnInstanceInstanceIdentifier(String instanceName) {
+        return InstanceIdentifier.builder(VpnInstances.class).child(VpnInstance.class, new VpnInstanceKey(instanceName))
+                .build();
     }
 
     public static void createUpdateVpnInterface(DataBroker dataBroker, String vpnName, String interfaceName,
-            IpPrefix ifPrefix, MacAddress macAddress, boolean primary, IpPrefix gwIpAddress) {
+            String ifAddr, String macAddress, boolean primary, String gwIpAddress) {
+        WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
+        createUpdateVpnInterface(vpnName, interfaceName, ifAddr, macAddress, primary, gwIpAddress, tx);
+        MdsalUtils.commitTransaction(tx);
+    }
+
+    public static void createUpdateVpnInterface(String vpnName, String interfaceName, IpPrefix ifPrefix,
+            String macAddress, boolean primary, IpPrefix gwIpAddress, WriteTransaction tx) {
         synchronized (interfaceName.intern()) {
             String ipAddress = null;
             String nextHopIp = null;
             if (primary) {
-                ipAddress = getPrefixFromSubnet(MefUtils.ipPrefixToString(ifPrefix));
+                ipAddress = getAddressFromSubnet(ipPrefixToString(ifPrefix));
             } else {
-                ipAddress = MefUtils.ipPrefixToString(ifPrefix);
-                nextHopIp = getIpAddressFromPrefix(MefUtils.ipPrefixToString(gwIpAddress));
+                ipAddress = ipPrefixToString(ifPrefix);
+                nextHopIp = getIpAddressFromPrefix(ipPrefixToString(gwIpAddress));
             }
-
-            Adjacencies adjancencies = buildInterfaceAdjacency(ipAddress, macAddress, primary, nextHopIp);
-            VpnInterfaceBuilder einterfaceBuilder = createVpnInterface(vpnName, interfaceName, adjancencies);
-
-            MdsalUtils.syncUpdate(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                    getVpnInterfaceInstanceIdentifier(interfaceName), einterfaceBuilder.build());
+            createUpdateVpnInterface(vpnName, interfaceName, ipAddress, macAddress, primary, nextHopIp, tx);
         }
     }
 
-    private static Adjacencies buildInterfaceAdjacency(String ipAddress, MacAddress macAddress, boolean primary,
-            String nextHopIp) {
-        AdjacenciesBuilder builder = new AdjacenciesBuilder();
-        List<Adjacency> list = new ArrayList<>();
+    public static void createUpdateVpnInterface(String vpnName, String interfaceName, String ipAddress,
+            String  macAddress, boolean primary, String nextHopIp, WriteTransaction tx) {
+        synchronized (interfaceName.intern()) {
+            Adjacencies adjancencies = buildInterfaceAdjacency(ipAddress, macAddress, primary, nextHopIp);
+            VpnInterfaceBuilder einterfaceBuilder = createVpnInterface(vpnName, interfaceName, adjancencies);
 
-        AdjacencyBuilder aBuilder = new AdjacencyBuilder();
-        aBuilder.setIpAddress(ipAddress);
-        if (macAddress != null) {
-            aBuilder.setMacAddress(macAddress.getValue());
+            tx.merge(LogicalDatastoreType.CONFIGURATION, getVpnInterfaceInstanceIdentifier(interfaceName),
+                    einterfaceBuilder.build());
         }
-        aBuilder.setPrimaryAdjacency(primary);
-        if (nextHopIp != null) {
-            aBuilder.setNextHopIpList(Arrays.asList(nextHopIp));
-        }
-        list.add(aBuilder.build());
-
-        builder.setAdjacency(list);
-        return builder.build();
     }
 
     private static VpnInterfaceBuilder createVpnInterface(String instanceName, String interfaceName,
@@ -136,9 +147,66 @@ public class NetvirtVpnUtils {
         return einterfaceBuilder;
     }
 
-    private static InstanceIdentifier<VpnInstance> getVpnInstanceInstanceIdentifier(String instanceName) {
-        return InstanceIdentifier.builder(VpnInstances.class).child(VpnInstance.class, new VpnInstanceKey(instanceName))
-                .build();
+    private static Adjacencies buildInterfaceAdjacency(String ipAddress, String macAddress, boolean primary,
+            String nextHopIp) {
+        AdjacenciesBuilder builder = new AdjacenciesBuilder();
+        List<Adjacency> list = new ArrayList<>();
+
+        AdjacencyBuilder aBuilder = new AdjacencyBuilder();
+        aBuilder.setIpAddress(ipAddress);
+        if (macAddress != null) {
+            aBuilder.setMacAddress(macAddress);
+        }
+        aBuilder.setPrimaryAdjacency(primary);
+        if (nextHopIp != null) {
+            aBuilder.setNextHopIpList(Arrays.asList(nextHopIp));
+        }
+        list.add(aBuilder.build());
+
+        builder.setAdjacency(list);
+        return builder.build();
+    }
+
+    public static void removeVpnInterface(String interfaceName, WriteTransaction tx) {
+        synchronized (interfaceName.intern()) {
+            tx.delete(LogicalDatastoreType.CONFIGURATION, getVpnInterfaceInstanceIdentifier(interfaceName));
+        }
+    }
+
+    public static void removeVpnInterfaceAdjacencies(DataBroker dataBroker, String vpnName, String interfaceName) {
+        AdjacenciesBuilder builder = new AdjacenciesBuilder();
+        List<Adjacency> list = new ArrayList<>();
+        builder.setAdjacency(list);
+        VpnInterfaceBuilder einterfaceBuilder = createVpnInterface(vpnName, interfaceName, builder.build());
+
+        MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION,
+                getVpnInterfaceInstanceIdentifier(interfaceName), einterfaceBuilder.build());
+
+    }
+
+    public static void removeVpnInterfaceAdjacency(DataBroker dataBroker, String interfaceName, IpPrefix ifPrefix) {
+        WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
+        String ipAddress = ipPrefixToString(ifPrefix);
+        removeVpnInterfaceAdjacency(interfaceName, ipAddress, tx);
+        MdsalUtils.commitTransaction(tx);
+    }
+
+    public static void removeVpnInterfaceAdjacency(DataBroker dataBroker, String interfaceName, IpAddress ifAddress) {
+        WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
+        String ifAddressStr = getAddressFromSubnet(ipAddressToString(ifAddress));
+        removeVpnInterfaceAdjacency(interfaceName, ifAddressStr, tx);
+        MdsalUtils.commitTransaction(tx);
+    }
+
+    private static void removeVpnInterfaceAdjacency(String interfaceName, String ipAddress, WriteTransaction tx) {
+        synchronized (interfaceName.intern()) {
+
+            InstanceIdentifier<Adjacency> adjacencyIdentifier = InstanceIdentifier.builder(VpnInterfaces.class)
+                    .child(VpnInterface.class, new VpnInterfaceKey(interfaceName)).augmentation(Adjacencies.class)
+                    .child(Adjacency.class, new AdjacencyKey(ipAddress)).build();
+
+            tx.delete(LogicalDatastoreType.CONFIGURATION, adjacencyIdentifier);
+        }
     }
 
     private static InstanceIdentifier<VpnInterface> getVpnInterfaceInstanceIdentifier(String interfaceName) {
@@ -148,41 +216,113 @@ public class NetvirtVpnUtils {
 
     public static void createVpnPortFixedIp(DataBroker dataBroker, String vpnName, String portName, IpPrefix ipAddress,
             MacAddress macAddress) {
-        String fixedIpPrefix = MefUtils.ipPrefixToString(ipAddress);
+        String fixedIpPrefix = ipPrefixToString(ipAddress);
         String fixedIp = getIpAddressFromPrefix(fixedIpPrefix);
-        createVpnPortFixedIp(dataBroker, vpnName, portName, fixedIp, macAddress);
+
+        WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
+        createVpnPortFixedIp(vpnName, portName, fixedIp, macAddress, tx);
+        MdsalUtils.commitTransaction(tx);
     }
 
-    public static void createVpnPortFixedIp(DataBroker dataBroker, String vpnName, String portName, IpAddress ipAddress,
-            MacAddress macAddress) {
-        String fixedIp = MefUtils.ipAddressToString(ipAddress);
-        createVpnPortFixedIp(dataBroker, vpnName, portName, fixedIp, macAddress);
+    public static void createVpnPortFixedIp(String vpnName, String portName, IpPrefix ipAddress, MacAddress macAddress,
+            WriteTransaction tx) {
+        String fixedIpPrefix = ipPrefixToString(ipAddress);
+        String fixedIp = getIpAddressFromPrefix(fixedIpPrefix);
+        createVpnPortFixedIp(vpnName, portName, fixedIp, macAddress, tx);
     }
 
-    public static void createVpnPortFixedIp(DataBroker dataBroker, String vpnName, String portName, String fixedIp,
-            MacAddress macAddress) {
+    private static void createVpnPortFixedIp(String vpnName, String portName, String fixedIp, MacAddress macAddress,
+            WriteTransaction tx) {
         synchronized ((vpnName + fixedIp).intern()) {
-            InstanceIdentifier<VpnPortipToPort> id = buildVpnPortipToPortIdentifier(vpnName, fixedIp);
+            InstanceIdentifier<VpnPortipToPort> id = getVpnPortipToPortIdentifier(vpnName, fixedIp);
             VpnPortipToPortBuilder builder = new VpnPortipToPortBuilder()
                     .setKey(new VpnPortipToPortKey(fixedIp, vpnName)).setVpnName(vpnName).setPortFixedip(fixedIp)
                     .setPortName(portName).setMacAddress(macAddress.getValue()).setSubnetIp(true).setConfig(true)
                     .setLearnt(false);
-            MDSALUtil.syncWrite(dataBroker, LogicalDatastoreType.OPERATIONAL, id, builder.build());
+            tx.put(LogicalDatastoreType.OPERATIONAL, id, builder.build());
             logger.debug(
                     "Interface to fixedIp added: {}, vpn {}, interface {}, mac {} added to " + "VpnPortipToPort DS",
                     fixedIp, vpnName, portName, macAddress);
         }
     }
 
-    static InstanceIdentifier<NetworkMap> buildNetworkMapIdentifier(Uuid networkId) {
-        InstanceIdentifier<NetworkMap> id = InstanceIdentifier.builder(NetworkMaps.class)
-                .child(NetworkMap.class, new NetworkMapKey(networkId)).build();
-        return id;
+    public static VpnPortipToPort getVpnPortFixedIp(DataBroker dataBroker, String vpnName, String fixedIp) {
+        InstanceIdentifier<VpnPortipToPort> id = getVpnPortipToPortIdentifier(vpnName, fixedIp);
+        Optional<VpnPortipToPort> opt = MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, id);
+        return opt != null && opt.isPresent() ? opt.get() : null;
+    }
+
+    public static void removeVpnPortFixedIp(String vpnName, IpPrefix ipAddress, WriteTransaction tx) {
+        String fixedIpPrefix = ipPrefixToString(ipAddress);
+        String fixedIp = getIpAddressFromPrefix(fixedIpPrefix);
+        InstanceIdentifier<VpnPortipToPort> id = getVpnPortipToPortIdentifier(vpnName, fixedIp);
+        tx.delete(LogicalDatastoreType.OPERATIONAL, id);
+    }
+
+    public static void addDirectSubnetToVpn(DataBroker dataBroker,
+            final NotificationPublishService notificationPublishService, String vpnName, String subnetName,
+            IpPrefix subnetIpPrefix, String interfaceName) {
+        InstanceIdentifier<ElanInstance> elanIdentifierId = InstanceIdentifier.builder(ElanInstances.class)
+                .child(ElanInstance.class, new ElanInstanceKey(subnetName)).build();
+        Optional<ElanInstance> elanInstance = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION,
+                elanIdentifierId);
+        if (!elanInstance.isPresent()) {
+            logger.error("Trying to add invalid elan {} to vpn {}", subnetName, vpnName);
+            return;
+        }
+        Long elanTag = elanInstance.get().getElanTag() != null ? elanInstance.get().getElanTag()
+                : elanInstance.get().getSegmentationId();
+
+        Uuid subnetId = new Uuid(subnetName);
+        logger.info("Adding subnet {} {} to elan map", subnetId, subnetId);
+        createSubnetToNetworkMapping(dataBroker, subnetId, subnetId);
+
+        String subnetIp = getSubnetFromPrefix(ipPrefixToString(subnetIpPrefix));
+        logger.info("Adding subnet {} {} to vpn {}", subnetName, subnetIp, vpnName);
+        updateSubnetNode(dataBroker, new Uuid(vpnName), subnetId, subnetIp);
+
+        logger.info("Adding port {} to subnet {}", interfaceName, subnetName);
+        updateSubnetmapNodeWithPorts(dataBroker, subnetId, new Uuid(interfaceName), null);
+
+        logger.info("Publish subnet {}", subnetName);
+        publishSubnetAddNotification(notificationPublishService, subnetId, subnetIp, vpnName, elanTag);
+        logger.info("Finished Working on subnet {}", subnetName);
+
+    }
+
+    public static void removeDirectSubnetFromVpn(DataBroker dataBroker,
+            final NotificationPublishService notificationPublishService, String vpnName, String subnetName,
+            String interfaceName) {
+        InstanceIdentifier<ElanInstance> elanIdentifierId = InstanceIdentifier.builder(ElanInstances.class)
+                .child(ElanInstance.class, new ElanInstanceKey(subnetName)).build();
+        Optional<ElanInstance> elanInstance = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION,
+                elanIdentifierId);
+        if (!elanInstance.isPresent()) {
+            logger.error("Trying to add invalid elan {} to vpn {}", subnetName, vpnName);
+            return;
+        }
+        Long elanTag = elanInstance.get().getElanTag() != null ? elanInstance.get().getElanTag()
+                : elanInstance.get().getSegmentationId();
+        Uuid subnetId = new Uuid(subnetName);
+
+        logger.info("Publish subnet remove {}", subnetName);
+        publishSubnetRemoveNotification(notificationPublishService, subnetId, vpnName, elanTag);
+
+        logger.info("Removing port {} from subnet {}", interfaceName, subnetName);
+        updateSubnetmapNodeWithPorts(dataBroker, subnetId, null, new Uuid(interfaceName));
+
+        logger.info("Removing subnet {} from vpn {}", subnetName, vpnName);
+        removeSubnetNode(dataBroker, new Uuid(vpnName));
+
+        logger.info("Removing subnet {} to elan map", subnetId);
+        removeSubnetToNetworkMapping(dataBroker, subnetId);
+
+        logger.info("Finished Working on subnet {}", subnetName);
     }
 
     private static void createSubnetToNetworkMapping(DataBroker dataBroker, Uuid subnetId, Uuid networkId) {
-        InstanceIdentifier<NetworkMap> networkMapIdentifier = buildNetworkMapIdentifier(networkId);
-        Optional<NetworkMap> optionalNetworkMap = MDSALUtil.read(dataBroker, LogicalDatastoreType.CONFIGURATION,
+        InstanceIdentifier<NetworkMap> networkMapIdentifier = getNetworkMapIdentifier(networkId);
+        Optional<NetworkMap> optionalNetworkMap = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION,
                 networkMapIdentifier);
         NetworkMapBuilder nwMapBuilder = null;
         if (optionalNetworkMap.isPresent()) {
@@ -202,40 +342,10 @@ public class NetvirtVpnUtils {
                 networkId.getValue());
     }
 
-    private static InstanceIdentifier<VpnPortipToPort> buildVpnPortipToPortIdentifier(String vpnName, String fixedIp) {
-        InstanceIdentifier<VpnPortipToPort> id = InstanceIdentifier.builder(NeutronVpnPortipPortData.class)
-                .child(VpnPortipToPort.class, new VpnPortipToPortKey(fixedIp, vpnName)).build();
-        return id;
-    }
-
-    public static void addDirectSubnetToVpn(DataBroker dataBroker,
-            final NotificationPublishService notificationPublishService, String vpnName, String subnetName,
-            IpPrefix subnetIpPrefix, String interfaceName) {
-        InstanceIdentifier<ElanInstance> elanIdentifierId = InstanceIdentifier.builder(ElanInstances.class)
-                .child(ElanInstance.class, new ElanInstanceKey(subnetName)).build();
-        Optional<ElanInstance> elanInstance = MDSALUtil.read(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                elanIdentifierId);
-        if (!elanInstance.isPresent()) {
-            logger.error("Trying to add invalid elan {} to vpn {}", subnetName, vpnName);
-            return;
-        }
-        Long elanTag = elanInstance.get().getElanTag();
-
-        Uuid subnetId = new Uuid(subnetName);
-        logger.info("Adding subnet {} {} to elan map", subnetId);
-        createSubnetToNetworkMapping(dataBroker, subnetId, subnetId);
-
-        String subnetIp = getSubnetFromPrefix(MefUtils.ipPrefixToString(subnetIpPrefix));
-        logger.info("Adding subnet {} {} to vpn {}", subnetName, subnetIp, vpnName);
-        updateSubnetNode(dataBroker, new Uuid(vpnName), subnetId, subnetIp);
-
-        logger.info("Adding port {} to subnet {}", interfaceName, subnetName);
-        updateSubnetmapNodeWithPorts(dataBroker, subnetId, new Uuid(interfaceName));
-
-        logger.info("Publish subnet {}", subnetName);
-        publishSubnetAddNotification(notificationPublishService, subnetId, subnetIp, vpnName, elanTag);
-        logger.info("Finished Working on subnet {}", subnetName);
-
+    private static void removeSubnetToNetworkMapping(DataBroker dataBroker, Uuid networkId) {
+        InstanceIdentifier<NetworkMap> networkMapIdentifier = getNetworkMapIdentifier(networkId);
+        MDSALUtil.syncDelete(dataBroker, LogicalDatastoreType.CONFIGURATION, networkMapIdentifier);
+        logger.debug("Deleted subnet-network mapping for  network {}", networkId.getValue());
     }
 
     protected static void updateSubnetNode(DataBroker dataBroker, Uuid vpnId, Uuid subnetId, String subnetIp) {
@@ -245,7 +355,7 @@ public class NetvirtVpnUtils {
                 .child(Subnetmap.class, new SubnetmapKey(subnetId)).build();
 
         synchronized (subnetId.getValue().intern()) {
-            Optional<Subnetmap> sn = MDSALUtil.read(dataBroker, LogicalDatastoreType.CONFIGURATION, id);
+            Optional<Subnetmap> sn = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, id);
             if (sn.isPresent()) {
                 builder = new SubnetmapBuilder(sn.get());
                 logger.debug("updating existing subnetmap node for subnet ID {}", subnetId.getValue());
@@ -264,22 +374,43 @@ public class NetvirtVpnUtils {
         }
     }
 
-    private static void updateSubnetmapNodeWithPorts(DataBroker dataBroker, Uuid subnetId, Uuid portId) {
+    protected static void removeSubnetNode(DataBroker dataBroker, Uuid subnetId) {
+        InstanceIdentifier<Subnetmap> id = InstanceIdentifier.builder(Subnetmaps.class)
+                .child(Subnetmap.class, new SubnetmapKey(subnetId)).build();
+
+        synchronized (subnetId.getValue().intern()) {
+            logger.debug("Deleting subnetMap node: {} ", subnetId.getValue());
+            MDSALUtil.syncDelete(dataBroker, LogicalDatastoreType.CONFIGURATION, id);
+        }
+    }
+
+    private static void updateSubnetmapNodeWithPorts(DataBroker dataBroker, Uuid subnetId, Uuid portIdToAdd,
+            Uuid portIdToRemove) {
         Subnetmap subnetmap = null;
         InstanceIdentifier<Subnetmap> id = InstanceIdentifier.builder(Subnetmaps.class)
                 .child(Subnetmap.class, new SubnetmapKey(subnetId)).build();
         synchronized (subnetId.getValue().intern()) {
-            Optional<Subnetmap> sn = MDSALUtil.read(dataBroker, LogicalDatastoreType.CONFIGURATION, id);
+            Optional<Subnetmap> sn = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, id);
             if (sn.isPresent()) {
                 SubnetmapBuilder builder = new SubnetmapBuilder(sn.get());
-                if (null != portId) {
+                if (null != portIdToAdd) {
                     List<Uuid> portList = builder.getPortList();
                     if (null == portList) {
                         portList = new ArrayList<>();
                     }
-                    portList.add(portId);
+                    if (portIdToAdd != null) {
+                        portList.add(portIdToAdd);
+                        logger.debug("Updating subnetmap node {} with port {}", subnetId.getValue(),
+                                portIdToAdd.getValue());
+
+                    }
+                    if (portIdToRemove != null) {
+                        portList.remove(portIdToRemove);
+                        logger.debug("Updating subnetmap node {} removing port {}", subnetId.getValue(),
+                                portIdToRemove.getValue());
+
+                    }
                     builder.setPortList(portList);
-                    logger.debug("Updating subnetmap node {} with port {}", subnetId.getValue(), portId.getValue());
                 }
                 subnetmap = builder.build();
                 MDSALUtil.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION, id, subnetmap);
@@ -289,11 +420,27 @@ public class NetvirtVpnUtils {
         }
     }
 
+    private static InstanceIdentifier<NetworkMap> getNetworkMapIdentifier(Uuid networkId) {
+        InstanceIdentifier<NetworkMap> id = InstanceIdentifier.builder(NetworkMaps.class)
+                .child(NetworkMap.class, new NetworkMapKey(networkId)).build();
+        return id;
+    }
+
+    private static InstanceIdentifier<VpnPortipToPort> getVpnPortipToPortIdentifier(String vpnName, String fixedIp) {
+        InstanceIdentifier<VpnPortipToPort> id = InstanceIdentifier.builder(NeutronVpnPortipPortData.class)
+                .child(VpnPortipToPort.class, new VpnPortipToPortKey(fixedIp, vpnName)).build();
+        return id;
+    }
+
+    public static InstanceIdentifier<VpnPortipToPort> getVpnPortipToPortIdentifier() {
+        return InstanceIdentifier.builder(NeutronVpnPortipPortData.class).child(VpnPortipToPort.class).build();
+    }
+
     private static void publishSubnetAddNotification(final NotificationPublishService notificationPublishService,
             Uuid subnetId, String subnetIp, String vpnName, Long elanTag) {
         SubnetAddedToVpnBuilder builder = new SubnetAddedToVpnBuilder();
 
-        logger.info("publish notification called");
+        logger.info("publish notification called for network creation");
 
         builder.setSubnetId(subnetId);
         builder.setSubnetIp(subnetIp);
@@ -309,65 +456,26 @@ public class NetvirtVpnUtils {
         }
     }
 
-    private static String getIpAddressFromPrefix(String prefix) {
-        return prefix.split(IP_MUSK_SEPARATOR)[0];
-    }
+    private static void publishSubnetRemoveNotification(final NotificationPublishService notificationPublishService,
+            Uuid subnetId, String vpnName, Long elanTag) {
+        SubnetDeletedFromVpnBuilder builder = new SubnetDeletedFromVpnBuilder();
 
-    private static String getMaskFromPrefix(String prefix) {
-        return prefix.split(IP_MUSK_SEPARATOR)[1];
-    }
+        logger.info("publish notification called for network deletion");
 
-    private static String getSubnetFromPrefix(String prefix) {
-        SubnetInfo subnet = new SubnetUtils(prefix).getInfo();
-        return subnet.getNetworkAddress() + IP_MUSK_SEPARATOR + getMaskFromPrefix(prefix);
-    }
+        builder.setSubnetId(subnetId);
+        builder.setVpnName(vpnName);
+        builder.setExternalVpn(true);
+        builder.setElanTag(elanTag);
 
-    private static String getPrefixFromSubnet(String prefix) {
-        String myAddress = getIpAddressFromPrefix(prefix);
-        return myAddress + IP_ADDR_SUFFIX;
-    }
-
-    public static String getElanNameForVpnPort(String portName) {
-        return getUUidFromString(ELAN_PREFIX + portName);
-    }
-
-    public static String getInterfaceNameForVlan(String interfaceName, Integer vlan) {
-        final StringBuilder s = new StringBuilder();
-        s.append(interfaceName);
-        if (vlan != null) {
-            s.append(VLAN_SEPARATOR).append(vlan);
+        try {
+            notificationPublishService.putNotification(builder.build());
+        } catch (InterruptedException e) {
+            logger.error("Fail to publish notification {}", builder, e);
+            throw new RuntimeException(e.getMessage());
         }
-        s.append(TRUNK_SUFFIX);
-        return getUUidFromString(s.toString());
     }
 
-    public static String getUUidFromString(String key) {
-        return java.util.UUID.nameUUIDFromBytes(key.getBytes()).toString();
-    }
-
-    public static MacAddress resolveGwMac(DataBroker dataBroker, OdlArputilService arpUtilService, String vpnName,
-            IpPrefix srcIpPrefix, IpAddress dstIpAddress, String interf) {
-
-        String srcTpAddressStr = getIpAddressFromPrefix(MefUtils.ipPrefixToString(srcIpPrefix));
-        IpAddress srcIpAddress = new IpAddress(srcTpAddressStr.toCharArray());
-
-        if (srcIpAddress == null || dstIpAddress == null) {
-            logger.error("Can't send ARP to srcIp {} dstIp {}", srcIpAddress, dstIpAddress);
-            throw new RuntimeException("Can't send ARP for dstIp " + dstIpAddress);
-        }
-
-        MacAddress macAddress = null;
-        int retries = MaxRetries;
-        while (retries > 0 && macAddress == null) {
-            logger.info("Sending ARP request to dstIp {} take {}", dstIpAddress, MaxRetries - retries + 1);
-            sendArpRequest(arpUtilService, srcIpAddress, dstIpAddress, interf);
-            macAddress = waitForArpReplyProcessing(dataBroker, vpnName, dstIpAddress, MaxRetries);
-            retries--;
-        }
-        return macAddress;
-    }
-
-    private static void sendArpRequest(OdlArputilService arpUtilService, IpAddress srcIpAddress, IpAddress dstIpAddress,
+    public static void sendArpRequest(OdlArputilService arpUtilService, IpAddress srcIpAddress, IpAddress dstIpAddress,
             String interf) {
         try {
             List<InterfaceAddress> interfaceAddresses = new ArrayList<>();
@@ -384,29 +492,50 @@ public class NetvirtVpnUtils {
         }
     }
 
-    public static MacAddress waitForArpReplyProcessing(DataBroker dataBroker, String vpnName, IpAddress dstIpAddress,
-            int retries) {
-        while (retries > 0) {
-            logger.info("Waiting for ARP reply from dstIp {} take {}", dstIpAddress, MaxRetries - retries + 1);
-            InstanceIdentifier<VpnPortipToPort> optionalPortIpId = buildVpnPortipToPortIdentifier(vpnName,
-                    MefUtils.ipAddressToString(dstIpAddress));
-            Optional<VpnPortipToPort> optionalPortIp = MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL,
-                    optionalPortIpId);
-
-            if (optionalPortIp.isPresent()) {
-                return new MacAddress(optionalPortIp.get().getMacAddress());
-            } else {
-                sleep();
-            }
-            retries--;
-        }
-        return null;
+    public static String getIpAddressFromPrefix(String prefix) {
+        return prefix.split(IP_MUSK_SEPARATOR)[0];
     }
 
-    private static void sleep() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
+    private static String getMaskFromPrefix(String prefix) {
+        return prefix.split(IP_MUSK_SEPARATOR)[1];
+    }
+
+    public static String getSubnetFromPrefix(String prefix) {
+        SubnetInfo subnet = new SubnetUtils(prefix).getInfo();
+        return subnet.getNetworkAddress() + IP_MUSK_SEPARATOR + getMaskFromPrefix(prefix);
+    }
+
+    public static String getSubnetFromPrefix(IpPrefix prefix) {
+        String prefixStr = ipPrefixToString(prefix);
+        return getSubnetFromPrefix(prefixStr);
+    }
+
+    private static String getAddressFromSubnet(String prefix) {
+        String myAddress = getIpAddressFromPrefix(prefix);
+        return myAddress + IP_ADDR_SUFFIX;
+    }
+
+    public static String getElanNameForVpnPort(String portName) {
+        return getUUidFromString(ELAN_PREFIX + portName);
+    }
+
+    public static String getUUidFromString(String key) {
+        return java.util.UUID.nameUUIDFromBytes(key.getBytes()).toString();
+    }
+
+    public static String ipPrefixToString(IpPrefix ipAddress) {
+        if (ipAddress.getIpv4Prefix() != null) {
+            return ipAddress.getIpv4Prefix().getValue();
         }
+
+        return ipAddress.getIpv6Prefix().getValue();
+    }
+
+    public static String ipAddressToString(IpAddress ipAddress) {
+        if (ipAddress.getIpv4Address() != null) {
+            return ipAddress.getIpv4Address().getValue();
+        }
+
+        return ipAddress.getIpv6Address().getValue();
     }
 }
