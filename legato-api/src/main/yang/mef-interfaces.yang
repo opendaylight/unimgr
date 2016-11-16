@@ -6,6 +6,7 @@ module mef-interfaces {
   import mef-types { prefix mef-types; }
   import mef-global { prefix mef-global; }
   import mef-topology { prefix mef-topology; }
+  import yang-ext {prefix ext; revision-date "2013-07-09";}
 
   import opendaylight-l2-types { prefix ethertype; }
   // revision-date "2013-08-27";
@@ -118,25 +119,11 @@ module mef-interfaces {
             leaf ip-uni-id {
               type mef-types:identifier45;
             }
-            leaf id {
-              type mef-types:identifier45;
-            }
             leaf ip-address {
               type inet:ip-prefix;
             }
             leaf vlan {
               type ethertype:vlan-id;
-            }
-            container subnets {
-              list subnet {
-                key "subnet";
-                leaf subnet {
-                  type inet:ip-prefix;
-                }
-                leaf gateway {
-                  type inet:ip-address;
-                }
-              }
             }
           }
         }
@@ -880,5 +867,39 @@ module mef-interfaces {
         }
       }
     }
+
+    container subnets {
+      list subnet {
+        key "uni-id ip-uni-id subnet";
+        leaf uni-id {
+          type leafref {
+            path "/mef-interfaces:mef-interfaces/mef-interfaces:unis/mef-interfaces:uni/mef-interfaces:uni-id"; 
+          }
+        }
+        leaf ip-uni-id {
+          type leafref {
+            path "/mef-interfaces:mef-interfaces/mef-interfaces:unis/mef-interfaces:uni/" +
+                 "mef-interfaces:ip-unis/mef-interfaces:ip-uni/mef-interfaces:ip-uni-id";
+          }
+        }
+        leaf subnet {type inet:ip-prefix;}
+        leaf gateway {type inet:ip-address;}
+      }
+    }
+
   }
+
+  augment "/mef-interfaces:mef-interfaces/mef-interfaces:unis/mef-interfaces:uni" {
+    ext:augment-identifier "port-vlan-mapping";
+    list vlan-to-port {
+      key "vlan";
+      leaf vlan {
+        type mef-types:vlan-id-or-none-type;
+      }
+      leaf vlan-port-id {
+        type string;
+      }
+    }
+  }
+  
 }

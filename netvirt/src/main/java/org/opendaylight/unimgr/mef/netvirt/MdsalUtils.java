@@ -98,4 +98,20 @@ public class MdsalUtils {
 
         return result;
     }
+    
+
+    public static WriteTransaction createTransaction(DataBroker dataBroker) {
+        WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
+        return tx;
+    }
+
+    public static void commitTransaction(WriteTransaction tx) {
+        try {
+            CheckedFuture<Void, TransactionCommitFailedException> futures = tx.submit();
+            futures.get();
+        } catch (Exception e) {
+            logger.error("failed to commit transaction due to exception ", e);
+        }
+    }
+
 }

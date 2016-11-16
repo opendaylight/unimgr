@@ -14,38 +14,42 @@ import java.util.List;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.subnets.Subnet;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.subnets.SubnetBuilder;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.ip.unis.IpUni;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.ip.unis.ip.uni.subnets.Subnet;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.IpvcVpn;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.IpvcVpnBuilder;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.Ipvc;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.VpnElans;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.VpnElansBuilder;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.Identifier45;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.unis.Uni;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpPrefix;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInterface.EtreeInterfaceType;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.arputil.rev160406.OdlArputilService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
     private static final Logger Log = LoggerFactory.getLogger(IpvcListener.class);
+    private final IUniPortManager uniPortManager;
     private ListenerRegistration<IpvcListener> ipvcListenerRegistration;
-    private final NotificationPublishService notificationPublishService;
-    private final OdlArputilService arpUtilService;
 
-    public IpvcListener(final DataBroker dataBroker, final NotificationPublishService notPublishService,
-            final OdlArputilService arputilService) {
+    public IpvcListener(final DataBroker dataBroker, final UniPortManager uniPortManager) {
         super(dataBroker);
-        this.notificationPublishService = notPublishService;
-        this.arpUtilService = arputilService;
+        this.uniPortManager = uniPortManager;
         registerListener();
     }
 
     public void registerListener() {
         try {
             final DataTreeIdentifier<Ipvc> dataTreeIid = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION,
-                    MefUtils.getIpvcInstanceIdentifier());
+                    MefServicesUtils.getIpvcsInstanceIdentifier());
             ipvcListenerRegistration = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
             Log.info("IpvcDataTreeChangeListener created and registered");
         } catch (final Exception e) {
@@ -85,18 +89,27 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
 
     private void addIpvc(DataTreeModification<Ipvc> newDataObject) {
         try {
+            WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
             Ipvc data = newDataObject.getRootNode().getDataAfter();
             String instanceName = data.getIpvcId().getValue();
             final String vpnName = NetvirtVpnUtils.getUUidFromString(instanceName);
+            InstanceIdentifier<Ipvc> ipvcId = newDataObject.getRootPath().getRootIdentifier();
+            synchronized (vpnName.intern()) {
+                Log.info("Adding vpn instance: " + instanceName);
+                NetvirtVpnUtils.createVpnInstance(vpnName, tx);
+                Log.info("Number of UNI's: " + data.getUnis().getUni().size());
 
-            Log.info("Adding vpn instance: " + instanceName);
-            NetvirtVpnUtils.createVpnInstance(dataBroker, vpnName);
-            Log.info("Number of UNI's: " + data.getUnis().getUni().size());
-
-
-            // Create elan interfaces
+                // Create elan/vpn interfaces
+                for (Uni uni : data.getUnis().getUni()) {
+                    createInterfaces(vpnName, uni, ipvcId, tx);
+                }
+            }
+            MdsalUtils.commitTransaction(tx);
             for (Uni uni : data.getUnis().getUni()) {
-                createInterfaces(vpnName, uni);
+                IpUni ipUni = MefInterfaceUtils.getIpUni(dataBroker, uni.getUniId(), uni.getIpUniId(),
+                        LogicalDatastoreType.CONFIGURATION);
+                createDirectSubnet(uni, ipUni);
+                assignExternalNetworks(uni, ipUni);
             }
         } catch (final Exception e) {
             Log.error("Add ipvc failed !", e);
@@ -136,7 +149,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
                 // Adding the new Uni which are presented in the updated List
                 if (updateUni.size() > 0) {
                     for (Uni uni : updateUni) {
-                        createInterfaces(vpnName, uni);
+                        // createInterfaces(original, uni);
                     }
                 }
             } else if (originalUni != null && !originalUni.isEmpty()) {
@@ -152,7 +165,6 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
     private void removeIpvc(DataTreeModification<Ipvc> removedDataObject) {
         try {
             Ipvc data = removedDataObject.getRootNode().getDataBefore();
-
             String instanceName = data.getIpvcId().getValue();
 
             for (Uni uni : data.getUnis().getUni()) {
@@ -166,61 +178,82 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
         }
     }
 
-    private void createInterfaces(Ipvc ipvc, Uni uni) {
-        String instanceName = ipvc.getIpvcId().getValue();
-        createInterfaces(instanceName, uni);
-    }
-
-    private void createInterfaces(String vpnName, Uni uniInService) {
+    private void createInterfaces(String vpnName, Uni uniInService, InstanceIdentifier<Ipvc> ipvcId,
+            WriteTransaction tx) {
         String uniId = uniInService.getUniId().getValue();
         String ipUniId = uniInService.getIpUniId().getValue();
-
-        Log.info("Adding/updating elan instance: " + uniId);
-
-        org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.Uni uni = IpvcUniUtils
-                .getUni(dataBroker, uniId);
+        org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.Uni uni = MefInterfaceUtils
+                .getUni(dataBroker, uniId, LogicalDatastoreType.OPERATIONAL);
         if (uni == null) {
-            Log.error("Couldn't find uni {} for ipvc-uni", uniId);
-            throw new UnsupportedOperationException();
+            String errorMessage = String.format("Couldn't find uni %s for ipvc", uniId);
+            Log.error(errorMessage);
+            throw new UnsupportedOperationException(errorMessage);
         }
-        IpUni ipUni = IpvcUniUtils.getIpUni(dataBroker, uniId, ipUniId);
-        Integer vlan = ipUni.getVlan() != null ? ipUni.getVlan().getValue() : null;
+        IpUni ipUni = MefInterfaceUtils.getIpUni(dataBroker, uniInService.getUniId(), uniInService.getIpUniId(),
+                LogicalDatastoreType.CONFIGURATION);
+        if (ipUni == null) {
+            String errorMessage = String.format("Couldn't find ipuni %s for uni %s", ipUniId, uniId);
+            Log.error(errorMessage);
+            throw new UnsupportedOperationException(errorMessage);
+        }
 
+        Long vlan = (ipUni.getVlan()) != null ? Long.valueOf(ipUni.getVlan().getValue()) : null;
         String elanName = NetvirtVpnUtils.getElanNameForVpnPort(uniId);
-        Log.info("Adding elan instance: " + elanName);
-        NetvirtUtils.updateElanInstance(dataBroker, elanName);
+        String interfaceName = createElanInterface(vpnName, ipvcId, uniId, elanName, vlan, tx);
+        createVpnInterface(vpnName, uni, ipUni, interfaceName, tx);
+        MefServicesUtils.setOperIpvcVpnElan(dataBroker, ipvcId, vpnName, uniInService.getUniId(),
+                uniInService.getIpUniId(), elanName, interfaceName, tx);
+    }
 
-        String interfaceName = NetvirtVpnUtils.getInterfaceNameForVlan(ipUniId, vlan);
-        Log.info("Adding trunk interface: " + interfaceName);
-        IpvcUniUtils.addUni(dataBroker, uniInService, interfaceName, vlan);
+    private void assignExternalNetworks(Uni uni, IpUni ipUni) {
+        // TODO Auto-generated method stub
+
+    }
+
+    private void createDirectSubnet(Uni uni, IpUni ipUni) {
+        IpPrefix uniIpPrefix = ipUni.getIpAddress();
+        String subnetIp = NetvirtVpnUtils.getSubnetFromPrefix(uniIpPrefix);
+        IpPrefix subnetPrefix = new IpPrefix(new Ipv4Prefix(subnetIp));
+        InstanceIdentifier<Subnet> path = MefInterfaceUtils.getSubnetInstanceIdentifier(uni.getUniId(),
+                ipUni.getIpUniId(), subnetPrefix);
+        SubnetBuilder subnet = new SubnetBuilder();
+        subnet.setUniId(uni.getUniId());
+        subnet.setIpUniId(ipUni.getIpUniId());
+        subnet.setSubnet(subnetPrefix);
+        MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION, path, subnet.build());
+
+    }
+
+    private String createElanInterface(String vpnName, InstanceIdentifier<Ipvc> ipvcId, String uniId, String elanName,
+            Long vlan, WriteTransaction tx) {
+        Log.info("Adding elan instance: " + elanName);
+        NetvirtUtils.updateElanInstance(elanName, tx);
+
+        Log.info("Added trunk interface for uni {} vlan: {}", uniId, vlan);
+        if (vlan != null) {
+            uniPortManager.addCeVlan(uniId, vlan);
+        }
+        String interfaceName = uniPortManager.getUniVlanInterface(uniId, vlan);
+        if (interfaceName == null) {
+            String errorMessage = String.format("Couldn't create  uni %s vlan interface %s", uniId, vlan);
+            Log.error(errorMessage);
+            throw new UnsupportedOperationException(errorMessage);
+        }
 
         Log.info("Adding elan interface: " + interfaceName);
-        NetvirtUtils.createInterface(dataBroker, elanName, interfaceName, EtreeInterfaceType.Root, false);
+        NetvirtUtils.createElanInterface(elanName, interfaceName, EtreeInterfaceType.Root, false, tx);
+        return interfaceName;
+    }
+
+    private void createVpnInterface(String vpnName,
+            org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.Uni uni,
+            IpUni ipUni, String interfaceName, WriteTransaction tx) {
 
         Log.info("Adding vpn interface: " + interfaceName);
-        NetvirtVpnUtils.createUpdateVpnInterface(dataBroker, vpnName, interfaceName, ipUni.getIpAddress(),
-                uni.getMacAddress(), true, null);
-        NetvirtVpnUtils.createVpnPortFixedIp(dataBroker, vpnName, interfaceName, ipUni.getIpAddress(),
-                uni.getMacAddress());
-
-        Log.info("Adding connected network for interface : " + interfaceName);
-        NetvirtVpnUtils.addDirectSubnetToVpn(dataBroker, notificationPublishService, vpnName, elanName,
-                ipUni.getIpAddress(), interfaceName);
-
-        if (ipUni != null && ipUni.getSubnets() != null && ipUni.getSubnets().getSubnet() != null) {
-            for (Subnet subnet : ipUni.getSubnets().getSubnet()) {
-                Log.info("Resolving MAC address for gateway: " + subnet.getGateway());
-                MacAddress gwMacAddress = NetvirtVpnUtils.resolveGwMac(dataBroker, arpUtilService, vpnName,
-                        ipUni.getIpAddress(), subnet.getGateway(), interfaceName); // trunk
-                if (gwMacAddress == null) {
-                    continue;
-                }
-                Log.info("update vpn interface: " + interfaceName);
-                NetvirtVpnUtils.createUpdateVpnInterface(dataBroker, vpnName, interfaceName, subnet.getSubnet(),
-                        gwMacAddress, false, ipUni.getIpAddress());
-            }
-        }
-        Log.info("Finished working on elan instance: " + uniId);
+        NetvirtVpnUtils.createUpdateVpnInterface(vpnName, interfaceName, ipUni.getIpAddress(), uni.getMacAddress(),
+                true, null, tx);
+        NetvirtVpnUtils.createVpnPortFixedIp(vpnName, interfaceName, ipUni.getIpAddress(), uni.getMacAddress(), tx);
+        Log.info("Finished working on vpn instance: " + vpnName);
     }
 
     private void removeElanInterface(String instanceName, Uni uni) {
