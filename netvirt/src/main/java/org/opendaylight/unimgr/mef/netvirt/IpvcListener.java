@@ -45,7 +45,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
     public void registerListener() {
         try {
             final DataTreeIdentifier<Ipvc> dataTreeIid = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION,
-                    MefUtils.getIpvcInstanceIdentifier());
+                    MefServicesUtils.getIpvcInstanceIdentifier());
             ipvcListenerRegistration = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
             Log.info("IpvcDataTreeChangeListener created and registered");
         } catch (final Exception e) {
@@ -186,7 +186,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
         IpvcUniUtils.addUni(dataBroker, uniInService, interfaceName, vlan);
 
         Log.info("Adding elan interface: " + interfaceName);
-        NetvirtUtils.createInterface(dataBroker, elanName, interfaceName, EtreeInterfaceType.Root, false);
+        NetvirtUtils.createElanInterface(dataBroker, elanName, interfaceName, EtreeInterfaceType.Root, false);
 
         Log.info("Adding vpn interface: " + interfaceName);
         NetvirtVpnUtils.createUpdateVpnInterface(dataBroker, vpnName, interfaceName, ipUni.getIpAddress(),
