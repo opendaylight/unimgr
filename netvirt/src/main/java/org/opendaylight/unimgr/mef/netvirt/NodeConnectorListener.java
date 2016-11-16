@@ -20,11 +20,13 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.genius.interfacemanager.globals.IfmConstants;
 import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.Uni;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.UniBuilder;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.PhysicalLayersBuilder;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.physical.layers.LinksBuilder;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.physical.layers.links.Link;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.physical.layers.links.LinkBuilder;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.topology.rev150526.mef.topology.devices.device.interfaces.Interface;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.topology.rev150526.mef.topology.devices.device.interfaces.InterfaceBuilder;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.Identifier45;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
@@ -35,7 +37,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.config.rev150710.ElanConfig;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.config.rev150710.ElanConfigBuilder;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,11 +47,12 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
 
     private static final Logger log = LoggerFactory.getLogger(NodeConnectorListener.class);
     private static boolean generateMac = false;
-    private static boolean handleRemovedNodeConnectors = false;
-    private ListenerRegistration<NodeConnectorListener> evcListenerRegistration;
+    private final UniPortManager uniPortManager;
+    private ListenerRegistration<NodeConnectorListener> nodeConnectorListenerRegistration;
 
-    public NodeConnectorListener(final DataBroker dataBroker, boolean generateMac) {
+    public NodeConnectorListener(final DataBroker dataBroker, final UniPortManager uniPortManager, final boolean generateMac) {
         super(dataBroker);
+        this.uniPortManager = uniPortManager;
         NodeConnectorListener.generateMac = generateMac;
         registerListener();
     }
@@ -59,7 +61,7 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
         try {
             final DataTreeIdentifier<FlowCapableNodeConnector> dataTreeIid = new DataTreeIdentifier<>(
                     LogicalDatastoreType.OPERATIONAL, getInstanceIdentifier());
-            evcListenerRegistration = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
+            nodeConnectorListenerRegistration = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
             log.info("NodeConnectorListener created and registered");
 
             configIntegrationBridge();
@@ -69,6 +71,7 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
         }
     }
 
+    @SuppressWarnings("deprecation")
     private InstanceIdentifier<FlowCapableNodeConnector> getInstanceIdentifier() {
         return InstanceIdentifier.create(Nodes.class).child(Node.class).child(NodeConnector.class)
                 .augmentation(FlowCapableNodeConnector.class);
@@ -76,7 +79,7 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
 
     @Override
     public void close() throws Exception {
-        evcListenerRegistration.close();
+        nodeConnectorListenerRegistration.close();
     }
 
     @Override
@@ -140,6 +143,7 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
         }
     }
 
+    @SuppressWarnings("deprecation")
     private String getDpnIdFromNodeConnector(DataTreeModification<FlowCapableNodeConnector> newDataObject) {
         InstanceIdentifier<FlowCapableNodeConnector> key = newDataObject.getRootPath().getRootIdentifier();
         NodeConnectorId nodeConnectorId = InstanceIdentifier.keyOf(key.firstIdentifierOf(NodeConnector.class)).getId();
@@ -148,6 +152,7 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
         return dpnFromNodeConnectorId;
     }
 
+    @SuppressWarnings("deprecation")
     private static String getDpnFromNodeConnectorId(NodeConnectorId portId) {
         /*
          * NodeConnectorId is of form 'openflow:dpnid:portnum'
@@ -162,22 +167,22 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
 
         log.info("Adding mef uni/device interface {} with device {}", nodeConnector.getName(), dpnId);
 
-        String uniName = NetvirtUtils.getDeviceInterfaceName(dpnId, nodeConnector.getName());
-        InstanceIdentifier interfacePath = MefUtils.getDeviceInterfaceInstanceIdentifier(dpnId, uniName);
+        String uniName = MefInterfaceUtils.getDeviceInterfaceName(dpnId, nodeConnector.getName());
+        InstanceIdentifier<Interface> interfacePath = MefInterfaceUtils.getDeviceInterfaceInstanceIdentifier(dpnId,
+                uniName);
         InterfaceBuilder interfaceBuilder = new InterfaceBuilder();
         interfaceBuilder.setPhy(new Identifier45(uniName));
-        DataObject deviceInterface = interfaceBuilder.build();
+        Interface deviceInterface = interfaceBuilder.build();
+        tx.merge(LogicalDatastoreType.OPERATIONAL, interfacePath, deviceInterface, true);
 
-        tx.merge(LogicalDatastoreType.CONFIGURATION, interfacePath, deviceInterface, true);
-
-        InstanceIdentifier uniPath = MefUtils.getUniInstanceIdentifier(uniName);
+        InstanceIdentifier<Uni> uniPath = MefInterfaceUtils.getUniInstanceIdentifier(uniName);
         UniBuilder uniBuilder = new UniBuilder();
         uniBuilder.setUniId(new Identifier45(uniName));
         uniBuilder.setMacAddress(nodeConnector.getHardwareAddress());
 
         PhysicalLayersBuilder physicalLayersBuilder = new PhysicalLayersBuilder();
         LinksBuilder linksBuilder = new LinksBuilder();
-        List<Link> links = new ArrayList();
+        List<Link> links = new ArrayList<>();
         LinkBuilder linkBuilder = new LinkBuilder();
         linkBuilder.setDevice(new Identifier45(dpnId));
         linkBuilder.setInterface(uniName);
@@ -185,11 +190,10 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
         linksBuilder.setLink(links);
         physicalLayersBuilder.setLinks(linksBuilder.build());
         uniBuilder.setPhysicalLayers(physicalLayersBuilder.build());
-        DataObject uni = uniBuilder.build();
+        Uni uni = uniBuilder.build();
+        tx.merge(LogicalDatastoreType.OPERATIONAL, uniPath, uni, true);
 
-        tx.merge(LogicalDatastoreType.CONFIGURATION, uniPath, uni, true);
         CheckedFuture<Void, TransactionCommitFailedException> futures = tx.submit();
-
         try {
             futures.get();
         } catch (InterruptedException | ExecutionException e) {
@@ -197,22 +201,27 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
                     uniPath, uni);
             throw new RuntimeException(e.getMessage());
         }
+
+        // Reply UNI port configuration
+        uniPortManager.updateOperUni(uni.getUniId().getValue());
     }
 
     private void handleNodeConnectorRemoved(DataBroker dataBroker, String dpnId,
             FlowCapableNodeConnector nodeConnector) {
 
-        String uniName = NetvirtUtils.getDeviceInterfaceName(dpnId, nodeConnector.getName());
-
-        if (!handleRemovedNodeConnectors) {
-            return;
+        String uniName = MefInterfaceUtils.getDeviceInterfaceName(dpnId, nodeConnector.getName());
+        InstanceIdentifier<Interface> interfacePath = MefInterfaceUtils.getDeviceInterfaceInstanceIdentifier(dpnId,
+                uniName);
+        if (MefInterfaceUtils.getInterface(dataBroker, dpnId, uniName, LogicalDatastoreType.OPERATIONAL) != null) {
+            MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.OPERATIONAL, interfacePath);
         }
 
-        MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                MefUtils.getDeviceInterfaceInstanceIdentifier(dpnId, uniName));
-
-        MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                MefUtils.getUniLinkInstanceIdentifier(nodeConnector.getName(), dpnId, uniName));
+        // Reply UNI port configuration
+        uniPortManager.removeUniPorts(uniName);
+        InstanceIdentifier<Uni> uniPath = MefInterfaceUtils.getUniInstanceIdentifier(uniName);
+        if (MefInterfaceUtils.getUni(dataBroker, uniName, LogicalDatastoreType.OPERATIONAL) != null) {
+            MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.OPERATIONAL, uniPath);
+        }
     }
 
     private void handleNodeConnectorUpdated(DataBroker dataBroker, String dpnFromNodeConnectorId,
