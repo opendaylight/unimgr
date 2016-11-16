@@ -26,12 +26,14 @@ public class IpvcUniUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(IpvcUniUtils.class);
 
+    // TODO : delete it !
     public static void addUni(DataBroker dataBroker, Uni data, String interfaceName, Integer vlanId) {
         try {
             String uniId = data.getUniId().getValue();
             WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
-            Link link = EvcUniUtils.getLink(dataBroker, uniId);
-            addTrunkInterface(interfaceName, MefUtils.getTrunkParentName(link), vlanId, tx);
+            // Link link = MefUniUtils.getLink(dataBroker, uniId);
+            // addTrunkInterface(interfaceName,
+            // MefInterfaceUtils.getTrunkParentName(link), vlanId, tx);
             commitTransaction(tx);
         } catch (final Exception e) {
             logger.error("Add uni failed !", e);
@@ -53,7 +55,8 @@ public class IpvcUniUtils {
     public static org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.Uni getUni(
             DataBroker dataBroker, String uniId) {
         Optional<org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.Uni> optional = MdsalUtils
-                .read(dataBroker, LogicalDatastoreType.CONFIGURATION, MefUtils.getUniInstanceIdentifier(uniId));
+                .read(dataBroker, LogicalDatastoreType.CONFIGURATION,
+                        MefInterfaceUtils.getUniInstanceIdentifier(uniId));
         if (!optional.isPresent()) {
             logger.error("Couldn't find uni {} for ipvc-uni", uniId);
             return null;
@@ -63,7 +66,7 @@ public class IpvcUniUtils {
 
     public static IpUni getIpUni(DataBroker dataBroker, String uniId, String ipUniId) {
         Optional<IpUni> optional = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                MefUtils.getIpUniInstanceIdentifier(uniId, ipUniId));
+                MefInterfaceUtils.getIpUniInstanceIdentifier(uniId, ipUniId));
 
         if (!optional.isPresent()) {
             logger.error("A matching IpUni doesn't exist Uni {} IpUni {}", uniId, ipUniId);

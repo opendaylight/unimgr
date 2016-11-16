@@ -6,6 +6,8 @@ module mef-services {
   import mef-types { prefix mef-types; }
   import mef-global { prefix mef-global; }
   import mef-interfaces { prefix mef-interfaces; }
+  import yang-ext {prefix ext; revision-date "2013-07-09";}
+
   organization "Metro Ethernet Forum";
   contact
     "Web URL: http://metroethernetforum.org/ E-mail: mibs@metroethernetforum.org
@@ -1999,4 +2001,27 @@ module mef-services {
       }
     }
   }
+  
+  augment "/mef-services:mef-services/mef-services:mef-service/mef-services:mef-service-choice/mef-services:evc-choice/mef-services:evc" {
+    ext:augment-identifier "evc-elan";
+    leaf elan {type string;}
+    list elan-ports {
+      key "port";
+      leaf port {type string;}
+    }
+  }
+  
+  augment "/mef-services:mef-services/mef-services:mef-service/mef-services:mef-service-choice/mef-services:ipvc-choice/mef-services:ipvc" {
+	ext:augment-identifier "ipvc-elans";
+    list ipvc-elans {
+    key "elan";
+    leaf elan {type string;}
+	  list elan-ports {
+		key "port";
+		leaf port {type string;}
+	  }
+  }
+}
+
+	  
 }

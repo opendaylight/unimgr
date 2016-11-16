@@ -93,10 +93,10 @@ public class NetvirtVpnUtils {
             String ipAddress = null;
             String nextHopIp = null;
             if (primary) {
-                ipAddress = getPrefixFromSubnet(MefUtils.ipPrefixToString(ifPrefix));
+                ipAddress = getPrefixFromSubnet(MefInterfaceUtils.ipPrefixToString(ifPrefix));
             } else {
-                ipAddress = MefUtils.ipPrefixToString(ifPrefix);
-                nextHopIp = getIpAddressFromPrefix(MefUtils.ipPrefixToString(gwIpAddress));
+                ipAddress = MefInterfaceUtils.ipPrefixToString(ifPrefix);
+                nextHopIp = getIpAddressFromPrefix(MefInterfaceUtils.ipPrefixToString(gwIpAddress));
             }
 
             Adjacencies adjancencies = buildInterfaceAdjacency(ipAddress, macAddress, primary, nextHopIp);
@@ -146,14 +146,14 @@ public class NetvirtVpnUtils {
 
     public static void createVpnPortFixedIp(DataBroker dataBroker, String vpnName, String portName, IpPrefix ipAddress,
             MacAddress macAddress) {
-        String fixedIpPrefix = MefUtils.ipPrefixToString(ipAddress);
+        String fixedIpPrefix = MefInterfaceUtils.ipPrefixToString(ipAddress);
         String fixedIp = getIpAddressFromPrefix(fixedIpPrefix);
         createVpnPortFixedIp(dataBroker, vpnName, portName, fixedIp, macAddress);
     }
 
     public static void createVpnPortFixedIp(DataBroker dataBroker, String vpnName, String portName, IpAddress ipAddress,
             MacAddress macAddress) {
-        String fixedIp = MefUtils.ipAddressToString(ipAddress);
+        String fixedIp = MefInterfaceUtils.ipAddressToString(ipAddress);
         createVpnPortFixedIp(dataBroker, vpnName, portName, fixedIp, macAddress);
     }
 
@@ -223,7 +223,7 @@ public class NetvirtVpnUtils {
         logger.info("Adding subnet {} {} to elan map", subnetId);
         createSubnetToNetworkMapping(dataBroker, subnetId, subnetId);
 
-        String subnetIp = getSubnetFromPrefix(MefUtils.ipPrefixToString(subnetIpPrefix));
+        String subnetIp = getSubnetFromPrefix(MefInterfaceUtils.ipPrefixToString(subnetIpPrefix));
         logger.info("Adding subnet {} {} to vpn {}", subnetName, subnetIp, vpnName);
         updateSubnetNode(dataBroker, new Uuid(vpnName), subnetId, subnetIp);
 
@@ -345,7 +345,7 @@ public class NetvirtVpnUtils {
     public static MacAddress resolveGwMac(DataBroker dataBroker, OdlArputilService arpUtilService, String vpnName,
             IpPrefix srcIpPrefix, IpAddress dstIpAddress, String interf) {
 
-        String srcTpAddressStr = getIpAddressFromPrefix(MefUtils.ipPrefixToString(srcIpPrefix));
+        String srcTpAddressStr = getIpAddressFromPrefix(MefInterfaceUtils.ipPrefixToString(srcIpPrefix));
         IpAddress srcIpAddress = new IpAddress(srcTpAddressStr.toCharArray());
 
         if (srcIpAddress == null || dstIpAddress == null) {
@@ -384,23 +384,16 @@ public class NetvirtVpnUtils {
             int retries) {
         while (retries > 0) {
             InstanceIdentifier<VpnPortipToPort> optionalPortIpId = buildVpnPortipToPortIdentifier(vpnName,
-                    MefUtils.ipAddressToString(dstIpAddress));
+                    MefInterfaceUtils.ipAddressToString(dstIpAddress));
             Optional<VpnPortipToPort> optionalPortIp = MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL,
                     optionalPortIpId);
 
             if (optionalPortIp.isPresent()) {
                 return new MacAddress(optionalPortIp.get().getMacAddress());
             } else {
-                sleep();
+                NetvirtUtils.safeSleep();
             }
         }
         return null;
-    }
-
-    private static void sleep() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-        }
     }
 }

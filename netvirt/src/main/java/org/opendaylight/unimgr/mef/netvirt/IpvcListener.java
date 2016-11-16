@@ -18,7 +18,6 @@ import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.ip.unis.IpUni;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.ip.unis.ip.uni.subnets.Subnet;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.Ipvc;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.unis.Uni;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
@@ -45,7 +44,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
     public void registerListener() {
         try {
             final DataTreeIdentifier<Ipvc> dataTreeIid = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION,
-                    MefUtils.getIpvcInstanceIdentifier());
+                    MefServicesUtils.getIpvcsInstanceIdentifier());
             ipvcListenerRegistration = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
             Log.info("IpvcDataTreeChangeListener created and registered");
         } catch (final Exception e) {
@@ -186,7 +185,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
         IpvcUniUtils.addUni(dataBroker, uniInService, interfaceName, vlan);
 
         Log.info("Adding elan interface: " + interfaceName);
-        NetvirtUtils.createInterface(dataBroker, elanName, interfaceName, EtreeInterfaceType.Root, false);
+        NetvirtUtils.createElanInterface(dataBroker, elanName, interfaceName, EtreeInterfaceType.Root, false);
 
         Log.info("Adding vpn interface: " + interfaceName);
         NetvirtVpnUtils.createUpdateVpnInterface(dataBroker, vpnName, interfaceName, ipUni.getIpAddress(),
@@ -198,6 +197,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
         NetvirtVpnUtils.addDirectSubnetToVpn(dataBroker, notificationPublishService, vpnName, elanName,
                 ipUni.getIpAddress(), interfaceName);
 
+        /*
         if (ipUni.getSubnets() != null) {
             for (Subnet subnet : ipUni.getSubnets().getSubnet()) {
                 MacAddress gwMacAddress = NetvirtVpnUtils.resolveGwMac(dataBroker, arpUtilService, vpnName,
@@ -209,6 +209,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
                         gwMacAddress, false, ipUni.getIpAddress());
             }
         }
+        */
     }
 
     private void removeElanInterface(String instanceName, Uni uni) {
