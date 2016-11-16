@@ -138,7 +138,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
             // TODO didn't find a better way to keep other uni fields, PATCH method is not supported :(
             $http({
                 method:'GET',
-                url:"/restconf/config/mef-interfaces:mef-interfaces/unis/uni/" + id + "/"
+                url:"/restconf/operational/mef-interfaces:mef-interfaces/unis/uni/" + id + "/"
             }).then(function successCallback(response) {
                 uni = response.data;
                 uni["uni"][0]["tenant-id"] = tenantid;
@@ -162,7 +162,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
             var unis;
             $http({
                 method:'GET',
-                url:"/restconf/config/mef-interfaces:mef-interfaces/unis/"
+                url:"/restconf/operational/mef-interfaces:mef-interfaces/unis/"
             }).then(function successCallback(response) {
                 unis = response.data["unis"]["uni"];
                 if (unis != undefined){
@@ -172,13 +172,33 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                         }
                     }
                 }
-                unis.forEach(function(u) {
-                  u.prettyID = u['uni-id'].split(":")[u['uni-id'].split(":").length - 1];
-                });
-                if (callback != undefined) {
+                var confMap = {}
+                $http({
+                  method:'GET',
+                  url:"/restconf/config/mef-interfaces:mef-interfaces/unis/"
+                }).then(function(response){
+                  var confUnis = response.data["unis"]["uni"];
+                  confUnis.forEach(function(u) {
+                    confMap[u['uni-id']] = u;
+                  });
+                }).finally(function(){
+                  unis.forEach(function(u) {
+                    u.prettyID = u['uni-id'].split(":")[u['uni-id'].split(":").length - 1];
+                    // copy config fields like tenant-id
+                    if (confMap[u['uni-id']]){
+                      for (var attrname in confMap[u['uni-id']]) {
+                        u[attrname] = confMap[u['uni-id']][attrname]; 
+                      }
+                    }
+                  });
+                  if (callback != undefined) {
                     callback(unis);
-                }
+                  }
+                });
             }, function errorCallback(response) {
+              if (response.status == 404) {
+                callback([]);
+              }
                 console.log(response);
             });
         };
@@ -235,13 +255,10 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
           });
       };
 
-      svc.addIpUni = function(uniid, ipuni_id, ip_address, vlan, subnets, callback) {
+      svc.addIpUni = function(uniid, ipuni_id, ip_address, vlan, callback) {
         var data = {"ip-uni":{
           "ip-uni-id": ipuni_id,
-          "ip-address": ip_address,          
-          "subnets":{
-                "subnet":subnets
-          }
+          "ip-address": ip_address
         }};
         if (vlan){
           data["ip-uni"].vlan = vlan;
@@ -257,20 +274,44 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
         });
     };
     
-      svc.addIpUniSubnet = function(uniid, ipuniid, subnet, gateway,
-          callback) {
+    svc.getAllIpUniSubnets = function(callback) {
+      $http({
+          method:'GET',
+          url : "/restconf/config/mef-interfaces:mef-interfaces/subnets/"
+      }).then(function successCallback(response) {
+          var raw_subnets = response.data["subnets"]["subnet"];
+          var subnets ={}
+          raw_subnets.forEach(function(sub){
+            if (subnets[sub["uni-id"]] == undefined) {
+              subnets[sub["uni-id"]] = {};
+            }
+            if (subnets[sub["uni-id"]][sub["ip-uni-id"]] == undefined) {
+              subnets[sub["uni-id"]][sub["ip-uni-id"]] = [];
+            }
+            subnets[sub["uni-id"]][sub["ip-uni-id"]].push(sub);
+          });
+          if (callback != undefined) {
+              callback(subnets);
+          }
+      }, function errorCallback(response) {
+          console.log(response);
+      });
+  };
+
+  svc.addIpUniSubnet = function(uniid, ipuniid, subnet, gateway, callback) {
         var data = {
             "subnet": 
             {
               "subnet": subnet,
+              "uni-id":uniid,
+              "ip-uni-id":ipuniid,
               "gateway": gateway
             }
-          
         };
         $http(
             {
               method : 'POST',
-              url : "/restconf/config/mef-interfaces:mef-interfaces/unis/uni/"+uniid+"/ip-unis/ip-uni/"+ipuniid+"/subnets/",                                
+              url : "/restconf/config/mef-interfaces:mef-interfaces/subnets/",                                
               data : data
             }).then(function successCallback(response) {
           if (callback != undefined) {
@@ -283,7 +324,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
         
         $http({
             method:'DELETE',
-            url:"/restconf/config/mef-interfaces:mef-interfaces/unis/uni/"+uniid+"/ip-unis/ip-uni/"+ipuni_id+"/subnets/subnet/"+subnet.replace("/","%2F")+"/"
+            url:"/restconf/config/mef-interfaces:mef-interfaces/subnets/subnet/"+uniid+"/"+ipuni_id+"/"+subnet.replace("/","%2F")+"/"
         }).then(function successCallback(response) {
             if (callback != undefined) {
                 callback();
@@ -305,9 +346,11 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
     svc.getIpUniSubnets = function(uniid, ipuni_id, callback) {
       $http({
           method:'GET',
-          url:"/restconf/config/mef-interfaces:mef-interfaces/unis/uni/"+uniid+"/ip-unis/ip-uni/"+ipuni_id+"/subnets"
+          url:"/restconf/config/mef-interfaces:mef-interfaces/subnets/"
+            //subnet/"+uniid+"/ip-unis/ip-uni/"+ipuni_id+"/subnets"
       }).then(function successCallback(response) {
           subnets = response.data["subnets"]["subnet"];
+          subnets = subnets.filterByField('uni-id',uniid).filterByField('ip-uni-id',ipuni_id);
           if (callback != undefined) {
               callback(subnets);
           }
@@ -440,7 +483,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                       };          
            $http({
               method:'PUT',
-              url:"/restconf/config/mef-services:mef-services/mef-service/" + svcid + "/ipvc/unis/uni/"+uni_id,
+              url:"/restconf/config/mef-services:mef-services/mef-service/" + svcid + "/ipvc/unis/uni/"+uni_id+"/"+ipuni_id,
               data: data
           }).then(function successCallback(response) {
               if (callback != undefined) {
@@ -453,10 +496,10 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
           });
       };
       
-      svc.deleteIpvcUni = function(svcid, uni_id, callback) {
+      svc.deleteIpvcUni = function(svcid, uni_id, ipuni_id, callback) {
         $http({
            method:'DELETE',
-           url:"/restconf/config/mef-services:mef-services/mef-service/" + svcid + "/ipvc/unis/uni/" + uni_id + "/"
+           url:"/restconf/config/mef-services:mef-services/mef-service/" + svcid + "/ipvc/unis/uni/" + uni_id +"/"+ipuni_id + "/"
        }).then(function successCallback(response) {
            if (callback != undefined) {
                callback();

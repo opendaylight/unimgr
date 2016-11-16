@@ -75,7 +75,7 @@
 			</thead>
 			<tbody id="ces_table">
 				<tr ng-repeat="item in unis | orderBy: '[\'uni-id\']'">
-					<td ng-init="device = ces.filterByField('dev-id',item.device)[0]">{{ device["device-name"] ? device["device-name"] : device["dev-id"]}}</td>
+					<td ng-init="device = ces.filterByField('dev-id',item.device)[0]">{{ device["device-name"] ? device["device-name"] : item.device}}</td>
 					<td>{{ item.prettyID }}</td>
 					<td ng-if="item['tenant-id'] != undefined" >
 						{{ item['tenant-id'] }} <button class="btn add-row right" ng-click="linkUniDialog.show($event, {'uni':item['uni-id'], tenants:tenantArray})">Edit</button>

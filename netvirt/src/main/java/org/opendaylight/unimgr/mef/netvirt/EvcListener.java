@@ -11,42 +11,51 @@ package org.opendaylight.unimgr.mef.netvirt;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.physical.layers.links.Link;
+
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.Evc;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.Uni;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.uni.EvcUniCeVlans;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.uni.evc.uni.ce.vlans.EvcUniCeVlan;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.EvcElan;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.EvcElanBuilder;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.ElanPorts;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.ElanPortsBuilder;
+
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcType;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcUniRoleType;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.rev140508.interfaces.state.Interface;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInterface.EtreeInterfaceType;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
+import jline.internal.Log;
+
 public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
 
     private static final Logger log = LoggerFactory.getLogger(EvcListener.class);
     private ListenerRegistration<EvcListener> evcListenerRegistration;
+    private final IUniPortManager uniPortManager;
 
-    public EvcListener(final DataBroker dataBroker) {
+    public EvcListener(final DataBroker dataBroker, final UniPortManager uniPortManager) {
         super(dataBroker);
-
+        this.uniPortManager = uniPortManager;
         registerListener();
     }
 
     public void registerListener() {
         try {
             final DataTreeIdentifier<Evc> dataTreeIid = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION,
-                    MefUtils.getEvcInstanceIdentifier());
+                    MefServicesUtils.getEvcsInstanceIdentifier());
             evcListenerRegistration = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
             log.info("EvcDataTreeChangeListener created and registered");
         } catch (final Exception e) {
@@ -89,22 +98,18 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
             Evc data = newDataObject.getRootNode().getDataAfter();
             String instanceName = data.getEvcId().getValue();
             boolean isEtree = data.getEvcType() == EvcType.RootedMultipoint;
-            if (!data.isAdminStateEnabled()) {
-                log.info("add - evc {} AdminStateEnabled false", data.getEvcId().getValue());
-            } else {
-                log.info("Adding {} instance: {}", isEtree ? "etree" : "elan", instanceName);
+            InstanceIdentifier<Evc> evcId = newDataObject.getRootPath().getRootIdentifier();
+
+            synchronized (instanceName.intern()) {
                 NetvirtUtils.createElanInstance(dataBroker, instanceName, isEtree);
-            }
-            // Create interfaces
-            if (data.getUnis() == null) {
-                log.info("No UNI's in service {}, exiting", instanceName);
-                return;
-            }
-            for (Uni uni : data.getUnis().getUni()) {
-                if (!uni.isAdminStateEnabled()) {
-                    log.info("uni {} AdminStateEnabled false", uni.getUniId().getValue());
-                } else {
-                    createInterface(instanceName, uni, isEtree);
+
+                // Create interfaces
+                if (data.getUnis() == null) {
+                    log.info("No UNI's in service {}, exiting", instanceName);
+                    return;
+                }
+                for (Uni uni : data.getUnis().getUni()) {
+                    createUniElanInterfaces(evcId, instanceName, uni, isEtree);
                 }
             }
         } catch (final Exception e) {
@@ -112,58 +117,64 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
         }
     }
 
+    private void removeEvc(DataTreeModification<Evc> removedDataObject) {
+        try {
+            Evc data = removedDataObject.getRootNode().getDataBefore();
+            InstanceIdentifier<Evc> evcId = removedDataObject.getRootPath().getRootIdentifier();
+            List<Uni> uniToRemove = data.getUnis() != null && data.getUnis().getUni() != null
+                    ? data.getUnis().getUni() : Collections.emptyList();
+
+
+            synchronized (data.getEvcId().getValue().intern()) {
+                EvcElan evcElan = getOperEvcElan(evcId);
+                if (evcElan == null) {
+                    log.error("Evc {} has not been created as required. Nothing to remove", data.getEvcId().getValue());
+                }
+
+                String instanceName = evcElan.getElanId();
+
+                for (Uni uni : uniToRemove) {
+                    removeUniElanInterfaces(evcId, instanceName, uni);
+                }
+
+                log.info("Removing elan instance: " + instanceName);
+                NetvirtUtils.deleteElanInstance(dataBroker, instanceName);
+                removeOperEvcElan(evcId);
+            }
+        } catch (final Exception e) {
+            log.error("Remove evc failed !", e);
+        }
+    }
+
     private void updateEvc(DataTreeModification<Evc> modifiedDataObject) {
+        InstanceIdentifier<Evc> evcId = modifiedDataObject.getRootPath().getRootIdentifier();
+
         try {
             Evc original = modifiedDataObject.getRootNode().getDataBefore();
             Evc update = modifiedDataObject.getRootNode().getDataAfter();
 
-            String instanceName = original.getEvcId().getValue();
-            boolean isEtree = update.getEvcType() == EvcType.RootedMultipoint;
+            List<Uni> originalUni = original.getUnis() != null && original.getUnis().getUni() != null
+                    ? original.getUnis().getUni() : Collections.emptyList();
+            List<Uni> updateUni = update.getUnis() != null && update.getUnis().getUni() != null
+                    ? update.getUnis().getUni() : Collections.emptyList();
 
-            if (!update.isAdminStateEnabled()) {
-                log.info("update - evc {} AdminStateEnabled false", update.getEvcId().getValue());
-            }
-            log.info("Updating {} instance: {}", isEtree ? "etree" : "elan", instanceName);
+            synchronized (original.getEvcId().getValue().intern()) {
 
-            List<Uni> originalUni = original.getUnis() != null ? original.getUnis().getUni() : Collections.emptyList();
-            if (update == null || update.getUnis() == null) {
-                log.info("update uni is null");
-            }
-            List<Uni> updateUni = update.getUnis().getUni();
-            if (updateUni != null && !updateUni.isEmpty()) {
-                List<Uni> existingClonedUni = new ArrayList<>();
-                if (originalUni != null && !originalUni.isEmpty()) {
-                    existingClonedUni.addAll(0, originalUni);
-                    originalUni.removeAll(updateUni);
-                    updateUni.removeAll(existingClonedUni);
-                    // removing the Uni which are not presented in the updated
-                    // List
-                    for (Uni uni : originalUni) {
-                        if (!uni.isAdminStateEnabled()) {
-                            log.info("uni {} AdminStateEnabled false", uni.getUniId().getValue());
-                        } else {
-                            removeElanInterface(instanceName, uni);
-                        }
-                    }
+                String instanceName = original.getEvcId().getValue();
+                boolean isEtree = update.getEvcType() == EvcType.RootedMultipoint;
+                log.info("Updating {} instance: {}", isEtree ? "etree" : "elan", instanceName);
+
+                // Changed Uni will be deleted / recreated
+                List<Uni> uniToRemove = new ArrayList<>(originalUni);
+                uniToRemove.removeAll(updateUni);
+                for (Uni uni : uniToRemove) {
+                    removeUniElanInterfaces(evcId, instanceName, uni);
                 }
 
-                // Adding the new Uni which are presented in the updated List
-                if (updateUni.size() > 0) {
-                    for (Uni uni : updateUni) {
-                        if (!uni.isAdminStateEnabled()) {
-                            log.info("uni {} AdminStateEnabled false", uni.getUniId().getValue());
-                        } else {
-                            createInterface(instanceName, uni, isEtree);
-                        }
-                    }
-                }
-            } else if (originalUni != null && !originalUni.isEmpty()) {
-                for (Uni uni : originalUni) {
-                    if (!uni.isAdminStateEnabled()) {
-                        log.info("uni {} AdminStateEnabled false", uni.getUniId().getValue());
-                    } else {
-                        removeElanInterface(instanceName, uni);
-                    }
+                List<Uni> uniToCreate = new ArrayList<>(updateUni);
+                uniToCreate.removeAll(originalUni);
+                for (Uni uni : uniToCreate) {
+                    createUniElanInterfaces(evcId, instanceName, uni, isEtree);
                 }
             }
         } catch (final Exception e) {
@@ -171,51 +182,103 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
         }
     }
 
-    private void removeEvc(DataTreeModification<Evc> removedDataObject) {
-        try {
-            Evc data = removedDataObject.getRootNode().getDataBefore();
-            if (!data.isAdminStateEnabled()) {
-                log.info("remove - evc {} AdminStateEnabled false", data.getEvcId().getValue());
-            }
-
-            String instanceName = data.getEvcId().getValue();
-
-            for (Uni uni : data.getUnis().getUni()) {
-                if (!uni.isAdminStateEnabled()) {
-                    log.info("uni {} AdminStateEnabled false", uni.getUniId().getValue());
-                } else {
-
-                    removeElanInterface(instanceName, uni);
-                }
-            }
-
-            log.info("Removing elan instance: " + instanceName);
-            NetvirtUtils.deleteElanInstance(dataBroker, instanceName);
-        } catch (final Exception e) {
-            log.error("Remove evc failed !", e);
-        }
-    }
-
-    private void createInterface(String instanceName, Uni uni, boolean isEtree) {
-        EvcUniUtils.addUni(dataBroker, uni);
-        String interfaceName = uni.getUniId().getValue();
+    private void createUniElanInterfaces(InstanceIdentifier<Evc> evcId, String instanceName, Uni uni, boolean isEtree) {
         EvcUniRoleType role = uni.getRole();
         EvcUniCeVlans evcUniCeVlans = uni.getEvcUniCeVlans();
 
-        if (evcUniCeVlans != null && evcUniCeVlans.getEvcUniCeVlan() != null
-                && !evcUniCeVlans.getEvcUniCeVlan().isEmpty()) {
-            for (EvcUniCeVlan x : evcUniCeVlans.getEvcUniCeVlan()) {
-                interfaceName = NetvirtUtils.getInterfaceNameForVlan(interfaceName, x.getVid().toString());
+        List<EvcUniCeVlan> evcUniCeVlan = evcUniCeVlans != null && evcUniCeVlans.getEvcUniCeVlan() != null
+                && !evcUniCeVlans.getEvcUniCeVlan().isEmpty() ? evcUniCeVlans.getEvcUniCeVlan()
+                        : Collections.emptyList();
 
-                NetvirtUtils.createInterface(dataBroker, instanceName, interfaceName, RoleToInterfaceType(role),
-                        isEtree);
+        for (EvcUniCeVlan ceVlan : evcUniCeVlan) {
+            Long vlan = safeCastVlan(ceVlan.getVid());
+            uniPortManager.addCeVlan(uni.getUniId().getValue(), vlan);
+        }
+
+        if (evcUniCeVlan.isEmpty()) {
+            String interfaceName = uniPortManager.getUniVlanInterface(uni.getUniId().getValue(), Long.valueOf(0));
+            if (isOperEvcElanPort(evcId, interfaceName)) {
+                log.info("elan interface for elan {} vlan {} interface {} exists already", instanceName, 0,
+                        interfaceName);
+                return;
             }
+            log.info("Creting elan interface for elan {} vlan {} interface {}", instanceName, 0, interfaceName);
+            NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName, roleToInterfaceType(role),
+                    isEtree);
+            setOperEvcElanPort(evcId, instanceName, interfaceName);
         } else {
-            NetvirtUtils.createInterface(dataBroker, instanceName, interfaceName, RoleToInterfaceType(role), isEtree);
+            for (EvcUniCeVlan ceVlan : evcUniCeVlan) {
+                Long vlan = safeCastVlan(ceVlan.getVid());
+                String interfaceName = uniPortManager.getUniVlanInterface(uni.getUniId().getValue(), vlan);
+                if (isOperEvcElanPort(evcId, interfaceName)) {
+                    log.info("elan interface for elan {} vlan {} interface {} exists already", instanceName, 0,
+                            interfaceName);
+                    return;
+                }
+                log.info("Creting elan interface for elan {} vlan {} interface {}", instanceName, 0, interfaceName);
+                NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName, roleToInterfaceType(role),
+                        isEtree);
+                setOperEvcElanPort(evcId, instanceName, interfaceName);
+            }
         }
     }
 
-    private static EtreeInterfaceType RoleToInterfaceType(EvcUniRoleType role) {
+    private void removeUniElanInterfaces(InstanceIdentifier<Evc> evcId, String instanceName, Uni uni) {
+        EvcUniCeVlans evcUniCeVlans = uni.getEvcUniCeVlans();
+
+        List<EvcUniCeVlan> evcUniCeVlan = evcUniCeVlans != null && evcUniCeVlans.getEvcUniCeVlan() != null
+                && !evcUniCeVlans.getEvcUniCeVlan().isEmpty() ? evcUniCeVlans.getEvcUniCeVlan()
+                        : Collections.emptyList();
+
+        for (EvcUniCeVlan ceVlan : evcUniCeVlan) {
+            Long vlan = safeCastVlan(ceVlan.getVid());
+            uniPortManager.removeCeVlan(uni.getUniId().getValue(), vlan);
+        }
+
+        if (evcUniCeVlan.isEmpty()) {
+            String interfaceName = uniPortManager.getUniVlanInterface(uni.getUniId().getValue(), Long.valueOf(0));
+            if (!isOperEvcElanPort(evcId, interfaceName)) {
+                log.info("elan interface for elan {} vlan {} is not operational, nothing to remove", instanceName, 0,
+                        interfaceName);
+                return;
+            }
+            removeElanInterface(evcId, interfaceName);
+        } else {
+            for (EvcUniCeVlan ceVlan : evcUniCeVlan) {
+                Long vlan = safeCastVlan(ceVlan.getVid());
+                String interfaceName = uniPortManager.getUniVlanInterface(uni.getUniId().getValue(), vlan);
+                if (!isOperEvcElanPort(evcId, interfaceName)) {
+                    log.info("elan interface for elan {} vlan {} is not operational, nothing to remove", instanceName,
+                            vlan, interfaceName);
+                    return;
+                }
+                removeElanInterface(evcId, interfaceName);
+            }
+        }
+    }
+
+    private void removeElanInterface(InstanceIdentifier<Evc> identifier, String interfaceName) {
+        log.info("Removing elan interface: " + interfaceName);
+        NetvirtUtils.deleteElanInterface(dataBroker, interfaceName);
+
+        EvcElan evcElan = getOperEvcElan(identifier);
+        if (evcElan == null) {
+            log.error("Removing non-operational Elan interface {}", interfaceName);
+        }
+        deleteOperEvcElanPort(identifier, interfaceName);
+    }
+
+    // Expected from API is Long
+    private Long safeCastVlan(Object vid) {
+        if (!(vid instanceof Long)) {
+            String errorMessage = String.format("vlan id %s cannot be cast to Long", vid);
+            log.error(errorMessage);
+            throw new UnsupportedOperationException(errorMessage);
+        }
+        return (Long) vid;
+    }
+
+    private static EtreeInterfaceType roleToInterfaceType(EvcUniRoleType role) {
         if (role == EvcUniRoleType.Root) {
             return EtreeInterfaceType.Root;
         } else {
@@ -223,23 +286,60 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
         }
     }
 
-    private void removeElanInterface(String instanceName, Uni uni) {
-        EvcUniUtils.removeUni(dataBroker, uni);
-
-        String uniId = uni.getUniId().getValue();
-        EvcUniCeVlans evcUniCeVlans = uni.getEvcUniCeVlans();
-        String interfaceName = uniId;
-
-        if (evcUniCeVlans != null && !evcUniCeVlans.getEvcUniCeVlan().isEmpty()) {
-            for (EvcUniCeVlan x : evcUniCeVlans.getEvcUniCeVlan()) {
-
-                interfaceName = NetvirtUtils.getInterfaceNameForVlan(uniId, x.getVid().toString());
-                log.info("Removing elan interface: " + interfaceName);
-                NetvirtUtils.deleteElanInterface(dataBroker, instanceName, interfaceName);
-            }
+    private EvcElan getOperEvcElan(InstanceIdentifier<Evc> identifier) {
+        InstanceIdentifier<EvcElan> path = identifier.augmentation(EvcElan.class);
+        Optional<EvcElan> evcElan = MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, path);
+        if (evcElan.isPresent()) {
+            return evcElan.get();
         } else {
-            log.info("Removing elan interface: " + uniId);
-            NetvirtUtils.deleteElanInterface(dataBroker, instanceName, interfaceName);
+            return null;
         }
     }
+
+    private void removeOperEvcElan(InstanceIdentifier<Evc> identifier) {
+        InstanceIdentifier<EvcElan> path = identifier.augmentation(EvcElan.class);
+        MdsalUtils.delete(dataBroker, LogicalDatastoreType.OPERATIONAL, path);
+    }
+
+    private boolean isOperEvcElanPort(InstanceIdentifier<Evc> identifier, String elanPort) {
+        EvcElan evcElan = getOperEvcElan(identifier);
+        if (evcElan == null || evcElan.getElanPorts() == null) {
+            return false;
+        }
+        List<ElanPorts> exPorts = evcElan.getElanPorts();
+        return exPorts.stream().anyMatch(p -> p.getPortId().equals(elanPort));
+    }
+
+    private void setOperEvcElanPort(InstanceIdentifier<Evc> identifier, String elanName, String elanPort) {
+        InstanceIdentifier<EvcElan> path = identifier.augmentation(EvcElan.class);
+        EvcElan evcElan = getOperEvcElan(identifier);
+        EvcElanBuilder evcElanBuilder = evcElan != null ? new EvcElanBuilder(evcElan) : new EvcElanBuilder();
+        List<ElanPorts> exPorts =  evcElan != null && evcElan.getElanPorts() != null ? evcElan.getElanPorts() : new ArrayList<>();
+
+        ElanPortsBuilder portB = new ElanPortsBuilder();
+        portB.setPortId(elanPort);
+        exPorts.add(portB.build());
+        evcElanBuilder.setElanId(elanName);
+        evcElanBuilder.setElanPorts(exPorts);
+        MdsalUtils.write(dataBroker, LogicalDatastoreType.OPERATIONAL, path, evcElanBuilder.build());
+    }
+
+    private void deleteOperEvcElanPort(InstanceIdentifier<Evc> identifier, String elanPort) {
+        InstanceIdentifier<EvcElan> path = identifier.augmentation(EvcElan.class);
+        EvcElan evcElan = getOperEvcElan(identifier);
+        EvcElanBuilder evcElanBuilder = null;
+        List<ElanPorts> exPorts = Collections.emptyList();
+        if (evcElan != null) {
+            evcElanBuilder = new EvcElanBuilder(evcElan);
+            exPorts = evcElan.getElanPorts() != null ? evcElan.getElanPorts() : Collections.emptyList();
+        } else {
+            Log.error("Deleting non-operational Elan port {}", elanPort);
+            return;
+        }
+        List<ElanPorts> newList = exPorts.stream().filter(p -> !p.getPortId().equals(elanPort))
+                .collect(Collectors.toList());
+        evcElanBuilder.setElanPorts(newList);
+        MdsalUtils.write(dataBroker, LogicalDatastoreType.OPERATIONAL, path, evcElanBuilder.build());
+    }
+
 }

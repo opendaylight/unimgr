@@ -6,6 +6,8 @@ module mef-services {
   import mef-types { prefix mef-types; }
   import mef-global { prefix mef-global; }
   import mef-interfaces { prefix mef-interfaces; }
+  import yang-ext {prefix ext; revision-date "2013-07-09";}
+
   organization "Metro Ethernet Forum";
   contact
     "Web URL: http://metroethernetforum.org/ E-mail: mibs@metroethernetforum.org
@@ -76,7 +78,7 @@ module mef-services {
           container ipvc {
             container unis {
               list uni {
-            	 key "uni-id";
+                key "uni-id ip-uni-id";
                 leaf uni-id {
                   type leafref {
                     path "/mef-interfaces:mef-interfaces/" +
@@ -1997,6 +1999,31 @@ module mef-services {
         type leafref {
           path "/mef-global:mef-global/mef-global:tenants-instances/mef-global:tenant-list/mef-global:name";
         }
+      }
+    }
+  }
+
+  augment "/mef-services:mef-services/mef-services:mef-service/mef-services:mef-service-choice/mef-services:evc-choice/mef-services:evc" {
+    ext:augment-identifier "evc-elan";
+    leaf elan-id {type string;}
+    list elan-ports {
+      key "port-id";
+      leaf port-id {type string;}
+    }
+  }
+
+  augment "/mef-services:mef-services/mef-services:mef-service/mef-services:mef-service-choice/mef-services:ipvc-choice/mef-services:ipvc" {
+    ext:augment-identifier "ipvc-vpn";
+    leaf vpn-id {type string;}
+    list vpn-elans {
+      key "uni-id ip-uni-id";
+      leaf uni-id {type  mef-types:identifier45;}
+      leaf ip-uni-id {type  mef-types:identifier45;}
+      leaf elan-id {type string;}
+      leaf elan-port {type string;}
+      list subnets {
+        key "subnet";
+        leaf subnet {type string;}
       }
     }
   }

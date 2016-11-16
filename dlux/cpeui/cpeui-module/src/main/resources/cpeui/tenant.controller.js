@@ -5,7 +5,8 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
     $scope.unisTables = {};
     $scope.unis = [];
     $scope.ces = [];
-    $scope.ipvcs = []
+    $scope.ipvcs = [];
+    $scope.subnets = {};
     $scope.cesDisplayNames = {};
     $scope.unisMap = {};
     $scope.networkNames = {};
@@ -91,6 +92,9 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
           }
         });
       });
+      CpeuiSvc.getAllIpUniSubnets(function(subnets){
+        $scope.subnets = subnets;
+      });
     };
 
     $scope.title = function(str) {
@@ -153,7 +157,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
     };
 
     $scope.ipUniDialog = new CpeuiDialogs.Dialog('AddIpUni', {}, function(obj) {
-      CpeuiSvc.addIpUni(obj['uni-id'], obj['ip-uni-id'], obj['ip-address'], obj.vlan, obj.subnets, function() {
+      CpeuiSvc.addIpUni(obj['uni-id'], obj['ip-uni-id'], obj['ip-address'], obj.vlan, function() {
         var uni = $scope.unis.filterByField('uni-id',obj['uni-id'])[0];
         if (uni['ip-unis'] == undefined || uni['ip-unis']['ip-uni'] == undefined){
           uni['ip-unis'] = {'ip-uni':[]};
@@ -177,9 +181,18 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
 
     $scope.ipUniSubnetDialog = new CpeuiDialogs.Dialog('AddIpUniSubnet', {}, function(obj) {
       CpeuiSvc.addIpUniSubnet(obj.uniid, obj.ipuniid, obj.subnet, obj.gateway, function() {
-          CpeuiSvc.getIpUniSubnets(obj.uniid, obj.ipuniid, function(subnets) {
-            $scope.unis.filterByField('uni-id',obj.uniid)[0]['ip-unis']['ip-uni'].filterByField('ip-uni-id',obj.ipuniid)[0].subnets = {subnet:subnets};
-          });
+        if ($scope.subnets[obj.uniid] == undefined){
+          $scope.subnets[obj.uniid] = {};
+        }
+        if ($scope.subnets[obj.uniid][obj.ipuniid] == undefined){
+          $scope.subnets[obj.uniid][obj.ipuniid] = [];
+        }
+        $scope.subnets[obj.uniid][obj.ipuniid].push({
+          "uni-id": obj.uniid,
+          "ip-uni-id": obj.ipuniid,
+          "subnet": obj.subnet,
+          "gateway": obj.gateway
+        });
       });
     });
 
@@ -190,9 +203,9 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
           });
         });
       };
-      $scope.deleteIpvcUni = function(svc_id, uni_id) {
+      $scope.deleteIpvcUni = function(svc_id, uni_id, ipuni_id) {
         CpeuiDialogs.confirm(function() {
-          CpeuiSvc.deleteIpvcUni(svc_id, uni_id, function() {
+          CpeuiSvc.deleteIpvcUni(svc_id, uni_id, ipuni_id, function() {
             $scope.updateEvcView();
           });
         });
