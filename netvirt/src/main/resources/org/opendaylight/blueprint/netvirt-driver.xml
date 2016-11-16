@@ -13,27 +13,30 @@
 	<odl:rpc-service id="odlArputilService"
 		interface="org.opendaylight.yang.gen.v1.urn.opendaylight.genius.arputil.rev160406.OdlArputilService" />
 
-	<bean class="org.opendaylight.unimgr.mef.netvirt.EvcListener">
-		<argument index="0" ref="dataBroker" />
+	<bean id="uniPortManager" class="org.opendaylight.unimgr.mef.netvirt.UniPortManager">
+		<argument ref="dataBroker" />
 	</bean>
 
-	<bean class="org.opendaylight.unimgr.mef.netvirt.NodeConnectorListener">
-		<argument index="0" ref="dataBroker" />
-		<argument index="1" value="false" />
+	<bean id="nodeConnectorListener"
+		class="org.opendaylight.unimgr.mef.netvirt.NodeConnectorListener">
+		<argument ref="dataBroker" />
+		<argument ref="uniPortManager" />
+	        <argument value="false" />
 	</bean>
 
-	<!-- <bean class="org.opendaylight.unimgr.mef.netvirt.TenantlessEvcListener"> -->
-	<!-- <argument index="0" ref="dataBroker" /> -->
-	<!-- </bean> -->
+	<bean id="evcListener" class="org.opendaylight.unimgr.mef.netvirt.EvcListener">
+		<argument ref="dataBroker" />
+		<argument ref="uniPortManager" />
+	</bean>
 
-	<!-- <bean class="org.opendaylight.unimgr.mef.netvirt.TenantUniListener"> -->
-	<!-- <argument index="0" ref="dataBroker" /> -->
-	<!-- </bean> -->
-
-	<bean class="org.opendaylight.unimgr.mef.netvirt.IpvcListener">
+	<bean id="ipvcListener" class="org.opendaylight.unimgr.mef.netvirt.IpvcListener">
+		<argument ref="dataBroker" />
+        <argument ref="uniPortManager" />	
+	</bean>
+	
+	<bean id="subnetListener" class="org.opendaylight.unimgr.mef.netvirt.SubnetListener">
 		<argument ref="dataBroker" />
 		<argument ref="notificationPublishService" />
 		<argument ref="odlArputilService" />
 	</bean>
-
 </blueprint>
