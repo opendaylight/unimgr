@@ -1,0 +1,48 @@
+<md-dialog class="cpe-dialog" aria-label="Update UNI" ng-cloak>
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>Update {{ params.svc['svc-id'] }} Uni</h2>
+        <span flex></span>
+        <md-button class="md-icon-button" aria-label="Close dialog" ng-click="cancel()">
+        <i class="icon-remove-sign"></i>
+        </md-button>
+      </div>
+    </md-toolbar>
+    <form name="projectForm" novalidate>
+    <md-dialog-content>
+
+<div ng-controller="AppCtrl" layout="column" ng-cloak ng-init="obj.role = 'root'">
+  <md-content layout-padding>
+    <md-input-container class="md-block">
+        <label>Device</label>
+        <md-select ng-model="obj.device_id" name="device">
+       		<md-option ng-repeat="ce in params.ces" ng-value="ce['dev-id']">{{ ce.displayName }}</md-option>
+        </md-select>
+      </md-input-container>
+      <md-input-container class="md-block">
+        <label>Uni</label>
+        <md-select ng-model="obj.uni" name="uniid" ng-disabled="!obj.device_id">
+       		<md-option ng-repeat="uni in params.unis.filterByField('device',obj.device_id)" ng-value="uni" >{{ uni.prettyID }}</md-option>
+        </md-select>
+      </md-input-container>
+      <md-input-container class="md-block">
+        <label>IP Uni</label>
+        <md-select ng-model="obj.ip_uni" name="ip_uni" ng-disabled="!obj.uni">
+       		<md-option ng-repeat="ipuni in obj.uni['ip-unis']['ip-uni'] " value="{{ ipuni['ip-uni-id'] }}" >{{ ipuni['ip-uni-id'] }} : {{ipuni['ip-address']}}{{ipuni.vlan ? (' (vlan: ' + ipuni.vlan+')') : ''}}</md-option>
+        </md-select>
+      </md-input-container>      
+  </md-content>
+</div>
+
+    </md-dialog-content>
+    <md-dialog-actions layout="row">
+      <span flex></span>
+      <md-button ng-click="cancel()">
+       Cancel
+      </md-button>
+      <md-button type="submit" ng-click="obj.svc_id = params.svc['svc-id'];obj.evc_unis = params.svc_unis; done(obj)">
+        link
+      </md-button>
+    </md-dialog-actions>
+    </form>
+</md-dialog>

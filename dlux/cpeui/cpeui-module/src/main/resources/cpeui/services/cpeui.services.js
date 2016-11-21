@@ -63,7 +63,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                 }
             });
         };
-        
+
         svc.addCeName = function(ce, new_name, callback) {
           $http({
             method:'POST',
@@ -73,11 +73,11 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
             if (callback != undefined) {
                 callback();
             }
-          }, function errorCallback(response) {          
+          }, function errorCallback(response) {
             console.log(response);
             $http({
               method:'GET',
-              url:"/restconf/config/mef-topology:mef-topology/devices/device/" + ce['dev-id']              
+              url:"/restconf/config/mef-topology:mef-topology/devices/device/" + ce['dev-id']
             }).then(function successCallback(response) {
               ce["device-name"] = response.data["device"][0]["device-name"];
             });
@@ -167,7 +167,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                 unis = response.data["unis"]["uni"];
                 if (unis != undefined){
                     for (i=0; i < unis.length; i++) {
-                        if ((unis[i]["physical-layers"] != undefined) && (unis[i].device = unis[i]["physical-layers"].links != undefined)){
+                        if ((unis[i]["physical-layers"] != undefined) && (unis[i]["physical-layers"].links != undefined)){
                             unis[i].device = unis[i]["physical-layers"].links.link[0].device;
                         }
                     }
@@ -206,9 +206,117 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
             });
         };
 
-        // EVCs
+        // IPVCs
+        svc.addIpvc = function(ipvc, tenant, callback) {
+//          var uni_json = getJsonUnis(evc.unis);
+//          preserved-vlan
+          var data = {
+            "mef-service" :  {
+              "svc-id" : ipvc.id,
+              "svc-type" : 'eplan',
+              "tenant-id" : tenant,
+              "ipvc" : {
+                "ipvc-id" : ipvc.id,
+                "ipvc-type" : 'multipoint',
+//                "unis" : {
+//                  "uni" : uni_json
+//                },
+              }
+            }
+          };
+          $http({
+              method:'POST',
+              url:"/restconf/config/mef-services:mef-services/",
+              data:data
+          }).then(function successCallback(response) {
+              if (callback != undefined) {
+                  callback();
+              }
+          });
+      };
 
-        function getJsonUnis(unis) {
+      svc.addIpUni = function(uniid, ipuni_id, ip_address, vlan, subnets, callback) {
+        var data = {"ip-uni":{
+          "ip-uni-id": ipuni_id,
+          "ip-address": ip_address,          
+          "subnets":{
+                "subnet":subnets
+          }
+        }};
+        if (vlan){
+          data["ip-uni"].vlan = vlan;
+        }
+        $http({
+            method:'POST',
+            url:"/restconf/config/mef-interfaces:mef-interfaces/unis/uni/"+uniid+"/ip-unis/",
+            data:data
+        }).then(function successCallback(response) {
+            if (callback != undefined) {
+                callback();
+            }
+        });
+    };
+    
+      svc.addIpUniSubnet = function(uniid, ipuniid, subnet, gateway,
+          callback) {
+        var data = {
+            "subnet": 
+            {
+              "subnet": subnet,
+              "gateway": gateway
+            }
+          
+        };
+        $http(
+            {
+              method : 'POST',
+              url : "/restconf/config/mef-interfaces:mef-interfaces/unis/uni/"+uniid+"/ip-unis/ip-uni/"+ipuniid+"/subnets/",                                
+              data : data
+            }).then(function successCallback(response) {
+          if (callback != undefined) {
+            callback();
+          }
+        });
+      };
+    
+    svc.deleteIpUniSubnet = function(uniid, ipuni_id, subnet, callback) {
+        
+        $http({
+            method:'DELETE',
+            url:"/restconf/config/mef-interfaces:mef-interfaces/unis/uni/"+uniid+"/ip-unis/ip-uni/"+ipuni_id+"/subnets/subnet/"+subnet.replace("/","%2F")+"/"
+        }).then(function successCallback(response) {
+            if (callback != undefined) {
+                callback();
+            }
+        });
+    };
+    svc.deleteIpUni = function(uniid, ipuni_id, callback) {
+        
+        $http({
+            method:'DELETE',
+            url:"/restconf/config/mef-interfaces:mef-interfaces/unis/uni/"+uniid+"/ip-unis/ip-uni/"+ipuni_id+"/"
+        }).then(function successCallback(response) {
+            if (callback != undefined) {
+                callback();
+            }
+        });
+    };
+    
+    svc.getIpUniSubnets = function(uniid, ipuni_id, callback) {
+      $http({
+          method:'GET',
+          url:"/restconf/config/mef-interfaces:mef-interfaces/unis/uni/"+uniid+"/ip-unis/ip-uni/"+ipuni_id+"/subnets"
+      }).then(function successCallback(response) {
+          subnets = response.data["subnets"]["subnet"];
+          if (callback != undefined) {
+              callback(subnets);
+          }
+      });
+    };
+
+    
+    // EVCs
+    function getJsonUnis(unis) {
             var uni_json = [];
             if (unis == undefined) {
                 unis = [];
@@ -216,7 +324,6 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
             unis.forEach(function(i){uni_json.push({"uni-id":i});});
             return uni_json;
         }
-
         svc.addEvc = function(evc, evc_type, tenant, callback) {
             var uni_json = getJsonUnis(evc.unis);
 //            preserved-vlan
@@ -237,7 +344,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                   },
                   "admin-state-enabled" : true
                 }
-              } 
+              }
             };
             if (evc.is_preserve_vlan) {
               data["mef-service"]["evc"]["preserved-vlan"] = evc.preserved_vlan;
@@ -252,7 +359,6 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                 }
             });
         };
-
         svc.getServices = function(tenantid, callback) {
             var evcs;
             $http({
@@ -260,7 +366,6 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                 url:"/restconf/config/mef-services:mef-services/"
             }).then(function successCallback(response) {
                 evcs = response.data["mef-services"]["mef-service"]; // TODO try to filter on server side
-
                 if (evcs != undefined) {
                     evcs = evcs.filter(function(evc){return evc["tenant-id"] == tenantid;});
                     for (i=0; i < evcs.length; i++) {
@@ -282,15 +387,14 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
             }, function errorCallback(response) {
                 console.log(response);
             });
-
             return evcs;
         };
 
-        svc.getAllServices = function(callback) {          
+        svc.getAllServices = function(callback) {
           $http({
               method:'GET',
               url:"/restconf/config/mef-services:mef-services/"
-          }).then(function successCallback(response) {              
+          }).then(function successCallback(response) {
               if (callback != undefined) {
                   callback(response.data["mef-services"]["mef-service"]);
               }
@@ -298,7 +402,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
               console.log(response);
           });
         };
-        
+
         svc.addTenantToService = function(svcId, tenantName, callbackSuccess, callbackFailure){
           $http({
             method:'POST',
@@ -328,6 +432,40 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
             });
         };
 
+        svc.addIpvcUni = function(svcid, uni_id, ipuni_id, callback) {
+          var data = {"uni":{
+                          "uni-id":uni_id,
+                          "ip-uni-id":ipuni_id
+                          }
+                      };          
+           $http({
+              method:'PUT',
+              url:"/restconf/config/mef-services:mef-services/mef-service/" + svcid + "/ipvc/unis/uni/"+uni_id,
+              data: data
+          }).then(function successCallback(response) {
+              if (callback != undefined) {
+                  callback();
+              }
+          }, function failureCallback(response) {
+              if (callback != undefined) {
+                  callback();
+              }
+          });
+      };
+      
+      svc.deleteIpvcUni = function(svcid, uni_id, callback) {
+        $http({
+           method:'DELETE',
+           url:"/restconf/config/mef-services:mef-services/mef-service/" + svcid + "/ipvc/unis/uni/" + uni_id + "/"
+       }).then(function successCallback(response) {
+           if (callback != undefined) {
+               callback();
+           }
+       });
+   };
+      
+      
+      
         svc.addEvcUni = function(svcid, uni_id, role, vlans, callback) {
             var data = {"uni":{
                             "uni-id":uni_id,
@@ -407,14 +545,14 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
         svc.getNetworkNames = function(callback){
           $http({
             method:'GET',
-            url:"/restconf/config/neutron:neutron/networks/"            
+            url:"/restconf/config/neutron:neutron/networks/"
         }).then(function successCallback(response) {
-            if (callback != undefined) {                
+            if (callback != undefined) {
                 callback(response.data.networks.network);
             }
         });
         };
-        
+
         return svc;
 
     });

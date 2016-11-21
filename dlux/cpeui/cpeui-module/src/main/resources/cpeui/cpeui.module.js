@@ -47,7 +47,7 @@ define([ 'angularAMD', 'app/routingConfig', 'app/core/core.services',
     });
 
     $stateProvider.state('main.cpeui.tenant', {
-      url : '/tenant/:tenantid',
+      url : '/tenant/:tenantid/:tenantTabName',
       access : access.public,
       views : {
         'cpeui' : {

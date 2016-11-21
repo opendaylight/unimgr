@@ -126,6 +126,8 @@ MD-TOOLBAR:active {
 
 .inner-table {
 	border: 1px solid;
+	margin-top: 0;
+	margin-bottom: 0;
 }
 .clickable {
 	cursor: pointer;

@@ -56,6 +56,12 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
       $mdDialog.show(confirm).then(callback_ok, callback_cancel);
     };
 
+    svc.alert = function(title, content, callback_ok) {
+      var alert = $mdDialog.alert().title(title).textContent(content).ok(
+          'Ok');
+      $mdDialog.show(alert).then(callback_ok);
+    };
+    
     return svc;
   });
 

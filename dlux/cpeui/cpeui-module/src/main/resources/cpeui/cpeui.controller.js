@@ -25,7 +25,7 @@ define([].concat(modules).concat(services).concat(directives).concat(controllers
     }
 
     $scope.tab = {
-      tenantData : mainTabIndexs["tenants"],
+      tenantData : 1,
       admin : 1
     };
     var selectedTab = mainTabIndexs[$state.params.tabName];

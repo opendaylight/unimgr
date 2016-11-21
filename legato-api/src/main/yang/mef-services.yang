@@ -76,6 +76,7 @@ module mef-services {
           container ipvc {
             container unis {
               list uni {
+            	 key "uni-id";
                 leaf uni-id {
                   type leafref {
                     path "/mef-interfaces:mef-interfaces/" +

@@ -28,7 +28,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
 
         $scope.OpenTenantPortal = function(tenant) {
           $scope.currentTenent = tenant;
-          window.location = "#cpeui/tenant/" + tenant.name;
+          window.location = "#cpeui/tenant/" + tenant.name +"/";
         };
 
         $scope.DeleteTenant = function(tenantID) {

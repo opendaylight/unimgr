@@ -2,7 +2,6 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
   cpeui.register.controller('OpenTenantCtrl', function($scope, CpeuiSvc, CpeuiDialogs, $stateParams) {
 
     $scope.curTenant = $stateParams.tenantid;
-
     $scope.unisTables = {};
     $scope.unis = [];
     $scope.ces = [];
@@ -10,14 +9,26 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
     $scope.cesDisplayNames = {};
     $scope.unisMap = {};
     $scope.networkNames = {};
+    $scope.expandFlags = {
+        ipuni:{},
+        tuni:{}
+    };
 
+    var tabIndexs = {
+        "L2" : 1,
+        "L3" : 2,
+        "unis" : 3,
+      }
+    if (tabIndexs[$stateParams.tenantTabName]) {
+      $scope.tab.tenantData = tabIndexs[$stateParams.tenantTabName];
+    }
 
     function init(){
       $scope.updateUnis(function(unis){
         CpeuiSvc.getCes(function(ces) {
           $scope.ces = ces.filter(function(item) {
-            
-            var filteredUnis = unis.filterByField('device', item["dev-id"]); 
+
+            var filteredUnis = unis.filterByField('device', item["dev-id"]);
             filteredUnis = filteredUnis.filterByField('prettyID', 'br-int', true);
             filteredUnis = filteredUnis.filter(function(i){return !(i.prettyID && i.prettyID.startsWith('tun'));});
 
@@ -29,8 +40,8 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
           $scope.updateEvcView();
         });
       });
-      
-      CpeuiSvc.getNetworkNames(function(networks){        
+
+      CpeuiSvc.getNetworkNames(function(networks){
         networks.forEach(function(net){
           $scope.networkNames[net.uuid] = net.name;
         });
@@ -53,25 +64,28 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
 
     $scope.updateEvcView = function() {
       CpeuiSvc.getServices($scope.curTenant, function(services) {
-        
+
         $scope.evcs = services.filter(function(svc){ return svc.evc != undefined;});
         $scope.ipvcs = services.filter(function(svc){ return svc.ipvc != undefined;});
-
         $scope.updateUnis();
-
+        console.log($scope.ipvcs);
         $scope.ipvcs.forEach(function(e){
-          e.isTree = (e.ipvc['ipvc-type'] == 'rooted-multipoint');
+          if (e.ipvc.unis != undefined && e.ipvc.unis.uni != undefined){
+              e.ipvc.unis.uni.forEach(function(u){
+                u.device = u['uni-id'].split(":")[u['uni-id'].split(":").length-2];
+                u.prettyID = u['uni-id'].split(":")[u['uni-id'].split(":").length-1];
+            });
+          }
         });
-        
         $scope.evcs.forEach(function(e){
           e.isTree = (e.evc['evc-type'] == 'rooted-multipoint');
           e.device2unis = {};
-          if (e.evc.unis.uni != undefined){
+          if (e.evc.unis != undefined && e.evc.unis.uni != undefined){
             e.evc.unis.uni.forEach(function(u){
               if (e.device2unis[$scope.unisMap[u['uni-id']].device] == undefined){
                 e.device2unis[$scope.unisMap[u['uni-id']].device] = [];
               }
-              u.prettyID = u['uni-id'].split(":")[u['uni-id'].split(":").length - 1];              
+              u.prettyID = u['uni-id'].split(":")[u['uni-id'].split(":").length - 1];
               e.device2unis[$scope.unisMap[u['uni-id']].device].push(u);
             });
           }
@@ -112,6 +126,89 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
           });
     }, addEvcController);
 
+    $scope.ipvcDialog = new CpeuiDialogs.Dialog('AddIpvc', {}, function(obj) {
+      CpeuiSvc.addIpvc(obj, $scope.curTenant, function() {
+            $scope.updateEvcView();
+          });
+    });
+
+    $scope.linkIpvcUniDialog = new CpeuiDialogs.Dialog('LinkIpvcUni', {},
+        function(obj) {
+          CpeuiSvc.addIpvcUni(obj.svc_id, obj.uni['uni-id'], obj.ip_uni,
+              function() {
+                $scope.updateEvcView();
+              });
+        });
+
+    var ipUniDialogController = function($scope, $mdDialog) {
+      $scope.hasVlans = false;
+      if ($scope.params.uni['ip-unis'] && $scope.params.uni['ip-unis']['ip-uni']) {
+        var ipunis = $scope.params.uni['ip-unis']['ip-uni'];
+        for (i = 0; i < ipunis.length; i++) {
+          if (ipunis[i].vlan){
+            $scope.hasVlans = true;
+          }
+        }
+      }
+    };
+
+    $scope.ipUniDialog = new CpeuiDialogs.Dialog('AddIpUni', {}, function(obj) {
+      CpeuiSvc.addIpUni(obj['uni-id'], obj['ip-uni-id'], obj['ip-address'], obj.vlan, obj.subnets, function() {
+          $scope.unis.filterByField('uni-id',obj['uni-id'])[0]['ip-unis']['ip-uni'].push(obj);
+          });
+    }, ipUniDialogController);
+
+    $scope.openIpUniDialog = function(event,uni){
+      if (uni['ip-unis'] && (uni['ip-unis']['ip-uni'] != undefined)){
+        var ipunis = uni['ip-unis']['ip-uni'];
+        for (i = 0; i < ipunis.length; i++) {
+          if (!ipunis[i].vlan){
+            CpeuiDialogs.alert("Error","You Can't have more then one ip-uni with no vlan. please remove the non-vlan ip-uni before adding new.")
+            return;
+          }
+        }
+      }
+      $scope.ipUniDialog.show(event,{'uniid':uni['uni-id'], uni:uni})
+    }
+
+    $scope.ipUniSubnetDialog = new CpeuiDialogs.Dialog('AddIpUniSubnet', {}, function(obj) {
+      CpeuiSvc.addIpUniSubnet(obj.uniid, obj.ipuniid, obj.subnet, obj.gateway, function() {
+          CpeuiSvc.getIpUniSubnets(obj.uniid, obj.ipuniid, function(subnets) {
+            $scope.unis.filterByField('uni-id',obj.uniid)[0]['ip-unis']['ip-uni'].filterByField('ip-uni-id',obj.ipuniid)[0].subnets = {subnet:subnets};
+          });
+      });
+    });
+
+    $scope.deleteIpUni = function(uniid, ipuni_id) {
+        CpeuiDialogs.confirm(function() {
+          CpeuiSvc.deleteIpUni(uniid, ipuni_id, function() {
+            $scope.updateEvcView(); // TODO update unis only
+          });
+        });
+      };
+      $scope.deleteIpvcUni = function(svc_id, uni_id) {
+        CpeuiDialogs.confirm(function() {
+          CpeuiSvc.deleteIpvcUni(svc_id, uni_id, function() {
+            $scope.updateEvcView();
+          });
+        });
+      };
+      $scope.getMefInterfaceIpvc = function(uni_id,ipuni_id){
+        var uni = $scope.unis.filterByField('uni-id',uni_id)[0];
+        if ((uni == undefined) || (uni['ip-unis'] == undefined) || (uni['ip-unis']['ip-uni'] == undefined)) {
+          return undefined;
+        }
+        return uni['ip-unis']['ip-uni'].filterByField('ip-uni-id',ipuni_id)[0];
+      }
+
+      $scope.deleteIpUniSubnet = function(uniid, ipuni_id, subnet) {
+          CpeuiDialogs.confirm(function() {
+            CpeuiSvc.deleteIpUniSubnet(uniid, ipuni_id, subnet, function() {
+              $scope.updateEvcView(); // TODO update unis only
+            });
+          });
+    };
+
     $scope.deleteEvc = function(svcid) {
       CpeuiDialogs.confirm(function() {
         CpeuiSvc.removeEvc(svcid, function() {
@@ -143,17 +240,17 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
         }
         $('#vlan_input').val(undefined);
       };
-      
+
       $scope.filterUsedUnis = function(evc){
-        return function(u) {          
+        return function(u) {
           if (u.prettyID == 'br-int') {
             return false;
           }
           if (u.prettyID && u.prettyID.startsWith('tun')) {
             return false;
           }
-          if (evc.evc.unis.uni == undefined){
-            evc.evc.unis.uni = [];     
+          if (evc.evc == undefined || evc.evc.unis.uni == undefined){
+            return true;
           }
           return evc.evc.unis.uni.filterByField('uni-id',u['uni-id']).length == 0;
         };
@@ -202,7 +299,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
     };
     $scope.sortIpvc = function(ipvc) {
       return ipvc['ipvc-id'];
-    };    
+    };
 
     init();
   });

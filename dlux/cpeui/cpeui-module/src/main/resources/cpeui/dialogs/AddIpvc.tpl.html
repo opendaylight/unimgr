@@ -1,7 +1,7 @@
-<md-dialog class="cpe-dialog" aria-label="Create EVC"  ng-cloak>
+<md-dialog class="cpe-dialog" aria-label="Create IPVC"  ng-cloak>
     <md-toolbar>
       <div class="md-toolbar-tools">
-        <h2>Create EVC</h2>
+        <h2>Create IPVC</h2>
         <span flex></span>
         <md-button class="md-icon-button" aria-label="Close dialog" ng-click="cancel()">
         <i class="icon-remove-sign"></i>
@@ -14,27 +14,13 @@
 <div layout="column" ng-cloak>
   <md-content layout-padding>
       <md-input-container class="md-block">
-        <label>EVC ID (Number)</label>
-        <input type="number" required name="evcid" ng-model="obj.id">
-        <div ng-messages="projectForm.evcid.$error">
+        <label>IPVC ID (Number)</label>
+        <input type="number" required name="ipvcid" ng-model="obj.id">
+        <div ng-messages="projectForm.ipvcid.$error">
       		<div ng-message="required">Number is required!</div>
     	</div>
-      </md-input-container>
-      <md-input-container class="md-block">
-        <label>Service Type</label>
-        <md-select required ng-model="obj.svc_type" name="svc_type" >
-       		<md-option ng-repeat="typ in params.svcTypes" value="{{ typ }}">{{ typ }}</md-option>
-        </md-select>
-        <div ng-messages="projectForm.svc_type.$error">
-      		<div ng-message="required">This is required!</div>
-    	</div>
-      </md-input-container>
-      <md-input-container class="md-block">
-        <label>Maximum Number of UNIs</label>
-        <input type="number" step="1" name="max_uni" ng-model="obj.max_uni">
-      </md-input-container>
-
-
+      </md-input-container>      
+      <!-- 
      <a ng-init="advancedCollapsed=true" ng-click="advancedCollapsed = !advancedCollapsed" class="btn btn-navbar btn-info">{{advancedCollapsed ? 'Show' : 'Hide'}} Advanced Options</a>
       	<div layout-gt-sm="row" ng-if-start="!advancedCollapsed">
 	      	<md-input-container class="md-block" flex-gt-sm>
@@ -49,7 +35,7 @@
 	      	</md-input-container>
       	</div>
       	<md-input-container class="md-block" ng-init="obj.mtu_size = 1522">
-        	<label>EVC MTU size</label>
+        	<label>IPVC MTU size</label>
         	<input type="number" step="1" name="mtu" min="1522" max="16384" ng-model="obj.mtu_size">
         	<div ng-messages="projectForm.mtu.$error">
       			<div ng-message="min">Number must be in range [1522..16384]</div>
@@ -73,15 +59,15 @@
        			<md-option value="conditional">Conditional</md-option>
         	</md-select>
       	</md-input-container>
+       -->
       	
   </md-content>
 </div>
     </md-dialog-content>
     <md-dialog-actions layout="row">
       <span flex></span>
-      <span ng-init="invalid = false" ng-if="invalid" style="color: red;">Invalid Input!</span>
       <md-button ng-click="cancel()"> Cancel </md-button>
-      <md-button type="submit" ng-click="validate(projectForm) ? done(obj) : (invalid = true)"> Create </md-button>
+      <md-button type="submit" ng-click="done(obj)"> Create </md-button>
     </md-dialog-actions>
     </form>
 </md-dialog>

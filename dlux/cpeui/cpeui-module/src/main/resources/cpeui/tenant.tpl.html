@@ -3,25 +3,26 @@
 	<div class="menu">
 		<ul id="EVCs-tab" class="nav nav-pills" role="tablist">
 			<li ng-class="{ active: isTabSet('tenantData',1)}" ng-click="setTab('tenantData',1)" >
-				<a id="evcs-configure-tab" > <i class="icon-tasks"></i> L2 Services</a>
-			</li>
-			<!-- UnComment to add L3 Services 
+				<a id="evcs-configure-tab" href="#/cpeui/tenant/{{curTenant}}/L2"> <i class="icon-tasks"></i> L2 Services</a>
+			</li>			 
 			<li ng-class="{ active: isTabSet('tenantData',2)}" ng-click="setTab('tenantData',2)" >
-				<a id="evcs-configure-tab" > <i class="icon-tasks"></i> L3 Services</a>
-			</li>			
-			  END of UnComment to add L3 Services-->
+				<a id="evcs-configure-tab" href="#/cpeui/tenant/{{curTenant}}/L3" > <i class="icon-tasks"></i> L3 Services</a>
+			</li>
+			<li ng-class="{ active: isTabSet('tenantData',3)}" ng-click="setTab('tenantData',3)" >
+				<a id="evcs-configure-tab" href="#/cpeui/tenant/{{curTenant}}/unis"> <i class="icon-tasks"></i> UNIs</a>
+			</li>
 			<li id="refresh_btn" class="active refresh-btn" ng-click="updateEvcView()">
 				<button class="btn add-row"> <i class="icon-refresh"></i> Refresh</button>
 			</li>
 		</ul>
 	</div>
-	<div id="EVCsContent" class="tab-content">
+	<div id="EVCsContent" class="tab-content">	
 		<div ng-show="isTabSet('tenantData',1)">
 			<div class="table-header">EVCs Table</div>
 			<table class="footable table table-striped">
 				<thead>
 					<tr>
-						<th>EVC ID</th>
+						<th class="minimal-width">EVC ID</th>
 						<th>UNIs</th>
 						<th>Network Name</th>
 						<th>SVC Type</th>
@@ -31,7 +32,7 @@
 				</thead>
 				<tbody id="l2_table">
 					<tr ng-repeat-start="item in evcs | orderBy : sortEvc">
-						<td rowspan="{{ 1 + unisTables[item['svc-id']] }}">{{ item.evc['evc-id'] }}</td>
+						<td rowspan="{{ 1 + unisTables[item['svc-id']] }}" class="minimal-width">{{ item.evc['evc-id'] }}</td>
 						<td >
 							<button ng-show="!unisTables[item['svc-id']]" class="btn add-row btn-block" ng-click="unisTables[item['svc-id']] = true;">Show Unis</button>
 							<button ng-show="unisTables[item['svc-id']]" class="btn add-row btn-block" ng-click="unisTables[item['svc-id']] = false;">Hide Unis</button>
@@ -50,8 +51,8 @@
 										<th>Device</th>
 										<th>UNI</th>
 										<th ng-if="item.isTree" >Role</th>
-										<th>Vlans <span style="font-size:small;color:inherit;"> (click to edit)</span></th>
-										<th class="delete-tr"><button class="btn btn-md btn-info" ng-click="linkEvcUniDialog.show($event, {'evc':item,'unis':unis,'ces':ces})"> <i class="icon-plus"></i> </button></th>
+										<th>VLANs <span style="font-size:small;color:inherit;"> (click to edit)</span></th>
+										<th class="delete-tr"><button class="btn btn-md btn-info" ng-click="linkEvcUniDialog.show($event, {'svc':item,'unis':unis,'ces':ces})"> <i class="icon-plus"></i> </button></th>
 									</tr>
 								</thead>
 								<tbody id="l2_table">
@@ -84,13 +85,12 @@
 			</table>
 			<div><a class="btn btn-info add-row" ng-click="evcDialog.show($event,{'svcTypes':svcTypes})" >Create EVC</a></div>
 		</div>
-		<!-- UnComment to add L3 Services 
 		<div ng-show="isTabSet('tenantData',2)">
 			<div class="table-header">IPVCs Table</div>
 			<table class="footable table table-striped">
 				<thead>
 					<tr>
-						<th>IPVC ID</th>
+						<th class="minimal-width">IPVC ID</th>
 						<th>UNIs</th>
 						<th>IPVC Type</th>						
 						<th colspan="2" >Tenant</th>
@@ -98,7 +98,7 @@
 				</thead>
 				<tbody id="l2_table">
 					<tr ng-repeat-start="ipvc in ipvcs | orderBy : sortIpvc">
-						<td rowspan="{{ 1 + unisTables[ipvc.ipvc['ipvc-id']] }}">{{ ipvc.ipvc['ipvc-id'] }}</td>
+						<td rowspan="{{ 1 + unisTables[ipvc.ipvc['ipvc-id']] }}" class="minimal-width">{{ ipvc.ipvc['ipvc-id'] }}</td>
 						<td >
 							<button ng-show="!unisTables[ipvc.ipvc['ipvc-id']]" class="btn add-row btn-block" ng-click="unisTables[ipvc.ipvc['ipvc-id']] = true;">Show Unis</button>
 							<button ng-show="unisTables[ipvc.ipvc['ipvc-id']]" class="btn add-row btn-block" ng-click="unisTables[ipvc.ipvc['ipvc-id']] = false;">Hide Unis</button>
@@ -114,38 +114,100 @@
 									<tr>
 										<th>Device</th>
 										<th>UNI</th>
-										<th ng-if="ipvc.isTree" >Role</th>
-										<th>Vlans <span style="font-size:small;color:inherit;"> (click to edit)</span></th>
-										<th class="delete-tr"><button class="btn btn-md btn-info" ng-click="linkEvcUniDialog.show($event, {'ipvc':ipvc,'unis':unis,'ces':ces})"> <i class="icon-plus"></i> </button></th>
+										<th>IP Address</th>
+										<th>vlan</th>
+										<th class="delete-tr"><button class="btn btn-md btn-info" ng-click="linkIpvcUniDialog.show($event, {'svc':ipvc,'unis':unis,'ces':ces})"> <i class="icon-plus"></i> </button></th>
 									</tr>
 								</thead>
 								<tbody id="l2_table">
-									<tr ng-repeat-start="(ce, unis) in ipvc.device2unis | orderBy : ce ">
-										<td rowspan="{{unis.length}}">{{ cesDisplayNames[ce] }}</td>
-										<td ng-repeat-start="uni in unis | orderBy: sortUni | limitTo :1">{{ uni['uni-id'] }}</td>
-										<td ng-if="ipvc.isTree">{{ uni['role'] }}</td>
-										<td class="clickable" ng-click="!ipvc.evc['preserve-ce-vlan-id'] ? editVlanDialog.show($event, {svcid:ipvc['svc-id'], uniid:uni['uni-id'], vlans:uni.vlans}) : 0">
-										{{ uni.vlans.join(', ') }} {{ipvc.evc['preserve-ce-vlan-id'] ? '(Preserved)' : ''}}
-										</td>
-										<td ng-repeat-end class="delete-tr"><button class="btn btn-md btn-danger" ng-click="deleteEvcUni(ipvc['svc-id'], uni['uni-id'])"> <i class="icon-trash"></i> </button></td>
-									</tr>
-									<tr ng-repeat-end ng-repeat="uni in unis | orderBy: sortUni | limitTo :(unis.length-1) :1">
-										<td>{{ uni['uni-id'] }}</td>
-										<td ng-if="item.isTree">{{ uni['role'] }}</td>
-										<td class="clickable" ng-click="!item.evc['preserve-ce-vlan-id'] ? editVlanDialog.show($event, {svcid:ipvc['svc-id'], uniid:uni['uni-id'], vlans:uni.vlans}) : 0">
-										{{ uni.vlans.join(', ') }} {{ipvc.evc['preserve-ce-vlan-id'] ? '(Preserved)' : ''}}
-										</td>
-										<td class="delete-tr"><button class="btn btn-md btn-danger" ng-click="deleteEvcUni(ipvc['svc-id'], uni['uni-id'])"> <i class="icon-trash"></i> </button></td>
-									</tr>
+									<tr ng-repeat="ipuni in ipvc.ipvc.unis.uni">
+										<td ng-init="serviceIpuni = getMefInterfaceIpvc(ipuni['uni-id'],ipuni['ip-uni-id'])">{{ ipuni.device }}</td>
+										<td>{{ ipuni.prettyID }}</td>
+										<td>{{serviceIpuni['ip-address']}}</td>
+										<td>{{serviceIpuni.vlan}}</td>
+										<td class="delete-tr"><button class="btn btn-md btn-danger" ng-click="deleteIpvcUni(ipvc['svc-id'], ipuni['uni-id'])"> <i class="icon-trash"></i> </button></td>
+									</tr>									
 								</tbody>
 							</table>
 						</td>
 					</tr>
 				</tbody>
 			</table>
-			<div><a class="btn btn-info add-row" ng-click="evcDialog.show($event,{'svcTypes':svcTypes})" >Create IPVC</a></div>
+			<div><a class="btn btn-info add-row" ng-click="ipvcDialog.show($event,{'svcTypes':svcTypes})" >Create IPVC</a></div>
 		</div>
-		 END OF UnComment to add L3 Services -->		
+		<div ng-show="isTabSet('tenantData',3)">
+			<div class="table-header">Tenant UNIs</div>
+			<table class="footable table table-striped">
+				<thead>
+					<tr>
+						<th class="minimal-width">Device</th>
+						<th class="minimal-width">UNI</th>
+						<th>Ports</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="uni in unis | orderBy: '[\'uni-id\']'">					
+						<td class="minimal-width">{{ uni.device }}</td>
+						<td class="minimal-width">{{ uni.prettyID }}</td>
+						<td>
+						<button class="btn btn-info add-row" ng-click="expandFlags.tuni[uni['uni-id']] = false" ng-if="expandFlags.tuni[uni['uni-id']]">
+							<i class="icon-plus"></i> Show Ports
+						</button>
+							<table class="footable table table-striped inner-table" ng-if="!expandFlags.tuni[uni['uni-id']]">
+								<thead>
+									<tr>
+										<th class="minimal-width">
+											<button class="btn btn-info add-row" ng-click="expandFlags.tuni[uni['uni-id']] = true">
+												<i class="icon-minus"></i>
+											</button>
+										</th>
+										<th class="minimal-width">IP UNI ID</th>
+										<th class="minimal-width">VLAN</th>
+										<th class="minimal-width">Address</th>
+										<th>Remote Subnets</th>
+										<th class="delete-tr"><button class="btn btn-md btn-info" ng-click="openIpUniDialog($event,uni)"> <i class="icon-plus"></i> </button></th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr ng-repeat="ipuni in uni['ip-unis']['ip-uni'] | orderBy: '[\'ip-uni-id\']'">
+										<td colspan="2" class="minimal-width">{{ ipuni['ip-uni-id'] }}</td>
+										<td class="minimal-width">{{ ipuni.vlan }}</td>
+										<td class="minimal-width">{{ ipuni['ip-address'] }}</td>
+										<td>
+										<button class="btn btn-info add-row" ng-click="expandFlags.ipuni[ipuni['ip-uni-id']] = true" ng-if="!expandFlags.ipuni[ipuni['ip-uni-id']]">
+											<i class="icon-plus"></i> Show Subnets
+										</button>
+											<table class="footable table table-striped inner-table" ng-if="expandFlags.ipuni[ipuni['ip-uni-id']]">
+												<thead>
+													<tr>
+														<th class="minimal-width">
+															<button class="btn btn-info add-row" ng-click="expandFlags.ipuni[ipuni['ip-uni-id']] = false">
+																<i class="icon-minus"></i>
+															</button>
+														</th>
+														<th>Subnet</th>
+														<th>Gateway</th>
+														<th class="delete-tr"><button class="btn btn-md btn-info" ng-click="ipUniSubnetDialog.show($event,{uniid:uni['uni-id'],ipuniid:ipuni['ip-uni-id']})"> <i class="icon-plus"></i> </button></th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr ng-repeat="subnet in ipuni['subnets']['subnet'] | orderBy: subnet">
+														<td colspan="2">{{ subnet.subnet }}</td>
+														<td>{{ subnet.gateway }}</td>
+														<td class="delete-tr"><button class="btn btn-md btn-danger" ng-click="deleteIpUniSubnet(uni['uni-id'],ipuni['ip-uni-id'],subnet.subnet)"> <i class="icon-trash"></i> </button></td>
+													</tr>									
+												</tbody>
+											</table>
+										</td>
+										<td class="delete-tr"><button class="btn btn-md btn-danger" ng-click="deleteIpUni(uni['uni-id'],ipuni['ip-uni-id'])"> <i class="icon-trash"></i> </button></td>
+									</tr>									
+								</tbody>
+							</table>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 	</div>
 	<div class="clear">
 		<button class="btn btn-default pull-right" onclick="window.location='#/cpeui/admin/tenants'" > Back </button>
