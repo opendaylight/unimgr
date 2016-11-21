@@ -91,6 +91,8 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
 
             Log.info("Adding vpn instance: " + instanceName);
             NetvirtVpnUtils.createVpnInstance(dataBroker, vpnName);
+            Log.info("Number of UNI's: " + data.getUnis().getUni().size());
+
 
             // Create elan interfaces
             for (Uni uni : data.getUnis().getUni()) {
@@ -167,6 +169,8 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
         String uniId = uniInService.getUniId().getValue();
         String ipUniId = uniInService.getIpUniId().getValue();
 
+        Log.info("Adding/updating elan instance: " + uniId);
+
         org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.Uni uni = IpvcUniUtils
                 .getUni(dataBroker, uniId);
         if (uni == null) {
@@ -174,9 +178,8 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
             throw new UnsupportedOperationException();
         }
         IpUni ipUni = IpvcUniUtils.getIpUni(dataBroker, uniId, ipUniId);
-        Integer vlan = (ipUni.getVlan()) != null ? ipUni.getVlan().getValue() : null;
+        Integer vlan = ipUni.getVlan() != null ? ipUni.getVlan().getValue() : null;
 
-        Log.info("Adding/updating elan instance: " + uniId);
         String elanName = NetvirtVpnUtils.getElanNameForVpnPort(uniId);
         Log.info("Adding elan instance: " + elanName);
         NetvirtUtils.updateElanInstance(dataBroker, elanName);
@@ -200,15 +203,18 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
 
         if (ipUni.getSubnets() != null) {
             for (Subnet subnet : ipUni.getSubnets().getSubnet()) {
+                Log.info("Resolving MAC address for gateway: " + subnet.getGateway());
                 MacAddress gwMacAddress = NetvirtVpnUtils.resolveGwMac(dataBroker, arpUtilService, vpnName,
                         ipUni.getIpAddress(), subnet.getGateway(), interfaceName); // trunk
                 if (gwMacAddress == null) {
                     continue;
                 }
+                Log.info("update vpn interface: " + interfaceName);
                 NetvirtVpnUtils.createUpdateVpnInterface(dataBroker, vpnName, interfaceName, subnet.getSubnet(),
                         gwMacAddress, false, ipUni.getIpAddress());
             }
         }
+        Log.info("Finished working on elan instance: " + uniId);
     }
 
     private void removeElanInterface(String instanceName, Uni uni) {

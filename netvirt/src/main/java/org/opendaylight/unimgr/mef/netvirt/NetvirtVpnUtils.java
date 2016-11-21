@@ -110,11 +110,13 @@ public class NetvirtVpnUtils {
     private static Adjacencies buildInterfaceAdjacency(String ipAddress, MacAddress macAddress, boolean primary,
             String nextHopIp) {
         AdjacenciesBuilder builder = new AdjacenciesBuilder();
-        List<Adjacency> list = new ArrayList<Adjacency>();
+        List<Adjacency> list = new ArrayList<>();
 
         AdjacencyBuilder aBuilder = new AdjacencyBuilder();
         aBuilder.setIpAddress(ipAddress);
-        aBuilder.setMacAddress(macAddress.getValue());
+        if (macAddress != null) {
+            aBuilder.setMacAddress(macAddress.getValue());
+        }
         aBuilder.setPrimaryAdjacency(primary);
         if (nextHopIp != null) {
             aBuilder.setNextHopIpList(Arrays.asList(nextHopIp));
@@ -232,6 +234,7 @@ public class NetvirtVpnUtils {
 
         logger.info("Publish subnet {}", subnetName);
         publishSubnetAddNotification(notificationPublishService, subnetId, subnetIp, vpnName, elanTag);
+        logger.info("Finished Working on subnet {}", subnetName);
 
     }
 
@@ -272,7 +275,7 @@ public class NetvirtVpnUtils {
                 if (null != portId) {
                     List<Uuid> portList = builder.getPortList();
                     if (null == portList) {
-                        portList = new ArrayList<Uuid>();
+                        portList = new ArrayList<>();
                     }
                     portList.add(portId);
                     builder.setPortList(portList);
@@ -356,6 +359,7 @@ public class NetvirtVpnUtils {
         MacAddress macAddress = null;
         int retries = MaxRetries;
         while (retries > 0 && macAddress == null) {
+            logger.info("Sending ARP request to dstIp {} take {}", dstIpAddress, MaxRetries - retries + 1);
             sendArpRequest(arpUtilService, srcIpAddress, dstIpAddress, interf);
             macAddress = waitForArpReplyProcessing(dataBroker, vpnName, dstIpAddress, MaxRetries);
             retries--;
@@ -383,6 +387,7 @@ public class NetvirtVpnUtils {
     public static MacAddress waitForArpReplyProcessing(DataBroker dataBroker, String vpnName, IpAddress dstIpAddress,
             int retries) {
         while (retries > 0) {
+            logger.info("Waiting for ARP reply from dstIp {} take {}", dstIpAddress, MaxRetries - retries + 1);
             InstanceIdentifier<VpnPortipToPort> optionalPortIpId = buildVpnPortipToPortIdentifier(vpnName,
                     MefUtils.ipAddressToString(dstIpAddress));
             Optional<VpnPortipToPort> optionalPortIp = MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL,
@@ -393,6 +398,7 @@ public class NetvirtVpnUtils {
             } else {
                 sleep();
             }
+            retries--;
         }
         return null;
     }

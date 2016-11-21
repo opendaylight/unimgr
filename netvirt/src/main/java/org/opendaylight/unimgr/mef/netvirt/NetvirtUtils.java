@@ -137,6 +137,7 @@ public class NetvirtUtils {
         ElanInstanceBuilder einstBuilder = new ElanInstanceBuilder();
         einstBuilder.setElanInstanceName(instanceName);
         einstBuilder.setKey(new ElanInstanceKey(instanceName));
+        einstBuilder.setSegmentationId(Math.abs((long) instanceName.hashCode()));
         return einstBuilder;
     }
 
