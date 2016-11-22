@@ -121,7 +121,7 @@
 								</thead>
 								<tbody id="l2_table">
 									<tr ng-repeat="ipuni in ipvc.ipvc.unis.uni">
-										<td ng-init="serviceIpuni = getMefInterfaceIpvc(ipuni['uni-id'],ipuni['ip-uni-id'])">{{ ipuni.device }}</td>
+										<td ng-init="serviceIpuni = getMefInterfaceIpvc(ipuni['uni-id'],ipuni['ip-uni-id'])">{{ cesDisplayNames[ipuni.device] }}</td>
 										<td>{{ ipuni.prettyID }}</td>
 										<td>{{serviceIpuni['ip-address']}}</td>
 										<td>{{serviceIpuni.vlan}}</td>
@@ -147,7 +147,7 @@
 				</thead>
 				<tbody>
 					<tr ng-repeat="uni in unis | orderBy: '[\'uni-id\']'">					
-						<td class="minimal-width">{{ uni.device }}</td>
+						<td class="minimal-width">{{ cesDisplayNames[uni.device] }}</td>
 						<td class="minimal-width">{{ uni.prettyID }}</td>
 						<td>
 						<button class="btn btn-info add-row" ng-click="expandFlags.tuni[uni['uni-id']] = false" ng-if="expandFlags.tuni[uni['uni-id']]">
