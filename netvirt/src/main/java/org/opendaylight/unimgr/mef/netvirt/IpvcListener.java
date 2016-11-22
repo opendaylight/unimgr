@@ -21,9 +21,9 @@ import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.inte
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.ip.unis.ip.uni.subnets.Subnet;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.Ipvc;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.unis.Uni;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInterface.EtreeInterfaceType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.arputil.rev160406.OdlArputilService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInterface.EtreeInterfaceType;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,8 +109,14 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
             Ipvc update = modifiedDataObject.getRootNode().getDataAfter();
 
             String instanceName = original.getIpvcId().getValue();
+            final String vpnName = NetvirtVpnUtils.getUUidFromString(instanceName);
 
             Log.info("Updating elan instance: " + instanceName);
+
+            if (original == null || original.getUnis() == null || original.getUnis().getUni() == null) {
+                addIpvc(modifiedDataObject);
+                return;
+            }
 
             List<Uni> originalUni = original.getUnis().getUni();
             List<Uni> updateUni = update.getUnis().getUni();
@@ -123,19 +129,19 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
                     // removing the Uni which are not presented in the updated
                     // List
                     for (Uni uni : originalUni) {
-                        removeElanInterface(instanceName, uni);
+                        removeElanInterface(vpnName, uni);
                     }
                 }
 
                 // Adding the new Uni which are presented in the updated List
                 if (updateUni.size() > 0) {
                     for (Uni uni : updateUni) {
-                        createInterfaces(original, uni);
+                        createInterfaces(vpnName, uni);
                     }
                 }
             } else if (originalUni != null && !originalUni.isEmpty()) {
                 for (Uni uni : originalUni) {
-                    removeElanInterface(instanceName, uni);
+                    removeElanInterface(vpnName, uni);
                 }
             }
         } catch (final Exception e) {
@@ -201,7 +207,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
         NetvirtVpnUtils.addDirectSubnetToVpn(dataBroker, notificationPublishService, vpnName, elanName,
                 ipUni.getIpAddress(), interfaceName);
 
-        if (ipUni.getSubnets() != null) {
+        if (ipUni != null && ipUni.getSubnets() != null && ipUni.getSubnets().getSubnet() != null) {
             for (Subnet subnet : ipUni.getSubnets().getSubnet()) {
                 Log.info("Resolving MAC address for gateway: " + subnet.getGateway());
                 MacAddress gwMacAddress = NetvirtVpnUtils.resolveGwMac(dataBroker, arpUtilService, vpnName,
