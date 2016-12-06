@@ -45,6 +45,8 @@ import com.google.common.util.concurrent.CheckedFuture;
 
 public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapableNodeConnector> {
 
+    private static final String BRIDGE_PREFIX = "br-";
+    private static final String TUNNEL_PREFIX = "tun";
     private static final Logger log = LoggerFactory.getLogger(NodeConnectorListener.class);
     private static boolean generateMac = false;
     private final UniPortManager uniPortManager;
@@ -163,11 +165,17 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
 
     private void handleNodeConnectorAdded(DataBroker dataBroker, String dpnId, FlowCapableNodeConnector nodeConnector) {
 
+        String uniName = MefInterfaceUtils.getDeviceInterfaceName(dpnId, nodeConnector.getName());
+
+        if (shouldFilterOutNodeConnector(uniName)) {
+            log.info("filtered out interface {} with device {}", nodeConnector.getName(), dpnId);
+            return;
+        }
+
         WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
 
         log.info("Adding mef uni/device interface {} with device {}", nodeConnector.getName(), dpnId);
 
-        String uniName = MefInterfaceUtils.getDeviceInterfaceName(dpnId, nodeConnector.getName());
         InstanceIdentifier<Interface> interfacePath = MefInterfaceUtils.getDeviceInterfaceInstanceIdentifier(dpnId,
                 uniName);
         InterfaceBuilder interfaceBuilder = new InterfaceBuilder();
@@ -227,6 +235,11 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
     private void handleNodeConnectorUpdated(DataBroker dataBroker, String dpnFromNodeConnectorId,
             FlowCapableNodeConnector original, FlowCapableNodeConnector update) {
 
+    }
+
+    private boolean shouldFilterOutNodeConnector(String interfaceName) {
+        String[] splits = interfaceName.split(":");
+        return splits.length > 1 && (splits[1].startsWith(TUNNEL_PREFIX) || splits[1].startsWith(BRIDGE_PREFIX));
     }
 
     private void configIntegrationBridge() {
