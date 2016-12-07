@@ -104,7 +104,7 @@ public class GwMacListener extends UnimgrDataTreeChangeListener<VpnPortipToPort>
         if (gwMacResolver.get(gwMacKey).getGwMac() == null || !gwMacResolver.get(gwMacKey).getGwMac().equals(macAddress)) {
             Log.info("Creating GW for vpn {} port {} ip {} MAC {}", vpnName, portName, ipAddress, macAddress);
             NetvirtVpnUtils.createUpdateVpnInterface(dataBroker, vpnName, portName, gwMacResolver.get(gwMacKey).getSubnet(), macAddress,
-                    false, gwMacResolver.get(gwMacKey).getPortIp());
+                    false, gwMacResolver.get(gwMacKey).getPortIp(), null);
 
             gwMacResolver.get(gwMacKey).setGwMac(macAddress);
         }
