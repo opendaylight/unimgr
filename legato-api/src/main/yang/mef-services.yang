@@ -1514,6 +1514,12 @@ module mef-services {
                             "This value must be 2 for point-to-point mode.";
               reference "[MEF10.3] [R14]. [MEF7.3] Section 12.2.2.";
             }
+            leaf subnet {
+              type inet:ip-prefix;
+            }
+            leaf segmentation-id {
+              type uint32;
+            }
             leaf preserved-vlan {
               type uint32;
             }

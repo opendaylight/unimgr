@@ -49,8 +49,8 @@ public class NetvirtUtils {
     private static final Logger logger = LoggerFactory.getLogger(NetvirtUtils.class);
     private static final long DEFAULT_MAC_TIMEOUT = 300;
 
-    public static void createElanInstance(DataBroker dataBroker, String instanceName, boolean isEtree) {
-        ElanInstanceBuilder einstBuilder = createElanInstance(instanceName);
+    public static void createElanInstance(DataBroker dataBroker, String instanceName, boolean isEtree, Long segmentationId) {
+        ElanInstanceBuilder einstBuilder = createElanInstance(instanceName, segmentationId);
 
         if (isEtree) {
             EtreeInstance etreeInstance = new EtreeInstanceBuilder().build();
@@ -69,6 +69,13 @@ public class NetvirtUtils {
 
     public static void updateElanInstance(String instanceName, WriteTransaction tx) {
         ElanInstanceBuilder einstBuilder = createElanInstance(instanceName);
+
+        tx.merge(LogicalDatastoreType.CONFIGURATION, getElanInstanceInstanceIdentifier(instanceName),
+                einstBuilder.build());
+    }
+
+    public static void updateElanInstance(String instanceName, WriteTransaction tx, Long segmentationId) {
+        ElanInstanceBuilder einstBuilder = createElanInstance(instanceName, segmentationId);
 
         tx.merge(LogicalDatastoreType.CONFIGURATION, getElanInstanceInstanceIdentifier(instanceName),
                 einstBuilder.build());
@@ -123,11 +130,15 @@ public class NetvirtUtils {
     }
 
     private static ElanInstanceBuilder createElanInstance(String instanceName) {
+        return createElanInstance(instanceName, Long.valueOf(Math.abs((short) instanceName.hashCode())));
+    }
+
+    private static ElanInstanceBuilder createElanInstance(String instanceName, Long segmentationId) {
         ElanInstanceBuilder einstBuilder = new ElanInstanceBuilder();
         einstBuilder.setElanInstanceName(instanceName);
         einstBuilder.setKey(new ElanInstanceKey(instanceName));
         einstBuilder.setMacTimeout(DEFAULT_MAC_TIMEOUT);
-        einstBuilder.setSegmentationId(Long.valueOf(Math.abs((short) instanceName.hashCode())));
+        einstBuilder.setSegmentationId(segmentationId);
         einstBuilder.setSegmentType(SegmentTypeVxlan.class);
         return einstBuilder;
     }

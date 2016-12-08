@@ -104,7 +104,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
             InstanceIdentifier<Evc> evcId = newDataObject.getRootPath().getRootIdentifier();
 
             synchronized (instanceName.intern()) {
-                NetvirtUtils.createElanInstance(dataBroker, instanceName, isEtree);
+                NetvirtUtils.createElanInstance(dataBroker, instanceName, isEtree, data.getSegmentationId());
 
                 // Create interfaces
                 if (data.getUnis() == null) {
