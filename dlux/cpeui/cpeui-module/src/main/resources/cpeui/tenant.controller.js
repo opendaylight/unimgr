@@ -162,7 +162,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
     };
 
     $scope.ipUniDialog = new CpeuiDialogs.Dialog('AddIpUni', {}, function(obj) {
-      CpeuiSvc.addIpUni(obj['uni-id'], obj['ip-uni-id'], obj['ip-address'], obj.vlan, function() {
+      CpeuiSvc.addIpUni(obj['uni-id'], obj['ip-uni-id'], obj['ip-address'], obj.vlan, obj['segmentation-id'], function() {
         var uni = $scope.unis.filterByField('uni-id',obj['uni-id'])[0];
         if (uni['ip-unis'] == undefined || uni['ip-unis']['ip-uni'] == undefined){
           uni['ip-unis'] = {'ip-uni':[]};

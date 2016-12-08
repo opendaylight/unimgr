@@ -317,13 +317,16 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
           });
       };
 
-      svc.addIpUni = function(uniid, ipuni_id, ip_address, vlan, callback) {
+      svc.addIpUni = function(uniid, ipuni_id, ip_address, vlan, segmentation_id, callback) {
         var data = {"ip-uni":{
           "ip-uni-id": ipuni_id,
           "ip-address": ip_address
         }};
         if (vlan){
           data["ip-uni"].vlan = vlan;
+        }
+        if (segmentation_id) {
+          data["ip-uni"]["segmentation-id"] = segmentation_id;
         }
         $http({
             method:'POST',
@@ -429,7 +432,8 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
             unis.forEach(function(i){uni_json.push({"uni-id":i});});
             return uni_json;
         }
-        svc.addEvc = function(evc, evc_type, tenant, callback) {
+    
+    svc.addEvc = function(evc, evc_type, tenant, callback) {
             var uni_json = getJsonUnis(evc.unis);
 //            preserved-vlan
             var data = {
@@ -453,6 +457,12 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
             };
             if (evc.is_preserve_vlan) {
               data["mef-service"]["evc"]["preserved-vlan"] = evc.preserved_vlan;
+            }
+            if (evc.subnet) {
+              data["mef-service"]["evc"].subnet = evc.subnet;
+            }
+            if (evc.segmentation_id) {
+              data["mef-service"]["evc"]["segmentation-id"] = evc.segmentation_id;
             }
             $http({
                 method:'POST',

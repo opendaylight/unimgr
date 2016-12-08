@@ -34,6 +34,13 @@
       		<div ng-message="required">Vlan is required when there are other ip-unis with vlans</div>
     	</div>
       </md-input-container>
+      <md-input-container class="md-block">
+        <label>Segmentation ID</label>
+        <input type="number" name="segmentationid" ng-model="obj['segmentation-id']">
+        <div ng-messages="projectForm.segmentationid.$error">
+      		<div ng-message="number">Number is required!</div>
+    	</div>
+      </md-input-container>
   </md-content>
 </div>
     </md-dialog-content>
