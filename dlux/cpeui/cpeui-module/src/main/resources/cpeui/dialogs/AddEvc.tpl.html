@@ -34,9 +34,19 @@
         <input type="number" step="1" name="max_uni" ng-model="obj.max_uni">
       </md-input-container>
 
-
      <a ng-init="advancedCollapsed=true" ng-click="advancedCollapsed = !advancedCollapsed" class="btn btn-navbar btn-info">{{advancedCollapsed ? 'Show' : 'Hide'}} Advanced Options</a>
-      	<div layout-gt-sm="row" ng-if-start="!advancedCollapsed">
+     <md-input-container class="md-block" ng-if-start="!advancedCollapsed">
+        <label>Segmentation ID</label>
+        <input type="number" step="1" name="segmentation_id" ng-model="obj.segmentation_id">
+      </md-input-container>
+      <md-input-container class="md-block">
+        <label>Subnet</label>
+        <input type="text" name="subnet" ng-model="obj.subnet" ng-pattern="/\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(?:[1-2]?[0-9]|3[0-2])\b/">
+        <div ng-messages="projectForm.subnet.$error">
+      		<div ng-message="pattern">IP/Mask is required! (ex. 127.0.0.1/32)</div>
+    	</div>
+      </md-input-container>
+      	<div layout-gt-sm="row">
 	      	<md-input-container class="md-block" flex-gt-sm>
 	      		<md-switch name="is_preserve_vlan" ng-model="obj.is_preserve_vlan">{{obj.is_preserve_vlan ? "" : "Do Not"}} Preserve VLAN</md-switch>
 	      	</md-input-container>

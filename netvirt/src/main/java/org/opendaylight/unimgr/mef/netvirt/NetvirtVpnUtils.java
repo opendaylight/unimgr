@@ -189,7 +189,7 @@ public class NetvirtVpnUtils {
         InstanceIdentifier<VpnInterface> identifier = getVpnInterfaceInstanceIdentifier(interfaceName);
         InstanceIdentifier<Adjacencies> path = identifier.augmentation(Adjacencies.class);
         Optional<Adjacencies> adjacencies = MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, path);
-        List<Adjacency> adjacenciesList = (adjacencies.isPresent() && adjacencies.get().getAdjacency() != null)
+        List<Adjacency> adjacenciesList = adjacencies.isPresent() && adjacencies.get().getAdjacency() != null
                 ? adjacencies.get().getAdjacency() : Collections.emptyList();
         adjacenciesList.forEach(a -> {
             String ipStr = getIpAddressFromPrefix(a.getIpAddress());
@@ -260,7 +260,7 @@ public class NetvirtVpnUtils {
             InstanceIdentifier<VpnPortipToPort> id = getVpnPortipToPortIdentifier(vpnName, fixedIp);
             VpnPortipToPortBuilder builder = new VpnPortipToPortBuilder()
                     .setKey(new VpnPortipToPortKey(fixedIp, vpnName)).setVpnName(vpnName).setPortFixedip(fixedIp)
-                    .setPortName(portName).setMacAddress(macAddress.getValue()).setSubnetIp(true).setConfig(true)
+                    .setPortName(portName).setMacAddress(macAddress.getValue()).setSubnetIp(true)
                     .setLearnt(false);
             tx.put(LogicalDatastoreType.OPERATIONAL, id, builder.build());
             logger.debug(
@@ -309,7 +309,7 @@ public class NetvirtVpnUtils {
         InstanceIdentifier<ElanInstance> elanIdentifierId = NetvirtUtils.getElanInstanceInstanceIdentifier(subnetName);
 
         @SuppressWarnings("resource") // AutoCloseable
-        DataWaitListener<ElanInstance> elanTagWaiter = new DataWaitListener<ElanInstance>(
+        DataWaitListener<ElanInstance> elanTagWaiter = new DataWaitListener<>(
                 dataBroker, elanIdentifierId, 10, LogicalDatastoreType.CONFIGURATION, el -> el.getElanTag());
         if ( !elanTagWaiter.waitForData()) {
             logger.error("Trying to add invalid elan {} to vpn {}", subnetName, vpnName);
