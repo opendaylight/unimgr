@@ -43,6 +43,7 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
     private static final Logger log = LoggerFactory.getLogger(UniPortManager.class);
     private ListenerRegistration<UniPortManager> uniListenerRegistration;
     private static int maxWaitRetries = 3;
+    private static long noVlan = 0l;
 
     public UniPortManager(final DataBroker dataBroker) {
         super(dataBroker);
@@ -203,7 +204,7 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
 
         for (VlanToPort oldPort : getOperTrunkInterfaces(uniId)) {
             Long oldVlan = oldPort.getVlan().getValue();
-            if (!vlansValue.contains(oldVlan)) {
+            if (!vlansValue.contains(oldVlan) && oldVlan != noVlan) {
                 VlanToPort removedOperVlanInterface = removeTrunkInterface(oldPort.getVlanPortId(), oldVlan, tx);
                 operVlanInterfaces.remove(removedOperVlanInterface);
             }
@@ -244,7 +245,7 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
     }
 
     private VlanToPort removeTrunkInterface(String interfaceName, Long vlan, WriteTransaction tx) {
-        log.info("Delete VLAN trunk {} ParentRef {}", interfaceName);
+        log.info("Delete VLAN trunk {}", interfaceName);
         NetvirtUtils.deleteInterface(interfaceName, tx);
         return createOperTrunkInterfaceMapping(vlan, interfaceName);
     }
@@ -347,7 +348,7 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
             log.info("UNI  {} Vlan {} deleting", uniId, vlanId);
             UniBuilder uniBuilder = new UniBuilder(confUni);
 
-            if (vlanId != null && vlanId != 0l) {
+            if (vlanId != null && vlanId != noVlan) {
                 List<CeVlan> ceVlans = confUni.getCeVlans() != null ? confUni.getCeVlans().getCeVlan()
                         : Collections.emptyList();
                 CeVlanBuilder ceVlanBuilder = new CeVlanBuilder();
