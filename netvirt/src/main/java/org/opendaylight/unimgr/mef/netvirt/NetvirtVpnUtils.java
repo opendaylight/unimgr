@@ -10,6 +10,7 @@ package org.opendaylight.unimgr.mef.netvirt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,8 +32,8 @@ import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev14081
 import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.interfaces.VpnInterface;
 import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.interfaces.VpnInterfaceBuilder;
 import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.interfaces.VpnInterfaceKey;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpPrefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpPrefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.arputil.rev160406.OdlArputilService;
@@ -62,9 +63,16 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev15060
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.subnetmaps.Subnetmap;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.subnetmaps.SubnetmapBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.subnetmaps.SubnetmapKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev150712.IpVersionV4;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.rev150712.Neutron;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.subnets.rev150712.subnets.attributes.Subnets;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.subnets.rev150712.subnets.attributes.subnets.Subnet;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.subnets.rev150712.subnets.attributes.subnets.SubnetBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.subnets.rev150712.subnets.attributes.subnets.SubnetKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Optional;
 
 public class NetvirtVpnUtils {
@@ -106,14 +114,14 @@ public class NetvirtVpnUtils {
     }
 
     public static void createUpdateVpnInterface(DataBroker dataBroker, String vpnName, String interfaceName,
-            String ifAddr, String macAddress, boolean primary, String gwIpAddress) {
+            String ifAddr, String macAddress, boolean primary, String gwIpAddress, String directSubnetId) {
         WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
-        createUpdateVpnInterface(vpnName, interfaceName, ifAddr, macAddress, primary, gwIpAddress, tx);
+        createUpdateVpnInterface(vpnName, interfaceName, ifAddr, macAddress, primary, gwIpAddress, directSubnetId, tx);
         MdsalUtils.commitTransaction(tx);
     }
 
     public static void createUpdateVpnInterface(String vpnName, String interfaceName, IpPrefix ifPrefix,
-            String macAddress, boolean primary, IpPrefix gwIpAddress, WriteTransaction tx) {
+            String macAddress, boolean primary, IpPrefix gwIpAddress, String directSubnetId, WriteTransaction tx) {
         synchronized (interfaceName.intern()) {
             String ipAddress = null;
             String nextHopIp = null;
@@ -123,14 +131,15 @@ public class NetvirtVpnUtils {
                 ipAddress = ipPrefixToString(ifPrefix);
                 nextHopIp = getIpAddressFromPrefix(ipPrefixToString(gwIpAddress));
             }
-            createUpdateVpnInterface(vpnName, interfaceName, ipAddress, macAddress, primary, nextHopIp, tx);
+            createUpdateVpnInterface(vpnName, interfaceName, ipAddress, macAddress, primary, nextHopIp, directSubnetId,
+                    tx);
         }
     }
 
     public static void createUpdateVpnInterface(String vpnName, String interfaceName, String ipAddress,
-            String  macAddress, boolean primary, String nextHopIp, WriteTransaction tx) {
+            String macAddress, boolean primary, String nextHopIp, String subnetId, WriteTransaction tx) {
         synchronized (interfaceName.intern()) {
-            Adjacencies adjancencies = buildInterfaceAdjacency(ipAddress, macAddress, primary, nextHopIp);
+            Adjacencies adjancencies = buildInterfaceAdjacency(ipAddress, macAddress, primary, nextHopIp, subnetId);
             VpnInterfaceBuilder einterfaceBuilder = createVpnInterface(vpnName, interfaceName, adjancencies);
 
             tx.merge(LogicalDatastoreType.CONFIGURATION, getVpnInterfaceInstanceIdentifier(interfaceName),
@@ -148,7 +157,7 @@ public class NetvirtVpnUtils {
     }
 
     private static Adjacencies buildInterfaceAdjacency(String ipAddress, String macAddress, boolean primary,
-            String nextHopIp) {
+            String nextHopIp, String subnetId) {
         AdjacenciesBuilder builder = new AdjacenciesBuilder();
         List<Adjacency> list = new ArrayList<>();
 
@@ -158,6 +167,9 @@ public class NetvirtVpnUtils {
             aBuilder.setMacAddress(macAddress);
         }
         aBuilder.setPrimaryAdjacency(primary);
+        if (subnetId != null) {
+            aBuilder.setSubnetId(new Uuid(subnetId));
+        }
         if (nextHopIp != null) {
             aBuilder.setNextHopIpList(Arrays.asList(nextHopIp));
         }
@@ -174,6 +186,17 @@ public class NetvirtVpnUtils {
     }
 
     public static void removeVpnInterfaceAdjacencies(DataBroker dataBroker, String vpnName, String interfaceName) {
+        InstanceIdentifier<VpnInterface> identifier = getVpnInterfaceInstanceIdentifier(interfaceName);
+        InstanceIdentifier<Adjacencies> path = identifier.augmentation(Adjacencies.class);
+        Optional<Adjacencies> adjacencies = MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, path);
+        List<Adjacency> adjacenciesList = (adjacencies.isPresent() && adjacencies.get().getAdjacency() != null)
+                ? adjacencies.get().getAdjacency() : Collections.emptyList();
+        adjacenciesList.forEach(a -> {
+            String ipStr = getIpAddressFromPrefix(a.getIpAddress());
+            InstanceIdentifier<VpnPortipToPort> id = getVpnPortipToPortIdentifier(vpnName, ipStr);
+            MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.OPERATIONAL, id);
+        });
+
         AdjacenciesBuilder builder = new AdjacenciesBuilder();
         List<Adjacency> list = new ArrayList<>();
         builder.setAdjacency(list);
@@ -259,6 +282,27 @@ public class NetvirtVpnUtils {
         tx.delete(LogicalDatastoreType.OPERATIONAL, id);
     }
 
+    public static void registerDirectSubnetForVpn(DataBroker dataBroker, Uuid subnetName, IpAddress gwIpAddress) {
+        final SubnetKey subnetkey = new SubnetKey(subnetName);
+
+        final InstanceIdentifier<Subnet> subnetidentifier = InstanceIdentifier.create(Neutron.class)
+                .child(Subnets.class).child(Subnet.class, subnetkey);
+
+        SubnetBuilder subnetBuilder = new SubnetBuilder();
+        subnetBuilder.setIpVersion(IpVersionV4.class);
+        subnetBuilder.setGatewayIp(gwIpAddress);
+        subnetBuilder.setKey(subnetkey);
+        MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION, subnetidentifier, subnetBuilder.build());
+    }
+
+    public static void unregisterDirectSubnetForVpn(DataBroker dataBroker, Uuid subnetName) {
+        final SubnetKey subnetkey = new SubnetKey(subnetName);
+        final InstanceIdentifier<Subnet> subnetidentifier = InstanceIdentifier.create(Neutron.class)
+                .child(Subnets.class).child(Subnet.class, subnetkey);
+
+        MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.CONFIGURATION, subnetidentifier);
+    }
+
     public static void addDirectSubnetToVpn(DataBroker dataBroker,
             final NotificationPublishService notificationPublishService, String vpnName, String subnetName,
             IpPrefix subnetIpPrefix, String interfaceName) {
@@ -287,7 +331,6 @@ public class NetvirtVpnUtils {
         logger.info("Publish subnet {}", subnetName);
         publishSubnetAddNotification(notificationPublishService, subnetId, subnetIp, vpnName, elanTag);
         logger.info("Finished Working on subnet {}", subnetName);
-
     }
 
     public static void removeDirectSubnetFromVpn(DataBroker dataBroker,
@@ -492,6 +535,10 @@ public class NetvirtVpnUtils {
         }
     }
 
+    public static String getElanNameForVpnPort(String uniId, String ipUniId) {
+        return getUUidFromString(ELAN_PREFIX + uniId + ipUniId);
+    }
+
     public static String getIpAddressFromPrefix(String prefix) {
         return prefix.split(IP_MUSK_SEPARATOR)[0];
     }
@@ -513,10 +560,6 @@ public class NetvirtVpnUtils {
     private static String getAddressFromSubnet(String prefix) {
         String myAddress = getIpAddressFromPrefix(prefix);
         return myAddress + IP_ADDR_SUFFIX;
-    }
-
-    public static String getElanNameForVpnPort(String portName) {
-        return getUUidFromString(ELAN_PREFIX + portName);
     }
 
     public static String getUUidFromString(String key) {

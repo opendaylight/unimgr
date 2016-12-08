@@ -26,8 +26,10 @@ import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.serv
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.VpnElans;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.unis.Uni;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.Identifier45;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpPrefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Prefix;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInterface.EtreeInterfaceType;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -241,17 +243,23 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
         }
 
         Long vlan = ipUni.getVlan() != null ? Long.valueOf(ipUni.getVlan().getValue()) : null;
-        String elanName = NetvirtVpnUtils.getElanNameForVpnPort(uniId);
-        String interfaceName = createElanInterface(vpnName, ipvcId, uniId, elanName, vlan, tx);
-        createVpnInterface(vpnName, uni, ipUni, interfaceName, tx);
+        String elanName = NetvirtVpnUtils.getElanNameForVpnPort(uniId, ipUniId);
+
+        String srcIpAddressStr = NetvirtVpnUtils
+                .getIpAddressFromPrefix(NetvirtVpnUtils.ipPrefixToString(ipUni.getIpAddress()));
+        IpAddress ipAddress = new IpAddress(srcIpAddressStr.toCharArray());
+
+        String interfaceName = createElanInterface(vpnName, ipvcId, uniId, elanName, vlan, ipAddress, tx);
+        createVpnInterface(vpnName, uni, ipUni, interfaceName, elanName, tx);
         MefServicesUtils.addOperIpvcVpnElan(ipvcId, vpnName, uniInService.getUniId(), uniInService.getIpUniId(),
                 elanName, interfaceName, null, tx);
     }
 
     private String createElanInterface(String vpnName, InstanceIdentifier<Ipvc> ipvcId, String uniId, String elanName,
-            Long vlan, WriteTransaction tx) {
+            Long vlan, IpAddress ipAddress, WriteTransaction tx) {
         Log.info("Adding elan instance: " + elanName);
         NetvirtUtils.updateElanInstance(elanName, tx);
+        NetvirtVpnUtils.registerDirectSubnetForVpn(dataBroker, new Uuid(elanName), ipAddress);
 
         Log.info("Added trunk interface for uni {} vlan: {}", uniId, vlan);
         if (vlan != null) {
@@ -271,11 +279,11 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
 
     private void createVpnInterface(String vpnName,
             org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.Uni uni,
-            IpUni ipUni, String interfaceName, WriteTransaction tx) {
+            IpUni ipUni, String interfaceName, String elanName, WriteTransaction tx) {
 
         Log.info("Adding vpn interface: " + interfaceName);
         NetvirtVpnUtils.createUpdateVpnInterface(vpnName, interfaceName, ipUni.getIpAddress(),
-                uni.getMacAddress().getValue(), true, null, tx);
+                uni.getMacAddress().getValue(), true, null, elanName, tx);
         NetvirtVpnUtils.createVpnPortFixedIp(vpnName, interfaceName, ipUni.getIpAddress(), uni.getMacAddress(), tx);
         Log.info("Finished working on vpn instance: " + vpnName);
     }
@@ -305,7 +313,6 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
         }
 
         String vpnName = ipvcVpn.getVpnId();
-
         VpnElans vpnElans = MefServicesUtils.findVpnElanForNetwork(new Identifier45(uniId), ipUni.getIpUniId(),
                 ipvcVpn);
         if (vpnElans == null) {
@@ -330,6 +337,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
         String interfaceName = vpnElans.getElanPort();
 
         Log.info("Removing elan instance {} and interface {}: ", elanName, interfaceName);
+        NetvirtVpnUtils.unregisterDirectSubnetForVpn(dataBroker, new Uuid(elanName));
         NetvirtUtils.deleteElanInterface(interfaceName, tx);
         NetvirtUtils.deleteElanInstance(elanName, tx);
     }
