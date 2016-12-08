@@ -251,19 +251,18 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
                 .getIpAddressFromPrefix(NetvirtVpnUtils.ipPrefixToString(ipUni.getIpAddress()));
         IpAddress ipAddress = new IpAddress(srcIpAddressStr.toCharArray());
 
-        String interfaceName = createElanInterface(vpnName, ipvcId, uniId, elanName, vlan, ipAddress, tx);
-
+        String interfaceName = createElanInterface(vpnName, ipvcId, uniId, elanName, vlan, ipAddress, tx,
+                ipUni.getSegmentationId());
         uniQosManager.mapUniPortBandwidthLimits(uniId, interfaceName, uniInService.getIngressBwProfile());
-
         createVpnInterface(vpnName, uni, ipUni, interfaceName, elanName, tx);
         MefServicesUtils.addOperIpvcVpnElan(ipvcId, vpnName, uniInService.getUniId(), uniInService.getIpUniId(),
                 elanName, interfaceName, null, tx);
     }
 
     private String createElanInterface(String vpnName, InstanceIdentifier<Ipvc> ipvcId, String uniId, String elanName,
-            Long vlan, IpAddress ipAddress, WriteTransaction tx) {
+            Long vlan, IpAddress ipAddress, WriteTransaction tx, Long segmentationId) {
         Log.info("Adding elan instance: " + elanName);
-        NetvirtUtils.updateElanInstance(elanName, tx);
+        NetvirtUtils.updateElanInstance(elanName, tx, segmentationId);
         NetvirtVpnUtils.registerDirectSubnetForVpn(dataBroker, new Uuid(elanName), ipAddress);
 
         Log.info("Added trunk interface for uni {} vlan: {}", uniId, vlan);
