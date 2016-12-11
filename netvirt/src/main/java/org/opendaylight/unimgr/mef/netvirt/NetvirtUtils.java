@@ -154,7 +154,7 @@ public class NetvirtUtils {
         return InstanceIdentifier.builder(ElanInterfaces.class).build();
     }
 
-    private static InstanceIdentifier<ElanInstance> getElanInstanceInstanceIdentifier(String instanceName) {
+    public static InstanceIdentifier<ElanInstance> getElanInstanceInstanceIdentifier(String instanceName) {
         return InstanceIdentifier.builder(ElanInstances.class)
                 .child(ElanInstance.class, new ElanInstanceKey(instanceName)).build();
     }
