@@ -305,17 +305,16 @@ public class NetvirtVpnUtils {
 
     public static void addDirectSubnetToVpn(DataBroker dataBroker,
             final NotificationPublishService notificationPublishService, String vpnName, String subnetName,
-            IpPrefix subnetIpPrefix, String interfaceName) {
-        InstanceIdentifier<ElanInstance> elanIdentifierId = InstanceIdentifier.builder(ElanInstances.class)
-                .child(ElanInstance.class, new ElanInstanceKey(subnetName)).build();
-        Optional<ElanInstance> elanInstance = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                elanIdentifierId);
-        if (!elanInstance.isPresent()) {
+            IpPrefix subnetIpPrefix, String interfaceName, int waitForElan) {
+        InstanceIdentifier<ElanInstance> elanIdentifierId = NetvirtUtils.getElanInstanceInstanceIdentifier(subnetName);
+
+        @SuppressWarnings("resource") // AutoCloseable
+        DataWaitListener<ElanInstance> elanTagWaiter = new DataWaitListener<ElanInstance>(
+                dataBroker, elanIdentifierId, 10, LogicalDatastoreType.CONFIGURATION, el -> el.getElanTag());
+        if ( !elanTagWaiter.waitForData()) {
             logger.error("Trying to add invalid elan {} to vpn {}", subnetName, vpnName);
             return;
         }
-        Long elanTag = elanInstance.get().getElanTag() != null ? elanInstance.get().getElanTag()
-                : elanInstance.get().getSegmentationId();
 
         Uuid subnetId = new Uuid(subnetName);
         logger.info("Adding subnet {} {} to elan map", subnetId, subnetId);
@@ -327,6 +326,10 @@ public class NetvirtVpnUtils {
 
         logger.info("Adding port {} to subnet {}", interfaceName, subnetName);
         updateSubnetmapNodeWithPorts(dataBroker, subnetId, new Uuid(interfaceName), null);
+
+        Optional<ElanInstance> elanInstance = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION,
+                elanIdentifierId);
+        Long elanTag = elanInstance.get().getElanTag();
 
         logger.info("Publish subnet {}", subnetName);
         publishSubnetAddNotification(notificationPublishService, subnetId, subnetIp, vpnName, elanTag);

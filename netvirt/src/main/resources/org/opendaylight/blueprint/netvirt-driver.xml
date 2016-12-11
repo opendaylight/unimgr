@@ -22,7 +22,7 @@
         class="org.opendaylight.unimgr.mef.netvirt.NodeConnectorListener">
         <argument ref="dataBroker" />
         <argument ref="uniPortManager" />
-            <argument value="false" />
+        <argument value="false" />
     </bean>
 
     <bean id="evcListener" class="org.opendaylight.unimgr.mef.netvirt.EvcListener">
@@ -40,6 +40,7 @@
         <argument ref="dataBroker" />
         <argument ref="notificationPublishService" />
         <argument ref="qwMacListener" />
+        <argument value="5" />   			
     </bean>
 
     <bean id="qwMacListener" class="org.opendaylight.unimgr.mef.netvirt.GwMacListener">

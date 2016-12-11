@@ -42,13 +42,14 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
     private ListenerRegistration<SubnetListener> subnetListenerRegistration;
     private final NotificationPublishService notificationPublishService;
     private final IGwMacListener gwMacListener;
-
+    private final int waitForElanInterval;
 
     public SubnetListener(final DataBroker dataBroker, final NotificationPublishService notPublishService,
-             final IGwMacListener gwMacListener ) {
+             final IGwMacListener gwMacListener, int sleepInterval) {
         super(dataBroker);
         this.notificationPublishService = notPublishService;
         this.gwMacListener = gwMacListener;
+        this.waitForElanInterval = sleepInterval;
         registerListener();
     }
 
@@ -196,7 +197,7 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
         }
 
         NetvirtVpnUtils.addDirectSubnetToVpn(dataBroker, notificationPublishService, ipvcVpn.getVpnId(),
-                vpnElan.getElanId(), newSubnet.getSubnet(), vpnElan.getElanPort());
+                vpnElan.getElanId(), newSubnet.getSubnet(), vpnElan.getElanPort(), waitForElanInterval);
 
     }
 

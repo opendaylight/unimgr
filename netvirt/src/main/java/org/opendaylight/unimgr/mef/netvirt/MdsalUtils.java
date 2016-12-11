@@ -99,7 +99,6 @@ public class MdsalUtils {
         return result;
     }
 
-
     public static WriteTransaction createTransaction(DataBroker dataBroker) {
         WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
         return tx;
