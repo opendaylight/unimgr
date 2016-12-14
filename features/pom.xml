@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2015 Cable Television Laboratories, Inc. All rights reserved. 
-  This program and the accompanying materials are made available under the 
-  terms of the Eclipse Public License v1.0 which accompanies this distribution, 
+<!-- Copyright (c) 2015 Cable Television Laboratories, Inc. All rights reserved.
+  This program and the accompanying materials are made available under the
+  terms of the Eclipse Public License v1.0 which accompanies this distribution,
   and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -24,6 +24,7 @@
     <restconf.version>1.5.0-SNAPSHOT</restconf.version>
     <yangtools.version>1.1.0-SNAPSHOT</yangtools.version>
     <dlux.version>0.5.0-SNAPSHOT</dlux.version>
+    <dluxapps.version>0.5.0-SNAPSHOT</dluxapps.version>
     <ovsdb.version>1.4.0-SNAPSHOT</ovsdb.version>
     <netvirt.version>1.4.0-SNAPSHOT</netvirt.version>
     <vpnservice.version>0.4.0-SNAPSHOT</vpnservice.version>
@@ -106,6 +107,14 @@
       <artifactId>features-dlux</artifactId>
       <classifier>features</classifier>
       <version>${dlux.version}</version>
+      <type>xml</type>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.dluxapps</groupId>
+      <artifactId>features-dluxapps</artifactId>
+      <classifier>features</classifier>
+      <version>${dluxapps.version}</version>
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>

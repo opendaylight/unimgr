@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- vi: set et smarttab sw=4 tabstop=4: -->
-<!-- Copyright (c) 2015 CableLabs This program and the accompanying materials 
-  are made available under the terms of the Eclipse Public License v1.0 which 
+<!-- Copyright (c) 2015 CableLabs This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License v1.0 which
   accompanies this distribution, and is available at http://www.eclipse.org/legal/epl-v10.html -->
 <features name="odl-unimgr-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -11,6 +11,7 @@
   <repository>mvn:org.opendaylight.netconf/features-restconf/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.ovsdb/southbound-features/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.dlux/features-dlux/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.dluxapps/features-dluxapps/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.netconf/features-netconf/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.netconf/features-netconf-connector/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.genius/genius-features/{{VERSION}}/xml/features</repository>
@@ -36,7 +37,7 @@
     <feature version='${ovsdb.version}'>odl-ovsdb-southbound-impl</feature>
     <feature version='${project.version}'>odl-unimgr-api</feature>
     <feature version='${project.version}'>odl-unimgr-presto-api</feature>
-    <!-- TODO these features should be dependencies of drivers not unimgr 
+    <!-- TODO these features should be dependencies of drivers not unimgr
       itself -->
     <feature version='${netconf.version}'>odl-netconf-connector</feature>
     <feature version='${netconf.version}'>odl-netconf-connector-ssh</feature>
@@ -62,7 +63,7 @@
         <feature version='${dlux.version}'>odl-dlux-core</feature>
         <bundle>mvn:org.opendaylight.unimgr/cpeui-bundle/{{VERSION}}</bundle>
     </feature>
-    
+
 
   <feature name='odl-unimgr-console' version='${project.version}'
     description='OpenDaylight :: UniMgr :: CLI'>
@@ -82,7 +83,7 @@
     <feature version="${project.version}">odl-unimgr-console</feature>
     <feature version="${restconf.version}">odl-mdsal-apidocs</feature>
     <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
-    <feature version="${dlux.version}">odl-dlux-all</feature>
+    <feature version="${dluxapps.version}">odl-dluxapps-applications</feature>
   </feature>
 
   <feature name='odl-unimgr-cisco-xr-driver' version='${project.version}'
