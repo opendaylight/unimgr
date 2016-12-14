@@ -9,12 +9,15 @@
 				ng-click="setTab('admin',2)"><a id="evcs-configure-tab" href="#/cpeui/admin/cpes">
 					<i class="icon-tasks"></i> CPEs (Devices)</a></li>
 			<li ng-class="{ active: isTabSet('admin',3)}"
-				ng-click="setTab('admin',3);updateView()"><a id="dashboard-tab"  href="#/cpeui/admin/unis">
+				ng-click="setTab('admin',3);updateView()"><a href="#/cpeui/admin/unis">
 				 <i class="icon-exchange"></i> UNIs</a>
 			 </li>
 			 <li ng-class="{ active: isTabSet('admin',4)}"
-				ng-click="setTab('admin',4);updateNetworksView()"><a id="dashboard-tab"  href="#/cpeui/admin/networks">
+				ng-click="setTab('admin',4);updateNetworksView()"><a href="#/cpeui/admin/networks">
 			 	<i class="icon-signal"></i> Networks</a>
+			 </li>
+			 <li ng-class="{ active: isTabSet('admin',5)}" ng-click="setTab('admin',5);updateProfilesView()">
+			 	<a href="#/cpeui/admin/profiles"><i class="icon-signal"></i> Profiles</a>
 			 </li>
 			<li id="refresh_btn" class="active refresh-btn"
 				ng-click="updateView()"><button class="btn add-row"> <i class="icon-refresh"></i> Refresh</button>
@@ -73,7 +76,7 @@
 					<th colspan="2">Tenant</th>
 				</tr>
 			</thead>
-			<tbody id="ces_table">
+			<tbody>
 				<tr ng-repeat="item in unis | orderBy: '[\'uni-id\']'">
 					<td ng-init="device = ces.filterByField('dev-id',item.device)[0]">{{ device["device-name"] ? device["device-name"] : item.device}}</td>
 					<td>{{ item.prettyID }}</td>
@@ -98,7 +101,7 @@
 					<th>Tenant</th>
 				</tr>
 			</thead>
-			<tbody id="ces_table">
+			<tbody>
 				<tr ng-repeat="svc in services ">					
 					<td class="minimal-width">{{ svc['svc-id'] }}</td>
 					<td class="minimal-width">{{ networkNames[svc['svc-id']] }}</td>					
@@ -114,5 +117,34 @@
 				</tr>
 			</tbody>
 		</table>		
+	</div>
+	<div ng-show="isTabSet('admin',5)">
+		<div class="table-header">Profiles</div>
+		<table class="footable table table-striped">
+			<thead>
+				<tr>
+					<th>Profile Name</th>
+					<th>Committed Information Rate (Kb/s)</th>
+					<th>Committed Burst Size (bytes)</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="profile in profiles | orderBy: '[\'bw-profile\']'">
+					<td class="minimal-width">{{ profile['bw-profile'] }}</td>
+					<td class="minimal-width">{{ profile.cir }}</td>
+					<td class="minimal-width">{{ profile.cbs }}</td>
+					<td class="delete-tr">
+						<button class="btn btn-md btn-danger" ng-click="deleteProfile(profile['bw-profile'])">
+						<i class="icon-trash"></i>
+						<md-tooltip>Delete Profile</md-tooltip>
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<div>
+			<a class="btn add-row" ng-click="addProfile.show($event)">Add Profile</a>
+		</div>
 	</div>
 </div>

@@ -32,6 +32,13 @@
        		<md-option value="leaf" default>Leaf</md-option>
         </md-select>
       </md-input-container>
+      <md-input-container class="md-block">
+        <label>Profile</label>
+        <md-select ng-model="obj.profile_name" name="profile_name">
+        	<md-option ng-value="undefined" > - None - </md-option>
+       		<md-option ng-repeat="profile in params.profiles | orderBy: '[\'bw-profile\']'" value="{{ profile['bw-profile'] }}" >{{ profile['bw-profile'] }} <span class="small">(CIR: {{profile.cir}}, CBS: {{profile.cbs}})</span></md-option>
+        </md-select>
+      </md-input-container>
     <input type="hidden" name="vlans" ng-model="obj.vlans">
     <div ng-if="params.svc.evc['preserve-ce-vlan-id']">
     	Preserved VLAN: {{params.svc.evc['preserved-vlan']}}

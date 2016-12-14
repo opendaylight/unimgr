@@ -50,21 +50,27 @@
 												<i class="icon-minus"></i>
 											</button>
 										</th>
-										<th>Device</th>
-										<th>UNI</th>
-										<th ng-if="item.isTree" >Role</th>
+										<th class="minimal-width">Device</th>
+										<th class="minimal-width">UNI</th>
+										<th class="minimal-width" ng-if="item.isTree" >Role</th>
 										<th class="minimal-width">VLANs <span style="font-size:small;color:inherit;"> (click to edit)</span></th>
-										<th class="delete-tr"><button class="btn btn-md btn-info" ng-click="linkEvcUniDialog.show($event, {'svc':item,'unis':unis,'ces':ces})"> <i class="icon-plus"></i> </button></th>										
+										<th class="minimal-width">Profile</th>
+										<th class="delete-tr">
+											<button class="btn btn-md btn-info" ng-click="linkEvcUniDialog.show($event, {svc:item, unis:unis, ces:ces, profiles:profiles})">
+											<i class="icon-plus"></i>
+											</button>
+										</th>
 									</tr>
 								</thead>
 								<tbody>
 									<tr ng-repeat-start="(ce, unis) in item.device2unis | orderBy : ce ">
-										<td colspan="2" rowspan="{{unis.length}}">{{ cesDisplayNames[ce] }}</td>
-										<td ng-repeat-start="uni in unis | orderBy: sortUni | limitTo :1">{{ uni.prettyID }}</td>
-										<td ng-if="item.isTree">{{ uni['role'] }}</td>
+										<td class="minimal-width" colspan="2" rowspan="{{unis.length}}">{{ cesDisplayNames[ce] }}</td>
+										<td class="minimal-width" ng-repeat-start="uni in unis | orderBy: sortUni | limitTo :1">{{ uni.prettyID }}</td>
+										<td class="minimal-width" ng-if="item.isTree">{{ uni['role'] }}</td>
 										<td class="clickable" ng-click="!item.evc['preserve-ce-vlan-id'] ? editVlanDialog.show($event, {svcid:item['svc-id'], uniid:uni['uni-id'], vlans:uni.vlans}) : 0">
 										{{ uni.vlans.join(', ') }} {{item.evc['preserve-ce-vlan-id'] ? '(Preserved)' : ''}}
 										</td>
+										<td class="minimal-width">{{ uni['ingress-bw-profile'] }}</td>
 										<td ng-repeat-end class="delete-tr" style="white-space: nowrap;">
 										<button class="btn btn-md btn-danger" ng-click="deleteEvcUni(item['svc-id'], uni['uni-id'])"> <i class="icon-trash"></i> </button>
 										</td>
@@ -75,6 +81,7 @@
 										<td class="clickable" ng-click="!item.evc['preserve-ce-vlan-id'] ? editVlanDialog.show($event, {svcid:item['svc-id'], uniid:uni['uni-id'], vlans:uni.vlans}) : 0">
 										{{ uni.vlans.join(', ') }} {{item.evc['preserve-ce-vlan-id'] ? '(Preserved)' : ''}}
 										</td>
+										<td class="minimal-width">{{ uni['ingress-bw-profile'] }}</td>
 										<td class="delete-tr" style="white-space: nowrap;">
 										<button class="btn btn-md btn-danger" ng-click="deleteEvcUni(item['svc-id'], uni['uni-id'])"> <i class="icon-trash"></i> </button>
 										</td>
@@ -165,16 +172,18 @@
 										<th>Device</th>
 										<th>UNI</th>
 										<th>IP Address</th>
-										<th>vlan</th>
-										<th class="delete-tr"><button class="btn btn-md btn-info" ng-click="linkIpvcUniDialog.show($event, {'svc':ipvc,'unis':unis,'ces':ces})"> <i class="icon-plus"></i> </button></th>
+										<th>Vlan</th>
+										<th>Profile</th>
+										<th class="delete-tr"><button class="btn btn-md btn-info" ng-click="linkIpvcUniDialog.show($event, {svc:ipvc, unis:unis, ces:ces, profiles:profiles})"> <i class="icon-plus"></i> </button></th>
 									</tr>
 								</thead>
 								<tbody>
-									<tr ng-repeat="ipuni in ipvc.ipvc.unis.uni">
+									<tr ng-repeat="ipuni in ipvc.ipvc.unis.uni | orderBy: 'prettyID'">
 										<td colspan="2" ng-init="serviceIpuni = getMefInterfaceIpvc(ipuni['uni-id'],ipuni['ip-uni-id'])">{{ cesDisplayNames[ipuni.device] }}</td>
 										<td>{{ ipuni.prettyID }}</td>
 										<td>{{serviceIpuni['ip-address']}}</td>
 										<td>{{serviceIpuni.vlan}}</td>
+										<td class="minimal-width">{{ ipuni['ingress-bw-profile'] }}</td>
 										<td class="delete-tr"><button class="btn btn-md btn-danger" ng-click="deleteIpvcUni(ipvc['svc-id'], ipuni['uni-id'], ipuni['ip-uni-id'])"> <i class="icon-trash"></i> </button></td>
 									</tr>																		
 								</tbody>

@@ -7,6 +7,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
     $scope.ces = [];
     $scope.ipvcs = [];
     $scope.subnets = {};
+    $scope.profiles =[];
     $scope.cesDisplayNames = {};
     $scope.unisMap = {};
     $scope.networkNames = {};
@@ -46,6 +47,10 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
         networks.forEach(function(net){
           $scope.networkNames[net.uuid] = net.name;
         });
+      });
+
+      CpeuiSvc.getProfiles(function(profiles) {
+        $scope.profiles = profiles;
       });
     }
 
@@ -138,7 +143,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
 
     $scope.linkIpvcUniDialog = new CpeuiDialogs.Dialog('LinkIpvcUni', {},
         function(obj) {
-          CpeuiSvc.addIpvcUni(obj.svc_id, obj.uni['uni-id'], obj.ip_uni,
+          CpeuiSvc.addIpvcUni(obj.svc_id, obj.uni['uni-id'], obj.ip_uni, obj.profile_name,
               function() {
                 $scope.updateEvcView();
               });
@@ -279,7 +284,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
           if (!obj.role) {
             obj.role = "root";
           }
-          CpeuiSvc.addEvcUni(obj.svc_id, obj.uni_id, obj.role, obj.vlans,
+          CpeuiSvc.addEvcUni(obj.svc_id, obj.uni_id, obj.role, obj.vlans, obj.profile_name,
               function() {
                 $scope.updateEvcView();
               });

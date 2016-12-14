@@ -45,10 +45,13 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
     private static final Logger log = LoggerFactory.getLogger(EvcListener.class);
     private ListenerRegistration<EvcListener> evcListenerRegistration;
     private final IUniPortManager uniPortManager;
+    private final UniQosManager uniQosManager;
 
-    public EvcListener(final DataBroker dataBroker, final UniPortManager uniPortManager) {
+    public EvcListener(final DataBroker dataBroker, final UniPortManager uniPortManager,
+            final UniQosManager uniQosManager) {
         super(dataBroker);
         this.uniPortManager = uniPortManager;
+        this.uniQosManager = uniQosManager;
         registerListener();
     }
 
@@ -111,6 +114,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
                 for (Uni uni : data.getUnis().getUni()) {
                     createUniElanInterfaces(evcId, instanceName, uni, isEtree);
                 }
+                updateQos(data.getUnis().getUni());
             }
         } catch (final Exception e) {
             log.error("Add evc failed !", e);
@@ -121,9 +125,8 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
         try {
             Evc data = removedDataObject.getRootNode().getDataBefore();
             InstanceIdentifier<Evc> evcId = removedDataObject.getRootPath().getRootIdentifier();
-            List<Uni> uniToRemove = data.getUnis() != null && data.getUnis().getUni() != null
-                    ? data.getUnis().getUni() : Collections.emptyList();
-
+            List<Uni> uniToRemove = data.getUnis() != null && data.getUnis().getUni() != null ? data.getUnis().getUni()
+                    : Collections.emptyList();
 
             synchronized (data.getEvcId().getValue().intern()) {
                 EvcElan evcElan = getOperEvcElan(evcId);
@@ -136,6 +139,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
                 for (Uni uni : uniToRemove) {
                     removeUniElanInterfaces(evcId, instanceName, uni);
                 }
+                updateQos(uniToRemove);
 
                 log.info("Removing elan instance: " + instanceName);
                 NetvirtUtils.deleteElanInstance(dataBroker, instanceName);
@@ -170,12 +174,14 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
                 for (Uni uni : uniToRemove) {
                     removeUniElanInterfaces(evcId, instanceName, uni);
                 }
+                updateQos(uniToRemove);
 
                 List<Uni> uniToCreate = new ArrayList<>(updateUni);
                 uniToCreate.removeAll(originalUni);
                 for (Uni uni : uniToCreate) {
                     createUniElanInterfaces(evcId, instanceName, uni, isEtree);
                 }
+                updateQos(uniToCreate);
             }
         } catch (final Exception e) {
             log.error("Update evc failed !", e);
@@ -205,6 +211,8 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
             log.info("Creting elan interface for elan {} vlan {} interface {}", instanceName, 0, interfaceName);
             NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName, roleToInterfaceType(role),
                     isEtree);
+            uniQosManager.mapUniPortBandwidthLimits(uni.getUniId().getValue(), interfaceName,
+                    uni.getIngressBwProfile());
             setOperEvcElanPort(evcId, instanceName, interfaceName);
         } else {
             for (EvcUniCeVlan ceVlan : evcUniCeVlan) {
@@ -218,6 +226,8 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
                 log.info("Creting elan interface for elan {} vlan {} interface {}", instanceName, 0, interfaceName);
                 NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName, roleToInterfaceType(role),
                         isEtree);
+                uniQosManager.mapUniPortBandwidthLimits(uni.getUniId().getValue(), interfaceName,
+                        uni.getIngressBwProfile());
                 setOperEvcElanPort(evcId, instanceName, interfaceName);
             }
         }
@@ -242,7 +252,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
                         interfaceName);
                 return;
             }
-            removeElanInterface(evcId, interfaceName);
+            removeElanInterface(evcId, uni.getUniId().getValue(), interfaceName);
         } else {
             for (EvcUniCeVlan ceVlan : evcUniCeVlan) {
                 Long vlan = safeCastVlan(ceVlan.getVid());
@@ -252,19 +262,21 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
                             vlan, interfaceName);
                     return;
                 }
-                removeElanInterface(evcId, interfaceName);
+                removeElanInterface(evcId, uni.getUniId().getValue(), interfaceName);
             }
         }
     }
 
-    private void removeElanInterface(InstanceIdentifier<Evc> identifier, String interfaceName) {
+    private void removeElanInterface(InstanceIdentifier<Evc> identifier, String uniId, String interfaceName) {
         log.info("Removing elan interface: " + interfaceName);
+        uniQosManager.unMapUniPortBandwidthLimits(uniId, interfaceName);
         NetvirtUtils.deleteElanInterface(dataBroker, interfaceName);
 
         EvcElan evcElan = getOperEvcElan(identifier);
         if (evcElan == null) {
             log.error("Removing non-operational Elan interface {}", interfaceName);
         }
+
         deleteOperEvcElanPort(identifier, interfaceName);
     }
 
@@ -314,7 +326,8 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
         InstanceIdentifier<EvcElan> path = identifier.augmentation(EvcElan.class);
         EvcElan evcElan = getOperEvcElan(identifier);
         EvcElanBuilder evcElanBuilder = evcElan != null ? new EvcElanBuilder(evcElan) : new EvcElanBuilder();
-        List<ElanPorts> exPorts =  evcElan != null && evcElan.getElanPorts() != null ? evcElan.getElanPorts() : new ArrayList<>();
+        List<ElanPorts> exPorts = evcElan != null && evcElan.getElanPorts() != null ? evcElan.getElanPorts()
+                : new ArrayList<>();
 
         ElanPortsBuilder portB = new ElanPortsBuilder();
         portB.setPortId(elanPort);
@@ -340,6 +353,10 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
                 .collect(Collectors.toList());
         evcElanBuilder.setElanPorts(newList);
         MdsalUtils.write(dataBroker, LogicalDatastoreType.OPERATIONAL, path, evcElanBuilder.build());
+    }
+
+    private void updateQos(List<Uni> uniToUpdate) {
+        uniToUpdate.forEach(u -> uniQosManager.setUniBandwidthLimits(u.getUniId()));
     }
 
 }

@@ -39,6 +39,28 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
           });
         };
 
+        // Profiles
+        $scope.profiles = [];
+        $scope.updateProfilesView = function() {
+          CpeuiSvc.getProfiles(function(profiles) {
+            $scope.profiles = profiles;
+          });
+        };
+
+        $scope.addProfile = new CpeuiDialogs.Dialog('AddProfile', {}, function(obj) {
+          CpeuiSvc.addProfile(obj['bw-profile'], obj.cir, obj.cbs, function() {
+            $scope.updateProfilesView();
+          });
+        });
+
+        $scope.deleteProfile = function(profileName) {
+          CpeuiDialogs.confirm(function() {
+            CpeuiSvc.deleteProfile(profileName, function() {
+              $scope.updateProfilesView();
+            });
+          });
+        };
+
         // CEs
         $scope.updateCesView = function() {
           CpeuiSvc.getCes(function(ces) {
@@ -195,6 +217,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
           $scope.updateTenantView();
           $scope.updateCesView();
           $scope.updateUniView();
+          $scope.updateProfilesView()
         };
 
         $scope.updateView();
