@@ -45,7 +45,9 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 
 public class NetvirtUtils {
+
     private static final Logger logger = LoggerFactory.getLogger(NetvirtUtils.class);
+    private static final long DEFAULT_MAC_TIMEOUT = 300;
 
     public static void createElanInstance(DataBroker dataBroker, String instanceName, boolean isEtree) {
         ElanInstanceBuilder einstBuilder = createElanInstance(instanceName);
@@ -124,6 +126,7 @@ public class NetvirtUtils {
         ElanInstanceBuilder einstBuilder = new ElanInstanceBuilder();
         einstBuilder.setElanInstanceName(instanceName);
         einstBuilder.setKey(new ElanInstanceKey(instanceName));
+        einstBuilder.setMacTimeout(DEFAULT_MAC_TIMEOUT);
         einstBuilder.setSegmentationId(Long.valueOf(Math.abs((short) instanceName.hashCode())));
         einstBuilder.setSegmentType(SegmentTypeVxlan.class);
         return einstBuilder;
