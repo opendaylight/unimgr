@@ -8,6 +8,10 @@
 
 package org.opendaylight.unimgr.mef.netvirt;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -85,7 +89,7 @@ public class GwMacListener extends UnimgrDataTreeChangeListener<VpnPortipToPort>
         }
     }
 
-    private void updateMac(VpnPortipToPort portIpToPort) {
+    private synchronized void updateMac(VpnPortipToPort portIpToPort) {
         String portName = portIpToPort.getPortName();
         String macAddress = portIpToPort.getMacAddress();
         String vpnName = portIpToPort.getVpnName();
@@ -101,40 +105,73 @@ public class GwMacListener extends UnimgrDataTreeChangeListener<VpnPortipToPort>
             Log.trace("Updating vpn {} port {} with IP {} MAC {}", vpnName, portName, ipAddress, macAddress);
         }
 
-        if (gwMacResolver.get(gwMacKey).getGwMac() == null || !gwMacResolver.get(gwMacKey).getGwMac().equals(macAddress)) {
-            Log.info("Creating GW for vpn {} port {} ip {} MAC {}", vpnName, portName, ipAddress, macAddress);
-            NetvirtVpnUtils.createUpdateVpnInterface(dataBroker, vpnName, portName, gwMacResolver.get(gwMacKey).getSubnet(), macAddress,
-                    false, gwMacResolver.get(gwMacKey).getPortIp(), null);
+        if (gwMacResolver.get(gwMacKey).getGwMac() == null
+                || !gwMacResolver.get(gwMacKey).getGwMac().equals(macAddress)) {
+            String portIp = gwMacResolver.get(gwMacKey).getPortIp();
+            for (String subnet : gwMacResolver.get(gwMacKey).getSubnets()) {
+                Log.info("Creating GW for vpn {} port {} ip {} subnet {} MAC {}", vpnName, portName, ipAddress, subnet,
+                        macAddress);
+
+                NetvirtVpnUtils.createUpdateVpnInterface(dataBroker, vpnName, portName, subnet, macAddress, false,
+                        portIp, null);
+            }
 
             gwMacResolver.get(gwMacKey).setGwMac(macAddress);
         }
     }
 
+    private void forceUpdateSubnet(GwMacKey gwMacKey, String subnet) {
+        if (!gwMacResolver.containsKey(gwMacKey)) {
+            return;
+        }
+        String portIp = gwMacResolver.get(gwMacKey).getPortIp();
+        String macAddress = gwMacResolver.get(gwMacKey).getGwMac();
+        if (macAddress == null) {
+            return;
+        }
+        Log.info("Creating GW for vpn {} port {} ip {} subnet {} MAC {}", gwMacKey.vpnId, gwMacKey.portId,
+                gwMacKey.gwIp, subnet, macAddress);
+        NetvirtVpnUtils.createUpdateVpnInterface(dataBroker, gwMacKey.vpnId, gwMacKey.portId, subnet, macAddress, false,
+                portIp, null);
+
+    }
+
     @Override
-    public void resolveGwMac(String vpnName, String portName, IpAddress srcIpAddress, IpAddress dstIpAddress, String subnet) {
+    public synchronized void resolveGwMac(String vpnName, String portName, IpAddress srcIpAddress,
+            IpAddress dstIpAddress, String subnet) {
         String dstIpAddressStr = NetvirtVpnUtils.ipAddressToString(dstIpAddress);
         GwMacKey gwMacKey = new GwMacKey(vpnName, portName, dstIpAddressStr);
 
         if (!gwMacResolver.containsKey(gwMacKey)) {
-            // check if IP was resolved already
-            gwMacResolver.putIfAbsent(gwMacKey, new GwMacValue(NetvirtVpnUtils.ipAddressToString(srcIpAddress), subnet));
-            VpnPortipToPort portIpToPort = NetvirtVpnUtils.getVpnPortFixedIp(dataBroker, vpnName, dstIpAddressStr);
-            if (portIpToPort != null) {
-                updateMac(portIpToPort);
-            }
-
+            gwMacResolver.putIfAbsent(gwMacKey,
+                    new GwMacValue(NetvirtVpnUtils.ipAddressToString(srcIpAddress), subnet));
             Log.info("Starting GW mac resolution for vpn {} port {} GW ip {}", vpnName, portName, dstIpAddress);
             NetvirtVpnUtils.sendArpRequest(arpUtilService, srcIpAddress, dstIpAddress, portName);
+        } else {
+            forceUpdateSubnet(gwMacKey, subnet);
+            gwMacResolver.get(gwMacKey).getSubnets().add(subnet);
         }
+
+        VpnPortipToPort portIpToPort = NetvirtVpnUtils.getVpnPortFixedIp(dataBroker, vpnName, dstIpAddressStr);
+        if (portIpToPort != null) {
+            updateMac(portIpToPort);
+        }
+
     }
 
     @Override
-    public void unResolveGwMac(String vpnName, String portName, IpAddress srcIpAddress, IpAddress dstIpAddress) {
+    public synchronized void unResolveGwMac(String vpnName, String portName, IpAddress srcIpAddress,
+            IpAddress dstIpAddress, String subnet) {
         String dstIpAddressStr = NetvirtVpnUtils.ipAddressToString(dstIpAddress);
         GwMacKey gwMacKey = new GwMacKey(vpnName, portName, dstIpAddressStr);
         if (gwMacResolver.containsKey(gwMacKey)) {
-            Log.info("Stopping GW mac resolution for vpn {} port {} GW ip {}", vpnName, portName, dstIpAddress);
-            gwMacResolver.remove(gwMacKey);
+            Log.info("Stopping GW mac resolution for vpn {} port {} GW ip {} Subnet {}", vpnName, portName,
+                    dstIpAddress, subnet);
+            gwMacResolver.get(gwMacKey).getSubnets().remove(subnet);
+
+            if (gwMacResolver.get(gwMacKey).getSubnets().isEmpty()) {
+                gwMacResolver.remove(gwMacKey);
+            }
         }
     }
 
@@ -163,13 +200,13 @@ public class GwMacListener extends UnimgrDataTreeChangeListener<VpnPortipToPort>
         Log.debug("Subnet GW Arp Retries");
     }
 
-    public static class GwMacKey {
-        private final String vpId;
+    private static class GwMacKey {
+        private final String vpnId;
         private final String portId;
         private final String gwIp;
 
         public GwMacKey(String vpId, String portId, String gwIp) {
-            this.vpId = vpId;
+            this.vpnId = vpId;
             this.portId = portId;
             this.gwIp = gwIp;
         }
@@ -178,21 +215,13 @@ public class GwMacListener extends UnimgrDataTreeChangeListener<VpnPortipToPort>
             return gwIp;
         }
 
-        public String getVpId() {
-            return vpId;
-        }
-
-        public String getPortId() {
-            return portId;
-        }
-
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
             result = prime * result + (gwIp == null ? 0 : gwIp.hashCode());
             result = prime * result + (portId == null ? 0 : portId.hashCode());
-            result = prime * result + (vpId == null ? 0 : vpId.hashCode());
+            result = prime * result + (vpnId == null ? 0 : vpnId.hashCode());
             return result;
         }
 
@@ -222,27 +251,27 @@ public class GwMacListener extends UnimgrDataTreeChangeListener<VpnPortipToPort>
             } else if (!portId.equals(other.portId)) {
                 return false;
             }
-            if (vpId == null) {
-                if (other.vpId != null) {
+            if (vpnId == null) {
+                if (other.vpnId != null) {
                     return false;
                 }
-            } else if (!vpId.equals(other.vpId)) {
+            } else if (!vpnId.equals(other.vpnId)) {
                 return false;
             }
             return true;
         }
 
-
     }
 
-    public static class GwMacValue {
-        String portIp;
-        String subnet;
-        String gwMac;
+    private static class GwMacValue {
+        private String portIp;
+        private Set<String> subnets;
+        private String gwMac;
 
         public GwMacValue(String portIp, String subnet) {
             this.portIp = portIp;
-            this.subnet = subnet;
+            this.subnets = new HashSet<String>();
+            this.subnets.add(subnet);
         }
 
         public String getGwMac() {
@@ -257,8 +286,8 @@ public class GwMacListener extends UnimgrDataTreeChangeListener<VpnPortipToPort>
             return portIp;
         }
 
-        public String getSubnet() {
-            return subnet;
+        public Set<String> getSubnets() {
+            return subnets;
         }
 
     }

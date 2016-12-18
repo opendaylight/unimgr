@@ -283,7 +283,8 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
 
         String srcTpAddressStr = NetvirtVpnUtils.getIpAddressFromPrefix(NetvirtVpnUtils.ipPrefixToString(ipUni.getIpAddress()));
         IpAddress srcIpAddress = new IpAddress(srcTpAddressStr.toCharArray());
-        gwMacListener.unResolveGwMac(ipvcVpn.getVpnId(), vpnElan.getElanPort(), srcIpAddress, deletedSubnet.getGateway() );
+        String subnet = NetvirtVpnUtils.ipPrefixToString(deletedSubnet.getSubnet());
+        gwMacListener.unResolveGwMac(ipvcVpn.getVpnId(), vpnElan.getElanPort(), srcIpAddress, deletedSubnet.getGateway(), subnet);
 
         NetvirtVpnUtils.removeVpnInterfaceAdjacency(dataBroker, vpnElan.getElanPort(), deletedSubnet.getSubnet());
         NetvirtVpnUtils.removeVpnInterfaceAdjacency(dataBroker, vpnElan.getElanPort(), deletedSubnet.getGateway());

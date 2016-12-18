@@ -11,9 +11,6 @@ package org.opendaylight.unimgr.mef.netvirt;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 
 public interface IGwMacListener {
-    // IpPrefix srcIpPrefix, IpAddress dstIpAddress, String interf
     public void resolveGwMac (String vpnName, String portName, IpAddress srcIpAddress, IpAddress dstIpAddress, String subnet);
-
-    public void unResolveGwMac (String vpnName, String portName, IpAddress srcIpAddress, IpAddress dstIpAddress);
-
+    public void unResolveGwMac(String vpnName, String portName, IpAddress srcIpAddress, IpAddress dstIpAddress, String subnet);
 }
