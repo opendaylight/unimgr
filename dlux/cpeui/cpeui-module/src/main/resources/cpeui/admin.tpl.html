@@ -115,4 +115,37 @@
 			</tbody>
 		</table>		
 	</div>
+	<div ng-show="isTabSet('admin',5)">
+		<div class="table-header">Profiles</div>
+		<table class="footable table table-striped">
+			<thead>
+				<tr>
+					<th>Profile Name</th>
+					<th>Committed Information Rate (KB/s)</th>
+					<th>Committed Burst Size (bytes)</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="profile in profiles | orderBy: '[\'bw-profile\']'">
+					<td class="minimal-width">{{ profile['bw-profile'] }}</td>
+					<td class="minimal-width">{{ profile.cir }}</td>
+					<td class="minimal-width">{{ profile.cbs }}</td>
+					<td class="delete-tr">
+					   <button class="btn btn-md btn-info" ng-click="editProfile(profile['bw-profile'],profile.cbs,profile.cir)">
+                        <i class="icon-edit"></i>
+                        <md-tooltip>Edit Profile</md-tooltip>
+                        </button>
+						<button class="btn btn-md btn-danger" ng-click="deleteProfile(profile['bw-profile'])">
+						<i class="icon-trash"></i>
+						<md-tooltip>Delete Profile</md-tooltip>
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<div>
+			<a class="btn add-row" ng-click="addProfile.show($event)">Add Profile</a>
+		</div>
+	</div>
 </div>

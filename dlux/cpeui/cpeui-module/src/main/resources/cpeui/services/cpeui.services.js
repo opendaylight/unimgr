@@ -46,6 +46,68 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                 }
             });
         };
+
+        // Profiles
+        svc.getProfiles = function(callback) {
+          $http({
+              method:'GET',
+              url:"/restconf/config/mef-global:mef-global/profiles/ingress-bwp-flows/"
+          }).then(function successCallback(response) {
+              if (callback != undefined) {
+                  callback(response.data["ingress-bwp-flows"]["bwp-flow"]);
+              }
+          }, function errorCallback(response) {
+              if (response.status == 404) {
+                  callback([]);
+              }
+              console.log(response);
+          });
+      };
+
+      svc.addProfile = function(name, cir, cbs, callback){
+          $http({
+              method:'POST',
+              url:"/restconf/config/mef-global:mef-global/profiles/ingress-bwp-flows/",
+              data: {"bwp-flow":{
+                        "bw-profile" : name,
+                         "cir" : cir,
+                         "cbs" : cbs
+                    }}
+          }).then(function successCallback(response) {
+              if (callback != undefined) {
+                  callback();
+              }
+          });
+      };
+
+      svc.editProfile = function(name, cir, cbs, callback){
+          $http({
+              method:'PUT',
+              url:"/restconf/config/mef-global:mef-global/profiles/ingress-bwp-flows/bwp-flow/"+name,
+              data: {"bwp-flow":{
+                      "bw-profile": name,
+                      cir: cir,
+                      cbs:cbs
+                    }}
+          }).then(function successCallback(response) {
+              if (callback != undefined) {
+                  callback();
+              }
+          });
+      };
+      
+      svc.deleteProfile = function(name, callback) {
+          $http({
+              method:'DELETE',
+              url:"/restconf/config/mef-global:mef-global/profiles/ingress-bwp-flows/bwp-flow/"+name,
+          }).then(function successCallback(response) {
+              if (callback != undefined) {
+                  callback();
+              }
+          });
+      };
+
+        // CEs
         svc.addCe = function(id, name, callback) {
             $http({
                 method:'POST',
