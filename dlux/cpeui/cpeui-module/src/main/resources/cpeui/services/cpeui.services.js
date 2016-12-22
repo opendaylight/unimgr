@@ -15,7 +15,11 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                     callback(tenantList);
                 }
             }, function errorCallback(response) {
-                console.log(response);
+                if (response.status == 404) {
+                  callback([]);
+                } else {
+                  console.log(response);
+                }
             });
         };
 
@@ -98,6 +102,9 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                     callback(ces);
                 }
             }, function errorCallback(response) {
+              if (response.status == 404) {
+                  callback([]);
+                }
                 console.log(response);
             });
 
@@ -196,9 +203,9 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                   }
                 });
             }, function errorCallback(response) {
-              if (response.status == 404) {
-                callback([]);
-              }
+                if (response.status == 404) {
+                  callback([]);
+                }
                 console.log(response);
             });
         };
@@ -442,6 +449,9 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                   callback(response.data["mef-services"]["mef-service"]);
               }
           }, function errorCallback(response) {
+              if (response.status == 404) {
+                callback([]);
+              }
               console.log(response);
           });
         };
