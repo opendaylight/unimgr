@@ -1,7 +1,7 @@
 <md-dialog class="cpe-dialog" aria-label="Create Profile" ng-cloak>
 	<md-toolbar>
 		<div class="md-toolbar-tools">
-			<h2>Create Profile</h2>
+			<h2>{{params.edit ? 'Edit' : 'Create'}} Profile</h2>
 			<span flex></span>
 			<md-button class="md-icon-button" aria-label="Close dialog"
 				ng-click="cancel()"> <i class="icon-remove-sign"></i> </md-button>
@@ -11,22 +11,25 @@
 		<md-dialog-content>
 			<div layout="column" ng-cloak>
 				<md-content layout-padding>
-					<md-input-container class="md-block">
+					<md-input-container class="md-block" ng-init="obj['bw-profile'] = params.profileName">
 						<label>Profile Name</label>
-					 	<input name="profilename" ng-model="obj['bw-profile']">
+					 	<input name="profilename" ng-model="obj['bw-profile']" ng-disabled="params.edit">
 					 	<div ng-messages="projectForm.profilename.$error">
 							<div ng-message="required">This is required!</div>
 						</div>
 				 	</md-input-container>
-					<md-input-container class="md-block">
-						<label>Committed Information Rate (Kb/s)</label>
+					<md-input-container class="md-block" ng-init="obj.cir = params.cir">
+						<label>Committed Information Rate (KB/s)</label>
 						<input type="number" required name="cir" ng-model="obj.cir" min="0">
 						<div ng-messages="projectForm.cir.$error">
 							<div ng-message="required">Number is required!</div>
 							<div ng-message="min">Number must be positive!</div>
 						</div>
 					</md-input-container>
-					<md-input-container class="md-block">
+					<md-checkbox name="" ng-model="obj.default_cbs" ng-init="obj.default_cbs = true">
+					   Use default Committed Burst Size {{obj.cir ? '('+((obj.cir - (obj.cir % 10)) / 10) + ' bytes)': ''}}
+					</md-checkbox>
+					<md-input-container class="md-block" ng-if="!obj.default_cbs" ng-init="obj.cbs = params.cbs">
 						<label>Committed Burst Size (bytes)</label>
 						<input type="number" required name="cbs" ng-model="obj.cbs" min="0">
 						<div ng-messages="projectForm.cbs.$error">

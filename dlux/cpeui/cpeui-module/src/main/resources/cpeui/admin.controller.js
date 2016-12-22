@@ -48,10 +48,24 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
         };
 
         $scope.addProfile = new CpeuiDialogs.Dialog('AddProfile', {}, function(obj) {
-          CpeuiSvc.addProfile(obj['bw-profile'], obj.cir, obj.cbs, function() {
-            $scope.updateProfilesView();
-          });
+            if (obj.default_cbs) {
+                obj.cbs = Math.floor(obj.cir/10);
+            }
+            CpeuiSvc.addProfile(obj['bw-profile'], obj.cir, obj.cbs, function() {
+              $scope.updateProfilesView();
+            });
         });
+
+        $scope.editProfile = function(profileName, cbs, cir) {
+            new CpeuiDialogs.Dialog('AddProfile', {}, function(obj) {
+                if (obj.default_cbs) {
+                    obj.cbs = Math.floor(obj.cir/10);
+                }
+                CpeuiSvc.editProfile(obj['bw-profile'], obj.cir, obj.cbs, function() {
+                  $scope.updateProfilesView();
+                });
+            }).show(null,{edit:true, profileName:profileName, cbs:cbs, cir:cir});
+        };
 
         $scope.deleteProfile = function(profileName) {
           CpeuiDialogs.confirm(function() {

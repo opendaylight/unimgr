@@ -41,7 +41,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
           locals : {
             params : params
           },
-        // onComplete: function() {$('md-dialog').draggable();}
+         onComplete: function() {$('md-dialog').draggable();}
         });
       };
     };

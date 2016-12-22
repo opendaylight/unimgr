@@ -80,6 +80,22 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
           });
       };
 
+      svc.editProfile = function(name, cir, cbs, callback){
+          $http({
+              method:'PUT',
+              url:"/restconf/config/mef-global:mef-global/profiles/ingress-bwp-flows/bwp-flow/"+name,
+              data: {"bwp-flow":{
+                      "bw-profile": name,
+                      cir: cir,
+                      cbs:cbs
+                    }}
+          }).then(function successCallback(response) {
+              if (callback != undefined) {
+                  callback();
+              }
+          });
+      };
+      
       svc.deleteProfile = function(name, callback) {
           $http({
               method:'DELETE',

@@ -124,7 +124,7 @@
 			<thead>
 				<tr>
 					<th>Profile Name</th>
-					<th>Committed Information Rate (Kb/s)</th>
+					<th>Committed Information Rate (KB/s)</th>
 					<th>Committed Burst Size (bytes)</th>
 					<th></th>
 				</tr>
@@ -135,6 +135,10 @@
 					<td class="minimal-width">{{ profile.cir }}</td>
 					<td class="minimal-width">{{ profile.cbs }}</td>
 					<td class="delete-tr">
+					   <button class="btn btn-md btn-info" ng-click="editProfile(profile['bw-profile'],profile.cbs,profile.cir)">
+                        <i class="icon-edit"></i>
+                        <md-tooltip>Edit Profile</md-tooltip>
+                        </button>
 						<button class="btn btn-md btn-danger" ng-click="deleteProfile(profile['bw-profile'])">
 						<i class="icon-trash"></i>
 						<md-tooltip>Delete Profile</md-tooltip>
