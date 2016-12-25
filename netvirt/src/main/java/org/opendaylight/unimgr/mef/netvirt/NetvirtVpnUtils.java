@@ -46,9 +46,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan.instances.ElanInstanceKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.Adjacencies;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.AdjacenciesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.VpnInstanceOpData;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.VpnInstanceToVpnId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.Adjacency;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.AdjacencyBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.AdjacencyKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.vpn.instance.op.data.VpnInstanceOpDataEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.vpn.instance.op.data.VpnInstanceOpDataEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.NetworkMaps;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.NeutronVpnPortipPortData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.SubnetAddedToVpnBuilder;
@@ -111,6 +115,20 @@ public class NetvirtVpnUtils {
     private static InstanceIdentifier<VpnInstance> getVpnInstanceInstanceIdentifier(String instanceName) {
         return InstanceIdentifier.builder(VpnInstances.class).child(VpnInstance.class, new VpnInstanceKey(instanceName))
                 .build();
+    }
+
+    static InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.vpn.instance.to.vpn.id.VpnInstance> getVpnInstanceToVpnIdIdentifier(
+            String vpnName) {
+        return InstanceIdentifier.builder(VpnInstanceToVpnId.class)
+                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.vpn.instance.to.vpn.id.VpnInstance.class,
+                        new org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.vpn.instance.to.vpn.id.VpnInstanceKey(
+                                vpnName))
+                .build();
+    }
+
+    public static InstanceIdentifier<VpnInstanceOpDataEntry> getVpnInstanceOpDataIdentifier(String rd) {
+        return InstanceIdentifier.builder(VpnInstanceOpData.class)
+                .child(VpnInstanceOpDataEntry.class, new VpnInstanceOpDataEntryKey(rd)).build();
     }
 
     public static void createUpdateVpnInterface(DataBroker dataBroker, String vpnName, String interfaceName,
@@ -247,13 +265,6 @@ public class NetvirtVpnUtils {
         MdsalUtils.commitTransaction(tx);
     }
 
-    public static void createVpnPortFixedIp(String vpnName, String portName, IpPrefix ipAddress, MacAddress macAddress,
-            WriteTransaction tx) {
-        String fixedIpPrefix = ipPrefixToString(ipAddress);
-        String fixedIp = getIpAddressFromPrefix(fixedIpPrefix);
-        createVpnPortFixedIp(vpnName, portName, fixedIp, macAddress, tx);
-    }
-
     private static void createVpnPortFixedIp(String vpnName, String portName, String fixedIp, MacAddress macAddress,
             WriteTransaction tx) {
         synchronized ((vpnName + fixedIp).intern()) {
@@ -308,9 +319,9 @@ public class NetvirtVpnUtils {
         InstanceIdentifier<ElanInstance> elanIdentifierId = NetvirtUtils.getElanInstanceInstanceIdentifier(subnetName);
 
         @SuppressWarnings("resource") // AutoCloseable
-        DataWaitListener<ElanInstance> elanTagWaiter = new DataWaitListener<>(
-                dataBroker, elanIdentifierId, 10, LogicalDatastoreType.CONFIGURATION, el -> el.getElanTag());
-        if ( !elanTagWaiter.waitForData()) {
+        DataWaitListener<ElanInstance> elanTagWaiter = new DataWaitListener<ElanInstance>(dataBroker, elanIdentifierId,
+                10, LogicalDatastoreType.CONFIGURATION, el -> el.getElanTag());
+        if (!elanTagWaiter.waitForData()) {
             logger.error("Trying to add invalid elan {} to vpn {}", subnetName, vpnName);
             return;
         }

@@ -93,7 +93,6 @@ public class MefServicesUtils {
         return null;
     }
 
-
     public static IpvcVpn getOperIpvcVpn(DataBroker dataBroker, InstanceIdentifier<Ipvc> identifier) {
         InstanceIdentifier<IpvcVpn> path = identifier.augmentation(IpvcVpn.class);
         Optional<IpvcVpn> ipvcVpn = MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, path);
@@ -155,8 +154,8 @@ public class MefServicesUtils {
     }
 
     public static void removeOperIpvcVpn(InstanceIdentifier<Ipvc> identifier, WriteTransaction tx) {
-        InstanceIdentifier<IpvcVpn> path = identifier.augmentation(IpvcVpn.class);
-        tx.delete(LogicalDatastoreType.OPERATIONAL, path);
+        final InstanceIdentifier<MefService> serviceId = identifier.firstIdentifierOf(MefService.class);
+        tx.delete(LogicalDatastoreType.OPERATIONAL, serviceId);
     }
 
     public static void removeOperIpvcSubnet(DataBroker dataBroker, InstanceIdentifier<Ipvc> identifier, String vpnId,
@@ -176,7 +175,8 @@ public class MefServicesUtils {
             vpnElansEx.remove(vpnElans);
             VpnElansBuilder vpnElansB = new VpnElansBuilder(vpnElans);
             List<Subnets> exSubnets = vpnElansB.getSubnets();
-            List<Subnets> newSubnets = exSubnets.stream().filter(s -> ! s.getSubnet().equals(deleteSubnet)).collect(Collectors.toList());
+            List<Subnets> newSubnets = exSubnets.stream().filter(s -> !s.getSubnet().equals(deleteSubnet))
+                    .collect(Collectors.toList());
             vpnElansB.setSubnets(newSubnets);
             vpnElansEx.add(vpnElansB.build());
         }

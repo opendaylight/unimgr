@@ -31,14 +31,13 @@ public class DataWaitListener<D extends DataObject> extends UnimgrDataTreeChange
     LogicalDatastoreType logicalDatastoreType;
     DataWaitGetter<D> getData;
     private final long waitMillisec = 1000;
-    
 
     public DataWaitListener(final DataBroker dataBroker, final InstanceIdentifier<D> objectIdentifierId,
             int maxRetiries, LogicalDatastoreType logicalDatastoreType, final DataWaitGetter<D> getData) {
         super(dataBroker);
         this.objectIdentifierId = objectIdentifierId;
         this.maxRetries = maxRetiries;
-        this.logicalDatastoreType = logicalDatastoreType; 
+        this.logicalDatastoreType = logicalDatastoreType;
         this.getData = getData;
         registerListener();
     }
@@ -46,8 +45,8 @@ public class DataWaitListener<D extends DataObject> extends UnimgrDataTreeChange
     @SuppressWarnings("unchecked")
     public void registerListener() {
         try {
-            final DataTreeIdentifier<D> dataTreeIid = new DataTreeIdentifier<D>(
-                    LogicalDatastoreType.CONFIGURATION, objectIdentifierId);
+            final DataTreeIdentifier<D> dataTreeIid = new DataTreeIdentifier<D>(logicalDatastoreType,
+                    objectIdentifierId);
             dataWaitListenerRegistration = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
             Log.info("DataWaitListener created and registered");
         } catch (final Exception e) {
@@ -86,23 +85,25 @@ public class DataWaitListener<D extends DataObject> extends UnimgrDataTreeChange
     }
 
     private boolean dataAvailable() {
-        Optional<D> objectInstance = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                objectIdentifierId);
-        if (!objectInstance.isPresent()) {
-            Log.debug("Data for {} doesn't exist, waiting more", objectIdentifierId);
-            return false;
-        }  
-        if (getData.get(objectInstance.get()) != null) {
+        if (getData() != null) {
             return true;
         }
         return false;
     }
 
-    public boolean waitForData () {
+    public boolean waitForData() {
         return waitForData(maxRetries);
     }
-    
-    
+
+    public Object getData() {
+        Optional<D> objectInstance = MdsalUtils.read(dataBroker, logicalDatastoreType, objectIdentifierId);
+        if (!objectInstance.isPresent()) {
+            Log.debug("Data for {} doesn't exist, waiting more", objectIdentifierId);
+            return null;
+        }
+        return getData.get(objectInstance.get());
+    }
+
     public boolean waitForData(int retry) {
         synchronized (dataAvailable) {
             dataAvailable = dataAvailable();

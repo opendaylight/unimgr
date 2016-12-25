@@ -18,7 +18,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
-
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.MefService;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.Evc;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.Uni;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.uni.EvcUniCeVlans;
@@ -129,9 +129,11 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
                     : Collections.emptyList();
 
             synchronized (data.getEvcId().getValue().intern()) {
+                updateQos(uniToRemove);
                 EvcElan evcElan = getOperEvcElan(evcId);
                 if (evcElan == null) {
                     log.error("Evc {} has not been created as required. Nothing to remove", data.getEvcId().getValue());
+                    return;
                 }
 
                 String instanceName = evcElan.getElanId();
@@ -139,7 +141,6 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
                 for (Uni uni : uniToRemove) {
                     removeUniElanInterfaces(evcId, instanceName, uni);
                 }
-                updateQos(uniToRemove);
 
                 log.info("Removing elan instance: " + instanceName);
                 NetvirtUtils.deleteElanInstance(dataBroker, instanceName);
@@ -203,6 +204,12 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
 
         if (evcUniCeVlan.isEmpty()) {
             String interfaceName = uniPortManager.getUniVlanInterface(uni.getUniId().getValue(), Long.valueOf(0));
+            if (interfaceName == null) {
+                String errorMessage = String.format("Uni %s Interface for vlan %d is not operational ", uni.getUniId(),
+                        0);
+                Log.error(errorMessage);
+                throw new UnsupportedOperationException(errorMessage);
+            }
             if (isOperEvcElanPort(evcId, interfaceName)) {
                 log.info("elan interface for elan {} vlan {} interface {} exists already", instanceName, 0,
                         interfaceName);
@@ -218,6 +225,12 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
             for (EvcUniCeVlan ceVlan : evcUniCeVlan) {
                 Long vlan = safeCastVlan(ceVlan.getVid());
                 String interfaceName = uniPortManager.getUniVlanInterface(uni.getUniId().getValue(), vlan);
+                if (interfaceName == null) {
+                    String errorMessage = String.format("Uni %s Interface for vlan %d is not operational ",
+                            uni.getUniId(), 0);
+                    Log.error(errorMessage);
+                    throw new UnsupportedOperationException(errorMessage);
+                }
                 if (isOperEvcElanPort(evcId, interfaceName)) {
                     log.info("elan interface for elan {} vlan {} interface {} exists already", instanceName, 0,
                             interfaceName);
@@ -309,8 +322,8 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
     }
 
     private void removeOperEvcElan(InstanceIdentifier<Evc> identifier) {
-        InstanceIdentifier<EvcElan> path = identifier.augmentation(EvcElan.class);
-        MdsalUtils.delete(dataBroker, LogicalDatastoreType.OPERATIONAL, path);
+        final InstanceIdentifier<MefService> serviceId = identifier.firstIdentifierOf(MefService.class);
+        MdsalUtils.delete(dataBroker, LogicalDatastoreType.OPERATIONAL, serviceId);
     }
 
     private boolean isOperEvcElanPort(InstanceIdentifier<Evc> identifier, String elanPort) {
