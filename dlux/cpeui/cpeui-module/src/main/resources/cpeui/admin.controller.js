@@ -15,14 +15,14 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
 
         $scope.AddTenant = function() {
           CpeuiSvc.addTenant($scope.tenantId, function() {
-            $scope.updateView();
+              $scope.updateTenantView();
           });
         };
 
         $scope.tenantDialog = new CpeuiDialogs.Dialog('AddTenant', {},
             function(obj) {
               CpeuiSvc.addTenant(obj.id, function() {
-                $scope.updateView();
+                 $scope.updateTenantView();
               });
             });
 
@@ -34,7 +34,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
         $scope.DeleteTenant = function(tenantID) {
           CpeuiDialogs.confirm(function() {
             CpeuiSvc.deleteTenant(tenantID, function() {
-              $scope.updateView();
+                $scope.updateTenantView();
             });
           });
         };
