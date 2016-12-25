@@ -90,10 +90,10 @@ public class UniQosManager {
                 Log.trace("Can't read bw profile {} for Uni {}", bwProfile, uniId);
                 return;
             }
-            // Kbytes per second
+            // Kb per second
             maxKbps = bwFlowOp.get().getCir().getValue();
             // burst in bytes, ovs requires in Kb
-            maxBurstKb = bwFlowOp.get().getCbs().getValue() / 1000;
+            maxBurstKb = bwFlowOp.get().getCbs().getValue() * 8 / 1024;
             Log.info("Record rate limits for Uni {} Profile {}", uniId, bwProfile);
         }
         mapUniPortBandwidthLimits(uniId, portId, maxKbps, maxBurstKb);
