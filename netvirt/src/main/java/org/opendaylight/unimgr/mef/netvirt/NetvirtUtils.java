@@ -75,6 +75,9 @@ public class NetvirtUtils {
     }
 
     public static void updateElanInstance(String instanceName, WriteTransaction tx, Long segmentationId) {
+        if (segmentationId == null) {
+            segmentationId = Long.valueOf(Math.abs((short) instanceName.hashCode()));
+        }
         ElanInstanceBuilder einstBuilder = createElanInstance(instanceName, segmentationId);
 
         tx.merge(LogicalDatastoreType.CONFIGURATION, getElanInstanceInstanceIdentifier(instanceName),
