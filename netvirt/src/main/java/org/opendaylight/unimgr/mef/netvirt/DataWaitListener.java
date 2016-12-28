@@ -26,7 +26,8 @@ public class DataWaitListener<D extends DataObject> extends UnimgrDataTreeChange
     private static final Logger Log = LoggerFactory.getLogger(DataWaitListener.class);
     InstanceIdentifier<D> objectIdentifierId;
     private ListenerRegistration<DataWaitListener> dataWaitListenerRegistration;
-    Boolean dataAvailable = false;
+    private Boolean dataAvailable = false;
+    private final Object lockDataAvailable = new Object();
     private int maxRetries;
     LogicalDatastoreType logicalDatastoreType;
     DataWaitGetter<D> getData;
@@ -65,8 +66,8 @@ public class DataWaitListener<D extends DataObject> extends UnimgrDataTreeChange
         if (newDataObject.getRootPath() != null && newDataObject.getRootNode() != null) {
             Log.info("data {} created", newDataObject.getRootNode().getIdentifier());
         }
-        synchronized (dataAvailable) {
-            dataAvailable.notifyAll();
+        synchronized (lockDataAvailable) {
+            lockDataAvailable.notifyAll();
         }
     }
 
@@ -79,8 +80,8 @@ public class DataWaitListener<D extends DataObject> extends UnimgrDataTreeChange
         if (modifiedDataObject.getRootPath() != null && modifiedDataObject.getRootNode() != null) {
             Log.info("data {} updated", modifiedDataObject.getRootNode().getIdentifier());
         }
-        synchronized (dataAvailable) {
-            dataAvailable.notifyAll();
+        synchronized (lockDataAvailable) {
+            lockDataAvailable.notifyAll();
         }
     }
 
@@ -105,7 +106,7 @@ public class DataWaitListener<D extends DataObject> extends UnimgrDataTreeChange
     }
 
     public boolean waitForData(int retry) {
-        synchronized (dataAvailable) {
+        synchronized (lockDataAvailable) {
             dataAvailable = dataAvailable();
             if (dataAvailable == true) {
                 return true;
@@ -113,7 +114,7 @@ public class DataWaitListener<D extends DataObject> extends UnimgrDataTreeChange
                 return false;
             }
             try {
-                dataAvailable.wait(waitMillisec);
+                lockDataAvailable.wait(waitMillisec);
             } catch (InterruptedException e1) {
             }
         }
