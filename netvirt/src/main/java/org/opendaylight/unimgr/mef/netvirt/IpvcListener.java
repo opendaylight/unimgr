@@ -111,8 +111,8 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
                 MdsalUtils.commitTransaction(tx);
 
                 InstanceIdentifier<VpnInstance> vpnId = NetvirtVpnUtils.getVpnInstanceToVpnIdIdentifier(vpnName);
-                DataWaitListener<VpnInstance> vpnInstanceWaiter = new DataWaitListener<VpnInstance>(dataBroker, vpnId,
-                        5, LogicalDatastoreType.CONFIGURATION, vpn -> vpn.getVrfId());
+                DataWaitListener<VpnInstance> vpnInstanceWaiter = new DataWaitListener<>(dataBroker, vpnId, 10,
+                        LogicalDatastoreType.CONFIGURATION, vpn -> vpn.getVrfId());
                 if (!vpnInstanceWaiter.waitForData()) {
                     String errorMessage = String.format("Fail to wait for vrfId for vpn %s", vpnName);
                     Log.error(errorMessage);
@@ -213,7 +213,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
             String vpnName = operIpvcVpn.getVpnId();
             InstanceIdentifier<VpnInstance> vpnId = NetvirtVpnUtils.getVpnInstanceToVpnIdIdentifier(vpnName);
             @SuppressWarnings("resource")
-            DataWaitListener<VpnInstance> vpnInstanceWaiter = new DataWaitListener<VpnInstance>(dataBroker, vpnId, 5,
+            DataWaitListener<VpnInstance> vpnInstanceWaiter = new DataWaitListener<>(dataBroker, vpnId, 10,
                     LogicalDatastoreType.CONFIGURATION, vpn -> vpn.getVrfId());
             if (!vpnInstanceWaiter.waitForData()) {
                 String errorMessage = String.format("Fail to wait for vrfId for vpn %s", vpnName);
@@ -233,14 +233,14 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
                 uniToRemove.removeAll(updateUni);
                 removeUnis(ipvcId, operIpvcVpn, uniToRemove, txRemove);
                 MdsalUtils.commitTransaction(txRemove);
-
-                List<Uni> uniToCreate = new ArrayList<>(updateUni);
-                uniToCreate.removeAll(originalUni);
-                for (Uni uni : uniToCreate) {
-                    createInterfaces(vpnName, uni, ipvcId, rd);
-                }
-                createUnis(ipvcId, uniToCreate);
             }
+            List<Uni> uniToCreate = new ArrayList<>(updateUni);
+            uniToCreate.removeAll(originalUni);
+
+            for (Uni uni : uniToCreate) {
+                createInterfaces(vpnName, uni, ipvcId, rd);
+            }
+            createUnis(ipvcId, uniToCreate);
 
         } catch (final Exception e) {
             Log.error("Update ipvc failed !", e);
@@ -287,8 +287,8 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
 
         InstanceIdentifier<VpnInstanceOpDataEntry> vpnId = NetvirtVpnUtils.getVpnInstanceOpDataIdentifier(rd);
         @SuppressWarnings("resource")
-        DataWaitListener<VpnInstanceOpDataEntry> vpnInstanceWaiter = new DataWaitListener<VpnInstanceOpDataEntry>(
-                dataBroker, vpnId, 5, LogicalDatastoreType.OPERATIONAL, vpn -> vpn.getVpnToDpnList());
+        DataWaitListener<VpnInstanceOpDataEntry> vpnInstanceWaiter = new DataWaitListener<>(dataBroker, vpnId, 10,
+                LogicalDatastoreType.OPERATIONAL, vpn -> vpn.getVpnToDpnList());
         if (!vpnInstanceWaiter.waitForData()) {
             String errorMessage = String.format("Fail to wait for vpn to dpn list %s", vpnName);
             Log.error(errorMessage);
