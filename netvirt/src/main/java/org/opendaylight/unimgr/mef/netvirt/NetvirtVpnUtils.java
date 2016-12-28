@@ -319,7 +319,7 @@ public class NetvirtVpnUtils {
         InstanceIdentifier<ElanInstance> elanIdentifierId = NetvirtUtils.getElanInstanceInstanceIdentifier(subnetName);
 
         @SuppressWarnings("resource") // AutoCloseable
-        DataWaitListener<ElanInstance> elanTagWaiter = new DataWaitListener<ElanInstance>(dataBroker, elanIdentifierId,
+        DataWaitListener<ElanInstance> elanTagWaiter = new DataWaitListener<>(dataBroker, elanIdentifierId,
                 10, LogicalDatastoreType.CONFIGURATION, el -> el.getElanTag());
         if (!elanTagWaiter.waitForData()) {
             logger.error("Trying to add invalid elan {} to vpn {}", subnetName, vpnName);
@@ -335,7 +335,7 @@ public class NetvirtVpnUtils {
         updateSubnetNode(dataBroker, new Uuid(vpnName), subnetId, subnetIp);
 
         logger.info("Adding port {} to subnet {}", interfaceName, subnetName);
-        updateSubnetmapNodeWithPorts(dataBroker, subnetId, new Uuid(interfaceName), null);
+        updateSubnetmapNodeWithPorts(dataBroker, subnetId, new Uuid(interfaceName), null, vpnName);
 
         Optional<ElanInstance> elanInstance = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION,
                 elanIdentifierId);
@@ -365,7 +365,7 @@ public class NetvirtVpnUtils {
         publishSubnetRemoveNotification(notificationPublishService, subnetId, vpnName, elanTag);
 
         logger.info("Removing port {} from subnet {}", interfaceName, subnetName);
-        updateSubnetmapNodeWithPorts(dataBroker, subnetId, null, new Uuid(interfaceName));
+        updateSubnetmapNodeWithPorts(dataBroker, subnetId, null, new Uuid(interfaceName), vpnName);
 
         logger.info("Removing subnet {} from vpn {}", subnetName, vpnName);
         removeSubnetNode(dataBroker, new Uuid(vpnName));
@@ -441,7 +441,7 @@ public class NetvirtVpnUtils {
     }
 
     private static void updateSubnetmapNodeWithPorts(DataBroker dataBroker, Uuid subnetId, Uuid portIdToAdd,
-            Uuid portIdToRemove) {
+            Uuid portIdToRemove, String vpnName) {
         Subnetmap subnetmap = null;
         InstanceIdentifier<Subnetmap> id = InstanceIdentifier.builder(Subnetmaps.class)
                 .child(Subnetmap.class, new SubnetmapKey(subnetId)).build();
@@ -466,6 +466,7 @@ public class NetvirtVpnUtils {
                                 portIdToRemove.getValue());
 
                     }
+                    builder.setRouterId(new Uuid(vpnName));
                     builder.setPortList(portList);
                 }
                 subnetmap = builder.build();
