@@ -45,7 +45,7 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
     private final int waitForElanInterval;
 
     public SubnetListener(final DataBroker dataBroker, final NotificationPublishService notPublishService,
-             final IGwMacListener gwMacListener, int sleepInterval) {
+            final IGwMacListener gwMacListener, int sleepInterval) {
         super(dataBroker);
         this.notificationPublishService = notPublishService;
         this.gwMacListener = gwMacListener;
@@ -122,7 +122,6 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
         ipUniSubnets.forEach(s -> removeNetwork(s, uniId, ipUniId, ipvcId));
     }
 
-
     private void createNetwork(DataTreeModification<Subnet> newDataObject) {
         Subnet newSubnet = newDataObject.getRootNode().getDataAfter();
 
@@ -184,10 +183,12 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
             return;
         }
 
-        String srcTpAddressStr = NetvirtVpnUtils.getIpAddressFromPrefix(NetvirtVpnUtils.ipPrefixToString(ipUni.getIpAddress()));
+        String srcTpAddressStr = NetvirtVpnUtils
+                .getIpAddressFromPrefix(NetvirtVpnUtils.ipPrefixToString(ipUni.getIpAddress()));
         IpAddress srcIpAddress = new IpAddress(srcTpAddressStr.toCharArray());
         String subnet = NetvirtVpnUtils.ipPrefixToString(newSubnet.getSubnet());
-        gwMacListener.resolveGwMac(ipvcVpn.getVpnId(), vpnElan.getElanPort(), srcIpAddress, newSubnet.getGateway(), subnet);
+        gwMacListener.resolveGwMac(ipvcVpn.getVpnId(), vpnElan.getElanPort(), srcIpAddress, newSubnet.getGateway(),
+                subnet);
     }
 
     private void checkCreateDirectNetwork(Subnet newSubnet, IpvcVpn ipvcVpn, InstanceIdentifier<Ipvc> ipvcId,
@@ -196,8 +197,16 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
             return;
         }
 
+        org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.Uni operUni = MefInterfaceUtils
+                .getUni(dataBroker, newSubnet.getUniId().getValue(), LogicalDatastoreType.OPERATIONAL);
+        if (operUni == null) {
+            Log.error("Uni {} for network {} is not operational", newSubnet.getUniId(), newSubnet.getSubnet());
+            return;
+        }
+        String portMacAddress = operUni.getMacAddress().getValue();
+
         NetvirtVpnUtils.addDirectSubnetToVpn(dataBroker, notificationPublishService, ipvcVpn.getVpnId(),
-                vpnElan.getElanId(), newSubnet.getSubnet(), vpnElan.getElanPort(), waitForElanInterval);
+                vpnElan.getElanId(), newSubnet.getSubnet(), vpnElan.getElanPort(), portMacAddress, waitForElanInterval);
 
     }
 
@@ -243,7 +252,6 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
                 vpnElan.getElanId(), vpnElan.getElanPort(), subnetStr);
     }
 
-
     private void removeDirectNetwork(Subnet deletedSubnet, IpvcVpn ipvcVpn, InstanceIdentifier<Ipvc> ipvcId) {
         if (deletedSubnet.getGateway() != null) {
             return;
@@ -281,10 +289,12 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
             return;
         }
 
-        String srcTpAddressStr = NetvirtVpnUtils.getIpAddressFromPrefix(NetvirtVpnUtils.ipPrefixToString(ipUni.getIpAddress()));
+        String srcTpAddressStr = NetvirtVpnUtils
+                .getIpAddressFromPrefix(NetvirtVpnUtils.ipPrefixToString(ipUni.getIpAddress()));
         IpAddress srcIpAddress = new IpAddress(srcTpAddressStr.toCharArray());
         String subnet = NetvirtVpnUtils.ipPrefixToString(deletedSubnet.getSubnet());
-        gwMacListener.unResolveGwMac(ipvcVpn.getVpnId(), vpnElan.getElanPort(), srcIpAddress, deletedSubnet.getGateway(), subnet);
+        gwMacListener.unResolveGwMac(ipvcVpn.getVpnId(), vpnElan.getElanPort(), srcIpAddress,
+                deletedSubnet.getGateway(), subnet);
 
         NetvirtVpnUtils.removeVpnInterfaceAdjacency(dataBroker, vpnElan.getElanPort(), deletedSubnet.getSubnet());
         NetvirtVpnUtils.removeVpnInterfaceAdjacency(dataBroker, vpnElan.getElanPort(), deletedSubnet.getGateway());

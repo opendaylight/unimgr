@@ -32,6 +32,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInterface.EtreeInterfaceType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.vpn.instance.op.data.VpnInstanceOpDataEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.vpn.instance.op.data.vpn.instance.op.data.entry.VpnToDpnList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.vpn.instance.op.data.vpn.instance.op.data.entry.vpn.to.dpn.list.VpnInterfaces;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.vpn.instance.to.vpn.id.VpnInstance;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -285,18 +287,35 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
             MdsalUtils.commitTransaction(tx);
         }
 
+        waitForInterfaceDpn(vpnName, rd, interfaceName);
+
+        NetvirtVpnUtils.createVpnPortFixedIp(dataBroker, vpnName, interfaceName, ipUni.getIpAddress(),
+                uni.getMacAddress());
+    }
+
+    private void waitForInterfaceDpn(String vpnName, String rd, String interfaceName) {
         InstanceIdentifier<VpnInstanceOpDataEntry> vpnId = NetvirtVpnUtils.getVpnInstanceOpDataIdentifier(rd);
+        DataWaitGetter<VpnInstanceOpDataEntry> getInterfByName = (vpn) -> {
+            if (vpn.getVpnToDpnList() == null)
+                return null;
+            for (VpnToDpnList is : vpn.getVpnToDpnList()) {
+                if (is.getVpnInterfaces() == null)
+                    continue;
+                for (VpnInterfaces i : is.getVpnInterfaces()) {
+                    if (i.getInterfaceName().equals(interfaceName))
+                        return interfaceName;
+                }
+            }
+            return null;
+        };
         @SuppressWarnings("resource")
         DataWaitListener<VpnInstanceOpDataEntry> vpnInstanceWaiter = new DataWaitListener<>(dataBroker, vpnId, 10,
-                LogicalDatastoreType.OPERATIONAL, vpn -> vpn.getVpnToDpnList());
+                LogicalDatastoreType.OPERATIONAL, getInterfByName);
         if (!vpnInstanceWaiter.waitForData()) {
             String errorMessage = String.format("Fail to wait for vpn to dpn list %s", vpnName);
             Log.error(errorMessage);
             throw new UnsupportedOperationException(errorMessage);
         }
-
-        NetvirtVpnUtils.createVpnPortFixedIp(dataBroker, vpnName, interfaceName, ipUni.getIpAddress(),
-                uni.getMacAddress());
     }
 
     private String createElanInterface(String vpnName, InstanceIdentifier<Ipvc> ipvcId, String uniId, String elanName,

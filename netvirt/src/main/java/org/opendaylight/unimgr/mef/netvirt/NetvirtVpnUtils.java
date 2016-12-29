@@ -315,7 +315,7 @@ public class NetvirtVpnUtils {
 
     public static void addDirectSubnetToVpn(DataBroker dataBroker,
             final NotificationPublishService notificationPublishService, String vpnName, String subnetName,
-            IpPrefix subnetIpPrefix, String interfaceName, int waitForElan) {
+            IpPrefix subnetIpPrefix, String interfaceName, String intfMac, int waitForElan) {
         InstanceIdentifier<ElanInstance> elanIdentifierId = NetvirtUtils.getElanInstanceInstanceIdentifier(subnetName);
 
         @SuppressWarnings("resource") // AutoCloseable
@@ -332,7 +332,7 @@ public class NetvirtVpnUtils {
 
         String subnetIp = getSubnetFromPrefix(ipPrefixToString(subnetIpPrefix));
         logger.info("Adding subnet {} {} to vpn {}", subnetName, subnetIp, vpnName);
-        updateSubnetNode(dataBroker, new Uuid(vpnName), subnetId, subnetIp);
+        updateSubnetNode(dataBroker, new Uuid(vpnName), subnetId, subnetIp, intfMac);
 
         logger.info("Adding port {} to subnet {}", interfaceName, subnetName);
         updateSubnetmapNodeWithPorts(dataBroker, subnetId, new Uuid(interfaceName), null, vpnName);
@@ -404,7 +404,8 @@ public class NetvirtVpnUtils {
         logger.debug("Deleted subnet-network mapping for  network {}", networkId.getValue());
     }
 
-    protected static void updateSubnetNode(DataBroker dataBroker, Uuid vpnId, Uuid subnetId, String subnetIp) {
+    protected static void updateSubnetNode(DataBroker dataBroker, Uuid vpnId, Uuid subnetId, String subnetIp,
+            String intfMac) {
         Subnetmap subnetmap = null;
         SubnetmapBuilder builder = null;
         InstanceIdentifier<Subnetmap> id = InstanceIdentifier.builder(Subnetmaps.class)
@@ -423,6 +424,7 @@ public class NetvirtVpnUtils {
             builder.setSubnetIp(subnetIp);
             builder.setNetworkId(subnetId);
             builder.setVpnId(vpnId);
+            builder.setRouterIntfMacAddress(intfMac);
 
             subnetmap = builder.build();
             logger.debug("Creating/Updating subnetMap node: {} ", subnetId.getValue());
