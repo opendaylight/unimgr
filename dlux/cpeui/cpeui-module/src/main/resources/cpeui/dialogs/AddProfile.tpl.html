@@ -13,24 +13,24 @@
 				<md-content layout-padding>
 					<md-input-container class="md-block" ng-init="obj['bw-profile'] = params.profileName">
 						<label>Profile Name</label>
-					 	<input name="profilename" ng-model="obj['bw-profile']" ng-disabled="params.edit">
+					 	<input name="profilename" required ng-model="obj['bw-profile']" ng-disabled="params.edit">
 					 	<div ng-messages="projectForm.profilename.$error">
 							<div ng-message="required">This is required!</div>
 						</div>
 				 	</md-input-container>
 					<md-input-container class="md-block" ng-init="obj.cir = params.cir">
-						<label>Committed Information Rate (KB/s)</label>
+						<label>Committed Information Rate (kb/s)</label>
 						<input type="number" required name="cir" ng-model="obj.cir" min="0">
 						<div ng-messages="projectForm.cir.$error">
 							<div ng-message="required">Number is required!</div>
 							<div ng-message="min">Number must be positive!</div>
 						</div>
 					</md-input-container>
-					<md-checkbox name="" ng-model="obj.default_cbs" ng-init="obj.default_cbs = true">
-					   Use default Committed Burst Size {{obj.cir ? '('+((obj.cir - (obj.cir % 10)) / 10) + ' bytes)': ''}}
+					<md-checkbox name="" ng-model="obj.default_cbs" ng-init="obj.default_cbs = (!params.edit || getDefualtCbs(params.cir) == params.cbs)">
+					   Use default Committed Burst Size {{obj.cir ? ('(' + getDefualtCbs(obj.cir) + ' Bytes)') : ''}}
 					</md-checkbox>
 					<md-input-container class="md-block" ng-if="!obj.default_cbs" ng-init="obj.cbs = params.cbs">
-						<label>Committed Burst Size (bytes)</label>
+						<label>Committed Burst Size (Bytes)</label>
 						<input type="number" required name="cbs" ng-model="obj.cbs" min="0">
 						<div ng-messages="projectForm.cbs.$error">
 							<div ng-message="required">Number is required!</div>
