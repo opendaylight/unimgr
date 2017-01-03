@@ -26,6 +26,7 @@ import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.serv
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.VpnElans;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.unis.Uni;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.Identifier45;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.RetailSvcIdType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpPrefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Prefix;
@@ -40,12 +41,14 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
+public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements IUniAwareService {
     private static final Logger Log = LoggerFactory.getLogger(IpvcListener.class);
     private final IUniPortManager uniPortManager;
     private final ISubnetManager subnetManager;
     private final UniQosManager uniQosManager;
     private ListenerRegistration<IpvcListener> ipvcListenerRegistration;
+    @SuppressWarnings("unused")
+    private final UniAwareListener uniAwareListener;
 
     public IpvcListener(final DataBroker dataBroker, final IUniPortManager uniPortManager,
             final ISubnetManager subnetManager, final UniQosManager uniQosManager) {
@@ -53,6 +56,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
         this.uniPortManager = uniPortManager;
         this.subnetManager = subnetManager;
         this.uniQosManager = uniQosManager;
+        this.uniAwareListener = new UniAwareListener(dataBroker, this);
         registerListener();
     }
 
@@ -97,46 +101,130 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
         }
     }
 
+    @Override
+    public void connectUni(String uniId) {
+        List<RetailSvcIdType> allIpvcs = MefServicesUtils.getAllIpvcsServiceIds(dataBroker);
+        allIpvcs = (allIpvcs != null) ? allIpvcs : Collections.emptyList();
+
+        for (RetailSvcIdType ipvcSerId : allIpvcs) {
+            InstanceIdentifier<Ipvc> ipvcId = MefServicesUtils.getIpvcInstanceIdentifier(ipvcSerId);
+            Ipvc ipvc = MefServicesUtils.getIpvc(dataBroker, ipvcId);
+            if (ipvc == null) {
+                Log.error("Inconsistent data for svcId {}", ipvcSerId);
+                continue;
+            }
+            List<Uni> toConnect = new ArrayList<>();
+
+            List<Uni> unis = (ipvc.getUnis() != null) ? ipvc.getUnis().getUni() : null;
+            unis = (unis != null) ? unis : Collections.emptyList();
+            for (Uni uni : unis) {
+                if (uni.getUniId().getValue().equals(uniId)) {
+                    Log.info("Connecting Uni {} to svc id {}", uniId, ipvcSerId);
+                    toConnect.add(uni);
+                    break;
+                }
+            }
+
+            IpvcVpn operIpvcVpn = MefServicesUtils.getOperIpvcVpn(dataBroker, ipvcId);
+            if (operIpvcVpn == null) {
+                String instanceName = ipvc.getIpvcId().getValue();
+                final String vpnName = NetvirtVpnUtils.getUUidFromString(instanceName);
+                createVpnInstance(vpnName, ipvcId);
+                operIpvcVpn = MefServicesUtils.getOperIpvcVpn(dataBroker, ipvcId);
+                if (operIpvcVpn == null) {
+                    Log.error("Ipvc {} hasn't been created as required, Nothing to reconnect", ipvcSerId);
+                    return;
+                }
+            }
+            String vpnName = operIpvcVpn.getVpnId();
+            String rd = waitForRd(vpnName);
+            createUnis(vpnName, ipvcId, toConnect, rd);
+        }
+    }
+
+    @Override
+    public void disconnectUni(String uniId) {
+
+        List<RetailSvcIdType> allIpvcs = MefServicesUtils.getAllIpvcsServiceIds(dataBroker);
+        allIpvcs = (allIpvcs != null) ? allIpvcs : Collections.emptyList();
+
+        for (RetailSvcIdType ipvcSerId : allIpvcs) {
+            InstanceIdentifier<Ipvc> ipvcId = MefServicesUtils.getIpvcInstanceIdentifier(ipvcSerId);
+            Ipvc ipvc = MefServicesUtils.getIpvc(dataBroker, ipvcId);
+            if (ipvc == null) {
+                Log.error("Inconsistent data for svcId {}", ipvcSerId);
+                continue;
+            }
+            List<Uni> toRemove = new ArrayList<>();
+
+            List<Uni> unis = (ipvc.getUnis() != null) ? ipvc.getUnis().getUni() : null;
+            unis = (unis != null) ? unis : Collections.emptyList();
+            for (Uni uni : unis) {
+                if (uni.getUniId().getValue().equals(uniId)) {
+                    Log.info("Disconnecting Uni {} from svc id {}", uniId, ipvcSerId);
+                    toRemove.add(uni);
+                    break;
+                }
+            }
+
+            IpvcVpn operIpvcVpn = MefServicesUtils.getOperIpvcVpn(dataBroker, ipvcId);
+            if (operIpvcVpn == null) {
+                Log.error("Ipvc {} hasn't been created as required, Nothing to disconnect", ipvcSerId);
+                return;
+            }
+            String vpnName = operIpvcVpn.getVpnId();
+
+            synchronized (vpnName.intern()) {
+                WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
+                removeUnis(ipvcId, operIpvcVpn, toRemove, tx);
+                MdsalUtils.commitTransaction(tx);
+            }
+        }
+    }
+
     private void addIpvc(DataTreeModification<Ipvc> newDataObject) {
         try {
             Ipvc ipvc = newDataObject.getRootNode().getDataAfter();
             String instanceName = ipvc.getIpvcId().getValue();
             final String vpnName = NetvirtVpnUtils.getUUidFromString(instanceName);
             InstanceIdentifier<Ipvc> ipvcId = newDataObject.getRootPath().getRootIdentifier();
+            createVpnInstance(vpnName, ipvcId);
+            String rd = waitForRd(vpnName);
+
             List<Uni> unis = new ArrayList<>();
-            String rd = null;
-            synchronized (vpnName.intern()) {
-                WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
-                Log.info("Adding vpn instance: " + instanceName);
-                NetvirtVpnUtils.createVpnInstance(vpnName, tx);
-                MefServicesUtils.addOperIpvcVpnElan(ipvcId, vpnName, tx);
-                MdsalUtils.commitTransaction(tx);
-
-                InstanceIdentifier<VpnInstance> vpnId = NetvirtVpnUtils.getVpnInstanceToVpnIdIdentifier(vpnName);
-                DataWaitListener<VpnInstance> vpnInstanceWaiter = new DataWaitListener<>(dataBroker, vpnId, 10,
-                        LogicalDatastoreType.CONFIGURATION, vpn -> vpn.getVrfId());
-                if (!vpnInstanceWaiter.waitForData()) {
-                    String errorMessage = String.format("Fail to wait for vrfId for vpn %s", vpnName);
-                    Log.error(errorMessage);
-                    throw new UnsupportedOperationException(errorMessage);
-                }
-                rd = (String) vpnInstanceWaiter.getData();
-            }
-
             if (ipvc.getUnis() != null && ipvc.getUnis() != null) {
                 unis = ipvc.getUnis().getUni();
             }
             Log.info("Number of UNI's: " + unis.size());
 
-            // Create elan/vpn interfaces
-            for (Uni uni : unis) {
-                createInterfaces(vpnName, uni, ipvcId, rd);
-            }
-
-            createUnis(ipvcId, unis);
+            createUnis(vpnName, ipvcId, unis, rd);
         } catch (final Exception e) {
             Log.error("Add ipvc failed !", e);
         }
+    }
+
+    private void createVpnInstance(final String vpnName, InstanceIdentifier<Ipvc> ipvcId) {
+        synchronized (vpnName.intern()) {
+            WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
+            Log.info("Adding vpn instance: " + vpnName);
+            NetvirtVpnUtils.createVpnInstance(vpnName, tx);
+            MefServicesUtils.addOperIpvcVpnElan(ipvcId, vpnName, tx);
+            MdsalUtils.commitTransaction(tx);
+        }
+    }
+
+    private String waitForRd(final String vpnName) {
+        InstanceIdentifier<VpnInstance> vpnId = NetvirtVpnUtils.getVpnInstanceToVpnIdIdentifier(vpnName);
+        @SuppressWarnings("resource")
+        DataWaitListener<VpnInstance> vpnInstanceWaiter = new DataWaitListener<VpnInstance>(dataBroker, vpnId, 5,
+                LogicalDatastoreType.CONFIGURATION, vpn -> vpn.getVrfId());
+        if (!vpnInstanceWaiter.waitForData()) {
+            String errorMessage = String.format("Fail to wait for vrfId for vpn %s", vpnName);
+            Log.error(errorMessage);
+            throw new UnsupportedOperationException(errorMessage);
+        }
+        String rd = (String) vpnInstanceWaiter.getData();
+        return rd;
     }
 
     private void removeIpvc(DataTreeModification<Ipvc> removedDataObject) {
@@ -192,7 +280,12 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
         updateQos(uniToRemove);
     }
 
-    private void createUnis(InstanceIdentifier<Ipvc> ipvcId, List<Uni> uniToCreate) {
+    private void createUnis(String vpnName, InstanceIdentifier<Ipvc> ipvcId, List<Uni> uniToCreate, String rd) {
+        // Create elan/vpn interfaces
+        for (Uni uni : uniToCreate) {
+            createInterfaces(vpnName, uni, ipvcId, rd);
+        }
+
         for (Uni uni : uniToCreate) {
             IpUni ipUni = MefInterfaceUtils.getIpUni(dataBroker, uni.getUniId(), uni.getIpUniId(),
                     LogicalDatastoreType.CONFIGURATION);
@@ -213,17 +306,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
                 return;
             }
             String vpnName = operIpvcVpn.getVpnId();
-            InstanceIdentifier<VpnInstance> vpnId = NetvirtVpnUtils.getVpnInstanceToVpnIdIdentifier(vpnName);
-            @SuppressWarnings("resource")
-            DataWaitListener<VpnInstance> vpnInstanceWaiter = new DataWaitListener<>(dataBroker, vpnId, 10,
-                    LogicalDatastoreType.CONFIGURATION, vpn -> vpn.getVrfId());
-            if (!vpnInstanceWaiter.waitForData()) {
-                String errorMessage = String.format("Fail to wait for vrfId for vpn %s", vpnName);
-                Log.error(errorMessage);
-                throw new UnsupportedOperationException(errorMessage);
-            }
-            String rd = (String) vpnInstanceWaiter.getData();
-
+            String rd = (String) waitForRd(vpnName);
             List<Uni> originalUni = origIpvc.getUnis() != null && origIpvc.getUnis().getUni() != null
                     ? origIpvc.getUnis().getUni() : Collections.emptyList();
             List<Uni> updateUni = updateIpvc.getUnis() != null && updateIpvc.getUnis().getUni() != null
@@ -238,19 +321,13 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
             }
             List<Uni> uniToCreate = new ArrayList<>(updateUni);
             uniToCreate.removeAll(originalUni);
-
-            for (Uni uni : uniToCreate) {
-                createInterfaces(vpnName, uni, ipvcId, rd);
-            }
-            createUnis(ipvcId, uniToCreate);
-
+            createUnis(vpnName, ipvcId, uniToCreate, rd);
         } catch (final Exception e) {
             Log.error("Update ipvc failed !", e);
         }
     }
 
     private void createInterfaces(String vpnName, Uni uniInService, InstanceIdentifier<Ipvc> ipvcId, String rd) {
-
         WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
         String uniId = uniInService.getUniId().getValue();
         String ipUniId = uniInService.getIpUniId().getValue();
@@ -368,19 +445,12 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
     private void removeInterfaces(InstanceIdentifier<Ipvc> ipvcId, IpvcVpn ipvcVpn, Uni uniInService, IpUni ipUni,
             WriteTransaction tx) {
         String uniId = uniInService.getUniId().getValue();
-        org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.Uni uni = MefInterfaceUtils
-                .getUni(dataBroker, uniId, LogicalDatastoreType.OPERATIONAL);
-        if (uni == null) {
-            String errorMessage = String.format("Couldn't find uni %s for ipvc", uniId);
-            Log.error(errorMessage);
-            throw new UnsupportedOperationException(errorMessage);
-        }
-
         String vpnName = ipvcVpn.getVpnId();
         VpnElans vpnElans = MefServicesUtils.findVpnElanForNetwork(new Identifier45(uniId), ipUni.getIpUniId(),
                 ipvcVpn);
         if (vpnElans == null) {
             Log.error("Trying to remome non-operational vpn/elan for Uni {} Ip-UNi {}", uniId, ipUni.getIpUniId());
+            return;
         }
 
         NetvirtVpnUtils.removeVpnInterfaceAdjacencies(dataBroker, vpnName, vpnElans.getElanPort());

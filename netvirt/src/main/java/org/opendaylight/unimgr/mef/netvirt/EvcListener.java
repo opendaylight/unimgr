@@ -30,6 +30,7 @@ import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.serv
 
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcType;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcUniRoleType;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.RetailSvcIdType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInterface.EtreeInterfaceType;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -40,18 +41,21 @@ import com.google.common.base.Optional;
 
 import jline.internal.Log;
 
-public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
+public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IUniAwareService {
 
     private static final Logger log = LoggerFactory.getLogger(EvcListener.class);
     private ListenerRegistration<EvcListener> evcListenerRegistration;
     private final IUniPortManager uniPortManager;
     private final UniQosManager uniQosManager;
+    @SuppressWarnings("unused")
+    private final UniAwareListener uniAwareListener;
 
     public EvcListener(final DataBroker dataBroker, final UniPortManager uniPortManager,
             final UniQosManager uniQosManager) {
         super(dataBroker);
         this.uniPortManager = uniPortManager;
         this.uniQosManager = uniQosManager;
+        this.uniAwareListener = new UniAwareListener(dataBroker, this);
         registerListener();
     }
 
@@ -94,6 +98,89 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
             log.info("evc {} updated", modifiedDataObject.getRootNode().getIdentifier());
             updateEvc(modifiedDataObject);
         }
+    }
+
+    @Override
+    public void connectUni(String uniId) {
+        List<RetailSvcIdType> allEvcs = MefServicesUtils.getAllEvcsServiceIds(dataBroker);
+        allEvcs = (allEvcs != null) ? allEvcs : Collections.emptyList();
+
+        for (RetailSvcIdType evcSerId : allEvcs) {
+            InstanceIdentifier<Evc> evcId = MefServicesUtils.getEvcInstanceIdentifier(evcSerId);
+            Evc evc = MefServicesUtils.getEvc(dataBroker, evcId);
+            if (evc == null) {
+                Log.error("Inconsistent data for svcId {}", evcSerId);
+                continue;
+            }
+
+            String instanceName = evc.getEvcId().getValue();
+            boolean isEtree = evc.getEvcType() == EvcType.RootedMultipoint;
+
+            List<Uni> toConnect = new ArrayList<>();
+            List<Uni> unis = (evc.getUnis() != null) ? evc.getUnis().getUni() : null;
+            unis = (unis != null) ? unis : Collections.emptyList();
+            for (Uni uni : unis) {
+                if (uni.getUniId().getValue().equals(uniId)) {
+                    Log.info("Connecting Uni {} to svc id {}", uniId, evcSerId);
+                    toConnect.add(uni);
+                    break;
+                }
+            }
+
+            EvcElan evcElan = getOperEvcElan(evcId);
+            if (evcElan == null) {
+                NetvirtUtils.createElanInstance(dataBroker, instanceName, isEtree, evc.getSegmentationId());
+                evcElan = getOperEvcElan(evcId);
+                if (evcElan == null) {
+                    log.error("Evc {} has not been created as required. Nothing to reconnect", evcId);
+                    return;
+                }
+            }
+
+            for (Uni uni : toConnect) {
+                createUniElanInterfaces(evcId, instanceName, uni, isEtree);
+            }
+            updateQos(toConnect);
+        }
+    }
+
+    @Override
+    public void disconnectUni(String uniId) {
+        List<RetailSvcIdType> allEvcs = MefServicesUtils.getAllEvcsServiceIds(dataBroker);
+        allEvcs = (allEvcs != null) ? allEvcs : Collections.emptyList();
+
+        for (RetailSvcIdType evcSerId : allEvcs) {
+            InstanceIdentifier<Evc> evcId = MefServicesUtils.getEvcInstanceIdentifier(evcSerId);
+            Evc evc = MefServicesUtils.getEvc(dataBroker, evcId);
+            if (evc == null) {
+                Log.error("Inconsistent data for svcId {}", evcSerId);
+                continue;
+            }
+
+            String instanceName = evc.getEvcId().getValue();
+            List<Uni> toDisconnect = new ArrayList<>();
+            List<Uni> unis = (evc.getUnis() != null) ? evc.getUnis().getUni() : null;
+            unis = (unis != null) ? unis : Collections.emptyList();
+            for (Uni uni : unis) {
+                if (uni.getUniId().getValue().equals(uniId)) {
+                    Log.info("Disconnecting Uni {} from svc id {}", uniId, evcSerId);
+                    toDisconnect.add(uni);
+                    break;
+                }
+            }
+
+            EvcElan evcElan = getOperEvcElan(evcId);
+            if (evcElan == null) {
+                log.error("Evc {} has not been created as required. Nothing to disconnect", evcId);
+                return;
+            }
+
+            updateQos(toDisconnect);
+            for (Uni uni : toDisconnect) {
+                removeUniElanInterfaces(evcId, instanceName, uni);
+            }
+        }
+
     }
 
     private void addEvc(DataTreeModification<Evc> newDataObject) {
@@ -253,30 +340,30 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> {
                 && !evcUniCeVlans.getEvcUniCeVlan().isEmpty() ? evcUniCeVlans.getEvcUniCeVlan()
                         : Collections.emptyList();
 
-        for (EvcUniCeVlan ceVlan : evcUniCeVlan) {
-            Long vlan = safeCastVlan(ceVlan.getVid());
-            uniPortManager.removeCeVlan(uni.getUniId().getValue(), vlan);
-        }
-
         if (evcUniCeVlan.isEmpty()) {
             String interfaceName = uniPortManager.getUniVlanInterface(uni.getUniId().getValue(), Long.valueOf(0));
-            if (!isOperEvcElanPort(evcId, interfaceName)) {
+            if (interfaceName == null || !isOperEvcElanPort(evcId, interfaceName)) {
                 log.info("elan interface for elan {} vlan {} is not operational, nothing to remove", instanceName, 0,
                         interfaceName);
-                return;
+                interfaceName = uniPortManager.getUniVlanInterfaceName(uni.getUniId().getValue(), null);
             }
             removeElanInterface(evcId, uni.getUniId().getValue(), interfaceName);
         } else {
             for (EvcUniCeVlan ceVlan : evcUniCeVlan) {
                 Long vlan = safeCastVlan(ceVlan.getVid());
                 String interfaceName = uniPortManager.getUniVlanInterface(uni.getUniId().getValue(), vlan);
-                if (!isOperEvcElanPort(evcId, interfaceName)) {
+                if (interfaceName == null || !isOperEvcElanPort(evcId, interfaceName)) {
                     log.info("elan interface for elan {} vlan {} is not operational, nothing to remove", instanceName,
                             vlan, interfaceName);
-                    return;
+                    interfaceName = uniPortManager.getUniVlanInterfaceName(uni.getUniId().getValue(), vlan);
                 }
                 removeElanInterface(evcId, uni.getUniId().getValue(), interfaceName);
             }
+        }
+
+        for (EvcUniCeVlan ceVlan : evcUniCeVlan) {
+            Long vlan = safeCastVlan(ceVlan.getVid());
+            uniPortManager.removeCeVlan(uni.getUniId().getValue(), vlan);
         }
     }
 

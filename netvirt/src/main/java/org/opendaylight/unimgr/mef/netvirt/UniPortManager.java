@@ -333,7 +333,7 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
     @Override
     public void removeCeVlan(String uniId, Long vlanId) {
         if (getUniVlanInterfaceNoRetry(uniId, vlanId) == null) {
-            log.debug("No UNI {} Port for vlan {} exists already, nothing to delete", uniId, vlanId);
+            log.debug("No UNI {} Port for vlan {} dosn't exist already, nothing to delete", uniId, vlanId);
             return;
         }
         synchronized (uniId.intern()) {
@@ -399,5 +399,10 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
             NetvirtUtils.safeSleep();
             return getUniVlanInterfaceRetry(uniId, vlanId, ++retries);
         }
+    }
+
+    @Override
+    public String getUniVlanInterfaceName(String uniId, Long vlanId) {
+        return MefInterfaceUtils.getInterfaceNameForVlan(uniId, null);
     }
 }

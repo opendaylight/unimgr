@@ -48,12 +48,15 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
     private static final String BRIDGE_PREFIX = "br-";
     private static final String TUNNEL_PREFIX = "tun";
     private static final Logger log = LoggerFactory.getLogger(NodeConnectorListener.class);
+    private static boolean generateMac = false;
     private final UniPortManager uniPortManager;
     private ListenerRegistration<NodeConnectorListener> nodeConnectorListenerRegistration;
 
-    public NodeConnectorListener(final DataBroker dataBroker, final UniPortManager uniPortManager) {
+    public NodeConnectorListener(final DataBroker dataBroker, final UniPortManager uniPortManager,
+            final boolean generateMac) {
         super(dataBroker);
         this.uniPortManager = uniPortManager;
+        NodeConnectorListener.generateMac = generateMac;
         registerListener();
     }
 
@@ -63,6 +66,8 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
                     LogicalDatastoreType.OPERATIONAL, getInstanceIdentifier());
             nodeConnectorListenerRegistration = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
             log.info("NodeConnectorListener created and registered");
+
+            configIntegrationBridge();
         } catch (final Exception e) {
             log.error("Node connector listener registration failed !", e);
             throw new IllegalStateException("Node connector listener registration failed.", e);
@@ -236,5 +241,17 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
     private boolean shouldFilterOutNodeConnector(String interfaceName) {
         String[] splits = interfaceName.split(":");
         return splits.length > 1 && (splits[1].startsWith(TUNNEL_PREFIX) || splits[1].startsWith(BRIDGE_PREFIX));
+    }
+
+    private void configIntegrationBridge() {
+        if (generateMac == true) {// default for netvirt
+            return;
+        }
+
+        ElanConfigBuilder elanConfigBuilder = new ElanConfigBuilder();
+        elanConfigBuilder.setIntBridgeGenMac(false);
+        InstanceIdentifier<ElanConfig> id = InstanceIdentifier.builder(ElanConfig.class).build();
+
+        MdsalUtils.syncUpdate(dataBroker, LogicalDatastoreType.CONFIGURATION, id, elanConfigBuilder.build());
     }
 }

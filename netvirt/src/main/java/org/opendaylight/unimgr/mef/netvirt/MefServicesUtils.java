@@ -22,6 +22,8 @@ import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.serv
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.MefServices;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.MefService;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.MefServiceKey;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.EvcChoice;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.IpvcChoice;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.Evc;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.Ipvc;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.Unis;
@@ -46,6 +48,11 @@ public class MefServicesUtils {
         return getMefServiceInstanceIdentifier().child(Evc.class);
     }
 
+    public static InstanceIdentifier<Evc> getEvcInstanceIdentifier(RetailSvcIdType svcId) {
+        return InstanceIdentifier.create(MefServices.class).child(MefService.class, new MefServiceKey(svcId))
+                .child(Evc.class);
+    }
+
     public static InstanceIdentifier<MefService> getMefServiceInstanceIdentifier() {
         return InstanceIdentifier.create(MefServices.class).child(MefService.class);
     }
@@ -55,10 +62,10 @@ public class MefServicesUtils {
     }
 
     public static InstanceIdentifier<Ipvc> getIpvcsInstanceIdentifier() {
-        return InstanceIdentifier.create(MefServices.class).child(MefService.class).child(Ipvc.class);
+        return getMefServiceInstanceIdentifier().child(Ipvc.class);
     }
 
-    public static InstanceIdentifier<Ipvc> getIpvcsInstanceIdentifier(RetailSvcIdType svcId) {
+    public static InstanceIdentifier<Ipvc> getIpvcInstanceIdentifier(RetailSvcIdType svcId) {
         return InstanceIdentifier.create(MefServices.class).child(MefService.class, new MefServiceKey(svcId))
                 .child(Ipvc.class);
     }
@@ -91,6 +98,24 @@ public class MefServicesUtils {
             return vpnElan;
         }
         return null;
+    }
+
+    public static Ipvc getIpvc(DataBroker dataBroker, InstanceIdentifier<Ipvc> identifier) {
+        Optional<Ipvc> ipvcVpn = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, identifier);
+        if (ipvcVpn.isPresent()) {
+            return ipvcVpn.get();
+        } else {
+            return null;
+        }
+    }
+
+    public static Evc getEvc(DataBroker dataBroker, InstanceIdentifier<Evc> identifier) {
+        Optional<Evc> evcVpn = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, identifier);
+        if (evcVpn.isPresent()) {
+            return evcVpn.get();
+        } else {
+            return null;
+        }
     }
 
     public static IpvcVpn getOperIpvcVpn(DataBroker dataBroker, InstanceIdentifier<Ipvc> identifier) {
@@ -198,6 +223,38 @@ public class MefServicesUtils {
             vpnElansEx.remove(vpnElans);
         }
         MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.OPERATIONAL, path, ipvcVpnBuilder.build());
+    }
+
+    public static List<RetailSvcIdType> getAllIpvcsServiceIds(DataBroker dataBroker) {
+        List<RetailSvcIdType> toReturn = new ArrayList<>();
+
+        InstanceIdentifier<MefServices> path = MefServicesUtils.getMefServicesInstanceIdentifier();
+        Optional<MefServices> mefServices = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, path);
+        if (!mefServices.isPresent() || mefServices.get() == null) {
+            return toReturn;
+        }
+        for (MefService service : mefServices.get().getMefService()) {
+            if (service.getMefServiceChoice() instanceof IpvcChoice) {
+                toReturn.add(service.getSvcId());
+            }
+        }
+        return toReturn;
+    }
+
+    public static List<RetailSvcIdType> getAllEvcsServiceIds(DataBroker dataBroker) {
+        List<RetailSvcIdType> toReturn = new ArrayList<>();
+
+        InstanceIdentifier<MefServices> path = MefServicesUtils.getMefServicesInstanceIdentifier();
+        Optional<MefServices> mefServices = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, path);
+        if (!mefServices.isPresent() || mefServices.get() == null) {
+            return toReturn;
+        }
+        for (MefService service : mefServices.get().getMefService()) {
+            if (service.getMefServiceChoice() instanceof EvcChoice) {
+                toReturn.add(service.getSvcId());
+            }
+        }
+        return toReturn;
     }
 
 }

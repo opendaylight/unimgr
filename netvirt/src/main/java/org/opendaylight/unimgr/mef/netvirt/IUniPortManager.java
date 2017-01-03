@@ -24,4 +24,5 @@ public interface IUniPortManager {
 
     String getUniVlanInterface(String uniId, Long vlanId);
 
+    String getUniVlanInterfaceName(String uniId, Long vlanId);
 }

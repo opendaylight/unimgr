@@ -23,6 +23,7 @@
 		class="org.opendaylight.unimgr.mef.netvirt.NodeConnectorListener">
 		<argument ref="dataBroker" />
 		<argument ref="uniPortManager" />
+		<argument value="true" />
 	</bean>
 
 	<bean id="evcListener" class="org.opendaylight.unimgr.mef.netvirt.EvcListener">

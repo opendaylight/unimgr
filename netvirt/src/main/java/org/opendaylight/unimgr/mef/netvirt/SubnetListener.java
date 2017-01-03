@@ -317,7 +317,7 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
                 for (Uni uni : unis) {
                     if (uni.getUniId().equals(uniId) && uni.getIpUniId().equals(ipUniId)) {
                         Log.info("Find service {} for uni {} ipuni {}", service.getSvcId(), uniId, ipUniId);
-                        return MefServicesUtils.getIpvcsInstanceIdentifier(service.getSvcId());
+                        return MefServicesUtils.getIpvcInstanceIdentifier(service.getSvcId());
                     }
                 }
             }
