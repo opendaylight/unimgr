@@ -40,14 +40,15 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
     private static final Logger Log = LoggerFactory.getLogger(IpvcListener.class);
     private final IUniPortManager uniPortManager;
     private final ISubnetManager subnetManager;
+    private final UniQosManager uniQosManager;
     private ListenerRegistration<IpvcListener> ipvcListenerRegistration;
 
     public IpvcListener(final DataBroker dataBroker, final IUniPortManager uniPortManager,
-            final ISubnetManager subnetManager) {
+            final ISubnetManager subnetManager, final UniQosManager uniQosManager) {
         super(dataBroker);
         this.uniPortManager = uniPortManager;
         this.subnetManager = subnetManager;
-
+        this.uniQosManager = uniQosManager;
         registerListener();
     }
 
@@ -115,12 +116,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
                 }
                 MdsalUtils.commitTransaction(tx);
             }
-            for (Uni uni : unis) {
-                IpUni ipUni = MefInterfaceUtils.getIpUni(dataBroker, uni.getUniId(), uni.getIpUniId(),
-                        LogicalDatastoreType.CONFIGURATION);
-                createDirectSubnet(uni, ipUni);
-                subnetManager.assignIpUniNetworks(uni.getUniId(), ipUni.getIpUniId(), ipvcId);
-            }
+            createUnis(ipvcId, unis);
         } catch (final Exception e) {
             Log.error("Add ipvc failed !", e);
         }
@@ -141,7 +137,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
                 // remove elan/vpn interfaces
                 // must be in different transactios
                 WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
-                removeUni(ipvcId, operIpvcVpn, ipvc.getUnis().getUni(), tx);
+                removeUnis(ipvcId, operIpvcVpn, ipvc.getUnis().getUni(), tx);
                 MdsalUtils.commitTransaction(tx);
                 // Let to work for listeners
                 // TODO : change to listener
@@ -157,7 +153,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
         }
     }
 
-    private void removeUni(InstanceIdentifier<Ipvc> ipvcId, IpvcVpn operIpvcVpn, List<Uni> uniToRemove,
+    private void removeUnis(InstanceIdentifier<Ipvc> ipvcId, IpvcVpn operIpvcVpn, List<Uni> uniToRemove,
             WriteTransaction tx) {
         if (uniToRemove == null) {
             Log.trace("No UNI's to remove");
@@ -176,6 +172,17 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
             subnetManager.unAssignIpUniNetworks(uni.getUniId(), ipUni.getIpUniId(), ipvcId);
             removeInterfaces(ipvcId, operIpvcVpn, uni, ipUni, tx);
         }
+        updateQos(uniToRemove);
+    }
+
+    private void createUnis(InstanceIdentifier<Ipvc> ipvcId, List<Uni> uniToCreate) {
+        for (Uni uni : uniToCreate) {
+            IpUni ipUni = MefInterfaceUtils.getIpUni(dataBroker, uni.getUniId(), uni.getIpUniId(),
+                    LogicalDatastoreType.CONFIGURATION);
+            createDirectSubnet(uni, ipUni);
+            subnetManager.assignIpUniNetworks(uni.getUniId(), ipUni.getIpUniId(), ipvcId);
+        }
+        updateQos(uniToCreate);
     }
 
     private void updateIpvc(DataTreeModification<Ipvc> modifiedDataObject) {
@@ -199,7 +206,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
                 WriteTransaction txRemove = MdsalUtils.createTransaction(dataBroker);
                 List<Uni> uniToRemove = new ArrayList<>(originalUni);
                 uniToRemove.removeAll(updateUni);
-                removeUni(ipvcId, operIpvcVpn, uniToRemove, txRemove);
+                removeUnis(ipvcId, operIpvcVpn, uniToRemove, txRemove);
                 MdsalUtils.commitTransaction(txRemove);
 
                 WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
@@ -210,12 +217,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
                 }
                 MdsalUtils.commitTransaction(tx);
 
-                for (Uni uni : uniToCreate) {
-                    IpUni ipUni = MefInterfaceUtils.getIpUni(dataBroker, uni.getUniId(), uni.getIpUniId(),
-                            LogicalDatastoreType.CONFIGURATION);
-                    createDirectSubnet(uni, ipUni);
-                    subnetManager.assignIpUniNetworks(uni.getUniId(), ipUni.getIpUniId(), ipvcId);
-                }
+                createUnis(ipvcId, uniToCreate);
             }
 
         } catch (final Exception e) {
@@ -250,6 +252,9 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
         IpAddress ipAddress = new IpAddress(srcIpAddressStr.toCharArray());
 
         String interfaceName = createElanInterface(vpnName, ipvcId, uniId, elanName, vlan, ipAddress, tx);
+
+        uniQosManager.mapUniPortBandwidthLimits(uniId, interfaceName, uniInService.getIngressBwProfile());
+
         createVpnInterface(vpnName, uni, ipUni, interfaceName, elanName, tx);
         MefServicesUtils.addOperIpvcVpnElan(ipvcId, vpnName, uniInService.getUniId(), uniInService.getIpUniId(),
                 elanName, interfaceName, null, tx);
@@ -322,7 +327,9 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
         NetvirtVpnUtils.removeVpnInterfaceAdjacencies(dataBroker, vpnName, vpnElans.getElanPort());
         // TODO : change to listener
         NetvirtUtils.safeSleep();
+        uniQosManager.unMapUniPortBandwidthLimits(uniId, vpnElans.getElanPort());
         removeElan(vpnElans, uniId, ipUni, tx);
+        // record Uni bw limits
         removeVpnInterface(vpnName, vpnElans, uniId, ipUni, tx);
         MefServicesUtils.removeOperIpvcElan(dataBroker, ipvcId, ipvcVpn.getVpnId(), uniInService.getUniId(),
                 uniInService.getIpUniId(), vpnElans.getElanId(), vpnElans.getElanPort());
@@ -357,5 +364,9 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> {
         InstanceIdentifier<Subnet> path = MefInterfaceUtils.getSubnetInstanceIdentifier(uni.getUniId(),
                 ipUni.getIpUniId(), subnetPrefix);
         MdsalUtils.delete(dataBroker, LogicalDatastoreType.CONFIGURATION, path);
+    }
+
+    private void updateQos(List<Uni> uniToUpdate) {
+        uniToUpdate.forEach(u -> uniQosManager.setUniBandwidthLimits(u.getUniId()));
     }
 }

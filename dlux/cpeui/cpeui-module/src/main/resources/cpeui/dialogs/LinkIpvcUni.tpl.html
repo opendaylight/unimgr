@@ -30,6 +30,13 @@
         <md-select ng-model="obj.ip_uni" name="ip_uni" ng-disabled="!obj.uni">
        		<md-option ng-repeat="ipuni in obj.uni['ip-unis']['ip-uni'] " value="{{ ipuni['ip-uni-id'] }}" >{{ ipuni['ip-uni-id'] }} : {{ipuni['ip-address']}}{{ipuni.vlan ? (' (vlan: ' + ipuni.vlan+')') : ''}}</md-option>
         </md-select>
+      </md-input-container>
+      <md-input-container class="md-block">
+        <label>Profile</label>
+        <md-select ng-model="obj.profile_name" name="profile_name">
+        	<md-option ng-value="undefined" > - None - </md-option>
+       		<md-option ng-repeat="profile in params.profiles | orderBy: '[\'bw-profile\']'" value="{{ profile['bw-profile'] }}" >{{ profile['bw-profile'] }} <span class="small">(CIR: {{profile.cir}}, CBS: {{profile.cbs}})</span></md-option>
+        </md-select>
       </md-input-container>      
   </md-content>
 </div>

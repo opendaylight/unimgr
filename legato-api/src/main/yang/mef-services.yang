@@ -89,6 +89,9 @@ module mef-services {
                 leaf ip-uni-id {
                   type mef-types:identifier45;
                 }
+                leaf ingress-bw-profile {
+                    type mef-types:identifier45;
+                }
 
                 container evc-uni-ce-vlans {
                   description
@@ -679,6 +682,9 @@ module mef-services {
                                             "VLAN Identifier.";
                     }
                   }
+                }
+                leaf ingress-bw-profile {
+                    type mef-types:identifier45;
                 }
                 container ingress-bwp-flows-per-cos {
                   presence "Use Ingress Bandwidth Profiles Per CoS";

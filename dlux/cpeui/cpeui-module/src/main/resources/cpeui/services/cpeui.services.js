@@ -46,6 +46,52 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                 }
             });
         };
+
+        // Profiles
+        svc.getProfiles = function(callback) {
+          $http({
+              method:'GET',
+              url:"/restconf/config/mef-global:mef-global/profiles/ingress-bwp-flows/"
+          }).then(function successCallback(response) {
+              if (callback != undefined) {
+                  callback(response.data["ingress-bwp-flows"]["bwp-flow"]);
+              }
+          }, function errorCallback(response) {
+              if (response.status == 404) {
+                  callback([]);
+              }
+              console.log(response);
+          });
+      };
+
+      svc.addProfile = function(name, cir, cbs, callback){
+          $http({
+              method:'POST',
+              url:"/restconf/config/mef-global:mef-global/profiles/ingress-bwp-flows/",
+              data: {"bwp-flow":{
+                        "bw-profile" : name,
+                         "cir" : cir,
+                         "cbs" : cbs
+                    }}
+          }).then(function successCallback(response) {
+              if (callback != undefined) {
+                  callback();
+              }
+          });
+      };
+
+      svc.deleteProfile = function(name, callback) {
+          $http({
+              method:'DELETE',
+              url:"/restconf/config/mef-global:mef-global/profiles/ingress-bwp-flows/bwp-flow/"+name,
+          }).then(function successCallback(response) {
+              if (callback != undefined) {
+                  callback();
+              }
+          });
+      };
+
+        // CEs
         svc.addCe = function(id, name, callback) {
             $http({
                 method:'POST',
@@ -90,27 +136,41 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
 
         svc.getCes = function(callback) {
             var ces;
+            var operMap = {};
+
             $http({
                 method:'GET',
-                url:"/restconf/config/mef-topology:mef-topology/devices/"
+                url:"/restconf/operational/mef-topology:mef-topology/devices/"
             }).then(function successCallback(response) {
                 ces = response.data["devices"]["device"];
-                ces.forEach(function(c){
-                  c.displayName = c['device-name'] ? c['device-name'] : c['dev-id'];
+                ces.forEach(function(c) {
+                  c.displayName = c['dev-id'];
+                  operMap[c['dev-id']] = c;
                 });
-                if (callback != undefined) {
-                    callback(ces);
-                }
-            }, function errorCallback(response) {
-              if (response.status == 404) {
-                  callback([]);
-                }
-                console.log(response);
+            }).finally(function() {
+                $http({
+                  method:'GET',
+                  url:"/restconf/config/mef-topology:mef-topology/devices/"
+                }).then(function(response){
+                  var confCes = response.data["devices"]["device"];
+                  confCes.forEach(function(c) {
+                    c.displayName = c['device-name'] ? c['device-name'] : c['dev-id'];
+                    if (operMap[c['dev-id']]) {
+                      for (var attrname in c) {
+                        operMap[c['dev-id']][attrname] = c[attrname];
+                      }
+                    } else {
+                      operMap[c['dev-id']] = c;
+                    }
+                  });
+                }).finally(function() {
+                  if (callback != undefined) {
+                    callback(Object.values(operMap));
+                  }
+                });
             });
-
-            return ces;
-
         };
+
         svc.removeCe = function(ceid, callback) {
              $http({
                 method:'DELETE',
@@ -235,8 +295,6 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
 
         // IPVCs
         svc.addIpvc = function(ipvc, tenant, callback) {
-//          var uni_json = getJsonUnis(evc.unis);
-//          preserved-vlan
           var data = {
             "mef-service" :  {
               "svc-id" : ipvc.id,
@@ -245,9 +303,6 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
               "ipvc" : {
                 "ipvc-id" : ipvc.id,
                 "ipvc-type" : 'multipoint',
-//                "unis" : {
-//                  "uni" : uni_json
-//                },
               }
             }
           };
@@ -485,12 +540,15 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
             });
         };
 
-        svc.addIpvcUni = function(svcid, uni_id, ipuni_id, callback) {
+        svc.addIpvcUni = function(svcid, uni_id, ipuni_id, profile_name, callback) {
           var data = {"uni":{
                           "uni-id":uni_id,
                           "ip-uni-id":ipuni_id
                           }
-                      };          
+                      };
+          if (profile_name) {
+            data.uni["ingress-bw-profile"] = profile_name;
+          }
            $http({
               method:'PUT',
               url:"/restconf/config/mef-services:mef-services/mef-service/" + svcid + "/ipvc/unis/uni/"+uni_id+"/"+ipuni_id,
@@ -519,13 +577,16 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
       
       
       
-        svc.addEvcUni = function(svcid, uni_id, role, vlans, callback) {
+        svc.addEvcUni = function(svcid, uni_id, role, vlans, profile_name, callback) {
             var data = {"uni":{
                             "uni-id":uni_id,
                             "role":role,
                             "admin-state-enabled":true
                             }
                         };
+            if (profile_name) {
+              data.uni["ingress-bw-profile"] = profile_name;
+            }
             if (vlans != undefined) {
                 data.uni['evc-uni-ce-vlans'] = {"evc-uni-ce-vlan":[]}
                 for (var i=0; i< vlans.length; ++i) {

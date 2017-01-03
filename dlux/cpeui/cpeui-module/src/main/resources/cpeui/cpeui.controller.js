@@ -21,7 +21,8 @@ define([].concat(modules).concat(services).concat(directives).concat(controllers
       "tenants" : 1,
       "cpes" : 2,
       "unis" : 3,
-      "networks" : 4
+      "networks" : 4,
+      "profiles" : 5
     }
 
     $scope.tab = {
