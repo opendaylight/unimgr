@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_e6133ab6",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/NetvirtUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 6071
+      },
+      "writtenOn": "2017-01-03T14:34:50Z",
+      "side": 1,
+      "message": "remove blank characters",
+      "revId": "44b8be339e8a063bef781d4947b3c2f0c746c1a3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
