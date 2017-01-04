@@ -50,7 +50,11 @@ public class NetvirtUtils {
     private static final long DEFAULT_MAC_TIMEOUT = 300;
 
     public static void createElanInstance(DataBroker dataBroker, String instanceName, boolean isEtree, Long segmentationId) {
-        ElanInstanceBuilder einstBuilder = createElanInstance(instanceName, segmentationId);
+        createElanInstance(dataBroker, instanceName, isEtree, segmentationId, DEFAULT_MAC_TIMEOUT);
+    }
+
+    public static void createElanInstance(DataBroker dataBroker, String instanceName, boolean isEtree, Long segmentationId, Long macTimeout) {
+        ElanInstanceBuilder einstBuilder = createElanInstanceBuilder(instanceName, segmentationId, macTimeout);
 
         if (isEtree) {
             EtreeInstance etreeInstance = new EtreeInstanceBuilder().build();
@@ -68,15 +72,21 @@ public class NetvirtUtils {
     }
 
     public static void updateElanInstance(String instanceName, WriteTransaction tx) {
-        ElanInstanceBuilder einstBuilder = createElanInstance(instanceName);
-
-        tx.merge(LogicalDatastoreType.CONFIGURATION, getElanInstanceInstanceIdentifier(instanceName),
-                einstBuilder.build());
+        ElanInstanceBuilder einstBuilder = createElanInstanceBuilder(instanceName);
+        saveElanInstance(instanceName, tx, einstBuilder);
     }
 
     public static void updateElanInstance(String instanceName, WriteTransaction tx, Long segmentationId) {
-        ElanInstanceBuilder einstBuilder = createElanInstance(instanceName, segmentationId);
+        ElanInstanceBuilder einstBuilder = createElanInstanceBuilder(instanceName, segmentationId);
+        saveElanInstance(instanceName, tx, einstBuilder);
+    }
 
+    public static void updateElanInstance(String instanceName, WriteTransaction tx, Long segmentationId, Long macTimeout) {
+        ElanInstanceBuilder einstBuilder = createElanInstanceBuilder(instanceName, segmentationId, macTimeout);
+        saveElanInstance(instanceName, tx, einstBuilder);
+    }
+
+    private static void saveElanInstance(String instanceName, WriteTransaction tx, ElanInstanceBuilder einstBuilder) {
         tx.merge(LogicalDatastoreType.CONFIGURATION, getElanInstanceInstanceIdentifier(instanceName),
                 einstBuilder.build());
     }
@@ -129,18 +139,22 @@ public class NetvirtUtils {
         return interfaceBuilder.build();
     }
 
-    private static ElanInstanceBuilder createElanInstance(String instanceName) {
-        return createElanInstance(instanceName, Long.valueOf(Math.abs((short) instanceName.hashCode())));
+    private static ElanInstanceBuilder createElanInstanceBuilder(String instanceName) {
+        return createElanInstanceBuilder(instanceName, Long.valueOf(Math.abs((short) instanceName.hashCode())));
     }
 
-    private static ElanInstanceBuilder createElanInstance(String instanceName, Long segmentationId) {
+    private static ElanInstanceBuilder createElanInstanceBuilder(String instanceName, Long segmentationId) {
+        return createElanInstanceBuilder(instanceName, segmentationId, DEFAULT_MAC_TIMEOUT);
+    }
+
+    private static ElanInstanceBuilder createElanInstanceBuilder(String instanceName, Long segmentationId, Long macTimeout) {
         if (segmentationId == null) {
             segmentationId = Long.valueOf(Math.abs((short) instanceName.hashCode()));
         }
         ElanInstanceBuilder einstBuilder = new ElanInstanceBuilder();
         einstBuilder.setElanInstanceName(instanceName);
         einstBuilder.setKey(new ElanInstanceKey(instanceName));
-        einstBuilder.setMacTimeout(DEFAULT_MAC_TIMEOUT);
+        einstBuilder.setMacTimeout(macTimeout);
         einstBuilder.setSegmentationId(segmentationId);
         einstBuilder.setSegmentType(SegmentTypeVxlan.class);
         return einstBuilder;

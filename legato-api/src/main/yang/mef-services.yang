@@ -1600,6 +1600,11 @@ module mef-services {
                             "[MEF6.2] Section 8.2.2 and MEF 22.1: [D2]. " +
                             "[MEF7.3] Section 12.2.2.";
             }
+            leaf mac-timeout {
+                type uint32;
+                description
+                            "EVC: Expiration time (in seconds) of a learned MAC address";
+            }
           }
         }
       }
