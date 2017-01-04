@@ -46,11 +46,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan.instances.ElanInstanceKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.Adjacencies;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.AdjacenciesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.LearntVpnVipToPortData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.VpnInstanceOpData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.VpnInstanceToVpnId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.Adjacency;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.AdjacencyBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.AdjacencyKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.learnt.vpn.vip.to.port.data.LearntVpnVipToPort;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.learnt.vpn.vip.to.port.data.LearntVpnVipToPortKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.vpn.instance.op.data.VpnInstanceOpDataEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.vpn.instance.op.data.VpnInstanceOpDataEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.NetworkMaps;
@@ -204,25 +207,39 @@ public class NetvirtVpnUtils {
     }
 
     public static void removeVpnInterfaceAdjacencies(DataBroker dataBroker, String vpnName, String interfaceName) {
+
         InstanceIdentifier<VpnInterface> identifier = getVpnInterfaceInstanceIdentifier(interfaceName);
         InstanceIdentifier<Adjacencies> path = identifier.augmentation(Adjacencies.class);
+
         Optional<Adjacencies> adjacencies = MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, path);
         List<Adjacency> adjacenciesList = adjacencies.isPresent() && adjacencies.get().getAdjacency() != null
                 ? adjacencies.get().getAdjacency() : Collections.emptyList();
         adjacenciesList.forEach(a -> {
             String ipStr = getIpAddressFromPrefix(a.getIpAddress());
-            InstanceIdentifier<VpnPortipToPort> id = getVpnPortipToPortIdentifier(vpnName, ipStr);
+            InstanceIdentifier<LearntVpnVipToPort> id = getLearntVpnVipToPortIdentifier(vpnName, ipStr);
             MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.OPERATIONAL, id);
         });
+        int waitCount = (adjacenciesList.isEmpty()) ? 2 : 2 * adjacenciesList.size();
 
         AdjacenciesBuilder builder = new AdjacenciesBuilder();
         List<Adjacency> list = new ArrayList<>();
         builder.setAdjacency(list);
         VpnInterfaceBuilder einterfaceBuilder = createVpnInterface(vpnName, interfaceName, builder.build());
+        MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION, identifier, einterfaceBuilder.build());
 
-        MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                getVpnInterfaceInstanceIdentifier(interfaceName), einterfaceBuilder.build());
+        final DataWaitGetter<Adjacencies> getData = vpnint -> {
+            if (vpnint.getAdjacency() == null)
+                return null;
+            return vpnint.getAdjacency().stream().filter(a -> !a.isPrimaryAdjacency());
+        };
 
+        @SuppressWarnings("resource") // AutoCloseable
+        DataWaitListener<Adjacencies> vpnIntWaiter = new DataWaitListener<Adjacencies>(dataBroker, path, waitCount,
+                LogicalDatastoreType.OPERATIONAL, getData);
+        if (!vpnIntWaiter.waitForClean()) {
+            logger.error("Fail to wait for VPN interface clean-up {} {}", vpnName, interfaceName);
+            return;
+        }
     }
 
     public static void removeVpnInterfaceAdjacency(DataBroker dataBroker, String interfaceName, IpPrefix ifPrefix) {
@@ -272,7 +289,7 @@ public class NetvirtVpnUtils {
             VpnPortipToPortBuilder builder = new VpnPortipToPortBuilder()
                     .setKey(new VpnPortipToPortKey(fixedIp, vpnName)).setVpnName(vpnName).setPortFixedip(fixedIp)
                     .setPortName(portName).setMacAddress(macAddress.getValue()).setSubnetIp(true);
-            tx.put(LogicalDatastoreType.OPERATIONAL, id, builder.build());
+            tx.put(LogicalDatastoreType.CONFIGURATION, id, builder.build());
             logger.debug(
                     "Interface to fixedIp added: {}, vpn {}, interface {}, mac {} added to " + "VpnPortipToPort DS",
                     fixedIp, vpnName, portName, macAddress);
@@ -281,7 +298,13 @@ public class NetvirtVpnUtils {
 
     public static VpnPortipToPort getVpnPortFixedIp(DataBroker dataBroker, String vpnName, String fixedIp) {
         InstanceIdentifier<VpnPortipToPort> id = getVpnPortipToPortIdentifier(vpnName, fixedIp);
-        Optional<VpnPortipToPort> opt = MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, id);
+        Optional<VpnPortipToPort> opt = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, id);
+        return opt != null && opt.isPresent() ? opt.get() : null;
+    }
+
+    public static LearntVpnVipToPort getLearntVpnVipToPort(DataBroker dataBroker, String vpnName, String fixedIp) {
+        InstanceIdentifier<LearntVpnVipToPort> id = getLearntVpnVipToPortIdentifier(vpnName, fixedIp);
+        Optional<LearntVpnVipToPort> opt = MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, id);
         return opt != null && opt.isPresent() ? opt.get() : null;
     }
 
@@ -289,7 +312,7 @@ public class NetvirtVpnUtils {
         String fixedIpPrefix = ipPrefixToString(ipAddress);
         String fixedIp = getIpAddressFromPrefix(fixedIpPrefix);
         InstanceIdentifier<VpnPortipToPort> id = getVpnPortipToPortIdentifier(vpnName, fixedIp);
-        tx.delete(LogicalDatastoreType.OPERATIONAL, id);
+        tx.delete(LogicalDatastoreType.CONFIGURATION, id);
     }
 
     public static void registerDirectSubnetForVpn(DataBroker dataBroker, Uuid subnetName, IpAddress gwIpAddress) {
@@ -491,8 +514,19 @@ public class NetvirtVpnUtils {
         return id;
     }
 
+    private static InstanceIdentifier<LearntVpnVipToPort> getLearntVpnVipToPortIdentifier(String vpnName,
+            String fixedIp) {
+        InstanceIdentifier<LearntVpnVipToPort> id = InstanceIdentifier.builder(LearntVpnVipToPortData.class)
+                .child(LearntVpnVipToPort.class, new LearntVpnVipToPortKey(fixedIp, vpnName)).build();
+        return id;
+    }
+
     public static InstanceIdentifier<VpnPortipToPort> getVpnPortipToPortIdentifier() {
         return InstanceIdentifier.builder(NeutronVpnPortipPortData.class).child(VpnPortipToPort.class).build();
+    }
+
+    public static InstanceIdentifier<LearntVpnVipToPort> getLearntVpnVipToPortIdentifier() {
+        return InstanceIdentifier.builder(LearntVpnVipToPortData.class).child(LearntVpnVipToPort.class).build();
     }
 
     private static void publishSubnetAddNotification(final NotificationPublishService notificationPublishService,

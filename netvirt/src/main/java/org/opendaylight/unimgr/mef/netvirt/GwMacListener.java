@@ -8,9 +8,7 @@
 
 package org.opendaylight.unimgr.mef.netvirt;
 
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -24,12 +22,12 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.arputil.rev160406.OdlArputilService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.neutron.vpn.portip.port.data.VpnPortipToPort;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.learnt.vpn.vip.to.port.data.LearntVpnVipToPort;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GwMacListener extends UnimgrDataTreeChangeListener<VpnPortipToPort> implements IGwMacListener {
+public class GwMacListener extends UnimgrDataTreeChangeListener<LearntVpnVipToPort> implements IGwMacListener {
     private static final Logger Log = LoggerFactory.getLogger(GwMacListener.class);
     private ListenerRegistration<GwMacListener> gwMacListenerRegistration;
     private final OdlArputilService arpUtilService;
@@ -49,8 +47,8 @@ public class GwMacListener extends UnimgrDataTreeChangeListener<VpnPortipToPort>
 
     public void registerListener() {
         try {
-            final DataTreeIdentifier<VpnPortipToPort> dataTreeIid = new DataTreeIdentifier<>(
-                    LogicalDatastoreType.OPERATIONAL, NetvirtVpnUtils.getVpnPortipToPortIdentifier());
+            final DataTreeIdentifier<LearntVpnVipToPort> dataTreeIid = new DataTreeIdentifier<>(
+                    LogicalDatastoreType.OPERATIONAL, NetvirtVpnUtils.getLearntVpnVipToPortIdentifier());
             gwMacListenerRegistration = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
             startRetriesThread();
             Log.info("GwMacListener created and registered");
@@ -70,26 +68,26 @@ public class GwMacListener extends UnimgrDataTreeChangeListener<VpnPortipToPort>
     }
 
     @Override
-    public void add(DataTreeModification<VpnPortipToPort> newDataObject) {
+    public void add(DataTreeModification<LearntVpnVipToPort> newDataObject) {
         if (newDataObject.getRootPath() != null && newDataObject.getRootNode() != null) {
-            VpnPortipToPort portIpToPort = newDataObject.getRootNode().getDataAfter();
+            LearntVpnVipToPort portIpToPort = newDataObject.getRootNode().getDataAfter();
             updateMac(portIpToPort);
         }
     }
 
     @Override
-    public void remove(DataTreeModification<VpnPortipToPort> removedDataObject) {
+    public void remove(DataTreeModification<LearntVpnVipToPort> removedDataObject) {
     }
 
     @Override
-    public void update(DataTreeModification<VpnPortipToPort> modifiedDataObject) {
+    public void update(DataTreeModification<LearntVpnVipToPort> modifiedDataObject) {
         if (modifiedDataObject.getRootPath() != null && modifiedDataObject.getRootNode() != null) {
-            VpnPortipToPort portIpToPort = modifiedDataObject.getRootNode().getDataAfter();
+            LearntVpnVipToPort portIpToPort = modifiedDataObject.getRootNode().getDataAfter();
             updateMac(portIpToPort);
         }
     }
 
-    private synchronized void updateMac(VpnPortipToPort portIpToPort) {
+    private synchronized void updateMac(LearntVpnVipToPort portIpToPort) {
         String portName = portIpToPort.getPortName();
         String macAddress = portIpToPort.getMacAddress();
         String vpnName = portIpToPort.getVpnName();
@@ -152,7 +150,7 @@ public class GwMacListener extends UnimgrDataTreeChangeListener<VpnPortipToPort>
             gwMacResolver.get(gwMacKey).getSubnets().add(subnet);
         }
 
-        VpnPortipToPort portIpToPort = NetvirtVpnUtils.getVpnPortFixedIp(dataBroker, vpnName, dstIpAddressStr);
+        LearntVpnVipToPort portIpToPort = NetvirtVpnUtils.getLearntVpnVipToPort(dataBroker, vpnName, dstIpAddressStr);
         if (portIpToPort != null) {
             updateMac(portIpToPort);
         }

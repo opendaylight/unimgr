@@ -73,6 +73,12 @@ public class DataWaitListener<D extends DataObject> extends UnimgrDataTreeChange
 
     @Override
     public void remove(DataTreeModification<D> removedDataObject) {
+        if (removedDataObject.getRootPath() != null && removedDataObject.getRootNode() != null) {
+            Log.info("data {} deleted", removedDataObject.getRootNode().getIdentifier());
+        }
+        synchronized (lockDataAvailable) {
+            lockDataAvailable.notifyAll();
+        }
     }
 
     @Override
@@ -96,6 +102,10 @@ public class DataWaitListener<D extends DataObject> extends UnimgrDataTreeChange
         return waitForData(maxRetries);
     }
 
+    public boolean waitForClean() {
+        return waitForClean(maxRetries);
+    }
+
     public Object getData() {
         Optional<D> objectInstance = MdsalUtils.read(dataBroker, logicalDatastoreType, objectIdentifierId);
         if (!objectInstance.isPresent()) {
@@ -113,11 +123,28 @@ public class DataWaitListener<D extends DataObject> extends UnimgrDataTreeChange
             } else if (retry <= 0) {
                 return false;
             }
-            try {
-                lockDataAvailable.wait(waitMillisec);
-            } catch (InterruptedException e1) {
-            }
+            safeWaitLock();
         }
         return waitForData(--retry);
+    }
+
+    public boolean waitForClean(int retry) {
+        synchronized (lockDataAvailable) {
+            dataAvailable = dataAvailable();
+            if (dataAvailable == false) {
+                return true;
+            } else if (retry <= 0) {
+                return false;
+            }
+            safeWaitLock();
+        }
+        return waitForClean(--retry);
+    }
+
+    private void safeWaitLock() {
+        try {
+            lockDataAvailable.wait(waitMillisec);
+        } catch (InterruptedException e1) {
+        }
     }
 }

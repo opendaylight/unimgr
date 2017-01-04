@@ -58,10 +58,10 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
             final DataTreeIdentifier<Subnet> dataTreeIid = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION,
                     MefInterfaceUtils.getSubnetsInstanceIdentifier());
             subnetListenerRegistration = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
-            Log.info("IpvcDataTreeChangeListener created and registered");
+            Log.info("SubnetListener created and registered");
         } catch (final Exception e) {
-            Log.error("Ipvc DataChange listener registration failed !", e);
-            throw new IllegalStateException("Ipvc registration Listener failed.", e);
+            Log.error("SubnetListener listener registration failed !", e);
+            throw new IllegalStateException("SubnetListener registration Listener failed.", e);
         }
     }
 
