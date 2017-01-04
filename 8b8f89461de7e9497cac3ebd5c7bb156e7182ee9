@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_49f95a7f",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/IpvcListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2017-01-04T17:05:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_c9bbaae3",
+      "revId": "8b8f89461de7e9497cac3ebd5c7bb156e7182ee9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_69ed36ef",
         "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/NetvirtUtils.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2017-01-04T16:38:47Z",
       "side": 1,
       "message": "segmentationId is not used",
+      "revId": "8b8f89461de7e9497cac3ebd5c7bb156e7182ee9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_a9e10ed2",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/NetvirtUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 656
+      },
+      "writtenOn": "2017-01-04T17:05:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_69ed36ef",
       "revId": "8b8f89461de7e9497cac3ebd5c7bb156e7182ee9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
