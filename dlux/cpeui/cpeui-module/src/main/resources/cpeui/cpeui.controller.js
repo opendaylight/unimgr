@@ -3,6 +3,7 @@ var controllers = ['app/cpeui/cpeui.controller',
                    'app/cpeui/tenant.controller', 
                    'app/cpeui/tenantsTable.controller' ];
 var services = ['app/cpeui/services/cpeui.services',
+                'app/cpeui/services/utils',
                 'app/cpeui/services/cpeui.dialogs', ];
 var directives = [];
 var modules = [ 'app/cpeui/cpeui.module' ];
@@ -10,10 +11,6 @@ var modules = [ 'app/cpeui/cpeui.module' ];
 define([].concat(modules).concat(services).concat(directives).concat(controllers), function(cpeui) {
 
   cpeui.controller('CpeuiCtrl', function($scope, $rootScope, $state, $mdDialog,$mdMedia) {
-
-    $rootScope['section_logo'] = 'static/cpe.png'; // Add your topbar logo
-                                                    // location here such as
-                                                    // 'assets/images/logo_topology.gif'
 
     $rootScope.section_logo = 'src/app/cpeui/static/logo_hpe.gif';
 

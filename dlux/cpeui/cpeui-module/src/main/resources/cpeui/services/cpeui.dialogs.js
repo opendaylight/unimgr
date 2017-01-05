@@ -9,6 +9,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
 
       this.dialogController = function($scope, $mdDialog, params) {
         $scope.params = params;
+        $scope.callback = callback;
 
         $scope.obj = {};
         $scope.hide = function() {
@@ -19,7 +20,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
         };
         $scope.done = function() {
           if ($scope.projectForm.$valid) {
-            callback($scope.obj);
+            $scope.callback($scope.obj);
             $mdDialog.hide();
           }
         };

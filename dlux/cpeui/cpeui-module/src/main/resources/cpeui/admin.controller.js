@@ -47,24 +47,35 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
           });
         };
 
-        $scope.addProfile = new CpeuiDialogs.Dialog('AddProfile', {}, function(obj) {
-            if (obj.default_cbs) {
-                obj.cbs = Math.floor(obj.cir/10);
+        var profileDialogController = function($scope, $mdDialog) {
+
+            $scope.getDefualtCbs = function(cir) {
+                return Math.round(cir * 0.0125);
             }
+
+            $scope.done = function() {
+                if ($scope.obj.default_cbs) {
+                    $scope.obj.cbs = $scope.getDefualtCbs($scope.obj.cir);
+                }
+                if ($scope.projectForm.$valid) {
+                  $scope.callback($scope.obj);
+                  $mdDialog.hide();
+                }
+              };
+          };
+
+        $scope.addProfile = new CpeuiDialogs.Dialog('AddProfile', {}, function(obj) {
             CpeuiSvc.addProfile(obj['bw-profile'], obj.cir, obj.cbs, function() {
               $scope.updateProfilesView();
             });
-        });
+        }, profileDialogController);
 
         $scope.editProfile = function(profileName, cbs, cir) {
             new CpeuiDialogs.Dialog('AddProfile', {}, function(obj) {
-                if (obj.default_cbs) {
-                    obj.cbs = Math.floor(obj.cir/10);
-                }
                 CpeuiSvc.editProfile(obj['bw-profile'], obj.cir, obj.cbs, function() {
                   $scope.updateProfilesView();
                 });
-            }).show(null,{edit:true, profileName:profileName, cbs:cbs, cir:cir});
+            }, profileDialogController).show(null,{edit:true, profileName:profileName, cbs:cbs, cir:cir});
         };
 
         $scope.deleteProfile = function(profileName) {

@@ -3,11 +3,11 @@ define([ 'angularAMD', 'app/routingConfig', 'app/core/core.services',
     'app/cpeui/assets/angular-material.min',
     'app/cpeui/assets/angular-animate.min',
     'app/cpeui/assets/angular-aria.min',
-    'app/cpeui/assets/angular-messages.min', 'app/cpeui/utils' ], function(ng) {
+    'app/cpeui/assets/angular-messages.min'], function(ng) {
 
   var cpeui = angular.module('app.cpeui', [ 'app.core', 'ui.router.state','restangular', 'config', 'ngMaterial', 'ngMessages', 'ngAnimate' ]);
 
-  cpeui.config(function($stateProvider, $compileProvider, $controllerProvider, $provide, NavHelperProvider, $translateProvider) {
+  cpeui.config(function($stateProvider, $compileProvider, $controllerProvider, $provide, NavHelperProvider, $translateProvider, $urlRouterProvider) {
 
     cpeui.register = cpeui; // for adding services, controllers, directives etc.
                             // to angular module before bootstrap
@@ -19,6 +19,8 @@ define([ 'angularAMD', 'app/routingConfig', 'app/core/core.services',
       service : $provide.service
 
     };
+    
+    $urlRouterProvider.otherwise("/cpeui/admin/");
 
     NavHelperProvider.addControllerUrl('app/cpeui/cpeui.controller');
     NavHelperProvider.addToMenu('cpe', {
