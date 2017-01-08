@@ -11,6 +11,7 @@ package org.opendaylight.unimgr.mef.netvirt;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
@@ -317,19 +318,27 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
             String rd = waitForRd(vpnName);
             List<Uni> originalUni = origIpvc.getUnis() != null && origIpvc.getUnis().getUni() != null
                     ? origIpvc.getUnis().getUni() : Collections.emptyList();
+            List<Identifier45> originalUniIds = originalUni.stream().map(u -> u.getUniId())
+                    .collect(Collectors.toList());
             List<Uni> updateUni = updateIpvc.getUnis() != null && updateIpvc.getUnis().getUni() != null
                     ? updateIpvc.getUnis().getUni() : Collections.emptyList();
+            List<Identifier45> updateUniIds = updateUni.stream().map(u -> u.getUniId()).collect(Collectors.toList());
 
             synchronized (vpnName.intern()) {
                 WriteTransaction txRemove = MdsalUtils.createTransaction(dataBroker);
                 List<Uni> uniToRemove = new ArrayList<>(originalUni);
-                uniToRemove.removeAll(updateUni);
+                uniToRemove.removeIf(u -> updateUniIds.contains(u.getUniId()));
                 removeUnis(ipvcId, operIpvcVpn, uniToRemove, txRemove);
                 MdsalUtils.commitTransaction(txRemove);
             }
             List<Uni> uniToCreate = new ArrayList<>(updateUni);
-            uniToCreate.removeAll(originalUni);
+            uniToCreate.removeIf(u -> originalUniIds.contains(u.getUniId()));
             createUnis(vpnName, ipvcId, uniToCreate, rd);
+
+            List<Uni> uniToUpdate = new ArrayList<>(updateUni);
+            uniToUpdate.removeIf(u -> !originalUniIds.contains(u.getUniId()));
+            updateUnis(uniToUpdate);
+
         } catch (final Exception e) {
             Log.error("Update ipvc failed !", e);
         }
@@ -480,5 +489,10 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
 
     private void updateQos(List<Uni> uniToUpdate) {
         uniToUpdate.forEach(u -> uniQosManager.setUniBandwidthLimits(u.getUniId()));
+    }
+
+    private void updateUnis(List<Uni> uniToUpdate) {
+        uniToUpdate.forEach(u -> uniQosManager.updateUni(u.getUniId(), u.getIngressBwProfile()));
+        updateQos(uniToUpdate);
     }
 }

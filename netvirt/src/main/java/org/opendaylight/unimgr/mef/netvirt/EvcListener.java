@@ -30,6 +30,7 @@ import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.serv
 
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcType;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcUniRoleType;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.Identifier45;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.RetailSvcIdType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInterface.EtreeInterfaceType;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -191,7 +192,8 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
             InstanceIdentifier<Evc> evcId = newDataObject.getRootPath().getRootIdentifier();
 
             synchronized (instanceName.intern()) {
-                NetvirtUtils.createElanInstance(dataBroker, instanceName, isEtree, data.getSegmentationId(), data.getMacTimeout());
+                NetvirtUtils.createElanInstance(dataBroker, instanceName, isEtree, data.getSegmentationId(),
+                        data.getMacTimeout());
 
                 // Create interfaces
                 if (data.getUnis() == null) {
@@ -247,8 +249,11 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
 
             List<Uni> originalUni = original.getUnis() != null && original.getUnis().getUni() != null
                     ? original.getUnis().getUni() : Collections.emptyList();
+            List<Identifier45> originalUniIds = originalUni.stream().map(u -> u.getUniId())
+                    .collect(Collectors.toList());
             List<Uni> updateUni = update.getUnis() != null && update.getUnis().getUni() != null
                     ? update.getUnis().getUni() : Collections.emptyList();
+            List<Identifier45> updateUniIds = updateUni.stream().map(u -> u.getUniId()).collect(Collectors.toList());
 
             synchronized (original.getEvcId().getValue().intern()) {
 
@@ -258,18 +263,23 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
 
                 // Changed Uni will be deleted / recreated
                 List<Uni> uniToRemove = new ArrayList<>(originalUni);
-                uniToRemove.removeAll(updateUni);
+                uniToRemove.removeIf(u -> updateUniIds.contains(u.getUniId()));
                 for (Uni uni : uniToRemove) {
                     removeUniElanInterfaces(evcId, instanceName, uni);
                 }
                 updateQos(uniToRemove);
 
                 List<Uni> uniToCreate = new ArrayList<>(updateUni);
+                uniToCreate.removeIf(u -> originalUniIds.contains(u.getUniId()));
                 uniToCreate.removeAll(originalUni);
                 for (Uni uni : uniToCreate) {
                     createUniElanInterfaces(evcId, instanceName, uni, isEtree);
                 }
                 updateQos(uniToCreate);
+
+                List<Uni> uniToUpdate = new ArrayList<>(updateUni);
+                uniToUpdate.removeIf(u -> !originalUniIds.contains(u.getUniId()));
+                updateUnis(uniToUpdate);
             }
         } catch (final Exception e) {
             log.error("Update evc failed !", e);
@@ -459,4 +469,8 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
         uniToUpdate.forEach(u -> uniQosManager.setUniBandwidthLimits(u.getUniId()));
     }
 
+    private void updateUnis(List<Uni> uniToUpdate) {
+        uniToUpdate.forEach(u -> uniQosManager.updateUni(u.getUniId(), u.getIngressBwProfile()));
+        updateQos(uniToUpdate);
+    }
 }
