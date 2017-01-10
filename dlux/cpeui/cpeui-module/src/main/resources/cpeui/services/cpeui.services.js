@@ -464,6 +464,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                   "max-svc-frame-size" : evc.mtu_size,
                   "unicast-svc-frm-delivery" : evc.unicast,
                   "multicast-svc-frm-delivery" : evc.multicast,
+                  "mac-timeout":evc.mac_timeout,
                   "unis" : {
                     "uni" : uni_json
                   },
