@@ -104,7 +104,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
     @Override
     public void connectUni(String uniId) {
         List<RetailSvcIdType> allIpvcs = MefServicesUtils.getAllIpvcsServiceIds(dataBroker);
-        allIpvcs = (allIpvcs != null) ? allIpvcs : Collections.emptyList();
+        allIpvcs = allIpvcs != null ? allIpvcs : Collections.emptyList();
 
         for (RetailSvcIdType ipvcSerId : allIpvcs) {
             InstanceIdentifier<Ipvc> ipvcId = MefServicesUtils.getIpvcInstanceIdentifier(ipvcSerId);
@@ -115,8 +115,8 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
             }
             List<Uni> toConnect = new ArrayList<>();
 
-            List<Uni> unis = (ipvc.getUnis() != null) ? ipvc.getUnis().getUni() : null;
-            unis = (unis != null) ? unis : Collections.emptyList();
+            List<Uni> unis = ipvc.getUnis() != null ? ipvc.getUnis().getUni() : null;
+            unis = unis != null ? unis : Collections.emptyList();
             for (Uni uni : unis) {
                 if (uni.getUniId().getValue().equals(uniId)) {
                     Log.info("Connecting Uni {} to svc id {}", uniId, ipvcSerId);
@@ -146,7 +146,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
     public void disconnectUni(String uniId) {
 
         List<RetailSvcIdType> allIpvcs = MefServicesUtils.getAllIpvcsServiceIds(dataBroker);
-        allIpvcs = (allIpvcs != null) ? allIpvcs : Collections.emptyList();
+        allIpvcs = allIpvcs != null ? allIpvcs : Collections.emptyList();
 
         for (RetailSvcIdType ipvcSerId : allIpvcs) {
             InstanceIdentifier<Ipvc> ipvcId = MefServicesUtils.getIpvcInstanceIdentifier(ipvcSerId);
@@ -157,8 +157,8 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
             }
             List<Uni> toRemove = new ArrayList<>();
 
-            List<Uni> unis = (ipvc.getUnis() != null) ? ipvc.getUnis().getUni() : null;
-            unis = (unis != null) ? unis : Collections.emptyList();
+            List<Uni> unis = ipvc.getUnis() != null ? ipvc.getUnis().getUni() : null;
+            unis = unis != null ? unis : Collections.emptyList();
             for (Uni uni : unis) {
                 if (uni.getUniId().getValue().equals(uniId)) {
                     Log.info("Disconnecting Uni {} from svc id {}", uniId, ipvcSerId);
@@ -191,6 +191,8 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
             createVpnInstance(vpnName, ipvcId);
             String rd = waitForRd(vpnName);
 
+            updateOperationalDataStoreWithVrfId(ipvcId, vpnName, rd);
+
             List<Uni> unis = new ArrayList<>();
             if (ipvc.getUnis() != null && ipvc.getUnis() != null) {
                 unis = ipvc.getUnis().getUni();
@@ -201,6 +203,12 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
         } catch (final Exception e) {
             Log.error("Add ipvc failed !", e);
         }
+    }
+
+    private void updateOperationalDataStoreWithVrfId(InstanceIdentifier<Ipvc> ipvcId, String vpnName, String vrfId) {
+        WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
+        MefServicesUtils.addOperIpvcVpnElan(ipvcId, vpnName, vrfId, tx);
+        MdsalUtils.commitTransaction(tx);
     }
 
     private void createVpnInstance(final String vpnName, InstanceIdentifier<Ipvc> ipvcId) {
@@ -306,7 +314,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
                 return;
             }
             String vpnName = operIpvcVpn.getVpnId();
-            String rd = (String) waitForRd(vpnName);
+            String rd = waitForRd(vpnName);
             List<Uni> originalUni = origIpvc.getUnis() != null && origIpvc.getUnis().getUni() != null
                     ? origIpvc.getUnis().getUni() : Collections.emptyList();
             List<Uni> updateUni = updateIpvc.getUnis() != null && updateIpvc.getUnis().getUni() != null
@@ -373,14 +381,17 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
     private void waitForInterfaceDpn(String vpnName, String rd, String interfaceName) {
         InstanceIdentifier<VpnInstanceOpDataEntry> vpnId = NetvirtVpnUtils.getVpnInstanceOpDataIdentifier(rd);
         DataWaitGetter<VpnInstanceOpDataEntry> getInterfByName = (vpn) -> {
-            if (vpn.getVpnToDpnList() == null)
+            if (vpn.getVpnToDpnList() == null) {
                 return null;
+            }
             for (VpnToDpnList is : vpn.getVpnToDpnList()) {
-                if (is.getVpnInterfaces() == null)
+                if (is.getVpnInterfaces() == null) {
                     continue;
+                }
                 for (VpnInterfaces i : is.getVpnInterfaces()) {
-                    if (i.getInterfaceName().equals(interfaceName))
+                    if (i.getInterfaceName().equals(interfaceName)) {
                         return interfaceName;
+                    }
                 }
             }
             return null;

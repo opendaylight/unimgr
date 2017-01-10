@@ -2032,6 +2032,7 @@ module mef-services {
   augment "/mef-services:mef-services/mef-services:mef-service/mef-services:mef-service-choice/mef-services:ipvc-choice/mef-services:ipvc" {
     ext:augment-identifier "ipvc-vpn";
     leaf vpn-id {type string;}
+    leaf vrf-id {type string;}
     list vpn-elans {
       key "uni-id ip-uni-id";
       leaf uni-id {type  mef-types:identifier45;}

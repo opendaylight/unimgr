@@ -129,12 +129,19 @@ public class MefServicesUtils {
     }
 
     public static void addOperIpvcVpnElan(InstanceIdentifier<Ipvc> identifier, String vpnId, WriteTransaction tx) {
+        addOperIpvcVpnElan(identifier, vpnId, null, tx);
+    }
+
+    public static void addOperIpvcVpnElan(InstanceIdentifier<Ipvc> identifier, String vpnId, String vrfId, WriteTransaction tx) {
 
         synchronized (vpnId.intern()) {
             InstanceIdentifier<IpvcVpn> path = identifier.augmentation(IpvcVpn.class);
 
             IpvcVpnBuilder ipvcVpnBuilder = new IpvcVpnBuilder();
             ipvcVpnBuilder.setVpnId(vpnId);
+            if (vrfId != null) {
+                ipvcVpnBuilder.setVrfId(vrfId);
+            }
 
             tx.merge(LogicalDatastoreType.OPERATIONAL, path, ipvcVpnBuilder.build(), true);
         }
