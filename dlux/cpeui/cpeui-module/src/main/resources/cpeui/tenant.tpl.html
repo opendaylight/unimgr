@@ -240,14 +240,14 @@
 						<td class="minimal-width">{{ cesDisplayNames[uni.device] }}</td>
 						<td class="minimal-width">{{ uni.prettyID }}</td>
 						<td>
-						<button class="btn add-row" ng-click="expandFlags.tuni[uni['uni-id']] = false" ng-if="expandFlags.tuni[uni['uni-id']]">
+						<button class="btn add-row" ng-click="expandFlags.tuni[uni['uni-id']] = true" ng-if="!expandFlags.tuni[uni['uni-id']]">
 							<i class="icon-plus"></i> Show Ports
 						</button>
-							<table class="footable table table-striped inner-table" ng-if="!expandFlags.tuni[uni['uni-id']]">
+							<table class="footable table table-striped inner-table" ng-if="expandFlags.tuni[uni['uni-id']]">
 								<thead>
 									<tr>
 										<th class="minimal-width">
-											<button class="btn add-row" ng-click="expandFlags.tuni[uni['uni-id']] = true">
+											<button class="btn add-row" ng-click="expandFlags.tuni[uni['uni-id']] = false">
 												<i class="icon-minus"></i>
 											</button>
 										</th>
