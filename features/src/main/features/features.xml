@@ -73,7 +73,6 @@
     <feature version="${project.version}">odl-unimgr-rest</feature>
     <feature version="${project.version}">odl-unimgr-console</feature>
     <feature version="${restconf.version}">odl-mdsal-apidocs</feature>
-    <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
     <feature version="${dlux.version}">odl-dlux-all</feature>
   </feature>
 
