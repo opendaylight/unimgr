@@ -14,8 +14,8 @@
 <div layout="column" ng-cloak>
   <md-content layout-padding>
       <md-input-container class="md-block">
-        <label>IP-UNI ID (Number)</label>
-        <input type="number" required name="ipuniid" ng-model="obj['ip-uni-id']" ng-init="obj['uni-id'] = params.uniid">
+        <label>IP-UNI Name</label>
+        <input type="text" required name="ipuniname" ng-model="obj['ip-uni-name']" ng-init="obj['uni-id'] = params.uniid">
         <div ng-messages="projectForm.ipuniid.$error">
       		<div ng-message="required">Number is required!</div>
     	</div>

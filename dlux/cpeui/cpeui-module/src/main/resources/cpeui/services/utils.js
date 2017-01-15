@@ -8,4 +8,14 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
           return (item[field_name] == value) != to_filter_out;
       });
   };
+
+  cpeui.factory('Utils', function() {
+      var svc = {};
+
+      svc.randomId = function () {
+          return Math.floor(Math.random() * Math.pow(2, 31));
+      };
+      return svc;
+  });
+
 });

@@ -1609,12 +1609,17 @@ module mef-services {
         }
       }
       leaf svc-id {
-        type mef-types:retail-svc-id-type;
-        description
-                "The MEF Service ID is a simple key used to " +
-                "distinguish MEF Service Configuration Groups.";
-        reference "[MEF10.3] Section 7.";
-      }
+          type mef-types:retail-svc-id-type;
+          description
+                  "The MEF Service ID is a simple key used to " +
+                  "distinguish MEF Service Configuration Groups.";
+          reference "[MEF10.3] Section 7.";
+        }
+      leaf name {
+          type mef-types:identifier45;
+          description
+                  "The MEF Service name.";
+        }
       leaf sp-id {
         when "/mef-global:mef-global/mef-global:svc-providers" {
           description
