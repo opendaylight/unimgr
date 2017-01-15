@@ -1,6 +1,6 @@
 define(['app/cpeui/cpeui.module'],function(cpeui) {
 
-    cpeui.factory('CpeuiSvc', function($http) {
+    cpeui.factory('CpeuiSvc', function($http, Utils) {
         var baseUrl = "/restconf/config/mef-global:mef-global/";
         var svc = {};
 
@@ -95,7 +95,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
               }
           });
       };
-      
+
       svc.deleteProfile = function(name, callback) {
           $http({
               method:'DELETE',
@@ -270,7 +270,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                     // copy config fields like tenant-id
                     if (confMap[u['uni-id']]){
                       for (var attrname in confMap[u['uni-id']]) {
-                        u[attrname] = confMap[u['uni-id']][attrname]; 
+                        u[attrname] = confMap[u['uni-id']][attrname];
                       }
                     }
                   });
@@ -311,13 +311,15 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
 
         // IPVCs
         svc.addIpvc = function(ipvc, tenant, callback) {
+          var ipvcId = Utils.randomId();
           var data = {
             "mef-service" :  {
-              "svc-id" : ipvc.id,
+              "svc-id" : ipvcId,
+              "name" : ipvc.svc_name,
               "svc-type" : 'eplan',
               "tenant-id" : tenant,
               "ipvc" : {
-                "ipvc-id" : ipvc.id,
+                "ipvc-id" : ipvcId,
                 "ipvc-type" : 'multipoint',
               }
             }
@@ -333,9 +335,10 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
           });
       };
 
-      svc.addIpUni = function(uniid, ipuni_id, ip_address, vlan, segmentation_id, callback) {
+      svc.addIpUni = function(uniid, ip_address, vlan, segmentation_id, callback) {
+        var ipUniId = Utils.randomId();
         var data = {"ip-uni":{
-          "ip-uni-id": ipuni_id,
+          "ip-uni-id": ipUniId,
           "ip-address": ip_address
         }};
         if (vlan){
@@ -354,7 +357,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
             }
         });
     };
-    
+
     svc.getAllIpUniSubnets = function(callback) {
       $http({
           method:'GET',
@@ -381,7 +384,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
 
   svc.addIpUniSubnet = function(uniid, ipuniid, subnet, gateway, callback) {
         var data = {
-            "subnet": 
+            "subnet":
             {
               "subnet": subnet,
               "uni-id":uniid,
@@ -392,7 +395,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
         $http(
             {
               method : 'POST',
-              url : "/restconf/config/mef-interfaces:mef-interfaces/subnets/",                                
+              url : "/restconf/config/mef-interfaces:mef-interfaces/subnets/",
               data : data
             }).then(function successCallback(response) {
           if (callback != undefined) {
@@ -400,9 +403,9 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
           }
         });
       };
-    
+
     svc.deleteIpUniSubnet = function(uniid, ipuni_id, subnet, callback) {
-        
+
         $http({
             method:'DELETE',
             url:"/restconf/config/mef-interfaces:mef-interfaces/subnets/subnet/"+uniid+"/"+ipuni_id+"/"+subnet.replace("/","%2F")+"/"
@@ -413,7 +416,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
         });
     };
     svc.deleteIpUni = function(uniid, ipuni_id, callback) {
-        
+
         $http({
             method:'DELETE',
             url:"/restconf/config/mef-interfaces:mef-interfaces/unis/uni/"+uniid+"/ip-unis/ip-uni/"+ipuni_id+"/"
@@ -423,7 +426,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
             }
         });
     };
-    
+
     svc.getIpUniSubnets = function(uniid, ipuni_id, callback) {
       $http({
           method:'GET',
@@ -438,7 +441,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
       });
     };
 
-    
+
     // EVCs
     function getJsonUnis(unis) {
             var uni_json = [];
@@ -448,17 +451,19 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
             unis.forEach(function(i){uni_json.push({"uni-id":i});});
             return uni_json;
         }
-    
+
     svc.addEvc = function(evc, evc_type, tenant, callback) {
             var uni_json = getJsonUnis(evc.unis);
 //            preserved-vlan
+            var evcId = Utils.randomId();
             var data = {
               "mef-service" :  {
-                "svc-id" : evc.id,
+                "svc-id" : evcId,
+                "name" : evc.svc_name,
                 "svc-type" : evc.svc_type,
                 "tenant-id" : tenant,
                 "evc" : {
-                  "evc-id" : evc.id,
+                  "evc-id" : evcId,
                   "evc-type" : evc_type,
                   "preserve-ce-vlan-id" : evc.is_preserve_vlan,
                   "max-svc-frame-size" : evc.mtu_size,
@@ -590,7 +595,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
               }
           });
       };
-      
+
       svc.deleteIpvcUni = function(svcid, uni_id, ipuni_id, callback) {
         $http({
            method:'DELETE',
@@ -601,9 +606,9 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
            }
        });
    };
-      
-      
-      
+
+
+
         svc.addEvcUni = function(svcid, uni_id, role, vlans, profile_name, callback) {
             var data = {"uni":{
                             "uni-id":uni_id,

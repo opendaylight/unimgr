@@ -14,20 +14,20 @@
 <div layout="column" ng-cloak>
   <md-content layout-padding>
       <md-input-container class="md-block">
-        <label>EVC ID (Number)</label>
-        <input type="number" required name="evcid" ng-model="obj.id">
-        <div ng-messages="projectForm.evcid.$error">
-      		<div ng-message="required">Number is required!</div>
-    	</div>
+        <label>EVC Name</label>
+        <input type="text" required name="svcName" ng-model="obj.svc_name">
+        <div ng-messages="projectForm.svcName.$error">
+              <div ng-message="required">Name is required!</div>
+        </div>
       </md-input-container>
       <md-input-container class="md-block">
         <label>Service Type</label>
         <md-select required ng-model="obj.svc_type" name="svc_type" >
-       		<md-option ng-repeat="typ in params.svcTypes" value="{{ typ }}">{{ typ }}</md-option>
+               <md-option ng-repeat="typ in params.svcTypes" value="{{ typ }}">{{ typ }}</md-option>
         </md-select>
         <div ng-messages="projectForm.svc_type.$error">
-      		<div ng-message="required">This is required!</div>
-    	</div>
+              <div ng-message="required">This is required!</div>
+        </div>
       </md-input-container>
       <md-input-container class="md-block">
         <label>Maximum Number of UNIs</label>
@@ -43,58 +43,58 @@
         <label>Subnet</label>
         <input type="text" name="subnet" ng-model="obj.subnet" ng-pattern="/\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(?:[1-2]?[0-9]|3[0-2])\b/">
         <div ng-messages="projectForm.subnet.$error">
-      		<div ng-message="pattern">IP/Mask is required! (ex. 127.0.0.1/32)</div>
-    	</div>
+              <div ng-message="pattern">IP/Mask is required! (ex. 127.0.0.1/32)</div>
+        </div>
       </md-input-container>
-      	<div layout-gt-sm="row" style="padding:0">
-	      	<md-input-container class="md-block" flex-gt-sm>
-	      	<!-- 
-	      		<md-switch name="is_preserve_vlan" ng-model="obj.is_preserve_vlan">{{obj.is_preserve_vlan ? "" : "Do Not"}} Preserve VLAN</md-switch>
-	      	 -->
-	      	 	<md-checkbox name="is_preserve_vlan" ng-model="obj.is_preserve_vlan">Preserve VLAN</md-checkbox>
-	      	</md-input-container>
-	      	<md-input-container class="md-block" ng-if="obj.is_preserve_vlan" flex-gt-sm style="margin-bottom: 0px;">
-	      		<label>Preserved VLAN</label>
-	      		<input required type="number" step="1" name="p_vlan" ng-model="obj.preserved_vlan">
-	      		<div ng-messages="projectForm.p_vlan.$error">
-      				<div ng-message="required">Number is required!</div>
-    			</div>
-	      	</md-input-container>
-      	</div>
-      	<md-input-container class="md-block" ng-init="obj.mac_timeout = 300">
-        	<label>Learned MAC Expiration Time (seconds)</label>
-        	<input type="number" step="1" name="mac_timeout" min="0" ng-model="obj.mac_timeout">
-        	<div ng-messages="projectForm.mac_timeout.$error">
-      			<div ng-message="min">Number must be positive</div>
-    		</div>
-      	</md-input-container>
-      	<md-input-container class="md-block" ng-init="obj.mtu_size = 1522">
-        	<label>EVC MTU size</label>
-        	<input type="number" step="1" name="mtu" min="1522" max="16384" ng-model="obj.mtu_size">
-        	<div ng-messages="projectForm.mtu.$error">
-      			<div ng-message="min">Number must be in range [1522..16384]</div>
-      			<div ng-message="max">Number must be in range [1522..16384]</div>
-    		</div>
-      	</md-input-container>
-      	<md-input-container class="md-block">
-      		<label>Unicast Service Frame Delivery</label>
-      		<md-select ng-model="obj.unicast" name="unicast">
-       			<md-option value="{{ undefined }}"></md-option>
-       			<md-option value="discard">Discard</md-option>
-       			<md-option value="unconditional">Unconditional</md-option>
-       			<md-option value="conditional">Conditional</md-option>
-        	</md-select>
-      	</md-input-container>
-      	<md-input-container class="md-block" ng-if-end>
-      		<label>Multicast Service Frame Delivery</label>
-      		<md-select ng-model="obj.multicast" name="multicast">
-       			<md-option value="{{ undefined }}"></md-option>
-       			<md-option value="discard">Discard</md-option>
-       			<md-option value="unconditional">Unconditional</md-option>
-       			<md-option value="conditional">Conditional</md-option>
-        	</md-select>
-      	</md-input-container>
-      	
+          <div layout-gt-sm="row" style="padding:0">
+              <md-input-container class="md-block" flex-gt-sm>
+              <!--
+                  <md-switch name="is_preserve_vlan" ng-model="obj.is_preserve_vlan">{{obj.is_preserve_vlan ? "" : "Do Not"}} Preserve VLAN</md-switch>
+               -->
+                   <md-checkbox name="is_preserve_vlan" ng-model="obj.is_preserve_vlan">Preserve VLAN</md-checkbox>
+              </md-input-container>
+              <md-input-container class="md-block" ng-if="obj.is_preserve_vlan" flex-gt-sm style="margin-bottom: 0px;">
+                  <label>Preserved VLAN</label>
+                  <input required type="number" step="1" name="p_vlan" ng-model="obj.preserved_vlan">
+                  <div ng-messages="projectForm.p_vlan.$error">
+                      <div ng-message="required">Number is required!</div>
+                </div>
+              </md-input-container>
+          </div>
+          <md-input-container class="md-block" ng-init="obj.mac_timeout = 300">
+            <label>Learned MAC Expiration Time (seconds)</label>
+            <input type="number" step="1" name="mac_timeout" min="0" ng-model="obj.mac_timeout">
+            <div ng-messages="projectForm.mac_timeout.$error">
+                  <div ng-message="min">Number must be positive</div>
+            </div>
+          </md-input-container>
+          <md-input-container class="md-block" ng-init="obj.mtu_size = 1522">
+            <label>EVC MTU size</label>
+            <input type="number" step="1" name="mtu" min="1522" max="16384" ng-model="obj.mtu_size">
+            <div ng-messages="projectForm.mtu.$error">
+                  <div ng-message="min">Number must be in range [1522..16384]</div>
+                  <div ng-message="max">Number must be in range [1522..16384]</div>
+            </div>
+          </md-input-container>
+          <md-input-container class="md-block">
+              <label>Unicast Service Frame Delivery</label>
+              <md-select ng-model="obj.unicast" name="unicast">
+                   <md-option value="{{ undefined }}"></md-option>
+                   <md-option value="discard">Discard</md-option>
+                   <md-option value="unconditional">Unconditional</md-option>
+                   <md-option value="conditional">Conditional</md-option>
+            </md-select>
+          </md-input-container>
+          <md-input-container class="md-block" ng-if-end>
+              <label>Multicast Service Frame Delivery</label>
+              <md-select ng-model="obj.multicast" name="multicast">
+                   <md-option value="{{ undefined }}"></md-option>
+                   <md-option value="discard">Discard</md-option>
+                   <md-option value="unconditional">Unconditional</md-option>
+                   <md-option value="conditional">Conditional</md-option>
+            </md-select>
+          </md-input-container>
+
   </md-content>
 </div>
     </md-dialog-content>
