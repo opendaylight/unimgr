@@ -5,15 +5,6 @@
 DIV {
  /*   color: white;*/
 }
-/**
-#EVCs-tab {
-    background: #808285 none repeat scroll 0 0;
-    overflow-y:auto;
-    z-index:1000;
-    border-bottom:0;
-    padding: 0 5px;
-}
- */
 .nestedTabs .nav-tabs li a {
     background-color: transparent !important;
     border-radius: 4px 4px 0 0 !important;
@@ -83,9 +74,6 @@ MD-SELECT-MENU MD-OPTION div, MD-SELECT-VALUE SPAN, MD-SELECT-VALUE SPAN * {
 }
 .layout-padding md-input-container {
 	padding: 0 !important;
-}
-.delete-tr {
-	width:1px;
 }
 .minimal-width {
 	white-space: nowrap;
@@ -166,3 +154,15 @@ MD-TOOLBAR:active {
 .animate-if.ng-enter.ng-enter-active {
   height:0;
 }
+.footable .multiline-headers TH {
+	/* text-align: center; */
+	vertical-align: middle;	
+}
+a.link {
+	text-decoration: underline;
+}
+TD a.link {
+	display:block;
+	width:100%;
+}
+

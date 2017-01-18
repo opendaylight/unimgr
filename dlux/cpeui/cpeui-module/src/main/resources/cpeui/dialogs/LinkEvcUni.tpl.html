@@ -33,7 +33,7 @@
         </md-select>
       </md-input-container>
       <md-input-container class="md-block">
-        <label>Profile</label>
+        <label>Bandwidth Profile</label>
         <md-select ng-model="obj.profile_name" name="profile_name">
         	<md-option ng-value="undefined" > - None - </md-option>
        		<md-option ng-repeat="profile in params.profiles | orderBy: '[\'bw-profile\']'" value="{{ profile['bw-profile'] }}" >{{ profile['bw-profile'] }} <span class="small">(CIR: {{profile.cir}}, CBS: {{profile.cbs}})</span></md-option>
@@ -52,14 +52,14 @@
 		<tbody id="l2_table">
 			<tr ng-repeat="vlan in obj.vlans | orderBy">
 				<td>{{ vlan }}</td>
-				<td class="delete-tr"><button class="btn btn-md btn-danger"
+				<td class="minimal-width"><button class="btn btn-md btn-danger"
 						ng-click="deleteVlan(vlan)">
 						<i class="icon-trash"></i>
 					</button></td>
 			</tr>
 			<tr>
 				<td><input id="vlan_input" type="number" name="current_vlan" ng-model="current_vlan"></td>
-				<td class="delete-tr"><button class="btn btn-md btn-info"
+				<td class="minimal-width"><button class="btn btn-md btn-info"
 						ng-click="addVlan(current_vlan)">
 						<i class="icon-plus"></i>
 					</button></td>

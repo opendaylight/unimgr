@@ -32,7 +32,7 @@
         </md-select>
       </md-input-container>
       <md-input-container class="md-block">
-        <label>Profile</label>
+        <label>Bandwidth Profile</label>
         <md-select ng-model="obj.profile_name" name="profile_name">
         	<md-option ng-value="undefined" > - None - </md-option>
        		<md-option ng-repeat="profile in params.profiles | orderBy: '[\'bw-profile\']'" value="{{ profile['bw-profile'] }}" >{{ profile['bw-profile'] }} <span class="small">(CIR: {{profile.cir}}, CBS: {{profile.cbs}})</span></md-option>

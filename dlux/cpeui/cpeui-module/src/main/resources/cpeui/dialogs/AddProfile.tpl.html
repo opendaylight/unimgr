@@ -1,7 +1,7 @@
-<md-dialog class="cpe-dialog" aria-label="Create Profile" ng-cloak>
+<md-dialog class="cpe-dialog" aria-label="Create Bandwidth Profile" ng-cloak>
 	<md-toolbar>
 		<div class="md-toolbar-tools">
-			<h2>{{params.edit ? 'Edit' : 'Create'}} Profile</h2>
+			<h2>{{params.edit ? 'Edit' : 'Create'}} Bandwidth Profile</h2>
 			<span flex></span>
 			<md-button class="md-icon-button" aria-label="Close dialog"
 				ng-click="cancel()"> <i class="icon-remove-sign"></i> </md-button>
@@ -12,7 +12,7 @@
 			<div layout="column" ng-cloak>
 				<md-content layout-padding>
 					<md-input-container class="md-block" ng-init="obj['bw-profile'] = params.profileName">
-						<label>Profile Name</label>
+						<label>Bandwidth Profile Name</label>
 					 	<input name="profilename" required ng-model="obj['bw-profile']" ng-disabled="params.edit">
 					 	<div ng-messages="projectForm.profilename.$error">
 							<div ng-message="required">This is required!</div>
@@ -27,7 +27,7 @@
 						</div>
 					</md-input-container>
 					<md-checkbox name="" ng-model="obj.default_cbs" ng-init="obj.default_cbs = (!params.edit || getDefualtCbs(params.cir) == params.cbs)">
-					   Use default Committed Burst Size {{obj.cir ? ('(' + getDefualtCbs(obj.cir) + ' Bytes)') : ''}}
+					   Use default Committed Burst Size {{obj.cir ? ('(' + getDefualtCbs(obj.cir) + ' KB)') : ''}}
 					</md-checkbox>
 					<md-input-container class="md-block" ng-if="!obj.default_cbs" ng-init="obj.cbs = params.cbs">
 						<label>Committed Burst Size (Bytes)</label>

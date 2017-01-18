@@ -9,7 +9,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
       });
   };
 
-  cpeui.factory('Utils', function() {
+  cpeui.factory('CpeUiUtils', function() {
       var svc = {};
 
       svc.randomId = function () {

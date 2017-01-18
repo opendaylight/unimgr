@@ -1,5 +1,5 @@
 <div class="container">
-	<h1>Admin Page</h1>
+	<h1>Global Administration</h1>
 	<div class="menu">
 		<ul id="MainTabs" class="nav nav-pills" role="tablist">
 			<li ng-class="{ active: isTabSet('admin',1)}"
@@ -7,7 +7,18 @@
 				 <i class="icon-desktop"></i> Tenants</a></li>
 			<li ng-class="{ active: isTabSet('admin',2)}"
 				ng-click="setTab('admin',2)"><a id="evcs-configure-tab" href="#/cpeui/admin/cpes">
-					<i class="icon-tasks"></i> CPEs (Devices)</a></li>
+					<i class="icon-tasks"></i> Assigned CPEs</a></li>
+			<!-- For Future Use
+			<li ng-class="{ active: isTabSet('admin',6)}"
+				ng-click="setTab('admin',6)"><a id="unassigned-cpe-tab" href="#/cpeui/admin/ucpes">
+					<i class="icon-tasks"></i> Unassigned CPEs</a></li>
+			<li ng-class="{ active: isTabSet('admin',7)}"
+				ng-click="setTab('admin',7)"><a id="dashboard-tab" href="#/cpeui/admin/dashboard">
+					<i class="icon-dashboard"></i> Dashboard</a></li>
+			<li ng-class="{ active: isTabSet('admin',7)}"
+				ng-click="setTab('admin',7)"><a id="monitor-tab" href="#/cpeui/admin/monitor">
+					<i class="icon-bar-chart"></i> CPE Monitor</a></li>
+		     -->
 			<li ng-class="{ active: isTabSet('admin',3)}"
 				ng-click="setTab('admin',3);updateView()"><a href="#/cpeui/admin/unis">
 				 <i class="icon-exchange"></i> UNIs</a>
@@ -17,7 +28,7 @@
 			 	<i class="icon-signal"></i> Networks</a>
 			 </li>
 			 <li ng-class="{ active: isTabSet('admin',5)}" ng-click="setTab('admin',5);updateProfilesView()">
-			 	<a href="#/cpeui/admin/profiles"><i class="icon-book"></i> Profiles</a>
+			 	<a href="#/cpeui/admin/profiles"><i class="icon-book"></i> Bandwidth Profiles</a>
 			 </li>
 			<li id="refresh_btn" class="active refresh-btn"
 				ng-click="updateView()"><button class="btn add-row"> <i class="icon-refresh"></i> Refresh</button>
@@ -32,9 +43,15 @@
 		<table class="footable table table-striped">
 			<thead>
 				<tr>
-					<th>CPE ID</th>
-					<th>CPE name</th>
-					<th colspan="2">Tenant</th>
+					<th>ID</th>
+					<th>Name</th>
+					<th>Tenant</th>
+                    <th class="minimal-width">
+					   <button class="btn btn-md btn-info" ng-click="cesDialog.show($event)">
+					       <i class="icon-plus"></i>
+					       <md-tooltip>Add Device</md-tooltip>
+					   </button>
+					</th>
 				</tr>
 			</thead>
 			<tbody id="ces_table">
@@ -58,13 +75,10 @@
 					        </md-select>
 		      			</md-input-container>
 					</td>
-					<td class="delete-tr"><button class="btn btn-md btn-danger" ng-click="deleteCe(curTenant,item['dev-id'])"> <i class="icon-trash"></i> </button></td>
+					<td class="minimal-width"><button class="btn btn-md btn-danger" ng-click="deleteCe(curTenant,item['dev-id'])"> <i class="icon-trash"></i> </button></td>
 				</tr>
 			</tbody>
 		</table>
-		<div>
-			<a class="btn add-row" ng-click="cesDialog.show($event)">Create CPE</a>
-		</div>
 	</div>
 	<div ng-show="isTabSet('admin',3)">
 		<div class="table-header">UNIs</div>
@@ -86,7 +100,7 @@
 					<td ng-if="item['tenant-id'] == undefined" >
 						<button class="btn add-row btn-middle" ng-click="linkUniDialog.show($event, {'uni':item['uni-id'], tenants:tenantArray})"><i class="icon-link"></i> Link Tenant</button>
 					</td>
-					<td class="delete-tr"><button class="btn btn-md btn-danger" ng-click="deleteUni(item['uni-id'])"> <i class="icon-trash"></i> </button></td>
+					<td class="minimal-width"><button class="btn btn-md btn-danger" ng-click="deleteUni(item['uni-id'])"> <i class="icon-trash"></i> </button></td>
 				</tr>
 			</tbody>
 		</table>
@@ -119,36 +133,38 @@
 		</table>		
 	</div>
 	<div ng-show="isTabSet('admin',5)">
-		<div class="table-header">Profiles</div>
+		<div class="table-header">Bandwidth Profiles</div>
 		<table class="footable table table-striped">
 			<thead>
 				<tr>
-					<th>Profile Name</th>
+					<th>Bandwidth Profile Name</th>
 					<th>Committed Information Rate (kb/s)</th>
-					<th>Committed Burst Size (Bytes)</th>
-					<th></th>
+					<th>Committed Burst Size (KB)</th>
+					<th class="minimal-width">
+                       <button class="btn btn-md btn-info right" ng-click="addProfile.show($event)">
+                           <i class="icon-plus"></i>
+                           <md-tooltip>Add Profile</md-tooltip>
+                       </button>
+                    </th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr ng-repeat="profile in profiles | orderBy: '[\'bw-profile\']'">
-					<td class="minimal-width">{{ profile['bw-profile'] }}</td>
-					<td class="minimal-width">{{ profile.cir }}</td>
-					<td class="minimal-width">{{ profile.cbs }}</td>
-					<td class="delete-tr">
+					<td>{{ profile['bw-profile'] }}</td>
+					<td>{{ profile.cir }}</td>
+					<td>{{ profile.cbs }}</td>
+					<td class="minimal-width">
 					   <button class="btn btn-md btn-info" ng-click="editProfile(profile['bw-profile'],profile.cbs,profile.cir)">
                         <i class="icon-edit"></i>
-                        <md-tooltip>Edit Profile</md-tooltip>
+                        <md-tooltip>Edit Bandwidth Profile</md-tooltip>
                         </button>
 						<button class="btn btn-md btn-danger" ng-click="deleteProfile(profile['bw-profile'])">
 						<i class="icon-trash"></i>
-						<md-tooltip>Delete Profile</md-tooltip>
+						<md-tooltip>Delete Bandwidth Profile</md-tooltip>
 						</button>
 					</td>
 				</tr>
 			</tbody>
 		</table>
-		<div>
-			<a class="btn add-row" ng-click="addProfile.show($event)">Add Profile</a>
-		</div>
 	</div>
 </div>

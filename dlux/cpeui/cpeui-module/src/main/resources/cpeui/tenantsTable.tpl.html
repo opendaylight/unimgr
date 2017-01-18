@@ -1,22 +1,22 @@
-<div class="">
-		<div class="table-header">Tenants</div>
-		<table class="footable table table-striped">
-			<thead>
-				<tr>
-					<th>Tenant name</th>
-					<th colspan="2">Open ...</th>
-				</tr>
-			</thead>
-			<tbody id="tenants_table">
-				<tr ng-repeat="item in tenantArray | orderBy : 'name'">
-					<td>{{ item.name }}</td>
-					<td><button class="btn add-row btn-block" ng-click="OpenTenantPortal(item)">Open ...</button></td>
-					<td class="delete-tr"><button class="btn btn-md btn-danger" ng-click="DeleteTenant(item.name)"> <i class="icon-trash"></i> </button></td>
-				</tr>
-			</tbody>
-		</table>
-		<div>
-			<a class="btn add-row" ng-click="tenantDialog.show($event)">Create Tenant</a>
-		</div>
-	</div>
+<div>
+	<div class="table-header">Tenants</div>
+	<table class="footable table table-striped">
+	   <thead>
+		   <tr>
+		   <th>Name</th>
+		   <th>
+		      <button class="btn btn-md btn-info" ng-click="tenantDialog.show($event)">
+                           <i class="icon-plus"></i> 
+                           <md-tooltip>Create Tenant</md-tooltip>
+              </button>
+		   </th>
+		   </tr>
+	   </thead>
+		<tbody id="tenants_table">
+			<tr ng-repeat="item in tenantArray | orderBy : 'name'">
+				<td><a class="link" href="#cpeui/tenant/{{ item.name }}/">{{ item.name }}</a></td>
+				<td class="minimal-width"><button class="btn btn-md btn-danger" ng-click="DeleteTenant(item.name)"> <i class="icon-trash"></i> </button></td>
+			</tr>
+		</tbody>
+	</table>	
 </div>

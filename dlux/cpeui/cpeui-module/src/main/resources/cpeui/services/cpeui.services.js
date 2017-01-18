@@ -1,6 +1,6 @@
 define(['app/cpeui/cpeui.module'],function(cpeui) {
 
-    cpeui.factory('CpeuiSvc', function($http, Utils) {
+    cpeui.factory('CpeuiSvc', function($http, CpeUiUtils) {
         var baseUrl = "/restconf/config/mef-global:mef-global/";
         var svc = {};
 
@@ -54,6 +54,11 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
               url:"/restconf/config/mef-global:mef-global/profiles/ingress-bwp-flows/"
           }).then(function successCallback(response) {
               if (callback != undefined) {
+                  if (response.data["ingress-bwp-flows"]["bwp-flow"]){
+                      response.data["ingress-bwp-flows"]["bwp-flow"].forEach(function(p){
+                         p.cir = Math.round(p.cir/1024);
+                      });
+                  }
                   callback(response.data["ingress-bwp-flows"]["bwp-flow"]);
               }
           }, function errorCallback(response) {
@@ -70,7 +75,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
               url:"/restconf/config/mef-global:mef-global/profiles/ingress-bwp-flows/",
               data: {"bwp-flow":{
                         "bw-profile" : name,
-                         "cir" : cir,
+                         "cir" : cir*1024,
                          "cbs" : cbs
                     }}
           }).then(function successCallback(response) {
@@ -86,7 +91,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
               url:"/restconf/config/mef-global:mef-global/profiles/ingress-bwp-flows/bwp-flow/"+name,
               data: {"bwp-flow":{
                       "bw-profile": name,
-                      cir: cir,
+                      cir: cir*1024,
                       cbs:cbs
                     }}
           }).then(function successCallback(response) {
@@ -153,7 +158,6 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
         svc.getCes = function(callback) {
             var ces;
             var operMap = {};
-
             $http({
                 method:'GET',
                 url:"/restconf/operational/mef-topology:mef-topology/devices/"
@@ -311,7 +315,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
 
         // IPVCs
         svc.addIpvc = function(ipvc, tenant, callback) {
-          var ipvcId = Utils.randomId();
+          var ipvcId = CpeUiUtils.randomId();
           var data = {
             "mef-service" :  {
               "svc-id" : ipvcId,
@@ -336,7 +340,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
       };
 
       svc.addIpUni = function(uniid, ip_address, vlan, segmentation_id, callback) {
-        var ipUniId = Utils.randomId();
+        var ipUniId = CpeUiUtils.randomId();
         var data = {"ip-uni":{
           "ip-uni-id": ipUniId,
           "ip-address": ip_address
@@ -455,7 +459,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
     svc.addEvc = function(evc, evc_type, tenant, callback) {
             var uni_json = getJsonUnis(evc.unis);
 //            preserved-vlan
-            var evcId = Utils.randomId();
+            var evcId = CpeUiUtils.randomId();
             var data = {
               "mef-service" :  {
                 "svc-id" : evcId,

@@ -6,6 +6,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
     $scope.unis = [];
     $scope.ces = [];
     $scope.ipvcs = [];
+    $scope.evcs = [];
     $scope.subnets = {};
     $scope.profiles =[];
     $scope.cesDisplayNames = {};
@@ -17,11 +18,12 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
     };
 
     var tabIndexs = {
+        "inventory" : 0,
         "L2" : 1,
         "L3" : 2,
-        "unis" : 3,
+        "unis" : 6,
       }
-    if (tabIndexs[$stateParams.tenantTabName]) {
+    if ($stateParams.tenantTabName in tabIndexs) {
       $scope.tab.tenantData = tabIndexs[$stateParams.tenantTabName];
     }
 
@@ -74,12 +76,37 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
         $scope.evcs = services.filter(function(svc){ return svc.evc != undefined;});
         $scope.ipvcs = services.filter(function(svc){ return svc.ipvc != undefined;});
         $scope.updateUnis();
-        console.log($scope.ipvcs);
+        function mapUniToService(uni, service) {
+            var uniObj = $scope.unis.filterByField('uni-id',uni['uni-id'])[0];
+            if (!uniObj.vlanToService) {
+                uniObj.vlanToService = [];
+            }
+            uniObj.hasService = true;
+            if (uni['evc-uni-ce-vlans'] && uni['evc-uni-ce-vlans']['evc-uni-ce-vlan']){
+                uni['evc-uni-ce-vlans']['evc-uni-ce-vlan'].forEach(function(v){
+                    uniObj.vlanToService.push({"vlan":v.vid, "svc":service});
+                });
+            } else {
+                if (uni["ip-uni-id"]) {
+                    var ipuni = $scope.unis.filterByField('uni-id',uni['uni-id'])[0];
+                    ipuni["ip-unis"]["ip-uni"].forEach(function(ipu){
+                        if (ipu['ip-uni-id'] == uni["ip-uni-id"]){
+                            var vlan = ipu.vlan ? ipu.vlan : 0;
+                            uniObj.vlanToService.push({"vlan":vlan, "svc":service});
+                        }
+                    });
+                } else {
+                    uniObj.vlanToService.push({"vlan":0, "svc":service});
+                }
+            }
+        }
+
         $scope.ipvcs.forEach(function(e){
           if (e.ipvc.unis != undefined && e.ipvc.unis.uni != undefined){
               e.ipvc.unis.uni.forEach(function(u){
                 u.device = u['uni-id'].split(":")[u['uni-id'].split(":").length-2];
                 u.prettyID = u['uni-id'].split(":")[u['uni-id'].split(":").length-1];
+                mapUniToService(u,e);
             });
           }
         });
@@ -93,6 +120,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
               }
               u.prettyID = u['uni-id'].split(":")[u['uni-id'].split(":").length - 1];
               e.device2unis[$scope.unisMap[u['uni-id']].device].push(u);
+              mapUniToService(u,e);
             });
           }
         });
@@ -101,6 +129,15 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
         $scope.subnets = subnets;
       });
     };
+
+    $scope.doesAllUniHasService = function(ceUnis) {
+        for (var i=0 ; i< ceUnis.length; ++i) {
+            if (!ceUnis[i].hasService) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     $scope.title = function(str) {
       if (!str) {
@@ -316,6 +353,11 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
     $scope.sortUni = function(uni) {
       return uni['uni-id'];
     };
+
+    $scope.isEmpty = function(obj){
+        return angular.equals({}, obj);
+    }
+
     init();
   });
 });
