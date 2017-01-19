@@ -283,6 +283,14 @@ public class NetvirtVpnUtils {
         MdsalUtils.commitTransaction(tx);
     }
 
+    public static void createVpnPortFixedIp(DataBroker dataBroker, String vpnName, String portName, IpPrefix ipAddress,
+            MacAddress macAddress, WriteTransaction tx) {
+        String fixedIpPrefix = ipPrefixToString(ipAddress);
+        String fixedIp = getIpAddressFromPrefix(fixedIpPrefix);
+
+        createVpnPortFixedIp(vpnName, portName, fixedIp, macAddress, tx);
+    }
+
     private static void createVpnPortFixedIp(String vpnName, String portName, String fixedIp, MacAddress macAddress,
             WriteTransaction tx) {
         synchronized ((vpnName + fixedIp).intern()) {

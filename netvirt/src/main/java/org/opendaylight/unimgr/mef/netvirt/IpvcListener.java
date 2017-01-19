@@ -355,56 +355,28 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
         }
 
         String interfaceName = null;
+        String elanName = NetvirtVpnUtils.getElanNameForVpnPort(uniId, ipUniId);
+
+        String srcIpAddressStr = NetvirtVpnUtils
+                .getIpAddressFromPrefix(NetvirtVpnUtils.ipPrefixToString(ipUni.getIpAddress()));
+        IpAddress ipAddress = new IpAddress(srcIpAddressStr.toCharArray());
+        NetvirtVpnUtils.registerDirectSubnetForVpn(dataBroker, new Uuid(elanName), ipAddress);
+
         synchronized (vpnName.intern()) {
             Long vlan = ipUni.getVlan() != null ? Long.valueOf(ipUni.getVlan().getValue()) : null;
-            String elanName = NetvirtVpnUtils.getElanNameForVpnPort(uniId, ipUniId);
-
-            String srcIpAddressStr = NetvirtVpnUtils
-                    .getIpAddressFromPrefix(NetvirtVpnUtils.ipPrefixToString(ipUni.getIpAddress()));
-            IpAddress ipAddress = new IpAddress(srcIpAddressStr.toCharArray());
 
             interfaceName = createElanInterface(vpnName, ipvcId, uniId, elanName, vlan, ipAddress, tx,
                     ipUni.getSegmentationId());
             uniQosManager.mapUniPortBandwidthLimits(uniId, interfaceName, uniInService.getIngressBwProfile());
             createVpnInterface(vpnName, uni, ipUni, interfaceName, elanName, tx);
+            NetvirtVpnUtils.createVpnPortFixedIp(dataBroker, vpnName, interfaceName, ipUni.getIpAddress(),
+                    uni.getMacAddress(), tx);
             MefServicesUtils.addOperIpvcVpnElan(ipvcId, vpnName, uniInService.getUniId(), uniInService.getIpUniId(),
                     elanName, interfaceName, null, tx);
             MdsalUtils.commitTransaction(tx);
         }
-
-        waitForInterfaceDpn(vpnName, rd, interfaceName);
-
-        NetvirtVpnUtils.createVpnPortFixedIp(dataBroker, vpnName, interfaceName, ipUni.getIpAddress(),
-                uni.getMacAddress());
     }
 
-    private void waitForInterfaceDpn(String vpnName, String rd, String interfaceName) {
-        InstanceIdentifier<VpnInstanceOpDataEntry> vpnId = NetvirtVpnUtils.getVpnInstanceOpDataIdentifier(rd);
-        DataWaitGetter<VpnInstanceOpDataEntry> getInterfByName = (vpn) -> {
-            if (vpn.getVpnToDpnList() == null) {
-                return null;
-            }
-            for (VpnToDpnList is : vpn.getVpnToDpnList()) {
-                if (is.getVpnInterfaces() == null) {
-                    continue;
-                }
-                for (VpnInterfaces i : is.getVpnInterfaces()) {
-                    if (i.getInterfaceName().equals(interfaceName)) {
-                        return interfaceName;
-                    }
-                }
-            }
-            return null;
-        };
-        @SuppressWarnings("resource")
-        DataWaitListener<VpnInstanceOpDataEntry> vpnInstanceWaiter = new DataWaitListener<>(dataBroker, vpnId, 10,
-                LogicalDatastoreType.OPERATIONAL, getInterfByName);
-        if (!vpnInstanceWaiter.waitForData()) {
-            String errorMessage = String.format("Fail to wait for vpn to dpn list %s", vpnName);
-            Log.error(errorMessage);
-            throw new UnsupportedOperationException(errorMessage);
-        }
-    }
 
     private String createElanInterface(String vpnName, InstanceIdentifier<Ipvc> ipvcId, String uniId, String elanName,
             Long vlan, IpAddress ipAddress, WriteTransaction tx, Long segmentationId) {
