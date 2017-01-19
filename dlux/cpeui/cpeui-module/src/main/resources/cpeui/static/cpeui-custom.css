@@ -165,4 +165,11 @@ TD a.link {
 	display:block;
 	width:100%;
 }
-
+I.expand-btn {
+	padding: 5px;
+	cursor: pointer;
+}
+I.expand-btn:focus {
+    outline: 0;
+    border: none;
+}

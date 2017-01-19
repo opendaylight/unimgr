@@ -14,7 +14,8 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
     $scope.networkNames = {};
     $scope.expandFlags = {
         ipuni:{},
-        tuni:{}
+        tuni:{},
+        L2:{},L3:{}
     };
 
     var tabIndexs = {
@@ -78,6 +79,9 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
         $scope.updateUnis();
         function mapUniToService(uni, service) {
             var uniObj = $scope.unis.filterByField('uni-id',uni['uni-id'])[0];
+            if (uniObj === undefined) {
+                return;
+            }
             if (!uniObj.vlanToService) {
                 uniObj.vlanToService = [];
             }
@@ -200,11 +204,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
 
     $scope.ipUniDialog = new CpeuiDialogs.Dialog('AddIpUni', {}, function(obj) {
       CpeuiSvc.addIpUni(obj['uni-id'], obj['ip-address'], obj.vlan, obj['segmentation-id'], function() {
-        var uni = $scope.unis.filterByField('uni-id',obj['uni-id'])[0];
-        if (uni['ip-unis'] == undefined || uni['ip-unis']['ip-uni'] == undefined){
-          uni['ip-unis'] = {'ip-uni':[]};
-          }
-        uni['ip-unis']['ip-uni'].push(obj);
+          $scope.updateUnis();
         });
       }, ipUniDialogController);
 
@@ -226,7 +226,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
         if ($scope.subnets[obj.uniid] == undefined){
           $scope.subnets[obj.uniid] = {};
         }
-        if ($scope.subnets[obj.uniid][obj.ipuniid] == undefined){
+        if ($scope.subnets[obj.uniid][obj.ipuniid] == undefined) {
           $scope.subnets[obj.uniid][obj.ipuniid] = [];
         }
         $scope.subnets[obj.uniid][obj.ipuniid].push({

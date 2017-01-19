@@ -46,7 +46,7 @@
                         <td class="minimal-width" ng-bind="ce['dev-id']"></td>
                         <td class="minimal-width" ng-bind="ce['device-name']"></td>
                         <td>
-                        <table class="footable table table-striped inner-table" ng-if="!unisTables[item['svc-id']]">
+                        <table class="footable table table-striped inner-table">
                                 <thead>
                                     <tr>
                                         <th class="minimal-width">Interface Name</th>
@@ -101,10 +101,15 @@
                         <td class="minimal-width">{{ item['svc-type'] | uppercase }}</td>
                         <td class="minimal-width">{{ item.evc['segmentation-id'] }}</td>
                         <td>
-                            <table class="footable table table-striped inner-table" ng-if="!isEmpty(item.device2unis)">
-                                <thead>
+                            <table class="footable table table-striped inner-table" ng-if="!isEmpty(item.device2unis)" ng-init="expandFlags.L2[item['svc-id']] = true">
+                                <thead ng-if="!expandFlags.L2[item['svc-id']]">
                                     <tr>
-                                        <th class="minimal-width">Device</th>
+                                        <th class="minimal-width"><i ng-click="expandFlags.L2[item['svc-id']] = true" class="expand-btn icon-caret-right"></i> Show UNIs</th>
+                                    </tr>
+                                </thead>
+                                <thead ng-if-start="expandFlags.L2[item['svc-id']]">
+                                    <tr>
+                                        <th class="minimal-width"><i ng-click="expandFlags.L2[item['svc-id']] = false" class="expand-btn icon-caret-down"></i> Device </th>
                                         <th class="minimal-width">Port</th>
                                         <th class="minimal-width">VLANs <span style="font-size:small;color:inherit;"> (click to edit)</span></th>
                                         <th class="minimal-width" ng-if="item.isTree" >Role</th>
@@ -112,7 +117,7 @@
                                         <th class="minimal-width"></th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody ng-if-end>
                                     <tr ng-repeat-start="(ce, unis) in item.device2unis | orderBy : ce ">
                                         <td class="minimal-width" rowspan="{{unis.length}}">{{ cesDisplayNames[ce] }}</td>
                                         <td class="minimal-width" ng-repeat-start="uni in unis | orderBy: sortUni | limitTo :1">{{ uni.prettyID }}</td>
@@ -174,10 +179,18 @@
                         <td class="minimal-width">{{ ipvc.ipvc['ipvc-id'] }}</td>
                         <td class="minimal-width">{{ ipvc['name'] }}</td>
                         <td>
-                            <table class="footable table table-striped inner-table" ng-if="ipvc.ipvc.unis.uni">
-                                <thead>
+                            <table class="footable table table-striped inner-table" ng-if="ipvc.ipvc.unis.uni" ng-init="expandFlags.L3[ipvc.ipvc['ipvc-id']] = true">
+                                <thead ng-if="!expandFlags.L3[ipvc.ipvc['ipvc-id']]">
                                     <tr>
-                                        <th class="minimal-width">Device Name</th>
+                                        <th class="minimal-width"><i ng-click="expandFlags.L3[ipvc.ipvc['ipvc-id']] = true" class="expand-btn icon-caret-right"></i> Show Service Endpoints</th>
+                                    </tr>
+                                </thead>
+                                <thead ng-if-start="expandFlags.L3[ipvc.ipvc['ipvc-id']]">
+                                    <tr>
+                                        <th class="minimal-width">
+                                            <i ng-click="expandFlags.L3[ipvc.ipvc['ipvc-id']] = false" class="expand-btn icon-caret-down"></i>
+                                            Device Name
+                                        </th>
                                         <th class="minimal-width">Port</th>
                                         <th>Vlan</th>
                                         <th class="minimal-width">I/F Address</th>
@@ -185,7 +198,7 @@
                                         <th class="minimal-width"></th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody ng-if-end>
                                     <tr ng-repeat="ipuni in ipvc.ipvc.unis.uni | orderBy: 'prettyID'">
                                         <td class="minimal-width" ng-init="serviceIpuni = getMefInterfaceIpvc(ipuni['uni-id'],ipuni['ip-uni-id'])">{{ cesDisplayNames[ipuni.device] }}</td>
                                         <td class="minimal-width">{{ ipuni.prettyID }}</td>
@@ -243,6 +256,7 @@
                         <th class="minimal-width">Device</th>
                         <th class="minimal-width">UNI</th>
                         <th>Ports</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -250,60 +264,69 @@
                         <td class="minimal-width">{{ cesDisplayNames[uni.device] }}</td>
                         <td class="minimal-width">{{ uni.prettyID }}</td>
                         <td>
-                        <button class="btn add-row" ng-click="expandFlags.tuni[uni['uni-id']] = true" ng-if="!expandFlags.tuni[uni['uni-id']]">
-                            <i class="icon-plus"></i> Show Ports
-                        </button>
-                            <table class="footable table table-striped inner-table" ng-if="expandFlags.tuni[uni['uni-id']]">
-                                <thead>
+                            <table class="footable table table-striped inner-table" ng-if="uni['ip-unis']['ip-uni']">
+                                <thead ng-if="!expandFlags.tuni[uni['uni-id']]">
+                                    <tr>
+                                        <th class="minimal-width"><i ng-click="expandFlags.tuni[uni['uni-id']] = true" class="expand-btn icon-caret-right"></i> Show Ports</th>
+                                    </tr>
+                                </thead>
+                                <thead ng-if-start="expandFlags.tuni[uni['uni-id']]">
                                     <tr>
                                         <th class="minimal-width">
-                                            <button class="btn add-row" ng-click="expandFlags.tuni[uni['uni-id']] = false">
-                                                <i class="icon-minus"></i>
-                                            </button>
+                                            <i ng-click="expandFlags.tuni[uni['uni-id']] = false" class="expand-btn icon-caret-down"></i>
+                                            IP UNI ID
                                         </th>
-                                        <th class="minimal-width">IP UNI ID</th>
                                         <th class="minimal-width">VLAN</th>
                                         <th class="minimal-width">Address</th>
                                         <th>Remote Subnets</th>
-                                        <th class="minimal-width"><button class="btn btn-md btn-info" ng-click="openIpUniDialog($event,uni)"> <i class="icon-plus"></i> </button></th>
+                                        <th></th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody ng-if-end>
                                     <tr ng-repeat="ipuni in uni['ip-unis']['ip-uni'] | orderBy: '[\'ip-uni-id\']'">
-                                        <td colspan="2" class="minimal-width">{{ ipuni['ip-uni-id'] }}</td>
+                                        <td class="minimal-width">{{ ipuni['ip-uni-id'] }}</td>
                                         <td class="minimal-width">{{ ipuni.vlan }}</td>
                                         <td class="minimal-width">{{ ipuni['ip-address'] }}</td>
                                         <td>
-                                        <button class="btn add-row" ng-click="expandFlags.ipuni[uni['uni-id']+':'+ipuni['ip-uni-id']] = true" ng-if="!expandFlags.ipuni[uni['uni-id']+':'+ipuni['ip-uni-id']]">
-                                            <i class="icon-plus"></i> Show Subnets
-                                        </button>
-                                            <table class="footable table table-striped inner-table" ng-if="expandFlags.ipuni[uni['uni-id']+':'+ipuni['ip-uni-id']]">
-                                                <thead>
+                                            <table class="footable table table-striped inner-table" ng-init="expKey=uni['uni-id']+':'+ipuni['ip-uni-id']" ng-if="subnets[uni['uni-id']][ipuni['ip-uni-id']]">
+                                                <thead ng-if="expandFlags.ipuni[expKey]">
+				                                    <tr>
+				                                        <th class="minimal-width"><i ng-click="expandFlags.ipuni[expKey] = false" class="expand-btn icon-caret-right"></i> Show Subnets</th>
+				                                    </tr>
+                                                </thead>
+                                                <thead ng-if-start="!expandFlags.ipuni[expKey]">
                                                     <tr>
-                                                        <th class="minimal-width">
-                                                            <button class="btn add-row" ng-click="expandFlags.ipuni[uni['uni-id']+':'+ipuni['ip-uni-id']] = false">
-                                                                <i class="icon-minus"></i>
-                                                            </button>
+                                                        <th>
+                                                            <i ng-click="expandFlags.ipuni[expKey] = true" class="expand-btn icon-caret-down"></i>
+                                                            Subnet
                                                         </th>
-                                                        <th>Subnet</th>
                                                         <th>Gateway</th>
-                                                        <th class="minimal-width"><button class="btn btn-md btn-info" ng-click="ipUniSubnetDialog.show($event,{uniid:uni['uni-id'],ipuniid:ipuni['ip-uni-id']})"> <i class="icon-plus"></i> </button></th>
+                                                        <th></th>
                                                     </tr>
                                                 </thead>
-                                                <tbody>
+                                                <tbody ng-if-end>
                                                     <tr ng-repeat="subnet in subnets[uni['uni-id']][ipuni['ip-uni-id']] | orderBy: subnet" ng-if="subnets[uni['uni-id']]">
-                                                        <td colspan="2">{{ subnet.subnet }}</td>
+                                                        <td>{{ subnet.subnet }}</td>
                                                         <td>{{ subnet.gateway }}</td>
-                                                        <td class="minimal-width"><button class="btn btn-md btn-danger" ng-click="deleteIpUniSubnet(uni['uni-id'],ipuni['ip-uni-id'],subnet.subnet)"> <i class="icon-trash"></i> </button></td>
+                                                        <td class="minimal-width">
+                                                            <button class="btn btn-md btn-danger" ng-click="deleteIpUniSubnet(uni['uni-id'],ipuni['ip-uni-id'],subnet.subnet)">
+                                                            <i class="icon-trash"></i>
+                                                            <md-tooltip>Delete Subnet</md-tooltip>
+                                                            </button>
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
                                         </td>
-                                        <td class="minimal-width"><button class="btn btn-md btn-danger" ng-click="deleteIpUni(uni['uni-id'],ipuni['ip-uni-id'])"> <i class="icon-trash"></i> </button></td>
+                                        <td class="minimal-width">
+                                            <button class="btn btn-md btn-danger" ng-click="deleteIpUni(uni['uni-id'],ipuni['ip-uni-id'])"> <i class="icon-trash"></i><md-tooltip>Delete IP-UNI</md-tooltip> </button>
+                                            <button class="btn btn-md btn-info" ng-click="ipUniSubnetDialog.show($event,{uniid:uni['uni-id'],ipuniid:ipuni['ip-uni-id']})"> <i class="icon-plus"></i><md-tooltip>Add Subnet</md-tooltip> </button>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </td>
+                        <td class="minimal-width"><button class="btn btn-md btn-info" ng-click="openIpUniDialog($event,uni)"> <i class="icon-plus"></i><md-tooltip>Add IP-UNI</md-tooltip> </button></td>
                     </tr>
                 </tbody>
             </table>
