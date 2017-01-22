@@ -59,7 +59,7 @@
                                         <td rowspan="{{uni.vlanToService.length}}" ng-if="$first" ng-bind="uni.prettyID" />
                                         <td ng-bind="svcs.vlan ? svcs.vlan : '-'" />
                                         <td>
-                                            <a class="link" href="#/cpeui/tenant/dav1/{{svcs.svc.evc ? 'L2' : 'L3'}}?svcs.svc={{svcs.svc['svc-id']}}">{{svcs.svc.name ? svcs.svc.name : svcs.svc['svc-id']}}</a>
+                                            <a class="link" href="#/cpeui/tenant/{{curTenant}}/{{svcs.svc.evc ? 'L2' : 'L3'}}?svcs.svc={{svcs.svc['svc-id']}}">{{svcs.svc.name ? svcs.svc.name : svcs.svc['svc-id']}}</a>
                                         </td>
                                     </tr>
                                 </tbody>
