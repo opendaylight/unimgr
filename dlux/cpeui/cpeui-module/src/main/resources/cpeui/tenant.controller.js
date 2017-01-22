@@ -26,7 +26,15 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
       }
     if ($stateParams.tenantTabName in tabIndexs) {
       $scope.tab.tenantData = tabIndexs[$stateParams.tenantTabName];
+    } else {
+        $scope.tab.tenantData = tabIndexs.inventory;
     }
+
+    CpeuiSvc.getTenantList(function(tenant_list) {
+        if (tenant_list.filter(t => t.name == $scope.curTenant).length == 0) {
+            window.location = "#/cpeui/admin/tenants";
+        }
+    });
 
     function init(){
       $scope.updateUnis(function(unis){
