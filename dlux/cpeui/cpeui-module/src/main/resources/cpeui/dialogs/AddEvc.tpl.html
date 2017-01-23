@@ -13,35 +13,87 @@
 
 <div layout="column" ng-cloak>
   <md-content layout-padding>
-      <md-input-container class="md-block">
+      <md-input-container class="md-block" ng-init="initObj(params.svc)">
         <label>EVC Name</label>
-        <input type="text" required name="svcName" ng-model="obj.svc_name">
+        <input type="text" required name="svcName" ng-model="obj.name">
         <div ng-messages="projectForm.svcName.$error">
               <div ng-message="required">Name is required!</div>
         </div>
       </md-input-container>
       <md-input-container class="md-block">
         <label>Service Type</label>
-        <md-select required ng-model="obj.svc_type" name="svc_type" >
+        <md-select required ng-model="obj['svc-type']" name="svc_type" >
                <md-option ng-repeat="typ in params.svcTypes" value="{{ typ }}">{{ typ }}</md-option>
         </md-select>
         <div ng-messages="projectForm.svc_type.$error">
               <div ng-message="required">This is required!</div>
         </div>
       </md-input-container>
-      <md-input-container class="md-block">
+      
+     <md-input-container class="md-block">
+        <label>Segmentation ID</label>
+        <input type="number" step="1" name="segmentation_id" ng-model="obj.evc['segmentation-id']">
+      </md-input-container>
+      <!-- //////////////////////////// 
+      <md-input-container class="md-block" ng-init="item=params.svc">
+        <div>Service UNIs 
+        <button><i class="icon-plus"></i></button>
+        </div>
+      <table class="footable table table-striped inner-table" ng-if="!isEmpty(item.device2unis)" ng-init="expandFlags.L2[item['svc-id']] = true">
+                                <thead ng-if="!expandFlags.L2[item['svc-id']]">
+                                    <tr>
+                                        <th class="minimal-width"><i ng-click="expandFlags.L2[item['svc-id']] = true" class="expand-btn icon-caret-right"></i> Show UNIs</th>
+                                    </tr>
+                                </thead>
+                                <thead ng-if-start="expandFlags.L2[item['svc-id']]">
+                                    <tr>
+                                        <th class="minimal-width"><i ng-click="expandFlags.L2[item['svc-id']] = false" class="expand-btn icon-caret-down"></i> Device </th>
+                                        <th class="minimal-width">Port</th>
+                                        <th class="minimal-width">VLANs <span style="font-size:small;color:inherit;"> (click to edit)</span></th>
+                                        <th class="minimal-width" ng-if="item.isTree" >Role</th>
+                                        <th>Bandwidth Profile</th>
+                                        <th class="minimal-width"></th>
+                                    </tr>
+                                </thead>
+                                <tbody ng-if-end>
+                                    <tr ng-repeat-start="(ce, unis) in item.device2unis | orderBy : ce ">
+                                        <td class="minimal-width" rowspan="{{unis.length}}">{{ cesDisplayNames[ce] }}</td>
+                                        <td class="minimal-width" ng-repeat-start="uni in unis | orderBy: sortUni | limitTo :1">{{ uni.prettyID }}</td>
+                                        <td class="clickable" ng-click="!item.evc['preserve-ce-vlan-id'] ? editVlanDialog.show($event, {svcid:item['svc-id'], uniid:uni['uni-id'], vlans:uni.vlans}) : 0">
+                                        {{ uni.vlans.join(', ') }} {{item.evc['preserve-ce-vlan-id'] ? '(Preserved)' : ''}}
+                                        </td>
+                                        <td class="minimal-width" ng-if="item.isTree">{{ uni['role'] }}</td>
+                                        <td >{{ uni['ingress-bw-profile'] }}</td>
+                                        <td ng-repeat-end class="minimal-width" style="white-space: nowrap;">
+                                        <button class="btn btn-md btn-danger" ng-click="deleteEvcUni(item['svc-id'], uni['uni-id'])"> <i class="icon-trash"></i> </button>
+                                        </td>
+                                    </tr>
+                                    <tr ng-repeat-end ng-repeat="uni in unis | orderBy: sortUni | limitTo :(unis.length-1) :1">
+                                        <td>{{ uni.prettyID }}</td>
+                                        <td ng-if="item.isTree">{{ uni['role'] }}</td>
+                                        <td class="clickable" ng-click="!item.evc['preserve-ce-vlan-id'] ? editVlanDialog.show($event, {svcid:item['svc-id'], uniid:uni['uni-id'], vlans:uni.vlans}) : 0">
+                                        {{ uni.vlans.join(', ') }} {{item.evc['preserve-ce-vlan-id'] ? '(Preserved)' : ''}}
+                                        </td>
+                                        <td class="minimal-width">{{ uni['ingress-bw-profile'] }}</td>
+                                            <td class="minimal-width" style="white-space: nowrap;">
+                                            <button class="btn btn-md btn-danger" ng-click="deleteEvcUni(item['svc-id'], uni['uni-id'])">
+                                                <i class="icon-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+        </md-input-container>
+       //////////////////////////// -->
+     <a ng-init="advancedCollapsed=true" ng-click="advancedCollapsed = !advancedCollapsed" class="btn btn-navbar btn-info">{{advancedCollapsed ? 'Show' : 'Hide'}} Advanced Options</a>
+      <md-input-container class="md-block" ng-if-start="!advancedCollapsed">
         <label>Maximum Number of UNIs</label>
         <input type="number" step="1" name="max_uni" ng-model="obj.max_uni">
       </md-input-container>
 
-     <a ng-init="advancedCollapsed=true" ng-click="advancedCollapsed = !advancedCollapsed" class="btn btn-navbar btn-info">{{advancedCollapsed ? 'Show' : 'Hide'}} Advanced Options</a>
-     <md-input-container class="md-block" ng-if-start="!advancedCollapsed">
-        <label>Segmentation ID</label>
-        <input type="number" step="1" name="segmentation_id" ng-model="obj.segmentation_id">
-      </md-input-container>
       <md-input-container class="md-block">
         <label>Subnet</label>
-        <input type="text" name="subnet" ng-model="obj.subnet" ng-pattern="/\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(?:[1-2]?[0-9]|3[0-2])\b/">
+        <input type="text" name="subnet" ng-model="obj.evc.subnet" ng-pattern="/\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(?:[1-2]?[0-9]|3[0-2])\b/">
         <div ng-messages="projectForm.subnet.$error">
               <div ng-message="pattern">IP/Mask is required! (ex. 127.0.0.1/32)</div>
         </div>
@@ -51,26 +103,26 @@
               <!--
                   <md-switch name="is_preserve_vlan" ng-model="obj.is_preserve_vlan">{{obj.is_preserve_vlan ? "" : "Do Not"}} Preserve VLAN</md-switch>
                -->
-                   <md-checkbox name="is_preserve_vlan" ng-model="obj.is_preserve_vlan">Preserve VLAN</md-checkbox>
+                   <md-checkbox name="is_preserve_vlan" ng-model="obj.evc['preserve-ce-vlan-id']">Preserve VLAN</md-checkbox>
               </md-input-container>
-              <md-input-container class="md-block" ng-if="obj.is_preserve_vlan" flex-gt-sm style="margin-bottom: 0px;">
+              <md-input-container class="md-block" ng-if="obj.evc['preserve-ce-vlan-id']" flex-gt-sm style="margin-bottom: 0px;">
                   <label>Preserved VLAN</label>
-                  <input required type="number" step="1" name="p_vlan" ng-model="obj.preserved_vlan">
+                  <input required type="number" step="1" name="p_vlan" ng-model="obj.evc['preserved-vlan']">
                   <div ng-messages="projectForm.p_vlan.$error">
                       <div ng-message="required">Number is required!</div>
                 </div>
               </md-input-container>
           </div>
-          <md-input-container class="md-block" ng-init="obj.mac_timeout = 300">
+          <md-input-container class="md-block">
             <label>Learned MAC Expiration Time (seconds)</label>
-            <input type="number" step="1" name="mac_timeout" min="0" ng-model="obj.mac_timeout">
+            <input type="number" step="1" name="mac_timeout" min="0" ng-model="obj.evc['mac-timeout']">
             <div ng-messages="projectForm.mac_timeout.$error">
                   <div ng-message="min">Number must be positive</div>
             </div>
           </md-input-container>
-          <md-input-container class="md-block" ng-init="obj.mtu_size = 1522">
+          <md-input-container class="md-block">
             <label>EVC MTU size</label>
-            <input type="number" step="1" name="mtu" min="1522" max="16384" ng-model="obj.mtu_size">
+            <input type="number" step="1" name="mtu" min="1522" max="16384" ng-model="obj.evc['max-svc-frame-size']">
             <div ng-messages="projectForm.mtu.$error">
                   <div ng-message="min">Number must be in range [1522..16384]</div>
                   <div ng-message="max">Number must be in range [1522..16384]</div>
@@ -78,7 +130,7 @@
           </md-input-container>
           <md-input-container class="md-block">
               <label>Unicast Service Frame Delivery</label>
-              <md-select ng-model="obj.unicast" name="unicast">
+              <md-select ng-model="obj.evc['unicast-svc-frm-delivery']" name="unicast">
                    <md-option value="{{ undefined }}"></md-option>
                    <md-option value="discard">Discard</md-option>
                    <md-option value="unconditional">Unconditional</md-option>
@@ -87,7 +139,7 @@
           </md-input-container>
           <md-input-container class="md-block" ng-if-end>
               <label>Multicast Service Frame Delivery</label>
-              <md-select ng-model="obj.multicast" name="multicast">
+              <md-select ng-model="obj.evc['multicast-svc-frm-delivery']" name="multicast">
                    <md-option value="{{ undefined }}"></md-option>
                    <md-option value="discard">Discard</md-option>
                    <md-option value="unconditional">Unconditional</md-option>

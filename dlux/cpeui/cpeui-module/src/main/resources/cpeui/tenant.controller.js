@@ -22,7 +22,6 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
         "inventory" : 0,
         "L2" : 1,
         "L3" : 2,
-        "unis" : 6,
       }
     if ($stateParams.tenantTabName in tabIndexs) {
       $scope.tab.tenantData = tabIndexs[$stateParams.tenantTabName];
@@ -101,12 +100,14 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
             } else {
                 if (uni["ip-uni-id"]) {
                     var ipuni = $scope.unis.filterByField('uni-id',uni['uni-id'])[0];
-                    ipuni["ip-unis"]["ip-uni"].forEach(function(ipu){
-                        if (ipu['ip-uni-id'] == uni["ip-uni-id"]){
-                            var vlan = ipu.vlan ? ipu.vlan : 0;
-                            uniObj.vlanToService.push({"vlan":vlan, "svc":service});
-                        }
-                    });
+                    if (ipuni && ipuni["ip-unis"] && ipuni["ip-unis"]["ip-uni"]) {
+                        ipuni["ip-unis"]["ip-uni"].forEach(function(ipu){
+                            if (ipu['ip-uni-id'] == uni["ip-uni-id"]){
+                                var vlan = ipu.vlan ? ipu.vlan : 0;
+                                uniObj.vlanToService.push({"vlan":vlan, "svc":service});
+                            }
+                        });
+                    }
                 } else {
                     uniObj.vlanToService.push({"vlan":0, "svc":service});
                 }
@@ -137,7 +138,19 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
           }
         });
       });
-      CpeuiSvc.getAllIpUniSubnets(function(subnets){
+      CpeuiSvc.getAllIpUniSubnets(function(raw_subnets){
+          var subnets ={}
+          if (raw_subnets) {
+              raw_subnets.forEach(function(sub) {
+                if (subnets[sub["uni-id"]] == undefined) {
+                  subnets[sub["uni-id"]] = {};
+                }
+                if (subnets[sub["uni-id"]][sub["ip-uni-id"]] == undefined) {
+                  subnets[sub["uni-id"]][sub["ip-uni-id"]] = [];
+                }
+                subnets[sub["uni-id"]][sub["ip-uni-id"]].push(sub);
+              });
+          }
         $scope.subnets = subnets;
       });
     };
@@ -171,12 +184,38 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
     }
 
     var addEvcController = function($scope, $mdDialog) {
+      $scope.initObj = function(svc) {
+          $scope.obj = angular.merge($scope.obj, svc);
+          if (!$scope.obj.evc) {
+              $scope.obj.evc = {};
+          }
+          if (!$scope.obj.evc['max-svc-frame-size']){
+              $scope.obj.evc['max-svc-frame-size'] = 1522;
+          }
+          if (!$scope.obj.evc['mac-timeout']){
+              $scope.obj.evc['mac-timeout'] = 300;
+          }
+      }
       $scope.validate = function(form) {
         form.svc_type.$setTouched(); // patch because angular bug http://stackoverflow.com/questions/36138442/error-not-showing-for-angular-material-md-select
         console.log($scope);
         return form.$valid;
       };
     };
+
+    $scope.editEvc = function($event, svc) {
+        new CpeuiDialogs.Dialog('AddEvc', {}, function(obj) {
+            obj['svc-id'] = svc['svc-id'];
+            CpeuiSvc.addEvc(obj, evcTypes[obj.svc_type], $scope.curTenant, function() {
+                  $scope.updateEvcView();
+                });
+          }, addEvcController).show($event, {'svcTypes':$scope.svcTypes, svc:svc});
+    }
+
+    $scope.openMenu = function($mdOpenMenu, ev) {
+        originatorEv = ev;
+        $mdOpenMenu(ev);
+      };
 
     $scope.evcDialog = new CpeuiDialogs.Dialog('AddEvc', {}, function(obj) {
       CpeuiSvc.addEvc(obj, evcTypes[obj.svc_type], $scope.curTenant, function() {
@@ -227,6 +266,95 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
         }
       }
       $scope.ipUniDialog.show(event,{'uniid':uni['uni-id'], uni:uni})
+    }
+
+
+    var staticRoutingController = function($scope, $mdDialog, params) {
+        $scope.add = function(obj){
+            if ($scope.projectForm.$valid) {
+                if (!obj.selectedUni.subnets) {
+                    obj.selectedUni.subnets = [];
+                }
+                obj.selectedUni.subnets.push({"subnet":obj.network,"gateway":obj.gateway});
+
+                if (!$scope.toAdd) {
+                    $scope.toAdd = [];
+                }
+                $scope.toAdd.push(obj);
+
+                // reset form
+                $scope.obj={};
+                $scope.projectForm.$setPristine();
+                $scope.projectForm.$setUntouched();
+
+            }
+        };
+
+        $scope.removeSubnet = function(u,subnet) {
+            if (!$scope.toRemove) {
+                $scope.toRemove = [];
+            }
+            u.subnets = u.subnets.filter(s=>s!=subnet);
+            $scope.toRemove.push({"uni":u, "subnet":subnet});
+        }
+
+        $scope.done = function() {
+//            if (!angular.equals({},$scope.obj)){
+//                $scope.projectForm.$setSubmitted();
+//                return;
+//            }
+            if (!$scope.toRemove && !$scope.toAdd) {
+                $mdDialog.hide();
+                return;
+            }
+            CpeuiSvc.getAllIpUniSubnets(function(subnets){
+                if ($scope.toRemove) {
+                    $scope.toRemove.forEach(function(u){
+                        subnets = subnets.filter(function(s) {
+                            if (s['uni-id'] != u.uni['uni-id']) {
+                                return true;
+                            } else if (s['ip-uni-id'] != u.uni['ip-uni-id']) {
+                                return true;
+                            } else if (s.subnet != u.subnet.subnet) {
+                                return true;
+                            }
+                            return false;
+                        });
+                    });
+                }
+                if ($scope.toAdd) {
+                    $scope.toAdd.forEach(function(added){
+                        var u = added.selectedUni;
+                        subnets.push({
+                            "ip-uni-id":u['ip-uni-id'],
+                            "subnet":added.network,
+                            "gateway":added.gateway,
+                            "uni-id":u['uni-id'],
+                        });
+                    });
+                }
+                CpeuiSvc.setAllSubnets(subnets, $scope.callback);
+            });
+          $mdDialog.hide();
+        };
+
+      };
+
+    $scope.openRoutingDialog = function(ipvc) {
+        if (ipvc.ipvc.unis && ipvc.ipvc.unis.uni) {
+            ipvc.ipvc.unis.uni.forEach(function(u){
+                var mefUni = $scope.getMefInterfaceIpvc(u['uni-id'],u['ip-uni-id']);
+                u.ipAddress = mefUni['ip-address'];
+                u.deviceName = $scope.cesDisplayNames[u.device];
+                if ($scope.subnets[u['uni-id']]) {
+                    u.subnets = $scope.subnets[u['uni-id']][u['ip-uni-id']];
+                }
+                if (mefUni.vlan) { u.vlan = mefUni.vlan };
+            });
+        }
+        new CpeuiDialogs.Dialog('StaticRouting', {}, function() {
+            $scope.updateEvcView();
+        }, staticRoutingController).show(undefined, {"ipvc":ipvc, "subnets":angular.copy($scope.subnets)});
     }
 
     $scope.ipUniSubnetDialog = new CpeuiDialogs.Dialog('AddIpUniSubnet', {}, function(obj) {

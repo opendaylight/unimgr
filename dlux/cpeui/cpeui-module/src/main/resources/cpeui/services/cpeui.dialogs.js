@@ -26,7 +26,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
         };
 
         if (customController != undefined) {
-          customController($scope, $mdDialog, params);
+          customController($scope, $mdDialog, params, CpeuiSvc);
         }
 
       };
@@ -37,7 +37,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
           templateUrl : 'src/app/cpeui/dialogs/' + tpl + '.tpl.html',
           parent : angular.element(document.body),
           targetEvent : ev,
-          clickOutsideToClose : true,
+          clickOutsideToClose : false,
           fullscreen : this.customFullscreen,
           locals : {
             params : params

@@ -367,19 +367,35 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
           method:'GET',
           url : "/restconf/config/mef-interfaces:mef-interfaces/subnets/"
       }).then(function successCallback(response) {
-          var raw_subnets = response.data["subnets"]["subnet"];
-          var subnets ={}
-          raw_subnets.forEach(function(sub){
-            if (subnets[sub["uni-id"]] == undefined) {
-              subnets[sub["uni-id"]] = {};
-            }
-            if (subnets[sub["uni-id"]][sub["ip-uni-id"]] == undefined) {
-              subnets[sub["uni-id"]][sub["ip-uni-id"]] = [];
-            }
-            subnets[sub["uni-id"]][sub["ip-uni-id"]].push(sub);
-          });
+          var subnets = response.data["subnets"]["subnet"];
+          if (!subnets) {
+              subnets = [];
+          }
           if (callback != undefined) {
               callback(subnets);
+          }
+      }, function errorCallback(response) {
+          if (response.status == 404) {
+              callback([]);
+          } else {
+              console.log(response);
+          }
+      });
+  };
+
+  svc.setAllSubnets = function(subnets, callback) {
+      var data = {
+              subnets:{
+                  subnet:subnets
+              }
+          };
+      $http({
+          method:'PUT',
+          url : "/restconf/config/mef-interfaces:mef-interfaces/subnets/",
+          data:data
+      }).then(function(response){
+          if (callback != undefined) {
+              callback();
           }
       }, function errorCallback(response) {
           console.log(response);
@@ -459,40 +475,57 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
     svc.addEvc = function(evc, evc_type, tenant, callback) {
             var uni_json = getJsonUnis(evc.unis);
 //            preserved-vlan
-            var evcId = CpeUiUtils.randomId();
+            if (evc['svc-id']) {
+                var evcId = evc['svc-id'];
+            } else {
+                var evcId = CpeUiUtils.randomId();
+            }
+            var unis = [];
+            if (!evc.evc) {
+                evc.evc = {};
+            }
+            if (evc.evc.unis && evc.evc.unis.uni){
+                evc.evc.unis.uni.forEach(function(u){
+                    unis.push({
+                        "uni-id": u["uni-id"],
+                        "admin-state-enabled": u["admin-state-enabled"],
+                        "role": u["role"],
+                        "evc-uni-ce-vlans":u["evc-uni-ce-vlans"],
+                        "ingress-bw-profile":u["ingress-bw-profile"],
+                    });
+                });
+            }
             var data = {
               "mef-service" :  {
                 "svc-id" : evcId,
-                "name" : evc.svc_name,
-                "svc-type" : evc.svc_type,
+                "name" : evc['name'],
+                "svc-type" : evc['svc-type'],
                 "tenant-id" : tenant,
                 "evc" : {
                   "evc-id" : evcId,
                   "evc-type" : evc_type,
-                  "preserve-ce-vlan-id" : evc.is_preserve_vlan,
-                  "max-svc-frame-size" : evc.mtu_size,
-                  "unicast-svc-frm-delivery" : evc.unicast,
-                  "multicast-svc-frm-delivery" : evc.multicast,
-                  "mac-timeout":evc.mac_timeout,
-                  "unis" : {
-                    "uni" : uni_json
-                  },
+                  "preserve-ce-vlan-id" : evc.evc['preserve-ce-vlan-id'],
+                  "max-svc-frame-size" : evc.evc['max-svc-frame-size'],
+                  "unicast-svc-frm-delivery" : evc.evc['unicast-svc-frm-delivery'],
+                  "multicast-svc-frm-delivery" : evc.evc['multicast-svc-frm-delivery'],
+                  "mac-timeout":evc.evc['mac-timeout'],
+                  "unis" : {"uni":unis},
                   "admin-state-enabled" : true
                 }
               }
             };
-            if (evc.is_preserve_vlan) {
-              data["mef-service"]["evc"]["preserved-vlan"] = evc.preserved_vlan;
+            if (evc.evc['preserve-ce-vlan-id']) {
+              data["mef-service"]["evc"]["preserved-vlan"] = evc.evc['preserved-vlan']
             }
-            if (evc.subnet) {
-              data["mef-service"]["evc"].subnet = evc.subnet;
+            if (evc.evc.subnet) {
+              data["mef-service"]["evc"].subnet = evc.evc.subnet;
             }
-            if (evc.segmentation_id) {
-              data["mef-service"]["evc"]["segmentation-id"] = evc.segmentation_id;
+            if (evc.evc['segmentation-id']) {
+              data["mef-service"]["evc"]["segmentation-id"] = evc.evc['segmentation-id'];
             }
             $http({
-                method:'POST',
-                url:"/restconf/config/mef-services:mef-services/",
+                method:'PUT',
+                url:"/restconf/config/mef-services:mef-services/mef-service/"+evcId,
                 data:data
             }).then(function successCallback(response) {
                 if (callback != undefined) {
@@ -500,6 +533,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
                 }
             });
         };
+
         svc.getServices = function(tenantid, callback) {
             var evcs;
             $http({

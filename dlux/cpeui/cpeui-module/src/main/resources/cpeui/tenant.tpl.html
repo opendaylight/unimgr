@@ -21,10 +21,10 @@
             <li ng-class="{ active: isTabSet('tenantData',5)}" ng-click="setTab('tenantData',5)" >
                 <a href="#/cpeui/tenant/{{curTenant}}/servicemonitor" > <i class="icon-bar-chart"></i> Service Monitor</a>
             </li>
-             -->
             <li ng-class="{ active: isTabSet('tenantData',6)}" ng-click="setTab('tenantData',6)" >
                 <a id="tenant-uni-tab" href="#/cpeui/tenant/{{curTenant}}/unis"> <i class="icon-tasks"></i> UNIs</a>
             </li>
+             -->
             <li id="refresh_btn" class="active refresh-btn" ng-click="updateEvcView()">
                 <button class="btn add-row"> <i class="icon-refresh"></i> Refresh</button>
             </li>
@@ -111,36 +111,23 @@
                                     <tr>
                                         <th class="minimal-width"><i ng-click="expandFlags.L2[item['svc-id']] = false" class="expand-btn icon-caret-down"></i> Device </th>
                                         <th class="minimal-width">Port</th>
-                                        <th class="minimal-width">VLANs <span style="font-size:small;color:inherit;"> (click to edit)</span></th>
+                                        <th class="minimal-width">VLANs</th>
                                         <th class="minimal-width" ng-if="item.isTree" >Role</th>
                                         <th>Bandwidth Profile</th>
                                         <th class="minimal-width"></th>
                                     </tr>
                                 </thead>
-                                <tbody ng-if-end>
-                                    <tr ng-repeat-start="(ce, unis) in item.device2unis | orderBy : ce ">
-                                        <td class="minimal-width" rowspan="{{unis.length}}">{{ cesDisplayNames[ce] }}</td>
-                                        <td class="minimal-width" ng-repeat-start="uni in unis | orderBy: sortUni | limitTo :1">{{ uni.prettyID }}</td>
-                                        <td class="clickable" ng-click="!item.evc['preserve-ce-vlan-id'] ? editVlanDialog.show($event, {svcid:item['svc-id'], uniid:uni['uni-id'], vlans:uni.vlans}) : 0">
+                                <tbody ng-if-end ng-repeat="(ce, unis) in item.device2unis | orderBy : ce ">
+                                    <tr ng-repeat="uni in unis | orderBy: sortUni">
+                                        <td ng-if="$first" class="minimal-width" rowspan="{{unis.length}}">{{ cesDisplayNames[ce] }}</td>
+                                        <td class="minimal-width">{{ uni.prettyID }}</td>
+                                        <td>
                                         {{ uni.vlans.join(', ') }} {{item.evc['preserve-ce-vlan-id'] ? '(Preserved)' : ''}}
                                         </td>
                                         <td class="minimal-width" ng-if="item.isTree">{{ uni['role'] }}</td>
                                         <td >{{ uni['ingress-bw-profile'] }}</td>
-                                        <td ng-repeat-end class="minimal-width" style="white-space: nowrap;">
+                                        <td class="minimal-width" style="white-space: nowrap;">
                                         <button class="btn btn-md btn-danger" ng-click="deleteEvcUni(item['svc-id'], uni['uni-id'])"> <i class="icon-trash"></i> </button>
-                                        </td>
-                                    </tr>
-                                    <tr ng-repeat-end ng-repeat="uni in unis | orderBy: sortUni | limitTo :(unis.length-1) :1">
-                                        <td>{{ uni.prettyID }}</td>
-                                        <td ng-if="item.isTree">{{ uni['role'] }}</td>
-                                        <td class="clickable" ng-click="!item.evc['preserve-ce-vlan-id'] ? editVlanDialog.show($event, {svcid:item['svc-id'], uniid:uni['uni-id'], vlans:uni.vlans}) : 0">
-                                        {{ uni.vlans.join(', ') }} {{item.evc['preserve-ce-vlan-id'] ? '(Preserved)' : ''}}
-                                        </td>
-                                        <td class="minimal-width">{{ uni['ingress-bw-profile'] }}</td>
-                                            <td class="minimal-width" style="white-space: nowrap;">
-                                            <button class="btn btn-md btn-danger" ng-click="deleteEvcUni(item['svc-id'], uni['uni-id'])">
-                                                <i class="icon-trash"></i>
-                                            </button>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -148,11 +135,12 @@
                         </td>
 
                         <td class="minimal-width">
-                            <button class="btn btn-md btn-danger" ng-click="deleteEvc(item['svc-id'])"> <i class="icon-trash"></i> </button>
+                            <button class="btn btn-md btn-action" ng-click="editEvc($event,item)"> <i class="icon-edit"></i> </button>
                             <button class="btn btn-md btn-info" ng-click="linkEvcUniDialog.show($event, {svc:item, unis:unis, ces:ces, profiles:profiles})">
                                 <i class="icon-plus"></i>
                                     <md-tooltip>Add UNI</md-tooltip>
                             </button>
+                            <button class="btn btn-md btn-danger" ng-click="deleteEvc(item['svc-id'])"> <i class="icon-trash"></i> </button>
                         </td>
                     </tr>
                 </tbody>
@@ -211,8 +199,33 @@
                             </table>
                         </td>
                         <td class="minimal-width">
-                            <button class="btn btn-md btn-danger" ng-click="deleteEvc(ipvc['svc-id'])"> <i class="icon-trash"></i> </button>
-                            <button class="btn btn-md btn-info" ng-click="linkIpvcUniDialog.show($event, {svc:ipvc, unis:unis, ces:ces, profiles:profiles})"> <i class="icon-plus"></i> </button>
+                            <div layout="column">
+                                <div layout="row">
+                                    <button class="btn btn-md btn-danger" ng-click="deleteEvc(ipvc['svc-id'])"> <i class="icon-trash"></i> </button>
+                                    <button class="btn btn-md btn-info" ng-click="linkIpvcUniDialog.show($event, {svc:ipvc, unis:unis, ces:ces, profiles:profiles})"> <i class="icon-plus"></i> </button>
+                                </div>
+                                <md-menu>
+							      <button class="btn btn-md btn-action" ng-click="openMenu($mdOpenMenu, $event)" style="width:100%">
+							        More
+							      </button>
+							      <md-menu-content width="4">
+							        <md-menu-item>
+							          <md-button ng-click="openRoutingDialog(ipvc)">Routing</md-button>
+							        </md-menu-item>
+							        <!--
+							        <md-menu-item>
+                                      <md-button>DHCP</md-button>
+                                    </md-menu-item>
+                                    <md-menu-item>
+                                      <md-button>NAT</md-button>
+                                    </md-menu-item>
+                                    <md-menu-item>
+                                      <md-button>ACLs</md-button>
+                                    </md-menu-item>
+							         -->
+							      </md-menu-content>
+							    </md-menu>
+                            </div>
                         </td>
                         <!--
                             <button ng-show="!unisTables[ipvc.ipvc['ipvc-id']]" class="btn add-row btn-block" ng-click="unisTables[ipvc.ipvc['ipvc-id']] = true;">Show Unis</button>
@@ -248,6 +261,7 @@
                 </tbody>
             </table>
         </div>
+        <!-- 
         <div ng-show="isTabSet('tenantData',6)">
             <div class="table-header">Tenant UNIs</div>
             <table class="footable table table-striped">
@@ -331,6 +345,7 @@
                 </tbody>
             </table>
         </div>
+        -->
     </div>
     <div class="clear">
         <button class="btn btn-default pull-right" onclick="window.location='#/cpeui/admin/tenants'" > Back </button>
