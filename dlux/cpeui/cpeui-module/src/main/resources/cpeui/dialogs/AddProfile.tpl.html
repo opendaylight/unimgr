@@ -30,7 +30,7 @@
 					   Use default Committed Burst Size {{obj.cir ? ('(' + getDefualtCbs(obj.cir) + ' KB)') : ''}}
 					</md-checkbox>
 					<md-input-container class="md-block" ng-if="!obj.default_cbs" ng-init="obj.cbs = params.cbs">
-						<label>Committed Burst Size (Bytes)</label>
+						<label>Committed Burst Size (KB)</label>
 						<input type="number" required name="cbs" ng-model="obj.cbs" min="0">
 						<div ng-messages="projectForm.cbs.$error">
 							<div ng-message="required">Number is required!</div>

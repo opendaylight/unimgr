@@ -56,7 +56,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
               if (callback != undefined) {
                   if (response.data["ingress-bwp-flows"]["bwp-flow"]){
                       response.data["ingress-bwp-flows"]["bwp-flow"].forEach(function(p){
-                         p.cir = Math.round(p.cir/1024);
+                         p.cbs = Math.round(p.cbs/1024);
                       });
                   }
                   callback(response.data["ingress-bwp-flows"]["bwp-flow"]);
@@ -75,8 +75,8 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
               url:"/restconf/config/mef-global:mef-global/profiles/ingress-bwp-flows/",
               data: {"bwp-flow":{
                         "bw-profile" : name,
-                         "cir" : cir*1024,
-                         "cbs" : cbs
+                         "cir" : cir,
+                         "cbs" : cbs*1024
                     }}
           }).then(function successCallback(response) {
               if (callback != undefined) {
@@ -91,8 +91,8 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
               url:"/restconf/config/mef-global:mef-global/profiles/ingress-bwp-flows/bwp-flow/"+name,
               data: {"bwp-flow":{
                       "bw-profile": name,
-                      cir: cir*1024,
-                      cbs:cbs
+                      cir: cir,
+                      cbs:cbs*1024
                     }}
           }).then(function successCallback(response) {
               if (callback != undefined) {
