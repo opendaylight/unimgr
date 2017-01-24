@@ -223,6 +223,18 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
           });
     }, addEvcController);
 
+    $scope.changeProfile = function(svcId, svcType, uni, profile) {
+        var uniKey = (svcType == 'evc') ? uni['uni-id'] : (uni['uni-id'] +'/' + uni['ip-uni-id']);
+        CpeuiDialogs.customConfirm("Are you sure?",
+                "This will change " + uniKey + " bandwidth profile.",
+                function() {
+                    CpeuiSvc.changeUniProfile(svcId, svcType, uniKey, profile);
+                },function() {
+                    uni.selectedProfile = uni['ingress-bw-profile']
+                });
+    }
+
+
     $scope.ipvcDialog = new CpeuiDialogs.Dialog('AddIpvc', {}, function(obj) {
       CpeuiSvc.addIpvc(obj, $scope.curTenant, function() {
             $scope.updateEvcView();

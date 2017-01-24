@@ -125,7 +125,15 @@
                                         {{ uni.vlans.join(', ') }} {{item.evc['preserve-ce-vlan-id'] ? '(Preserved)' : ''}}
                                         </td>
                                         <td class="minimal-width" ng-if="item.isTree">{{ uni['role'] }}</td>
-                                        <td >{{ uni['ingress-bw-profile'] }}</td>
+                                        <td >
+	                                        <md-input-container class="md-block">
+					                            <label>Profile</label>
+					                            <md-select name="profile" ng-change="changeProfile(item['svc-id'],'evc',uni,uni.selectedProfile)" ng-model="uni.selectedProfile" ng-init="uni.selectedProfile = uni['ingress-bw-profile']">
+					                                <md-option ng-value="undefined" default></md-option>
+					                                <md-option ng-repeat="profile in profiles" ng-value="profile['bw-profile']">{{profile['bw-profile']}} (CIR:{{profile.cir}}, CBS: {{profile.cbs}})</md-option>
+					                            </md-select>
+					                        </md-input-container>
+                                        </td>
                                         <td class="minimal-width" style="white-space: nowrap;">
                                         <button class="btn btn-md btn-danger" ng-click="deleteEvcUni(item['svc-id'], uni['uni-id'])"> <i class="icon-trash"></i> </button>
                                         </td>
@@ -164,7 +172,7 @@
                 </thead>
                 <tbody id="l2_table">
                     <tr ng-repeat="ipvc in ipvcs | orderBy : 'name'">
-                        <td class="minimal-width">{{ ipvc.ipvc['ipvc-id'] }}</td>
+                        <td class="minimal-width">{{ ipvc['svc-id'] }}</td>
                         <td class="minimal-width">{{ ipvc['name'] }}</td>
                         <td>
                             <table class="footable table table-striped inner-table" ng-if="ipvc.ipvc.unis.uni" ng-init="expandFlags.L3[ipvc.ipvc['ipvc-id']] = true">
@@ -192,7 +200,15 @@
                                         <td class="minimal-width">{{ ipuni.prettyID }}</td>
                                         <td>{{serviceIpuni.vlan}}</td>
                                         <td class="minimal-width">{{serviceIpuni['ip-address']}}</td>
-                                        <td>{{ ipuni['ingress-bw-profile'] }}</td>
+                                        <td>
+                                            <md-input-container class="md-block">
+                                                <label>Profile</label>
+                                                <md-select name="profile" ng-change="changeProfile(ipvc['svc-id'],'ipvc',ipuni, ipuni.selectedProfile)" ng-model="ipuni.selectedProfile" ng-init="ipuni.selectedProfile = ipuni['ingress-bw-profile']">
+                                                    <md-option ng-value="undefined" default></md-option>
+                                                    <md-option ng-repeat="profile in profiles" ng-value="profile['bw-profile']">{{profile['bw-profile']}} (CIR:{{profile.cir}}, CBS: {{profile.cbs}})</md-option>
+                                                </md-select>
+                                            </md-input-container>
+                                        </td>
                                         <td class="minimal-width"><button class="btn btn-md btn-danger" ng-click="deleteIpvcUni(ipvc['svc-id'], ipuni['uni-id'], ipuni['ip-uni-id'])"> <i class="icon-trash"></i> </button></td>
                                     </tr>
                                 </tbody>

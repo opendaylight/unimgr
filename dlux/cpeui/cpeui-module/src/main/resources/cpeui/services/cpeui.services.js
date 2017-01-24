@@ -112,6 +112,24 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
           });
       };
 
+      svc.changeUniProfile = function(svcId,svcType, uniKey, profileName, callback) {
+          $http({
+              method:'GET',
+              url:'/restconf/config/mef-services:mef-services/mef-service/'+svcId+'/'+svcType+'/unis/uni/' + uniKey,
+          }).then(function successCallback(response) {
+              response.data["uni"][0]['ingress-bw-profile'] = profileName;
+              $http({
+                  method:'PUT',
+                  url:'/restconf/config/mef-services:mef-services/mef-service/'+svcId+'/'+svcType+'/unis/uni/' + uniKey,
+                  data:response.data
+              }).then(function successCallback(response) {
+                  if (callback != undefined) {
+                      callback();
+                  }
+              });
+          });
+      }
+
         // CEs
         svc.addCe = function(id, name, callback) {
             $http({
