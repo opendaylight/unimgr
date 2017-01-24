@@ -117,8 +117,8 @@
                                         <th class="minimal-width"></th>
                                     </tr>
                                 </thead>
-                                <tbody ng-if-end ng-repeat="(ce, unis) in item.device2unis | orderBy : ce ">
-                                    <tr ng-repeat="uni in unis | orderBy: sortUni">
+                                <tbody ng-if-end ng-repeat="ce in getKeys(item.device2unis) | orderBy: sortCeFromId">
+                                    <tr ng-repeat="uni in item.device2unis[ce] | orderBy: sortUni">
                                         <td ng-if="$first" class="minimal-width" rowspan="{{unis.length}}">{{ cesDisplayNames[ce] }}</td>
                                         <td class="minimal-width">{{ uni.prettyID }}</td>
                                         <td>

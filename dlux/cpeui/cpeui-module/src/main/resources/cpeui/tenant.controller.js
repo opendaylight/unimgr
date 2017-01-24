@@ -490,6 +490,17 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
       return uni['uni-id'];
     };
 
+    $scope.getKeys = function(obj){
+        var keys = [];
+        for(var keyName in obj){
+            keys.push(keyName)
+        }
+        return keys;
+    }
+    $scope.sortCeFromId = function(ce) {
+        return $scope.cesDisplayNames[ce];
+    };
+
     $scope.isEmpty = function(obj){
         return angular.equals({}, obj);
     }
