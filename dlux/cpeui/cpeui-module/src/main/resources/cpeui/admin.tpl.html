@@ -23,10 +23,6 @@
 				ng-click="setTab('admin',3);updateView()"><a href="#/cpeui/admin/unis">
 				 <i class="icon-exchange"></i> UNIs</a>
 			 </li>
-			 <li ng-class="{ active: isTabSet('admin',4)}"
-				ng-click="setTab('admin',4);updateNetworksView()"><a href="#/cpeui/admin/networks">
-			 	<i class="icon-signal"></i> Networks</a>
-			 </li>
 			 <li ng-class="{ active: isTabSet('admin',5)}" ng-click="setTab('admin',5);updateProfilesView()">
 			 	<a href="#/cpeui/admin/profiles"><i class="icon-book"></i> Bandwidth Profiles</a>
 			 </li>
@@ -104,33 +100,6 @@
 				</tr>
 			</tbody>
 		</table>
-	</div>
-	<div ng-show="isTabSet('admin',4)">
-		<div class="table-header">Networks</div>
-		<table class="footable table table-striped">
-			<thead>
-				<tr>
-					<th>Network ID</th>
-					<th>Network name</th>
-					<th>Tenant</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr ng-repeat="svc in services ">					
-					<td class="minimal-width">{{ svc['svc-id'] }}</td>
-					<td class="minimal-width">{{ networkNames[svc['svc-id']] }}</td>					
-					<td ng-if="svc['tenant-id']" class="minimal-width">{{ svc['tenant-id'] }}</td>
-					<td ng-if="!(svc['tenant-id'])" class="minimal-width">
-					<md-input-container class="md-block">
-							<label>Assign Tenant</label>
-					        <md-select ng-change="assignNetworkToTenant(svc)" ng-model="selectedTenant[svc['svc-id']]" name="selectedTenant">
-					       		<md-option ng-repeat="tenant in tenantArray" value="{{ tenant.name }}">{{ tenant.name }}</md-option>
-					        </md-select>
-		      			</md-input-container>
-					</td>
-				</tr>
-			</tbody>
-		</table>		
 	</div>
 	<div ng-show="isTabSet('admin',5)">
 		<div class="table-header">Bandwidth Profiles</div>

@@ -1,5 +1,5 @@
 define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
-  cpeui.register.controller('OpenTenantCtrl', function($scope, CpeuiSvc, CpeuiDialogs, $stateParams) {
+  cpeui.register.controller('OpenTenantCtrl', function($scope, CpeuiSvc, CpeuiDialogs, CpeUiUtils, $stateParams) {
 
     $scope.curTenant = $stateParams.tenantid;
     $scope.unisTables = {};
@@ -21,7 +21,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
     var tabIndexs = {
         "inventory" : 0,
         "L2" : 1,
-        "L3" : 2,
+        "L3" : 2
       }
     if ($stateParams.tenantTabName in tabIndexs) {
       $scope.tab.tenantData = tabIndexs[$stateParams.tenantTabName];
@@ -243,10 +243,12 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
 
     $scope.linkIpvcUniDialog = new CpeuiDialogs.Dialog('LinkIpvcUni', {},
         function(obj) {
-          CpeuiSvc.addIpvcUni(obj.svc_id, obj.uni['uni-id'], obj.ip_uni, obj.profile_name,
+        CpeuiSvc.addIpUni(obj.uni['uni-id'], obj['ip-address'], obj.vlan, obj['segmentation-id'], function(ipUniId) {
+          CpeuiSvc.addIpvcUni(obj.svc_id, obj.uni['uni-id'], ipUniId, obj.profile_name,
               function() {
-                $scope.updateEvcView();
+                  $scope.updateUnis($scope.updateEvcView);
               });
+            });
         });
 
     var ipUniDialogController = function($scope, $mdDialog) {
@@ -311,10 +313,6 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
         }
 
         $scope.done = function() {
-//            if (!angular.equals({},$scope.obj)){
-//                $scope.projectForm.$setSubmitted();
-//                return;
-//            }
             if (!$scope.toRemove && !$scope.toAdd) {
                 $mdDialog.hide();
                 return;
@@ -364,9 +362,155 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
                 if (mefUni.vlan) { u.vlan = mefUni.vlan };
             });
         }
-        new CpeuiDialogs.Dialog('StaticRouting', {}, function() {
+        new CpeuiDialogs.Dialog('StaticRouting', {"ipvc":ipvc, "subnets":angular.copy($scope.subnets)}, function() {
             $scope.updateEvcView();
-        }, staticRoutingController).show(undefined, {"ipvc":ipvc, "subnets":angular.copy($scope.subnets)});
+        }, staticRoutingController).show();
+    }
+    
+    
+    var dhcpDialogController = function($scope, $mdDialog, params) {
+        
+        $scope.selectedNetworks = [];
+        $scope.vrfid = params.vrfId;
+        $scope._isAddingRow = false;
+        
+        $scope.selectAll = function(){
+            if (!$scope.isAllSelected()){
+                $scope.selectedNetworks = $scope.getAvailableNetwork();                
+            } else {
+                $scope.selectedNetworks = [];                
+            }
+        };
+        $scope.isPartialSelected = function(){
+            return ($scope.selectedNetworks.length != 0) && ($scope.selectedNetworks.length != $scope.getAvailableNetwork().length);
+        };
+        $scope.isAllSelected = function(){
+            return ($scope.selectedNetworks.length ==  $scope.getAvailableNetwork().length);
+        };
+        
+        $scope.updateEnabled = function() {
+            $scope.selectedNetworks.forEach(function(u){
+                $scope.addDhcp(u.mefUni['ip-address']);
+            });
+            $scope.selectedNetworks = [];
+            $('md-backdrop').click();// close md-select dropdown
+        };
+        
+        $scope.openStaticAssigment = function(subnet) {            
+            $scope.focusedSubnet = subnet;
+            CpeuiSvc.getDhcpStaticAllocation($scope.vrfid, subnet.subnet, function(allocations) {
+                $scope.subnetAllocations = allocations;
+                $scope.dialogState = 'STATIC';
+            });
+        };
+        $scope.openMain = function() {
+            $scope.dialogState = 'MAIN';
+        };
+        //confirmation
+        $scope.confirmationMsg = null;
+        $scope.okCallback = null;
+        $scope.previousState = null;
+
+        $scope.confirm = function(msg, okCallback) {
+            $scope.confirmationMsg = msg;
+            $scope.okCallback = okCallback;
+            $scope.previousState = $scope.dialogState;
+            $scope.dialogState = 'CONFIRM';
+        }
+        $scope.back = function() {
+            $scope.dialogState = $scope.previousState;
+        }
+        $scope.confirmed = function() {
+            $scope.okCallback()
+            $scope.dialogState = $scope.previousState;
+        }
+        
+        $scope.updateDhcpData = function() {
+            CpeuiSvc.getDhcp($scope.vrfid, function(dhcps){
+                $scope.dhcps = dhcps;
+                //$scope.params.ipvcUnis = $scope.params.ipvcUnis.filter(x => $scope.dhcps[x.mefUni['ip-address']] == undefined);
+            });
+        }
+        
+        $scope.getAvailableNetwork = function(){
+            if ($scope.dhcps !== undefined) {
+                return $scope.params.ipvcUnis.filter(x => $scope.dhcps[x.mefUni['ip-address']] == undefined);
+            } else {
+                return $scope.params.ipvcUnis;
+            }
+        }
+        
+        $scope.addDhcp = function(subnet) {
+            var edges = CpeUiUtils.getSubnetEdges(subnet);
+            CpeuiSvc.addDhcp($scope.vrfid, subnet, edges[0] ,edges[1],function(){
+                // TODO find a way to getDhcp only once, after the last add                
+                $scope.updateDhcpData();
+            });
+        }
+        
+        $scope.removeDhcp = function(subnet) {
+            $scope.confirm("This will delete this dhcp configuration",function(){
+                CpeuiSvc.removeDhcp($scope.vrfid, subnet, function(){
+                    $scope.updateDhcpData();
+                });
+            });
+        };
+        $scope.isAddingRow = function() {
+            return $scope._isAddingRow;
+        }
+        $scope.setAddingRow = function(val) {
+            $scope._isAddingRow = val;
+        }
+        $scope.addAllocation = function(form, mac, ip) {
+            if (form.$valid) {
+                CpeuiSvc.addDhcpStaticAllocation($scope.vrfid, $scope.focusedSubnet.subnet, [[mac,ip]], function(){
+                    CpeuiSvc.getDhcpStaticAllocation($scope.vrfid, $scope.focusedSubnet.subnet, function(allocations) {
+                        $scope.subnetAllocations = allocations;
+                    });
+                });
+
+                // reset form
+                delete $scope.obj.mac;
+                delete $scope.obj.ip;
+                form.$setPristine();
+                form.$setUntouched();
+                $scope.setAddingRow(false);
+            }
+        }
+        
+        $scope.removeAllocation = function(subnet, mac) {
+            $scope.confirm("Are you sure you want to remove this allocation?",function(){
+                CpeuiSvc.removeDhcpStaticAllocation($scope.vrfid, subnet, mac, function(){
+                    CpeuiSvc.getDhcpStaticAllocation($scope.vrfid, subnet, function(allocations) {
+                        $scope.subnetAllocations = allocations;
+                    });
+                });
+            });
+        };
+        
+        $scope.setDNS = function(primaryDns, secondaryDns) {
+            for (var i in $scope.dhcps) {
+                var allocPool = $scope.dhcps[i];
+                CpeuiSvc.setDHCPDnsServers($scope.vrfid, allocPool.subnet, primaryDns, secondaryDns, $scope.updateDhcpData);
+            };
+        }
+
+        $scope.updateDhcpData();
+    };
+    
+    $scope.openDhcpDialog = function(ipvc) {
+        CpeuiSvc.getServicesVrfId(ipvc['svc-id'],function(vrfId){            
+            params = {ipvc:ipvc,ipvcUnis:[],vrfId:vrfId};
+            if (ipvc.ipvc.unis && ipvc.ipvc.unis.uni) {            
+                params.ipvcUnis = angular.copy(ipvc.ipvc.unis.uni);
+                params.ipvcUnis.forEach(function(u){
+                    u.mefUni = $scope.getMefInterfaceIpvc(u['uni-id'],u['ip-uni-id']);
+                });
+            }
+            new CpeuiDialogs.Dialog('DHCP', params, function() {
+                $scope.updateEvcView();
+            }, dhcpDialogController).show();
+        });
     }
 
     $scope.ipUniSubnetDialog = new CpeuiDialogs.Dialog('AddIpUniSubnet', {}, function(obj) {

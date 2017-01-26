@@ -91,6 +91,7 @@ MD-SELECT-MENU MD-OPTION div, MD-SELECT-VALUE SPAN, MD-SELECT-VALUE SPAN * {
 
 MD-DIALOG {
 	min-width: 30% !important;
+	width: initial;
 }
 
 .no-error-spacer .md-errors-spacer {
@@ -173,4 +174,30 @@ I.expand-btn {
 I.expand-btn:focus {
     outline: 0;
     border: none;
+}
+#dnsInputs {
+    padding-bottom: 0;
+}
+#dnsInputs md-input-container {
+    padding-bottom: 0 !important;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-right: 16px;
+}
+#dnsForm {
+	padding-top:16px;
+	padding-bottom:0;
+}
+.confirmDialog {
+	background-color: #414040;
+}
+.confirmDialog P, .confirmDialog h2 {
+	color: white;
+}
+.complexSelect md-select-menu, .complexSelect md-content{
+	max-height:300px;
+}
+.complexSelectOptions {
+	overflow-y: scroll;
+	max-height:170px;
 }

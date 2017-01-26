@@ -24,7 +24,8 @@ define([].concat(modules).concat(services).concat(directives).concat(controllers
 
     $scope.tab = {
       tenantData : 1,
-      admin : 1
+      admin : 1,
+      L3subTable:0
     };
     var selectedTab = mainTabIndexs[$state.params.tabName];
     if (selectedTab != undefined) {

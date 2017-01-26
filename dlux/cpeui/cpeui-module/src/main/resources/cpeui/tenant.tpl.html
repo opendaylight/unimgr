@@ -161,7 +161,7 @@
                     <tr>
                         <th class="minimal-width">Service ID</th>
                         <th class="minimal-width">Service Name</th>
-                        <th>Service Endpoints</th>
+                        <th>Service Endpoints</th>                        
                         <th class="minimal-width">
                             <button class="btn btn-md btn-info right" ng-click="ipvcDialog.show($event,{'svcTypes':svcTypes})">
                                 <i class="icon-plus"></i>
@@ -172,8 +172,8 @@
                 </thead>
                 <tbody id="l2_table">
                     <tr ng-repeat="ipvc in ipvcs | orderBy : 'name'">
-                        <td class="minimal-width">{{ ipvc['svc-id'] }}</td>
-                        <td class="minimal-width">{{ ipvc['name'] }}</td>
+                        <td class="minimal-width">{{ ipvc.ipvc['ipvc-id'] }}</td>
+                        <td class="minimal-width">{{ ipvc['name'] }}</td>                        
                         <td>
                             <table class="footable table table-striped inner-table" ng-if="ipvc.ipvc.unis.uni" ng-init="expandFlags.L3[ipvc.ipvc['ipvc-id']] = true">
                                 <thead ng-if="!expandFlags.L3[ipvc.ipvc['ipvc-id']]">
@@ -228,10 +228,10 @@
 							        <md-menu-item>
 							          <md-button ng-click="openRoutingDialog(ipvc)">Routing</md-button>
 							        </md-menu-item>
-							        <!--
 							        <md-menu-item>
-                                      <md-button>DHCP</md-button>
+                                      <md-button ng-click="openDhcpDialog(ipvc)">DHCP</md-button>
                                     </md-menu-item>
+							        <!--
                                     <md-menu-item>
                                       <md-button>NAT</md-button>
                                     </md-menu-item>

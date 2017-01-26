@@ -3,7 +3,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
   cpeui.factory('CpeuiDialogs', function($mdDialog, $mdMedia, CpeuiSvc) {
     var svc = {};
 
-    svc.Dialog = function(tpl, params, callback, customController) {
+    svc.Dialog = function(tpl, _params, callback, customController) {
 
       this.customFullscreen = $mdMedia('xs') || $mdMedia('sm');
 
@@ -32,6 +32,9 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
       };
 
       this.show = function(ev, params) {
+        if (_params) {
+            params = angular.merge(_params,params);
+        }
         $mdDialog.show({
           controller : this.dialogController,
           templateUrl : 'src/app/cpeui/dialogs/' + tpl + '.tpl.html',

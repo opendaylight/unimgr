@@ -375,7 +375,7 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
             data:data
         }).then(function successCallback(response) {
             if (callback != undefined) {
-                callback();
+                callback(ipUniId);
             }
         });
     };
@@ -479,6 +479,149 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
       });
     };
 
+    // DHCP
+    svc.getServicesVrfId = function(svcid, callback) {
+        $http({
+            method:'GET',
+            url:"/restconf/operational/mef-services:mef-services/mef-service/"+svcid+"/ipvc"
+        }).then(function successCallback(response) {            
+            vrfId = response.data["ipvc"]["vrf-id"];            
+            if (callback != undefined) {
+                callback(vrfId);
+            }
+        }, function errorCallback(response) {
+            if (response.status == 404) {
+                callback({});
+            } else {
+                console.log(response);
+            }
+        });
+    };
+
+    svc.addDhcp = function(vrfid, subnet, fromIp, toIp, callback) {
+        var data = {"allocation-pool": {
+                        "subnet":subnet,
+                        "gateway":subnet.split('/')[0],
+                        "vrf-id":vrfid,
+                        "allocate-from": fromIp,
+                        "allocate-to":toIp
+                    }};
+        $http({
+            method:'POST',
+            url:"/restconf/config/dhcpi:dhcpi/vrf/" + vrfid,
+            data:data
+        }).then(function successCallback(response) {            
+            if (callback != undefined) {
+                callback();
+            }
+        }, function errorCallback(response) {
+            console.log(response);
+        });
+    }
+    
+    svc.removeDhcp = function(vrfid, subnet, callback) {        
+        $http({
+            method:'DELETE',
+            url:"/restconf/config/dhcpi:dhcpi/vrf/" + vrfid + "/allocation-pool/" + window.encodeURIComponent(subnet)
+        }).then(function successCallback(response) {            
+            if (callback != undefined) {
+                callback();
+            }
+        }, function errorCallback(response) {
+            console.log(response);
+        });
+    }
+    
+    svc.getDhcp = function(vrfid, callback) {        
+        $http({
+            method:'GET',
+            url:"/restconf/config/dhcpi:dhcpi/vrf/" + vrfid
+        }).then(function successCallback(response) {       
+            var dhcps = {};
+            if (!response.data.vrf[0] || !response.data.vrf[0]['allocation-pool']){
+                callback({});
+                return;
+            }
+            response.data.vrf[0]['allocation-pool'].forEach(function(d){
+                dhcps[d.subnet] = d;
+            });
+            
+            if (callback != undefined) {
+                callback(dhcps);
+            }
+        }, function errorCallback(response) {
+            console.log(response);
+        });
+    };
+    
+    svc.addDhcpStaticAllocation = function(vrfid, subnet, macAndIp, callback) {
+        
+        var data = {"allocation-instance": []};
+        
+        macAndIp.forEach(function(macIp){
+            data["allocation-instance"].push({
+                "mac":macIp[0],
+                "allocated-ip":macIp[1]
+            });
+        });
+        
+        $http({
+            method:'POST',
+            url:"/restconf/config/dhcpi:dhcpi/vrf/" + vrfid + "/allocation/"+ window.encodeURIComponent(subnet),
+            data:data
+        }).then(function successCallback(response) {
+            if (callback != undefined) {
+                callback();
+            }
+        }, function errorCallback(response) {
+            console.log(response);
+        });
+    };
+    
+    svc.getDhcpStaticAllocation = function(vrfid, subnet, callback) {
+        $http({
+            method:'GET',
+            url:"/restconf/config/dhcpi:dhcpi/vrf/" + vrfid + "/allocation/"+ window.encodeURIComponent(subnet)
+        }).then(function successCallback(response) {
+            if (callback != undefined) {
+                callback(response.data["allocation"][0]["allocation-instance"]);
+            }
+        }, function errorCallback(response) {
+            console.log(response);
+            callback([]);
+        });
+    };
+    
+    svc.removeDhcpStaticAllocation = function(vrfid, subnet, mac, callback) {
+        $http({
+            method:'DELETE',
+            url:"/restconf/config/dhcpi:dhcpi/vrf/" + vrfid + "/allocation/"+ window.encodeURIComponent(subnet) +"/allocation-instance/"+window.encodeURIComponent(mac)
+        }).then(function successCallback(response) {
+            if (callback != undefined) {
+                callback();
+            }
+        }, function errorCallback(response) {
+            console.log(response);            
+        });
+    };
+    
+    svc.setDHCPDnsServers = function(vrfid, subnet, primaryDns, secondaryDns, callback){
+        var data = {"dns-servers":[
+                       {"dns-server":primaryDns},
+                       {"dns-server":secondaryDns}
+                   ]};
+        $http({
+            method:'POST',
+            url:"/restconf/config/dhcpi:dhcpi/vrf/" + vrfid + "/allocation-pool/"+ window.encodeURIComponent(subnet),
+            data:data
+        }).then(function successCallback(response) {
+            if (callback != undefined) {
+                callback();
+            }
+        }, function errorCallback(response) {
+            console.log(response);
+        });
+    };
 
     // EVCs
     function getJsonUnis(unis) {
@@ -492,7 +635,6 @@ define(['app/cpeui/cpeui.module'],function(cpeui) {
 
     svc.addEvc = function(evc, evc_type, tenant, callback) {
             var uni_json = getJsonUnis(evc.unis);
-//            preserved-vlan
             if (evc['svc-id']) {
                 var evcId = evc['svc-id'];
             } else {
