@@ -21,6 +21,7 @@ import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.MefService;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.Evc;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.Uni;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.UniKey;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.uni.EvcUniCeVlans;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.uni.evc.uni.ce.vlans.EvcUniCeVlan;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.EvcElan;
@@ -249,11 +250,11 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
 
             List<Uni> originalUni = original.getUnis() != null && original.getUnis().getUni() != null
                     ? original.getUnis().getUni() : Collections.emptyList();
-            List<Identifier45> originalUniIds = originalUni.stream().map(u -> u.getUniId())
+            List<UniKey> originalUniIds = originalUni.stream().map(u -> u.getKey())
                     .collect(Collectors.toList());
             List<Uni> updateUni = update.getUnis() != null && update.getUnis().getUni() != null
                     ? update.getUnis().getUni() : Collections.emptyList();
-            List<Identifier45> updateUniIds = updateUni.stream().map(u -> u.getUniId()).collect(Collectors.toList());
+            List<UniKey> updateUniIds = updateUni.stream().map(u -> u.getKey()).collect(Collectors.toList());
 
             synchronized (original.getEvcId().getValue().intern()) {
 
@@ -263,14 +264,14 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
 
                 // Changed Uni will be deleted / recreated
                 List<Uni> uniToRemove = new ArrayList<>(originalUni);
-                uniToRemove.removeIf(u -> updateUniIds.contains(u.getUniId()));
+                uniToRemove.removeIf(u -> updateUniIds.contains(u.getKey()));
                 for (Uni uni : uniToRemove) {
                     removeUniElanInterfaces(evcId, instanceName, uni);
                 }
                 updateQos(uniToRemove);
 
                 List<Uni> uniToCreate = new ArrayList<>(updateUni);
-                uniToCreate.removeIf(u -> originalUniIds.contains(u.getUniId()));
+                uniToCreate.removeIf(u -> originalUniIds.contains(u.getKey()));
                 uniToCreate.removeAll(originalUni);
                 for (Uni uni : uniToCreate) {
                     createUniElanInterfaces(evcId, instanceName, uni, isEtree);
@@ -278,7 +279,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
                 updateQos(uniToCreate);
 
                 List<Uni> uniToUpdate = new ArrayList<>(updateUni);
-                uniToUpdate.removeIf(u -> !originalUniIds.contains(u.getUniId()));
+                uniToUpdate.removeIf(u -> !originalUniIds.contains(u.getKey()));
                 updateUnis(uniToUpdate);
             }
         } catch (final Exception e) {

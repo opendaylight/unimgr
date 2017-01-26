@@ -26,6 +26,7 @@ import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.serv
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.Ipvc;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.VpnElans;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.unis.Uni;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.unis.UniKey;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.Identifier45;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.RetailSvcIdType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
@@ -318,25 +319,25 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
             String rd = waitForRd(vpnName);
             List<Uni> originalUni = origIpvc.getUnis() != null && origIpvc.getUnis().getUni() != null
                     ? origIpvc.getUnis().getUni() : Collections.emptyList();
-            List<Identifier45> originalUniIds = originalUni.stream().map(u -> u.getUniId())
+            List<UniKey> originalUniIds = originalUni.stream().map(u -> u.getKey())
                     .collect(Collectors.toList());
             List<Uni> updateUni = updateIpvc.getUnis() != null && updateIpvc.getUnis().getUni() != null
                     ? updateIpvc.getUnis().getUni() : Collections.emptyList();
-            List<Identifier45> updateUniIds = updateUni.stream().map(u -> u.getUniId()).collect(Collectors.toList());
+            List<UniKey> updateUniIds = updateUni.stream().map(u -> u.getKey()).collect(Collectors.toList());
 
             synchronized (vpnName.intern()) {
                 WriteTransaction txRemove = MdsalUtils.createTransaction(dataBroker);
                 List<Uni> uniToRemove = new ArrayList<>(originalUni);
-                uniToRemove.removeIf(u -> updateUniIds.contains(u.getUniId()));
+                uniToRemove.removeIf(u -> updateUniIds.contains(u.getKey()));
                 removeUnis(ipvcId, operIpvcVpn, uniToRemove, txRemove);
                 MdsalUtils.commitTransaction(txRemove);
             }
             List<Uni> uniToCreate = new ArrayList<>(updateUni);
-            uniToCreate.removeIf(u -> originalUniIds.contains(u.getUniId()));
+            uniToCreate.removeIf(u -> originalUniIds.contains(u.getKey()));
             createUnis(vpnName, ipvcId, uniToCreate, rd);
 
             List<Uni> uniToUpdate = new ArrayList<>(updateUni);
-            uniToUpdate.removeIf(u -> !originalUniIds.contains(u.getUniId()));
+            uniToUpdate.removeIf(u -> !originalUniIds.contains(u.getKey()));
             updateUnis(uniToUpdate);
 
         } catch (final Exception e) {
