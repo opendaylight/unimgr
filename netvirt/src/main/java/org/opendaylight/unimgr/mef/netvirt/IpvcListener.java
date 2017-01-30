@@ -43,6 +43,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
+
 public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements IUniAwareService {
     private static final Logger Log = LoggerFactory.getLogger(IpvcListener.class);
     private final IUniPortManager uniPortManager;
@@ -174,14 +176,10 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
                 Log.error("Ipvc {} hasn't been created as required, Nothing to disconnect", ipvcSerId);
                 return;
             }
-            String vpnName = operIpvcVpn.getVpnId();
 
-            synchronized (vpnName.intern()) {
-                WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
-                removeUnis(ipvcId, operIpvcVpn, toRemove, tx);
-                MdsalUtils.commitTransaction(tx);
-            }
+            removeUnis(ipvcId, operIpvcVpn, toRemove);
         }
+
     }
 
     private void addIpvc(DataTreeModification<Ipvc> newDataObject) {
@@ -246,18 +244,11 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
                 Log.error("Ipvc {} hasn't been created as required", ipvc.getIpvcId());
                 return;
             }
-            String vpnName = operIpvcVpn.getVpnId();
+            removeUnis(ipvcId, operIpvcVpn, ipvc.getUnis().getUni());
+            NetvirtUtils.safeSleep();
 
-            synchronized (vpnName.intern()) {
-                // remove elan/vpn interfaces
-                // must be in different transactios
-                WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
-                removeUnis(ipvcId, operIpvcVpn, ipvc.getUnis().getUni(), tx);
-                MdsalUtils.commitTransaction(tx);
-                // Let to work for listeners
-                // TODO : change to listener
-                NetvirtUtils.safeSleep();
-
+            String vpnId = operIpvcVpn.getVpnId();
+            synchronized (vpnId.intern()) {
                 WriteTransaction txvpn = MdsalUtils.createTransaction(dataBroker);
                 NetvirtVpnUtils.removeVpnInstance(operIpvcVpn.getVpnId(), txvpn);
                 MefServicesUtils.removeOperIpvcVpn(ipvcId, txvpn);
@@ -268,8 +259,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
         }
     }
 
-    private void removeUnis(InstanceIdentifier<Ipvc> ipvcId, IpvcVpn operIpvcVpn, List<Uni> uniToRemove,
-            WriteTransaction tx) {
+    private void removeUnis(InstanceIdentifier<Ipvc> ipvcId, IpvcVpn operIpvcVpn, List<Uni> uniToRemove) {
         if (uniToRemove == null) {
             Log.trace("No UNI's to remove");
         }
@@ -285,7 +275,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
 
             removeDirectSubnet(uni, ipUni);
             subnetManager.unAssignIpUniNetworks(uni.getUniId(), ipUni.getIpUniId(), ipvcId);
-            removeInterfaces(ipvcId, operIpvcVpn, uni, ipUni, tx);
+            removeInterfaces(ipvcId, operIpvcVpn, uni, ipUni);
         }
         updateQos(uniToRemove);
     }
@@ -329,9 +319,10 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
                 WriteTransaction txRemove = MdsalUtils.createTransaction(dataBroker);
                 List<Uni> uniToRemove = new ArrayList<>(originalUni);
                 uniToRemove.removeIf(u -> updateUniIds.contains(u.getKey()));
-                removeUnis(ipvcId, operIpvcVpn, uniToRemove, txRemove);
+                removeUnis(ipvcId, operIpvcVpn, uniToRemove);
                 MdsalUtils.commitTransaction(txRemove);
             }
+
             List<Uni> uniToCreate = new ArrayList<>(updateUni);
             uniToCreate.removeIf(u -> originalUniIds.contains(u.getKey()));
             createUnis(vpnName, ipvcId, uniToCreate, rd);
@@ -387,7 +378,6 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
         }
     }
 
-
     private String createElanInterface(String vpnName, InstanceIdentifier<Ipvc> ipvcId, String uniId, String elanName,
             Long vlan, IpAddress ipAddress, WriteTransaction tx, Long segmentationId) {
         Log.info("Adding elan instance: " + elanName);
@@ -415,10 +405,8 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
             IpUni ipUni, String interfaceName, String elanName, WriteTransaction tx) {
 
         Log.info("Adding vpn interface: " + interfaceName);
-
         NetvirtVpnUtils.createUpdateVpnInterface(vpnName, interfaceName, ipUni.getIpAddress(),
                 uni.getMacAddress().getValue(), true, null, elanName, tx);
-
         Log.info("Finished working on vpn instance {} interface () ", vpnName, interfaceName);
     }
 
@@ -435,8 +423,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
         MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION, path, subnet.build());
     }
 
-    private void removeInterfaces(InstanceIdentifier<Ipvc> ipvcId, IpvcVpn ipvcVpn, Uni uniInService, IpUni ipUni,
-            WriteTransaction tx) {
+    private void removeInterfaces(InstanceIdentifier<Ipvc> ipvcId, IpvcVpn ipvcVpn, Uni uniInService, IpUni ipUni) {
         String uniId = uniInService.getUniId().getValue();
         String vpnName = ipvcVpn.getVpnId();
         VpnElans vpnElans = MefServicesUtils.findVpnElanForNetwork(new Identifier45(uniId), ipUni.getIpUniId(),
@@ -446,18 +433,59 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
             return;
         }
 
-        NetvirtVpnUtils.removeVpnInterfaceAdjacencies(dataBroker, vpnName, vpnElans.getElanPort());
-        // TODO : change to listener
-        NetvirtUtils.safeSleep();
-        uniQosManager.unMapUniPortBandwidthLimits(uniId, vpnElans.getElanPort());
-        removeElan(vpnElans, uniId, ipUni, tx);
-        // record Uni bw limits
-        removeVpnInterface(vpnName, vpnElans, uniId, ipUni, tx);
-        MefServicesUtils.removeOperIpvcElan(dataBroker, ipvcId, ipvcVpn.getVpnId(), uniInService.getUniId(),
-                uniInService.getIpUniId(), vpnElans.getElanId(), vpnElans.getElanPort());
+        synchronized (vpnName.intern()) {
+            uniQosManager.unMapUniPortBandwidthLimits(uniId, vpnElans.getElanPort());
+            NetvirtVpnUtils.removeLearnedVpnVipToPort(dataBroker, vpnName, vpnElans.getElanPort());
+            removeVpnInterface(vpnName, vpnElans, uniId, ipUni);
+        }
+        waitForInterfaceDpnClean(vpnName, ipvcVpn.getVrfId(), vpnElans.getElanPort());
+
+        synchronized (vpnName.intern()) {
+            removeElan(vpnElans, uniId, ipUni);
+            MefServicesUtils.removeOperIpvcElan(dataBroker, ipvcId, ipvcVpn.getVpnId(), uniInService.getUniId(),
+                    uniInService.getIpUniId(), vpnElans.getElanId(), vpnElans.getElanPort());
+        }
     }
 
-    private void removeElan(VpnElans vpnElans, String uniId, IpUni ipUni, WriteTransaction tx) {
+    private void waitForInterfaceDpnClean(String vpnName, String rd, String interfaceName) {
+        InstanceIdentifier<VpnInstanceOpDataEntry> vpnId = NetvirtVpnUtils.getVpnInstanceOpDataIdentifier(rd);
+        DataWaitGetter<VpnInstanceOpDataEntry> getInterfByName = (vpn) -> {
+            if (vpn.getVpnToDpnList() == null)
+                return null;
+            for (VpnToDpnList is : vpn.getVpnToDpnList()) {
+                if (is.getVpnInterfaces() == null)
+                    continue;
+                for (VpnInterfaces i : is.getVpnInterfaces()) {
+                    if (i.getInterfaceName().equals(interfaceName))
+                        return interfaceName;
+                }
+            }
+            return null;
+        };
+
+        int retryCount = 2;
+        Optional<VpnInstanceOpDataEntry> vpnOper = MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, vpnId);
+        if (vpnOper.isPresent() && vpnOper.get().getVpnToDpnList() != null) {
+            for (VpnToDpnList vpnList : vpnOper.get().getVpnToDpnList()) {
+                if (vpnList.getVpnInterfaces() != null) {
+                    retryCount = retryCount + 2 * vpnList.getVpnInterfaces().size();
+                }
+            }
+        }
+
+        @SuppressWarnings("resource")
+        DataWaitListener<VpnInstanceOpDataEntry> vpnInstanceWaiter = new DataWaitListener<>(dataBroker, vpnId,
+                retryCount, LogicalDatastoreType.OPERATIONAL, getInterfByName);
+        if (!vpnInstanceWaiter.waitForClean()) {
+            String errorMessage = String.format("Fail to wait for vpn to dpn list clean-up %s", vpnName);
+            Log.error(errorMessage);
+            throw new UnsupportedOperationException(errorMessage);
+        }
+    }
+
+    private void removeElan(VpnElans vpnElans, String uniId, IpUni ipUni) {
+        WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
+
         Long vlan = ipUni.getVlan() != null ? Long.valueOf(ipUni.getVlan().getValue()) : 0;
         Log.info("Removing trunk interface for uni {} vlan: {}", uniId, vlan);
         uniPortManager.removeCeVlan(uniId, vlan);
@@ -469,14 +497,21 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
         NetvirtVpnUtils.unregisterDirectSubnetForVpn(dataBroker, new Uuid(elanName));
         NetvirtUtils.deleteElanInterface(interfaceName, tx);
         NetvirtUtils.deleteElanInstance(elanName, tx);
+        MdsalUtils.commitTransaction(tx);
     }
 
     private void removeVpnInterface(String vpnName, VpnElans vpnElans, String uniId, IpUni ipUni, WriteTransaction tx) {
         String interfaceName = vpnElans.getElanPort();
-        Log.info("Removing vpn interface: " + interfaceName);
         NetvirtVpnUtils.removeVpnInterface(interfaceName, tx);
         NetvirtVpnUtils.removeVpnPortFixedIp(vpnName, ipUni.getIpAddress(), tx);
-        Log.info("Finished working on vpn instance: " + vpnName);
+    }
+
+    private void removeVpnInterface(String vpnName, VpnElans vpnElans, String uniId, IpUni ipUni) {
+        Log.info("Removing vpn interface: " + vpnElans.getElanPort());
+        WriteTransaction tx = MdsalUtils.createTransaction(dataBroker);
+        removeVpnInterface(vpnName, vpnElans, uniId, ipUni, tx);
+        MdsalUtils.commitTransaction(tx);
+        Log.info("Finished working on vpn interface: " + vpnElans.getElanPort());
     }
 
     private void removeDirectSubnet(Uni uni, IpUni ipUni) {

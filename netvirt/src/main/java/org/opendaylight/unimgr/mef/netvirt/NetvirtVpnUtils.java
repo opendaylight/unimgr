@@ -206,7 +206,7 @@ public class NetvirtVpnUtils {
         }
     }
 
-    public static void removeVpnInterfaceAdjacencies(DataBroker dataBroker, String vpnName, String interfaceName) {
+    public static void removeLearnedVpnVipToPort(DataBroker dataBroker, String vpnName, String interfaceName) {
 
         InstanceIdentifier<VpnInterface> identifier = getVpnInterfaceInstanceIdentifier(interfaceName);
         InstanceIdentifier<Adjacencies> path = identifier.augmentation(Adjacencies.class);
@@ -217,7 +217,9 @@ public class NetvirtVpnUtils {
         adjacenciesList.forEach(a -> {
             String ipStr = getIpAddressFromPrefix(a.getIpAddress());
             InstanceIdentifier<LearntVpnVipToPort> id = getLearntVpnVipToPortIdentifier(vpnName, ipStr);
-            MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.OPERATIONAL, id);
+            if (MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, id).isPresent()) {
+                MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.OPERATIONAL, id);
+            }
         });
         int waitCount = adjacenciesList.isEmpty() ? 2 : 2 * adjacenciesList.size();
 
@@ -271,6 +273,23 @@ public class NetvirtVpnUtils {
     private static InstanceIdentifier<VpnInterface> getVpnInterfaceInstanceIdentifier(String interfaceName) {
         return InstanceIdentifier.builder(VpnInterfaces.class)
                 .child(VpnInterface.class, new VpnInterfaceKey(interfaceName)).build();
+    }
+
+    public static void cleanVpnInterfaceInstanceOpt(DataBroker dataBroker, String vpnName) {
+        InstanceIdentifier<VpnInterfaces> path = InstanceIdentifier.builder(VpnInterfaces.class).build();
+
+        Optional<VpnInterfaces> opt = MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, path);
+        if (!opt.isPresent() || opt.get().getVpnInterface() == null) {
+            return;
+        }
+
+        for (VpnInterface interf : opt.get().getVpnInterface()) {
+            if (interf.getVpnInstanceName().equals(vpnName) && interf.isScheduledForRemove()) {
+                InstanceIdentifier<VpnInterface> interfId = path.child(VpnInterface.class,
+                        new VpnInterfaceKey(interf.getKey()));
+                MdsalUtils.delete(dataBroker, LogicalDatastoreType.OPERATIONAL, interfId);
+            }
+        }
     }
 
     public static void createVpnPortFixedIp(DataBroker dataBroker, String vpnName, String portName, IpPrefix ipAddress,
@@ -351,8 +370,8 @@ public class NetvirtVpnUtils {
         InstanceIdentifier<ElanInstance> elanIdentifierId = NetvirtUtils.getElanInstanceInstanceIdentifier(subnetName);
 
         @SuppressWarnings("resource") // AutoCloseable
-        DataWaitListener<ElanInstance> elanTagWaiter = new DataWaitListener<>(dataBroker, elanIdentifierId,
-                10, LogicalDatastoreType.CONFIGURATION, el -> el.getElanTag());
+        DataWaitListener<ElanInstance> elanTagWaiter = new DataWaitListener<>(dataBroker, elanIdentifierId, 10,
+                LogicalDatastoreType.CONFIGURATION, el -> el.getElanTag());
         if (!elanTagWaiter.waitForData()) {
             logger.error("Trying to add invalid elan {} to vpn {}", subnetName, vpnName);
             return;
@@ -386,7 +405,7 @@ public class NetvirtVpnUtils {
         Optional<ElanInstance> elanInstance = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION,
                 elanIdentifierId);
         if (!elanInstance.isPresent()) {
-            logger.error("Trying to add invalid elan {} to vpn {}", subnetName, vpnName);
+            logger.error("Trying to remove invalid elan {} to vpn {}", subnetName, vpnName);
             return;
         }
         Long elanTag = elanInstance.get().getElanTag() != null ? elanInstance.get().getElanTag()

@@ -134,7 +134,7 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
     private void createNetwork(Subnet newSubnet, Identifier45 nwUniId, Identifier45 nwIpUniId) {
         String subnetStr = NetvirtVpnUtils.ipPrefixToString(newSubnet.getSubnet());
 
-        InstanceIdentifier<Ipvc> ipvcId = findService(nwUniId, nwIpUniId);
+        InstanceIdentifier<Ipvc> ipvcId = findService(nwUniId, nwIpUniId, getMefServices());
         if (ipvcId == null) {
             Log.info("Subnet Uni {} IpUNI {} is not assosiated to service", nwUniId, nwIpUniId);
             return;
@@ -214,7 +214,7 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
         Subnet deletedSubnet = deletedDataObject.getRootNode().getDataBefore();
         Identifier45 dlUniId = deletedSubnet.getUniId();
         Identifier45 dlIpUniId = deletedSubnet.getIpUniId();
-        InstanceIdentifier<Ipvc> ipvcId = findService(dlUniId, dlIpUniId);
+        InstanceIdentifier<Ipvc> ipvcId = findService(dlUniId, dlIpUniId, getMefServicesOper());
         if (ipvcId == null) {
             Log.info("Subnet Uni {} IpUNI {} for deleted network is not assosiated to service", dlUniId, dlIpUniId);
             return;
@@ -300,9 +300,18 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
         NetvirtVpnUtils.removeVpnInterfaceAdjacency(dataBroker, vpnElan.getElanPort(), deletedSubnet.getGateway());
     }
 
-    private InstanceIdentifier<Ipvc> findService(Identifier45 uniId, Identifier45 ipUniId) {
+    Optional<MefServices> getMefServices() {
         InstanceIdentifier<MefServices> path = MefServicesUtils.getMefServicesInstanceIdentifier();
-        Optional<MefServices> mefServices = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, path);
+        return MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, path);
+    }
+
+    Optional<MefServices> getMefServicesOper() {
+        InstanceIdentifier<MefServices> path = MefServicesUtils.getMefServicesInstanceIdentifier();
+        return MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, path);
+    }
+
+    private InstanceIdentifier<Ipvc> findService(Identifier45 uniId, Identifier45 ipUniId,
+            Optional<MefServices> mefServices) {
         if (!mefServices.isPresent() || mefServices.get() == null) {
             Log.info("Uni {} IpUni {} is not assosiated with service", uniId, ipUniId);
             return null;
