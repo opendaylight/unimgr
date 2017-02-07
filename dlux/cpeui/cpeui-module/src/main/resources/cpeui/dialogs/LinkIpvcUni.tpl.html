@@ -1,7 +1,7 @@
 <md-dialog class="cpe-dialog" aria-label="Update UNI" ng-cloak>
     <md-toolbar>
       <div class="md-toolbar-tools">
-        <h2>Update {{ params.svc['svc-id'] }} Uni</h2>
+        <h2>Add UNI to {{ params.svc['name'] ? params.svc['name'] : params.svc['svc-id']}} </h2>
         <span flex></span>
         <md-button class="md-icon-button" aria-label="Close dialog" ng-click="cancel()">
         <i class="icon-remove-sign"></i>
@@ -16,7 +16,7 @@
     <md-input-container class="md-block">
         <label>Device</label>
         <md-select ng-model="obj.device_id" name="device">
-       		<md-option ng-repeat="ce in params.ces" ng-value="ce['dev-id']">{{ ce.displayName }}</md-option>
+       		<md-option ng-repeat="ce in params.ces | orderBy: 'displayName'" ng-value="ce['dev-id']">{{ ce.displayName }}</md-option>
         </md-select>
       </md-input-container>
       <md-input-container class="md-block">

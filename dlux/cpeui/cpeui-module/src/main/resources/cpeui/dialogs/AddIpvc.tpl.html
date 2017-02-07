@@ -1,7 +1,7 @@
 <md-dialog class="cpe-dialog" aria-label="Create IPVC"  ng-cloak>
     <md-toolbar>
       <div class="md-toolbar-tools">
-        <h2>Create IPVC</h2>
+        <h2>Create New L3 Service</h2>
         <span flex></span>
         <md-button class="md-icon-button" aria-label="Close dialog" ng-click="cancel()">
         <i class="icon-remove-sign"></i>
@@ -14,7 +14,7 @@
 <div layout="column" ng-cloak>
   <md-content layout-padding>
       <md-input-container class="md-block">
-        <label>IPVC Name</label>
+        <label>Service Name</label>
         <input type="text" required name="ipvcname" ng-model="obj.svc_name">
         <div ng-messages="projectForm.ipvcname.$error">
               <div ng-message="required">Number is required!</div>

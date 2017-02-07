@@ -1,4 +1,4 @@
-<div class="container" id="tenant-page">
+<div id="tenant-page">
     <h1>Tenant Administration - {{ curTenant }}</h1>
     <div class="menu">
         <ul id="TenantsTabs" class="nav nav-pills" role="tablist">
@@ -36,26 +36,26 @@
             <table class="footable table table-striped">
                 <thead>
                     <tr>
-                        <th class="minimal-width">CPE-ID</th>
+                        <th class="minimal-width">Device ID</th>
                         <th class="minimal-width">Device Name</th>
                         <th>UNIs</th>
                     </tr>
                 </thead>
-                <tbody ng-repeat="ce in ces" ng-init="ceUnis = unis.filterByField('device',ce['dev-id'])">
+                <tbody ng-repeat="ce in ces |orderBy: '[\'device-name\']'" ng-init="ceUnis = unis.filterByField('device',ce['dev-id'])">
                     <tr>
                         <td class="minimal-width" ng-bind="ce['dev-id']"></td>
                         <td class="minimal-width" ng-bind="ce['device-name']"></td>
                         <td>
-                        <table class="footable table table-striped inner-table">
+                        <table class="footable table table-striped inner-table" style="table-layout:fixed;">
                                 <thead>
                                     <tr>
-                                        <th class="minimal-width">Interface Name</th>
+                                        <th class="minimal-width">Port</th>
                                         <th class="minimal-width">VLAN</th>
                                         <th class="minimal-width">Service</th>
                                     </tr>
                                 </thead>
-                                <tbody ng-repeat="uni in ceUnis">
-                                    <tr ng-repeat="svcs in uni.vlanToService | orderBy: '-vlan'" ng-if="uni.hasService">
+                                <tbody ng-repeat="uni in ceUnis |orderBy: 'prettyID'">
+                                    <tr ng-repeat="svcs in uni.vlanToService | orderBy: 'vlan'" ng-if="uni.hasService">
                                         <td rowspan="{{uni.vlanToService.length}}" ng-if="$first" ng-bind="uni.prettyID" />
                                         <td ng-bind="svcs.vlan ? svcs.vlan : '-'" />
                                         <td>
@@ -65,7 +65,7 @@
                                 </tbody>
                                 <tbody ng-if="!doesAllUniHasService(ceUnis)">
                                     <tr>
-                                        <td><b ng-repeat="uni in ceUnis" ng-if="!uni.hasService">{{uni.prettyID}}{{$last ? '' : ', '}}</b></td>
+                                        <td><b style="text-decoration: underline;">Unused:</b> <b ng-repeat="uni in ceUnis |orderBy: 'prettyID'" ng-if="!uni.hasService">{{uni.prettyID}}{{$last ? '' : ', '}}</b></td>
                                         <td></td>
                                         <td></td>
                                     </tr>
@@ -87,9 +87,9 @@
                         <th class="minimal-width">Segmentation ID</th>
                         <th>UNIs</th>
                         <th class="minimal-width">
-                            <button class="btn btn-md btn-info right" ng-click="evcDialog.show($event,{'svcTypes':svcTypes})">
+                            <button class="btn btn-md btn-info right" ng-click="evcDialog.show($event,{})">
                                 <i class="icon-plus"></i>
-                                <md-tooltip>Create EVC</md-tooltip>
+                                <md-tooltip>Create Service</md-tooltip>
                             </button>
                         </th>
                     </tr>
@@ -135,7 +135,10 @@
 					                        </md-input-container>
                                         </td>
                                         <td class="minimal-width" style="white-space: nowrap;">
-                                        <button class="btn btn-md btn-danger" ng-click="deleteEvcUni(item['svc-id'], uni['uni-id'])"> <i class="icon-trash"></i> </button>
+                                        <button class="btn btn-md btn-danger" ng-click="deleteEvcUni(item['svc-id'], uni['uni-id'])">
+                                            <i class="icon-trash"></i>
+                                            <md-tooltip>Remove UNI</md-tooltip>
+                                        </button>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -143,12 +146,18 @@
                         </td>
 
                         <td class="minimal-width">
-                            <button class="btn btn-md btn-action" ng-click="editEvc($event,item)"> <i class="icon-edit"></i> </button>
+                            <button class="btn btn-md btn-action" ng-click="editEvc($event,item)"> 
+                                <i class="icon-edit"></i>
+                                <md-tooltip>Edit Service</md-tooltip>
+                                </button>
                             <button class="btn btn-md btn-info" ng-click="linkEvcUniDialog.show($event, {svc:item, unis:unis, ces:ces, profiles:profiles})">
                                 <i class="icon-plus"></i>
-                                    <md-tooltip>Add UNI</md-tooltip>
+                                <md-tooltip>Add UNI</md-tooltip>
                             </button>
-                            <button class="btn btn-md btn-danger" ng-click="deleteEvc(item['svc-id'])"> <i class="icon-trash"></i> </button>
+                            <button class="btn btn-md btn-danger" ng-click="deleteEvc(item['svc-id'])">
+                                <i class="icon-trash"></i>
+                                <md-tooltip>Remove Service</md-tooltip>
+                            </button>
                         </td>
                     </tr>
                 </tbody>
@@ -163,9 +172,9 @@
                         <th class="minimal-width">Service Name</th>
                         <th>Service Endpoints</th>                        
                         <th class="minimal-width">
-                            <button class="btn btn-md btn-info right" ng-click="ipvcDialog.show($event,{'svcTypes':svcTypes})">
+                            <button class="btn btn-md btn-info right" ng-click="ipvcDialog.show($event,{})">
                                 <i class="icon-plus"></i>
-                                <md-tooltip>Create IPVC</md-tooltip>
+                                <md-tooltip>Create Service</md-tooltip>
                             </button>
                         </th>
                     </tr>
@@ -195,7 +204,7 @@
                                     </tr>
                                 </thead>
                                 <tbody ng-if-end>
-                                    <tr ng-repeat="ipuni in ipvc.ipvc.unis.uni | orderBy: 'prettyID'">
+                                    <tr ng-repeat="ipuni in ipvc.ipvc.unis.uni | orderBy: ['device','prettyID']">
                                         <td class="minimal-width" ng-init="serviceIpuni = getMefInterfaceIpvc(ipuni['uni-id'],ipuni['ip-uni-id'])">{{ cesDisplayNames[ipuni.device] }}</td>
                                         <td class="minimal-width">{{ ipuni.prettyID }}</td>
                                         <td>{{serviceIpuni.vlan}}</td>
@@ -209,7 +218,12 @@
                                                 </md-select>
                                             </md-input-container>
                                         </td>
-                                        <td class="minimal-width"><button class="btn btn-md btn-danger" ng-click="deleteIpvcUni(ipvc['svc-id'], ipuni['uni-id'], ipuni['ip-uni-id'])"> <i class="icon-trash"></i> </button></td>
+                                        <td class="minimal-width">
+                                            <button class="btn btn-md btn-danger" ng-click="deleteIpvcUni(ipvc['svc-id'], ipuni['uni-id'], ipuni['ip-uni-id'])">
+                                                <i class="icon-trash"></i>
+                                                <md-tooltip>Remove Endpoint</md-tooltip>
+                                            </button>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -217,8 +231,13 @@
                         <td class="minimal-width">
                             <div layout="column">
                                 <div layout="row">
-                                    <button class="btn btn-md btn-danger" ng-click="deleteEvc(ipvc['svc-id'])"> <i class="icon-trash"></i> </button>
-                                    <button class="btn btn-md btn-info" ng-click="linkIpvcUniDialog.show($event, {svc:ipvc, unis:unis, ces:ces, profiles:profiles})"> <i class="icon-plus"></i> </button>
+                                    <button class="btn btn-md btn-danger" ng-click="deleteEvc(ipvc['svc-id'])"> <i class="icon-trash"></i>
+                                        <md-tooltip>Remove Service</md-tooltip>
+                                     </button>
+                                    <button class="btn btn-md btn-info" ng-click="linkIpvcUniDialog.show($event, {svc:ipvc, unis:unis, ces:ces, profiles:profiles})">
+	                                    <i class="icon-plus"></i>
+	                                    <md-tooltip>Add Endpoint</md-tooltip>
+                                    </button>
                                 </div>
                                 <md-menu>
 							      <button class="btn btn-md btn-action" ng-click="openMenu($mdOpenMenu, $event)" style="width:100%">

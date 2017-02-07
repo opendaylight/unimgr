@@ -1,7 +1,7 @@
 <md-dialog class="cpe-dialog" aria-label="Create EVC"  ng-cloak>
     <md-toolbar>
       <div class="md-toolbar-tools">
-        <h2>Create EVC</h2>
+        <h2>{{params.svc ? 'Edit L2 Service' : 'Create New L2 Service'}}</h2>
         <span flex></span>
         <md-button class="md-icon-button" aria-label="Close dialog" ng-click="cancel()">
         <i class="icon-remove-sign"></i>
@@ -14,16 +14,27 @@
 <div layout="column" ng-cloak>
   <md-content layout-padding>
       <md-input-container class="md-block" ng-init="initObj(params.svc)">
-        <label>EVC Name</label>
+        <label>Service Name</label>
         <input type="text" required name="svcName" ng-model="obj.name">
         <div ng-messages="projectForm.svcName.$error">
               <div ng-message="required">Name is required!</div>
         </div>
       </md-input-container>
       <md-input-container class="md-block">
-        <label>Service Type</label>
-        <md-select required ng-model="obj['svc-type']" name="svc_type" >
-               <md-option ng-repeat="typ in params.svcTypes" value="{{ typ }}">{{ typ }}</md-option>
+        <label>Service Type <i ng-if="params.svc"> (This field can not be edited)</i></label>
+        <md-select required ng-model="obj['svc-type']" name="svc_type" ng-disabled="params.svc">
+            <md-optgroup label="E-LINE">
+               <md-option value="epl">epl</md-option>
+               <md-option value="evpl">evpl</md-option>
+            </md-optgroup>
+            <md-optgroup label="E-LAN">
+               <md-option value="eplan">eplan</md-option>
+               <md-option value="evplan">evplan</md-option>
+            </md-optgroup>
+            <md-optgroup label="E-TREE">
+               <md-option value="eptree">eptree</md-option>
+               <md-option value="evptree">evptree</md-option>
+            </md-optgroup>
         </md-select>
         <div ng-messages="projectForm.svc_type.$error">
               <div ng-message="required">This is required!</div>
@@ -100,9 +111,6 @@
       </md-input-container>
           <div layout-gt-sm="row" style="padding:0">
               <md-input-container class="md-block" flex-gt-sm>
-              <!--
-                  <md-switch name="is_preserve_vlan" ng-model="obj.is_preserve_vlan">{{obj.is_preserve_vlan ? "" : "Do Not"}} Preserve VLAN</md-switch>
-               -->
                    <md-checkbox name="is_preserve_vlan" ng-model="obj.evc['preserve-ce-vlan-id']">Preserve VLAN</md-checkbox>
               </md-input-container>
               <md-input-container class="md-block" ng-if="obj.evc['preserve-ce-vlan-id']" flex-gt-sm style="margin-bottom: 0px;">
@@ -131,19 +139,19 @@
           <md-input-container class="md-block">
               <label>Unicast Service Frame Delivery</label>
               <md-select ng-model="obj.evc['unicast-svc-frm-delivery']" name="unicast">
-                   <md-option value="{{ undefined }}"></md-option>
-                   <md-option value="discard">Discard</md-option>
-                   <md-option value="unconditional">Unconditional</md-option>
-                   <md-option value="conditional">Conditional</md-option>
+                   <md-option ng-value="undefined"></md-option>
+                   <md-option ng-value="'discard'">Discard</md-option>
+                   <md-option ng-value="'unconditional'">Unconditional</md-option>
+                   <md-option ng-value="'conditional'">Conditional</md-option>
             </md-select>
           </md-input-container>
           <md-input-container class="md-block" ng-if-end>
               <label>Multicast Service Frame Delivery</label>
               <md-select ng-model="obj.evc['multicast-svc-frm-delivery']" name="multicast">
-                   <md-option value="{{ undefined }}"></md-option>
-                   <md-option value="discard">Discard</md-option>
-                   <md-option value="unconditional">Unconditional</md-option>
-                   <md-option value="conditional">Conditional</md-option>
+                   <md-option ng-value="undefined"></md-option>
+                   <md-option ng-value="'discard'">Discard</md-option>
+                   <md-option ng-value="'unconditional'">Unconditional</md-option>
+                   <md-option ng-value="'conditional'">Conditional</md-option>
             </md-select>
           </md-input-container>
 
