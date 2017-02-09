@@ -8,6 +8,7 @@
 
 package org.opendaylight.unimgr.mef.nrp.common;
 
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 
 /**
@@ -33,7 +34,7 @@ public interface ResourceActivator {
      *            the desired MTU for this forwarding construct
      */
     public void activate(String nodeName, String outerName, String innerName, FcPort flowPoint, FcPort neighbor,
-            long mtu);
+            long mtu) throws TransactionCommitFailedException, ResourceActivatorException;
 
     /**
      * Deactivate a service fragment on the node identified by nodeName.
@@ -52,5 +53,5 @@ public interface ResourceActivator {
      *            the desired MTU for this forwarding construct
      */
     public void deactivate(String nodeName, String outerName, String innerName, FcPort flowPoint, FcPort neighbor,
-            long mtu);
+            long mtu) throws TransactionCommitFailedException, ResourceActivatorException;
 }

@@ -10,6 +10,7 @@ package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -18,6 +19,7 @@ import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.common.MountPointHelper;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
@@ -76,9 +78,13 @@ public class L2vpnXconnectActivatorTest extends AbstractDataBrokerTest {
     }
 
     @Test
-    public void testActivate(){
+    public void testActivateAndDeactivate(){
         //when
-        l2vpnXconnectActivator.activate(nodeName, outerName, innerName, port, neighbor, mtu);
+        try {
+            l2vpnXconnectActivator.activate(nodeName, outerName, innerName, port, neighbor, mtu);
+        } catch (TransactionCommitFailedException e) {
+            fail("Error during activation : " + e.getMessage());
+        }
 
         //then
         ReadOnlyTransaction transaction = optBroker.get().newReadOnlyTransaction();
@@ -95,15 +101,21 @@ public class L2vpnXconnectActivatorTest extends AbstractDataBrokerTest {
         } catch (InterruptedException | ExecutionException e) {
             fail(e.getMessage());
         }
-    }
 
-    @Test
-    public void testDeactivate(){
         //when
-        l2vpnXconnectActivator.deactivate(nodeName,outerName,innerName,port,neighbor,mtu);
+        deactivate();
 
         //then
-        L2vpnActivatorTestUtils.checkDeactivation(optBroker);
+        L2vpnActivatorTestUtils.checkDeactivated(optBroker,portNo);
+    }
+
+    private void deactivate(){
+        //when
+        try {
+            l2vpnXconnectActivator.deactivate(nodeName,outerName,innerName,port,neighbor,mtu);
+        } catch (TransactionCommitFailedException e) {
+            fail("Error during deactivation : " + e.getMessage());
+        }
     }
 
     private void checkL2vpnTree(CheckedFuture<Optional<L2vpn>, ReadFailedException> driverL2vpn) throws InterruptedException, ExecutionException{

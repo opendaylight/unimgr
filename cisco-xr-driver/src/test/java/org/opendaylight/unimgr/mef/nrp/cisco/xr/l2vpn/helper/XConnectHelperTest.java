@@ -64,7 +64,6 @@ public class XConnectHelperTest {
     @Test
     public void testBuild() {
         //given
-        //XConnectHelper xConnectHelper =
         String xConnectName = "ExampleXConnectName";
         String xConnectGroupName = "ExampleXConnectGroupName";
         AttachmentCircuits attachmentCircuits = Mockito.mock(AttachmentCircuits.class);

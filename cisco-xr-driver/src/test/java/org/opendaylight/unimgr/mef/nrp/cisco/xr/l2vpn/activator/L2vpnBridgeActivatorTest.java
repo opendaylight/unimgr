@@ -18,6 +18,7 @@ import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.common.MountPointHelper;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
@@ -29,14 +30,13 @@ import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forw
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * @author marek.ryznar@amartus.com
@@ -44,6 +44,7 @@ import static org.junit.Assert.fail;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(MountPointHelper.class)
 public class L2vpnBridgeActivatorTest extends AbstractDataBrokerTest{
+    private static final Logger log = LoggerFactory.getLogger(L2vpnBridgeActivatorTest.class);
 
     private L2vpnBridgeActivator l2vpnBridgeActivator;
     private MountPointService mountService;
@@ -62,7 +63,6 @@ public class L2vpnBridgeActivatorTest extends AbstractDataBrokerTest{
         //given
         DataBroker broker = getDataBroker();
         optBroker = Optional.of(broker);
-
         mountService = L2vpnActivatorTestUtils.getMockedMountPointService(optBroker);
         l2vpnBridgeActivator = new L2vpnBridgeActivator(broker,mountService);
 
@@ -73,13 +73,13 @@ public class L2vpnBridgeActivatorTest extends AbstractDataBrokerTest{
         portNo2 = "8080";
         port = L2vpnActivatorTestUtils.port("a", "localhost", portNo1);
         neighbor = L2vpnActivatorTestUtils.port("z", "localhost", portNo2);
-        mtu = Long.valueOf(1500);
+        mtu = 1500L;
     }
 
     @Test
-    public void testActivate(){
+    public void testActivateAndDeactivate(){
         //when
-        l2vpnBridgeActivator.activate(nodeName, outerName, innerName, port, neighbor, mtu);
+        activate();
 
         //then
         ReadOnlyTransaction transaction = optBroker.get().newReadOnlyTransaction();
@@ -96,41 +96,55 @@ public class L2vpnBridgeActivatorTest extends AbstractDataBrokerTest{
         } catch (InterruptedException | ExecutionException e) {
             fail(e.getMessage());
         }
-    }
 
-    @Test
-    public void testDeactivate(){
         //when
-        l2vpnBridgeActivator.deactivate(nodeName,outerName,innerName,port,neighbor,mtu);
+        deactivate();
 
         //then
-        L2vpnActivatorTestUtils.checkDeactivation(optBroker);
+        L2vpnActivatorTestUtils.checkDeactivated(optBroker,portNo1);
+    }
+
+    private void deactivate(){
+        try {
+            l2vpnBridgeActivator.deactivate(nodeName,outerName,innerName,port,neighbor,mtu);
+        } catch (TransactionCommitFailedException e) {
+            fail("Error during deactivation : " + e.getMessage());
+        }
+    }
+
+    private void activate(){
+        log.debug("activate L2VPN");
+        try {
+            l2vpnBridgeActivator.activate(nodeName, outerName, innerName, port, neighbor, mtu);
+        } catch (TransactionCommitFailedException e) {
+            fail("Error during activation : " + e.getMessage());
+        }
     }
 
     private void checkL2vpnTree(CheckedFuture<Optional<L2vpn>, ReadFailedException> driverL2vpn) throws InterruptedException, ExecutionException {
-       if (driverL2vpn.get().isPresent()){
-           L2vpn l2vpn = driverL2vpn.get().get();
-           L2vpnActivatorTestUtils.checkL2vpn(l2vpn);
+        if (driverL2vpn.get().isPresent()){
+            L2vpn l2vpn = driverL2vpn.get().get();
+            L2vpnActivatorTestUtils.checkL2vpn(l2vpn);
 
-           XconnectGroup xconnectGroup = l2vpn.getDatabase().getXconnectGroups().getXconnectGroup().get(0);
-           L2vpnActivatorTestUtils.checkXConnectGroup(xconnectGroup,outerName);
+            XconnectGroup xconnectGroup = l2vpn.getDatabase().getXconnectGroups().getXconnectGroup().get(0);
+            L2vpnActivatorTestUtils.checkXConnectGroup(xconnectGroup,outerName);
 
-           P2pXconnect p2pXconnect = xconnectGroup.getP2pXconnects().getP2pXconnect().get(0);
-           L2vpnActivatorTestUtils.checkP2pXconnect(p2pXconnect,innerName);
+            P2pXconnect p2pXconnect = xconnectGroup.getP2pXconnects().getP2pXconnect().get(0);
+            L2vpnActivatorTestUtils.checkP2pXconnect(p2pXconnect,innerName);
 
-           List<AttachmentCircuit> attachmentCircuits = p2pXconnect.getAttachmentCircuits().getAttachmentCircuit();
-           assertNotNull(attachmentCircuits);
-           assertEquals(2, attachmentCircuits.size());
+            List<AttachmentCircuit> attachmentCircuits = p2pXconnect.getAttachmentCircuits().getAttachmentCircuit();
+            assertNotNull(attachmentCircuits);
+            assertEquals(2, attachmentCircuits.size());
 
-           attachmentCircuits.sort(
-                   (AttachmentCircuit ac1, AttachmentCircuit ac2)
-                           -> ac1.getName().getValue().compareTo(ac2.getName().getValue()));
+            attachmentCircuits.sort(
+                    (AttachmentCircuit ac1, AttachmentCircuit ac2)
+                            -> ac1.getName().getValue().compareTo(ac2.getName().getValue()));
 
-           L2vpnActivatorTestUtils.checkAttachmentCircuit(attachmentCircuits.get(0), portNo1);
-           L2vpnActivatorTestUtils.checkAttachmentCircuit(attachmentCircuits.get(1), portNo2);
-       } else {
-           fail("L2vpn was not found.");
-       }
+            L2vpnActivatorTestUtils.checkAttachmentCircuit(attachmentCircuits.get(0), portNo1);
+            L2vpnActivatorTestUtils.checkAttachmentCircuit(attachmentCircuits.get(1), portNo2);
+        } else {
+            fail("L2vpn was not found.");
+        }
     }
 
     private void checkInterfaceConfigurationTree(CheckedFuture<Optional<InterfaceConfigurations>, ReadFailedException> driverInterfaceConfigurations) throws InterruptedException, ExecutionException{

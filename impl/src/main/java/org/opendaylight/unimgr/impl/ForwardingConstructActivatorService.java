@@ -60,6 +60,7 @@ public class ForwardingConstructActivatorService {
                 }
             } else {
                 LOG.warn("No transaction for this activation request {}", forwardingConstruct);
+                stateTracker.activationFailed(forwardingConstruct);
             }
         }
     }
@@ -83,6 +84,7 @@ public class ForwardingConstructActivatorService {
                 }
             } else {
                 LOG.warn("No transaction for this deactivation request {}", forwardingConstruct);
+                stateTracker.deactivationFailed();
             }
         }
     }

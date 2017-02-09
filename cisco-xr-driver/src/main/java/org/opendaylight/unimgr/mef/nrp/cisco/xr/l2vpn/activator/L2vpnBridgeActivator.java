@@ -8,14 +8,15 @@
 
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator;
 
-import com.google.common.base.Optional;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.BandwidthProfileHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.InterfaceHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.AttachmentCircuitHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.L2vpnHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.PseudowireHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.XConnectHelper;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.asr9k.policymgr.cfg.rev150518.PolicyManager;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.L2vpn;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.XconnectGroups;
@@ -23,6 +24,12 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.AttachmentCircuits;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.Pseudowires;
 import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
+
+import java.util.Optional;
+
+import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.BandwidthProfileComposition.BwpApplicability.UNI;
+import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.BandwidthProfileComposition.BwpDirection.EGRESS;
+import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.BandwidthProfileComposition.BwpDirection.INGRESS;
 
 /**
  * Activator of VPLS-based L2 VPN using bridge connection on IOS-XR devices
@@ -32,14 +39,22 @@ import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forw
 public class L2vpnBridgeActivator extends AbstractL2vpnActivator {
 
     public L2vpnBridgeActivator(DataBroker dataBroker, MountPointService mountService) {
-        super(mountService);
+        super(dataBroker, mountService);
+    }
+
+    @Override
+    protected Optional<PolicyManager> activateQos(String name, FcPort port) {
+        return new BandwidthProfileHelper(dataBroker, port)
+                .addPolicyMap(name, INGRESS, UNI)
+                .addPolicyMap(name, EGRESS, UNI)
+                .build();
     }
 
     @Override
     protected InterfaceConfigurations activateInterface(FcPort port, FcPort neighbor, long mtu) {
         return new InterfaceHelper()
-            .addInterface(port, Optional.absent(), true)
-            .addInterface(neighbor, Optional.absent(), true)
+            .addInterface(port, Optional.empty(), true)
+            .addInterface(neighbor, Optional.empty(), true)
             .build();
     }
 

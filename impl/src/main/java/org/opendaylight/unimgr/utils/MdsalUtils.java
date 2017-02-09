@@ -15,8 +15,16 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +69,31 @@ public class MdsalUtils {
         }
         transaction.close();
         return result;
+    }
+
+    /**
+     * Read a specific datastore type and return a optional of DataObject
+     * @param dataBroker The dataBroker instance to create transactions
+     * @param store The store type to query
+     * @param path The generic path to query
+     * @return Read object optional
+     */
+    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> Optional<D> readOptional(
+            DataBroker dataBroker,
+            final LogicalDatastoreType store,
+            final InstanceIdentifier<D> path) {
+
+        final ReadOnlyTransaction transaction = dataBroker.newReadOnlyTransaction();
+        Optional<D> optionalDataObject = Optional.absent();
+        final CheckedFuture<Optional<D>, ReadFailedException> future = transaction.read(store, path);
+        try {
+            optionalDataObject = future.checkedGet();
+        } catch (final ReadFailedException e) {
+            LOG.warn("Failed to read {} ", path, e);
+        }
+
+        transaction.close();
+        return optionalDataObject;
     }
 
     /**
@@ -147,5 +180,48 @@ public class MdsalUtils {
             LOG.info("Unable to read node with Iid {}", linkIid, e);
         }
         return Optional.absent();
+    }
+
+    /**
+     * Read a specific Link from a specific datastore
+     * @param dataBroker The dataBroker instance to create transactions
+     * @param store The datastore type.
+     * @param topologyName The topology name.
+     * @return An Optional Link instance
+     */
+    public static final Optional<Topology> readTopology(DataBroker dataBroker,
+                                                        LogicalDatastoreType store,
+                                                        String topologyName) {
+        final ReadTransaction read = dataBroker.newReadOnlyTransaction();
+        final TopologyId topologyId = new TopologyId(topologyName);
+        InstanceIdentifier<Topology> topologyInstanceId
+            = InstanceIdentifier.builder(NetworkTopology.class)
+                                .child(Topology.class, new TopologyKey(topologyId))
+                                .build();
+        final CheckedFuture<Optional<Topology>, ReadFailedException> topologyFuture = read.read(store, topologyInstanceId);
+
+        try {
+            return topologyFuture.checkedGet();
+        } catch (final ReadFailedException e) {
+            LOG.info("Unable to read topology with Iid {}", topologyInstanceId, e);
+        }
+        return Optional.absent();
+    }
+
+    /**
+     * Read a TerminationPoint from datastore used in given FcPort
+     * @param dataBroker The dataBroker instance to create transactions
+     * @param store The datastore type.
+     * @param port FcPort data
+     * @return An Optional TerminationPoint instance
+     */
+    public static Optional<TerminationPoint> readTerminationPoint(DataBroker dataBroker, LogicalDatastoreType store, FcPort port) {
+        InstanceIdentifier tpIid = InstanceIdentifier.builder(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(port.getTopology()))
+                .child(Node.class, new NodeKey(port.getNode()))
+                .child(TerminationPoint.class, new TerminationPointKey(port.getTp()))
+                .build();
+
+        return MdsalUtils.readOptional(dataBroker, store, tpIid);
     }
 }
