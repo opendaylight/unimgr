@@ -8,6 +8,10 @@
 
 package org.opendaylight.unimgr.mef.netvirt;
 
+import java.math.BigInteger;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -22,6 +26,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rev
 import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rev160406.ParentRefsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rev160406.SplitHorizon;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rev160406.SplitHorizonBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rpcs.rev160406.GetDpidFromInterfaceInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rpcs.rev160406.GetDpidFromInterfaceInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rpcs.rev160406.GetDpidFromInterfaceOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rpcs.rev160406.OdlInterfaceRpcService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInstance;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInstanceBuilder;
@@ -39,6 +47,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.SegmentTypeVxlan;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
+import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -253,6 +262,24 @@ public class NetvirtUtils {
 
         tx.put(LogicalDatastoreType.CONFIGURATION, getElanInterfaceInstanceIdentifier(interfaceName),
                 einterfaceBuilder.build());
+    }
+
+    public static BigInteger getDpnForInterface(OdlInterfaceRpcService interfaceManagerRpcService, String ifName) {
+        BigInteger nodeId = BigInteger.ZERO;
+        try {
+            GetDpidFromInterfaceInput dpIdInput = new GetDpidFromInterfaceInputBuilder().setIntfName(ifName).build();
+            Future<RpcResult<GetDpidFromInterfaceOutput>> dpIdOutput = interfaceManagerRpcService
+                    .getDpidFromInterface(dpIdInput);
+            RpcResult<GetDpidFromInterfaceOutput> dpIdResult = dpIdOutput.get();
+            if (dpIdResult.isSuccessful()) {
+                nodeId = dpIdResult.getResult().getDpid();
+            } else {
+                logger.error("Could not retrieve DPN Id for interface {}", ifName);
+            }
+        } catch (NullPointerException | InterruptedException | ExecutionException e) {
+            logger.error("Exception when getting dpn for interface {}", ifName, e);
+        }
+        return nodeId;
     }
 
     public static void safeSleep() {

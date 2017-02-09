@@ -8,6 +8,7 @@
 
 package org.opendaylight.unimgr.mef.netvirt;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
 import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.subnets.Subnet;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.subnets.SubnetBuilder;
@@ -33,11 +35,17 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpPrefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.meta.rev160406.BridgeRefInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.meta.rev160406.bridge.ref.info.BridgeRefEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.meta.rev160406.bridge.ref.info.BridgeRefEntryKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rpcs.rev160406.OdlInterfaceRpcService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInterface.EtreeInterfaceType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.vpn.instance.op.data.VpnInstanceOpDataEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.vpn.instance.op.data.vpn.instance.op.data.entry.VpnToDpnList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.vpn.instance.op.data.vpn.instance.op.data.entry.vpn.to.dpn.list.VpnInterfaces;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.vpn.instance.to.vpn.id.VpnInstance;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -53,14 +61,23 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
     private ListenerRegistration<IpvcListener> ipvcListenerRegistration;
     @SuppressWarnings("unused")
     private final UniAwareListener uniAwareListener;
+    private OdlInterfaceRpcService odlInterfaceRpcService;
+    private final SouthboundUtils southBoundUtils;
+    private final org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils mdsalUtils;
+    private static final String LOCAL_IP = "local_ip";
 
     public IpvcListener(final DataBroker dataBroker, final IUniPortManager uniPortManager,
-            final ISubnetManager subnetManager, final UniQosManager uniQosManager) {
+            final ISubnetManager subnetManager, final UniQosManager uniQosManager,
+            final OdlInterfaceRpcService odlInterfaceRpcService) {
         super(dataBroker);
         this.uniPortManager = uniPortManager;
         this.subnetManager = subnetManager;
         this.uniQosManager = uniQosManager;
         this.uniAwareListener = new UniAwareListener(dataBroker, this);
+        this.odlInterfaceRpcService = odlInterfaceRpcService;
+        this.mdsalUtils = new org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils(dataBroker);
+        this.southBoundUtils = new SouthboundUtils(mdsalUtils);
+
         registerListener();
     }
 
@@ -405,7 +422,9 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
             IpUni ipUni, String interfaceName, String elanName, WriteTransaction tx) {
 
         Log.info("Adding vpn interface: " + interfaceName);
-        NetvirtVpnUtils.createUpdateVpnInterface(vpnName, interfaceName, ipUni.getIpAddress(),
+        BigInteger dpId = NetvirtUtils.getDpnForInterface(odlInterfaceRpcService, interfaceName);
+        IpAddress nextHop = getNodeIP(dpId);
+        NetvirtVpnUtils.createUpdateVpnInterface(vpnName, interfaceName, nextHop, ipUni.getIpAddress(),
                 uni.getMacAddress().getValue(), true, null, elanName, tx);
         Log.info("Finished working on vpn instance {} interface () ", vpnName, interfaceName);
     }
@@ -530,5 +549,37 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
     private void updateUnis(List<Uni> uniToUpdate) {
         uniToUpdate.forEach(u -> uniQosManager.updateUni(u.getUniId(), u.getIngressBwProfile()));
         updateQos(uniToUpdate);
+    }
+
+    private IpAddress getNodeIP(BigInteger dpId) {
+        Node node = getPortsNode(dpId);
+        String localIp = southBoundUtils.getOpenvswitchOtherConfig(node, LOCAL_IP);
+        if (localIp == null) {
+            throw new UnsupportedOperationException(
+                    "missing local_ip key in ovsdb:openvswitch-other-configs in operational"
+                    + " network-topology for node: " + node.getNodeId().getValue());
+        }
+
+        return new IpAddress(localIp.toCharArray());
+    }
+
+    @SuppressWarnings("unchecked")
+    private Node getPortsNode(BigInteger dpnId) {
+        InstanceIdentifier<BridgeRefEntry> bridgeRefInfoPath = InstanceIdentifier.create(BridgeRefInfo.class)
+                .child(BridgeRefEntry.class, new BridgeRefEntryKey(dpnId));
+        BridgeRefEntry bridgeRefEntry = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeRefInfoPath);
+        if (bridgeRefEntry == null) {
+            throw new UnsupportedOperationException("no bridge ref entry found for dpnId: " + dpnId);
+        }
+
+        InstanceIdentifier<Node> nodeId = ((InstanceIdentifier<OvsdbBridgeAugmentation>) bridgeRefEntry
+                .getBridgeReference().getValue()).firstIdentifierOf(Node.class);
+        Node node = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, nodeId);
+
+        if (node == null) {
+            throw new UnsupportedOperationException("missing node for dpnId: " + dpnId);
+        }
+        return node;
+
     }
 }

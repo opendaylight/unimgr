@@ -141,13 +141,15 @@ public class NetvirtVpnUtils {
         MdsalUtils.commitTransaction(tx);
     }
 
-    public static void createUpdateVpnInterface(String vpnName, String interfaceName, IpPrefix ifPrefix,
+    public static void createUpdateVpnInterface(String vpnName, String interfaceName, IpAddress primaryNextHop,
+            IpPrefix ifPrefix,
             String macAddress, boolean primary, IpPrefix gwIpAddress, String directSubnetId, WriteTransaction tx) {
         synchronized (interfaceName.intern()) {
             String ipAddress = null;
             String nextHopIp = null;
             if (primary) {
                 ipAddress = getAddressFromSubnet(ipPrefixToString(ifPrefix));
+                nextHopIp = ipAddressToString(primaryNextHop);
             } else {
                 ipAddress = ipPrefixToString(ifPrefix);
                 nextHopIp = getIpAddressFromPrefix(ipPrefixToString(gwIpAddress));

@@ -263,7 +263,7 @@ public class UniQosManager extends UnimgrDataTreeChangeListener<BwpFlow> {
         if (uniToDpn.containsKey(uniId)) {
             dpId = uniToDpn.get(uniId);
         } else {
-            dpId = getDpnForInterface(odlInterfaceRpcService, logicalPortId);
+            dpId = NetvirtUtils.getDpnForInterface(odlInterfaceRpcService, logicalPortId);
             uniToDpn.put(uniId, dpId);
         }
         if (dpId.equals(BigInteger.ZERO)) {
@@ -317,23 +317,6 @@ public class UniQosManager extends UnimgrDataTreeChangeListener<BwpFlow> {
         return null;
     }
 
-    private static BigInteger getDpnForInterface(OdlInterfaceRpcService interfaceManagerRpcService, String ifName) {
-        BigInteger nodeId = BigInteger.ZERO;
-        try {
-            GetDpidFromInterfaceInput dpIdInput = new GetDpidFromInterfaceInputBuilder().setIntfName(ifName).build();
-            Future<RpcResult<GetDpidFromInterfaceOutput>> dpIdOutput = interfaceManagerRpcService
-                    .getDpidFromInterface(dpIdInput);
-            RpcResult<GetDpidFromInterfaceOutput> dpIdResult = dpIdOutput.get();
-            if (dpIdResult.isSuccessful()) {
-                nodeId = dpIdResult.getResult().getDpid();
-            } else {
-                Log.error("Could not retrieve DPN Id for interface {}", ifName);
-            }
-        } catch (NullPointerException | InterruptedException | ExecutionException e) {
-            Log.error("Exception when getting dpn for interface {}", ifName, e);
-        }
-        return nodeId;
-    }
 
     private static String getPhysicalPortForUni(DataBroker dataBroker, String uniId) {
         String nodeId = null;
