@@ -36,15 +36,28 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-<!--                         <Export-Package> -->
-<!--                             org.opendaylight.unimgr.mef.nrp.common, -->
-<!--                             org.opendaylight.unimgr.mef.nrp.api, -->
-<!--                             org.opendaylight.unimgr.api -->
-<!--                         </Export-Package> -->
+                        <Export-Package>
+                            org.opendaylight.unimgr.mef.nrp.common,
+                            org.opendaylight.unimgr.mef.nrp.api,
+                            org.opendaylight.unimgr.api,
+                            org.opendaylight.unimgr.utils
+                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

@@ -142,4 +142,12 @@ module cl-unimgr-mef {
         uses evc;
     }
 
+    augment "/topo:network-topology/topo:topology/topo:node" {
+        description "Augmentation for loopback address nodes under topology";
+        ext:augment-identifier "loopback-augmentation";
+        leaf loopback-address {
+         type inet:ip-address;
+        }
+    }
+
 }

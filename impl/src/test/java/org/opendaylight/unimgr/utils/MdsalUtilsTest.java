@@ -8,8 +8,7 @@
 
 package org.opendaylight.unimgr.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.doNothing;
@@ -32,15 +31,15 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.unimgr.impl.UnimgrConstants;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.LinkId;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.*;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.LinkKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -171,5 +170,91 @@ public class MdsalUtilsTest {
         verify(transaction).read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         assertNotNull(expectedOpt);
         assertEquals(expectedOpt, optNode);
+    }
+
+    @Test
+    public void testReadOptionalPositive() throws ReadFailedException {
+        //given
+        DataBroker dataBroker = mock(DataBroker.class);
+        InstanceIdentifier<Node> nodeIid = PowerMockito.mock(InstanceIdentifier.class);
+        ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
+        Optional<Node> optionalDataObject = mock(Optional.class);
+        CheckedFuture<Optional<Node>, ReadFailedException> future = mock(CheckedFuture.class);
+        Node exceptedNode = mock(Node.class);
+
+        when(dataBroker.newReadOnlyTransaction()).thenReturn(transaction);
+        when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(future);
+        when(future.checkedGet()).thenReturn(optionalDataObject);
+        when(optionalDataObject.isPresent()).thenReturn(true);
+        when(optionalDataObject.get()).thenReturn(exceptedNode);
+
+        //when
+        Optional<Node> actualNodeOptional = MdsalUtils.readOptional(dataBroker, LogicalDatastoreType.CONFIGURATION, nodeIid);
+
+        //then
+        assertNotNull(actualNodeOptional);
+        assertTrue(actualNodeOptional.isPresent());
+
+        verify(transaction).read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(transaction).close();
+
+        assertEquals(actualNodeOptional.get(), exceptedNode);
+    }
+
+    @Test
+    public void testReadOptionalNegative() throws ReadFailedException {
+        //given
+        DataBroker dataBroker = mock(DataBroker.class);
+        InstanceIdentifier<Node> nodeIid = PowerMockito.mock(InstanceIdentifier.class);
+        ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
+        Optional<Node> optionalDataObject = mock(Optional.class);
+        CheckedFuture<Optional<Node>, ReadFailedException> future = mock(CheckedFuture.class);
+
+        when(dataBroker.newReadOnlyTransaction()).thenReturn(transaction);
+        when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(future);
+        when(future.checkedGet()).thenReturn(optionalDataObject);
+        when(optionalDataObject.isPresent()).thenReturn(false);
+
+        //when
+        Optional<Node> actualNodeOptional = MdsalUtils.readOptional(dataBroker, LogicalDatastoreType.CONFIGURATION, nodeIid);
+
+        //then
+        assertNotNull(actualNodeOptional);
+        assertFalse(actualNodeOptional.isPresent());
+
+        verify(transaction).read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(transaction).close();
+    }
+
+    @Test
+    public void testReadTerminationPoint() throws ReadFailedException {
+        //given
+        TerminationPoint expectedTp = mock(TerminationPoint.class);
+        FcPort fcPort = mock(FcPort.class);
+        when(fcPort.getNode()).thenReturn(new NodeId("r1"));
+        when(fcPort.getTopology()).thenReturn(new TopologyId("topology-netconf"));
+        when(fcPort.getTp()).thenReturn(new TpId("tp1"));
+
+        DataBroker dataBroker = mock(DataBroker.class);
+        ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
+        Optional<TerminationPoint> optionalDataObject = mock(Optional.class);
+        CheckedFuture<Optional<TerminationPoint>, ReadFailedException> future = mock(CheckedFuture.class);
+
+        when(dataBroker.newReadOnlyTransaction()).thenReturn(transaction);
+        when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(future);
+        when(future.checkedGet()).thenReturn(optionalDataObject);
+        when(optionalDataObject.isPresent()).thenReturn(true);
+        when(optionalDataObject.get()).thenReturn(expectedTp);
+
+        //when
+        Optional<TerminationPoint> actualTpOptional = MdsalUtils.readTerminationPoint(dataBroker, LogicalDatastoreType.CONFIGURATION, fcPort);
+
+        //then
+        assertNotNull(actualTpOptional);
+        assertTrue(actualTpOptional.isPresent());
+        assertEquals(expectedTp, actualTpOptional.get());
+
+        verify(transaction).read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(transaction).close();
     }
 }

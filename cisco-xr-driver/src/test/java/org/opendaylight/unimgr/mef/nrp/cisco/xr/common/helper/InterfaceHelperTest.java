@@ -7,7 +7,7 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.MtuUtils;
@@ -75,7 +75,7 @@ public class InterfaceHelperTest {
         //given
         String interfaceNameValue = "GigabitEthernet0/0/1";
         InterfaceName interfaceName = new InterfaceName(interfaceNameValue);
-        Optional<Mtus> mtus = Optional.absent();
+        Optional<Mtus> mtus = Optional.empty();
         boolean setL2Transport = false;
 
         InterfaceHelper interfaceHelper = new InterfaceHelper();
@@ -150,7 +150,7 @@ public class InterfaceHelperTest {
         InterfaceName interfaceName1 = new InterfaceName(interfaceNameValue1);
         String interfaceNameValue2 = "GigabitEthernet0/0/2";
         InterfaceName interfaceName2 = new InterfaceName(interfaceNameValue2);
-        Optional<Mtus> mtus = Optional.absent();
+        Optional<Mtus> mtus = Optional.empty();
         boolean setL2Transport = false;
 
         InterfaceHelper interfaceHelper = new InterfaceHelper();
