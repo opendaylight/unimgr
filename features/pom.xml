@@ -31,6 +31,7 @@
     <mdsal.model.version>0.10.0-SNAPSHOT</mdsal.model.version>
     <netconf.version>1.2.0-SNAPSHOT</netconf.version>
     <genius.version>0.2.0-SNAPSHOT</genius.version>
+    <l2switch.version>0.5.0-SNAPSHOT</l2switch.version>
     <configfile.directory>etc/opendaylight/karaf</configfile.directory>
   </properties>
   <dependencyManagement>
@@ -54,6 +55,13 @@
         <groupId>org.opendaylight.netconf</groupId>
         <artifactId>netconf-artifacts</artifactId>
         <version>${netconf.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.l2switch</groupId>
+        <artifactId>l2switch-artifacts</artifactId>
+        <version>${l2switch.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -173,6 +181,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ovs-driver</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.unimgr</groupId>
       <artifactId>edgeassure-1000</artifactId>
       <version>${project.version}</version>
@@ -196,6 +209,14 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>unimgr-legato-api</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.l2switch</groupId>
+      <artifactId>features-l2switch</artifactId>
+      <classifier>features</classifier>
+      <version>${l2switch.version}</version>
+      <type>xml</type>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
 </project>
