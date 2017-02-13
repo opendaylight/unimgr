@@ -6,6 +6,8 @@ module mef-unimgr-ext {
     prefix onf-cn;
   }
 
+  import ietf-inet-types { prefix "inet"; }
+
   revision 2016-07-25 {
   }
 
@@ -17,6 +19,12 @@ module mef-unimgr-ext {
     }
   }
 
+  typedef CTagVlanId {
+      type uint32 {
+        range "0..4094";
+      }
+  }
+
   augment "/onf-cn:forwarding-constructs/onf-cn:forwarding-construct" {
     container unimgr-attrs {
       leaf status {
@@ -26,4 +34,12 @@ module mef-unimgr-ext {
       }
     }
   }
+
+  augment "/onf-cn:forwarding-constructs/onf-cn:forwarding-construct/onf-cn:fcPort" {
+      leaf cTagVlanId {
+        type CTagVlanId;
+        config true;
+        default 0;
+      }
+   }
 }

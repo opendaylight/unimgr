@@ -16,6 +16,7 @@
   <repository>mvn:org.opendaylight.netconf/features-netconf-connector/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.genius/genius-features/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.netvirt/vpnservice-features/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.l2switch/features-l2switch/{{VERSION}}/xml/features</repository>
 
   <feature name='odl-unimgr-api' version='${project.version}'
     description='OpenDaylight :: UniMgr :: api'>
@@ -90,6 +91,21 @@
     <feature version='${project.version}'>odl-unimgr</feature>
     <bundle>mvn:org.opendaylight.unimgr/cisco-xrmodels/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.unimgr/unimgr-cisco-xr-driver/{{VERSION}}</bundle>
+  </feature>
+
+  <feature name="odl-unimgr-ovs-driver" version="${project.version}" description='OpenDaylight :: UniMgr :: OVSDB Driver'>
+    <feature version='${project.version}'>odl-unimgr</feature>
+    <feature version="${l2switch.version}">odl-l2switch-all</feature>
+    <feature version="${restconf.version}">odl-restconf</feature>
+    <feature version="${ovsdb.version}">odl-ovsdb-library</feature>
+    <feature version="${ovsdb.version}">odl-ovsdb-southbound-api</feature>
+    <feature version="${ovsdb.version}">odl-ovsdb-southbound-impl</feature>
+    <feature version="${ovsdb.version}">odl-ovsdb-southbound-impl-rest</feature>
+    <feature version="${openflowjava.version}">odl-openflowjava-protocol</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services-rest</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-southbound</feature>
+    <bundle>mvn:org.opendaylight.unimgr/ovs-driver/{{VERSION}}</bundle>
   </feature>
 
 </features>
