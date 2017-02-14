@@ -1,0 +1,9 @@
+interface {{interfaceName}}
+mtu 1522
+no ip address
+no service instance {{serviceInstanceId}} ethernet
+no shutdown
+service instance {{serviceInstanceId}} ethernet
+encapsulation dot1q {{cTagVlanId}}
+xconnect {{ipAddressOfPeer}} {{vcIdValue}} encapsulation mpls
+mtu 1508

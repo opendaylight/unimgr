@@ -18,7 +18,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>unimgr-aggregator</artifactId>
   <version>0.2.0-SNAPSHOT</version>
-  <name>unimgr</name>
+    <modules>
+        <module>cisco-xe-dependencies</module>
+    </modules>
+    <name>unimgr</name>
   <packaging>pom</packaging>
   <modelVersion>4.0.0</modelVersion>
   <prerequisites>
@@ -63,6 +66,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <module>impl</module>
         <module>netvirt</module>
         <module>cisco-xr-driver</module>
+        <module>cisco-xe-driver</module>
         <module>ovs-driver</module>
         <module>dlux</module>
         <module>cli</module>
