@@ -42,4 +42,21 @@ module mef-unimgr-ext {
         default 0;
       }
    }
+
+  augment "/nt:network-topology/nt:topology/nt:node" {
+      container connection-settings {
+        leaf userName {
+          type string;
+          config true;
+        }
+        leaf password {
+          type string;
+          config true;
+        }
+        leaf host {
+          type inet:host;
+          config true;
+        }
+      }
+  }
 }
