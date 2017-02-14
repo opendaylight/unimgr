@@ -86,8 +86,13 @@
     <feature version="${dluxapps.version}">odl-dluxapps-applications</feature>
   </feature>
 
-  <feature name='odl-unimgr-cisco-xr-driver' version='${project.version}'
-    description='OpenDaylight :: UniMgr :: Cisco XR Driver'>
+  <feature name="odl-unimgr-cisco-xe-driver" version="${project.version}" description='OpenDaylight :: UniMgr :: Cisco XE Driver'>
+    <feature version='${project.version}'>odl-unimgr</feature>
+    <bundle>mvn:org.opendaylight.unimgr/unimgr-cisco-xe-driver/{{VERSION}}</bundle>
+    <bundle>mvn:com.eclipsesource.jaxrs/jersey-all/2.22.2</bundle>
+  </feature>
+
+  <feature name='odl-unimgr-cisco-xr-driver' version='${project.version}' description='OpenDaylight :: UniMgr :: Cisco XR Driver'>
     <feature version='${project.version}'>odl-unimgr</feature>
     <bundle>mvn:org.opendaylight.unimgr/cisco-xrmodels/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.unimgr/unimgr-cisco-xr-driver/{{VERSION}}</bundle>
