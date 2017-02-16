@@ -105,7 +105,7 @@ public class NetvirtVpnUtils {
         // WA till netvirt will allow creation of VPN without RD
         UUID vpnId = UUID.fromString(instanceName);
         String rd = String.valueOf(Math.abs(vpnId.getLeastSignificantBits()));
-        ipv4FamilyBuilder.setRouteDistinguisher(rd);
+        ipv4FamilyBuilder.setRouteDistinguisher(Arrays.asList(rd));
         builder.setIpv4Family(ipv4FamilyBuilder.build());
 
         tx.put(LogicalDatastoreType.CONFIGURATION, getVpnInstanceInstanceIdentifier(instanceName), builder.build());
@@ -219,7 +219,7 @@ public class NetvirtVpnUtils {
             InstanceIdentifier<LearntVpnVipToPort> id = getLearntVpnVipToPortIdentifier(vpnName, ipStr);
             MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.OPERATIONAL, id);
         });
-        int waitCount = (adjacenciesList.isEmpty()) ? 2 : 2 * adjacenciesList.size();
+        int waitCount = adjacenciesList.isEmpty() ? 2 : 2 * adjacenciesList.size();
 
         AdjacenciesBuilder builder = new AdjacenciesBuilder();
         List<Adjacency> list = new ArrayList<>();
@@ -228,8 +228,9 @@ public class NetvirtVpnUtils {
         MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION, identifier, einterfaceBuilder.build());
 
         final DataWaitGetter<Adjacencies> getData = vpnint -> {
-            if (vpnint.getAdjacency() == null)
+            if (vpnint.getAdjacency() == null) {
                 return null;
+            }
             return vpnint.getAdjacency().stream().filter(a -> !a.isPrimaryAdjacency());
         };
 
