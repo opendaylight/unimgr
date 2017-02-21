@@ -33,10 +33,10 @@
                     </div>
                 </form>
 		        <md-input-container class="complexSelect md-block right" style="margin-top:0">
-		          <md-select md-container-class="complexSelect" ng-attr-disabled="{{getAvailableNetwork().length ? undefined : 'disabled' }}" name="networks" ng-model="selectedNetworks" md-selected-text="'Enable Networks'" multiple> <!-- md-on-close="updateEnabled()"> -->
+		          <md-select md-container-class="complexSelect" ng-attr-disabled="{{getAvailableNetwork().length ? undefined : 'disabled' }}" name="networks" ng-model="selectedNetworks" md-selected-text="'Enable Networks'" multiple>
 		              <md-checkbox style="margin: 11px" ng-checked="isAllSelected()" md-indeterminate="isPartialSelected()" ng-click="selectAll()"> Select All</md-checkbox>
 		              <div class="complexSelectOptions">
-		                  <md-option ng-repeat="u in getAvailableNetwork()" ng-value="u">{{u.mefUni['ip-address']}}</md-option>
+		                  <md-option ng-repeat="u in getAvailableNetwork()" ng-value="u">{{u.cidr}}</md-option>
 		              </div>
 		              <md-button class="btn btn-info" ng-click="updateEnabled()" style="background-color: orange;width: 90%;">Apply </md-button>
 		          </md-select>

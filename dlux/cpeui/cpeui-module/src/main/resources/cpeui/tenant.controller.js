@@ -390,10 +390,8 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
         };
         
         $scope.updateEnabled = function() {
-            $scope.selectedNetworks.forEach(function(u){
-                if (u.mefUni) {
-                    $scope.addDhcp(u.mefUni['ip-address']);
-                }
+            $scope.selectedNetworks.forEach(function(subnet){
+                $scope.addDhcp(subnet);
             });
             $scope.selectedNetworks = [];
             $('md-backdrop').click();// close md-select dropdown
@@ -437,15 +435,14 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
 
         $scope.getAvailableNetwork = function(){
             if ($scope.dhcps !== undefined) {
-                return $scope.params.ipvcUnis.filter(x => (x.mefUni && $scope.dhcps[x.mefUni['ip-address']] == undefined));
+                return $scope.params.ipvcUnis.filter(x => ($scope.dhcps[x.cidr] == undefined));
             } else {
                 return $scope.params.ipvcUnis;
             }
         }
 
         $scope.addDhcp = function(subnet) {
-            var edges = CpeUiUtils.getSubnetEdges(subnet);
-            CpeuiSvc.addDhcp($scope.vrfid, subnet, edges[0] ,edges[1],function(){
+            CpeuiSvc.addDhcp($scope.vrfid, subnet.cidr, subnet.min ,subnet.max,function(){
                 // TODO find a way to getDhcp only once, after the last add
                 $scope.updateDhcpData();
             });
@@ -505,10 +502,7 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
         CpeuiSvc.getServicesVrfId(ipvc['svc-id'],function(vrfId){
             params = {ipvc:ipvc,ipvcUnis:[],vrfId:vrfId};
             if (ipvc.ipvc.unis && ipvc.ipvc.unis.uni) {
-                params.ipvcUnis = angular.copy(ipvc.ipvc.unis.uni);
-                params.ipvcUnis.forEach(function(u){
-                    u.mefUni = $scope.getMefInterfaceIpvc(u['uni-id'],u['ip-uni-id']);
-                });
+                params.ipvcUnis = ipvc.ipvc.unis.uni.map(u => CpeUiUtils.getSubnetEdges($scope.getMefInterfaceIpvc(u['uni-id'],u['ip-uni-id'])['ip-address']));
             }
             new CpeuiDialogs.Dialog('DHCP', params, function() {
                 $scope.updateEvcView();

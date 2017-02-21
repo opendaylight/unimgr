@@ -16,28 +16,31 @@ define([ 'app/cpeui/cpeui.module' ], function(cpeui) {
           return Math.floor(Math.random() * Math.pow(2, 31));
       };
       
+      function intToIp(intVal) {
+          var byte1 = ( intVal >>> 24 );
+          var byte2 = ( intVal >>> 16 ) & 255;
+          var byte3 = ( intVal >>>  8 ) & 255;
+          var byte4 = intVal & 255;
+          return ( byte1 + '.' + byte2 + '.' + byte3 + '.' + byte4 );
+      }
       
       svc.getSubnetEdges = function(subnet) {
           var ip = subnet.split('/')[0];
           var mask = subnet.split('/')[1];
+          if (mask > 30) {
+              return {min:ip,
+                      max:ip,
+                      cidr:subnet}
+          }
           var ipParts = ip.split('.');
           var ipValue = Number(ipParts[0]) * Math.pow(2,24) + Number(ipParts[1]) * Math.pow(2,16) + Number(ipParts[2]) * Math.pow(2,8) + Number(ipParts[3]);
-          var minIP = (ipValue & (~(Math.pow(2,32-mask)-1))) + 1;
-          var byte1 = ( minIP >>> 24 );
-          var byte2 = ( minIP >>> 16 ) & 255;
-          var byte3 = ( minIP >>>  8 ) & 255;
-          var byte4 = minIP & 255;
-          minIP =  ( byte1 + '.' + byte2 + '.' + byte3 + '.' + byte4 );
+          var minIP = intToIp((ipValue & (~(Math.pow(2,32-mask)-1))) + 1);
+          var maxIP = intToIp((ipValue | ((Math.pow(2,32-mask)-1))) -1);
+          var cidr = intToIp(ipValue & (~(Math.pow(2,32-mask)-1)))+"/"+mask;
           
-          var maxIP = (ipValue | ((Math.pow(2,32-mask)-1))) -1;
-          byte1 = ( maxIP >>> 24 );
-          byte2 = ( maxIP >>> 16 ) & 255;
-          byte3 = ( maxIP >>>  8 ) & 255;
-          byte4 = maxIP & 255;
-          maxIP =  ( byte1 + '.' + byte2 + '.' + byte3 + '.' + byte4 );
-          
-          return [minIP, maxIP];
-          
+          return {min:minIP,
+                  max:maxIP,
+                  cidr:cidr};
       }
       
       return svc;
