@@ -326,19 +326,14 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
             String rd = waitForRd(vpnName);
             List<Uni> originalUni = origIpvc.getUnis() != null && origIpvc.getUnis().getUni() != null
                     ? origIpvc.getUnis().getUni() : Collections.emptyList();
-            List<UniKey> originalUniIds = originalUni.stream().map(u -> u.getKey())
-                    .collect(Collectors.toList());
+            List<UniKey> originalUniIds = originalUni.stream().map(u -> u.getKey()).collect(Collectors.toList());
             List<Uni> updateUni = updateIpvc.getUnis() != null && updateIpvc.getUnis().getUni() != null
                     ? updateIpvc.getUnis().getUni() : Collections.emptyList();
             List<UniKey> updateUniIds = updateUni.stream().map(u -> u.getKey()).collect(Collectors.toList());
 
-            synchronized (vpnName.intern()) {
-                WriteTransaction txRemove = MdsalUtils.createTransaction(dataBroker);
-                List<Uni> uniToRemove = new ArrayList<>(originalUni);
-                uniToRemove.removeIf(u -> updateUniIds.contains(u.getKey()));
-                removeUnis(ipvcId, operIpvcVpn, uniToRemove);
-                MdsalUtils.commitTransaction(txRemove);
-            }
+            List<Uni> uniToRemove = new ArrayList<>(originalUni);
+            uniToRemove.removeIf(u -> updateUniIds.contains(u.getKey()));
+            removeUnis(ipvcId, operIpvcVpn, uniToRemove);
 
             List<Uni> uniToCreate = new ArrayList<>(updateUni);
             uniToCreate.removeIf(u -> originalUniIds.contains(u.getKey()));
@@ -448,7 +443,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
         VpnElans vpnElans = MefServicesUtils.findVpnElanForNetwork(new Identifier45(uniId), ipUni.getIpUniId(),
                 ipvcVpn);
         if (vpnElans == null) {
-            Log.error("Trying to remome non-operational vpn/elan for Uni {} Ip-UNi {}", uniId, ipUni.getIpUniId());
+            Log.error("Trying to remove non-operational vpn/elan for Uni {} Ip-UNi {}", uniId, ipUni.getIpUniId());
             return;
         }
 
@@ -464,6 +459,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
             MefServicesUtils.removeOperIpvcElan(dataBroker, ipvcId, ipvcVpn.getVpnId(), uniInService.getUniId(),
                     uniInService.getIpUniId(), vpnElans.getElanId(), vpnElans.getElanPort());
         }
+
     }
 
     private void waitForInterfaceDpnClean(String vpnName, String rd, String interfaceName) {
@@ -475,10 +471,14 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
                 if (is.getVpnInterfaces() == null)
                     continue;
                 for (VpnInterfaces i : is.getVpnInterfaces()) {
-                    if (i.getInterfaceName().equals(interfaceName))
+                    if (i.getInterfaceName().equals(interfaceName)) {
+                        Log.info("Waiting for deletion vpn interface from vpn to dpn list vpn : {} interface: {}",
+                                vpnName, interfaceName);
                         return interfaceName;
+                    }
                 }
             }
+            Log.info("Deleted vpn interface from vpn to dpn list vpn : {} interface: {}", vpnName, interfaceName);
             return null;
         };
 
@@ -496,7 +496,8 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
         DataWaitListener<VpnInstanceOpDataEntry> vpnInstanceWaiter = new DataWaitListener<>(dataBroker, vpnId,
                 retryCount, LogicalDatastoreType.OPERATIONAL, getInterfByName);
         if (!vpnInstanceWaiter.waitForClean()) {
-            String errorMessage = String.format("Fail to wait for vpn to dpn list clean-up %s", vpnName);
+            String errorMessage = String.format("Fail to wait for vpn to dpn list clean-up vpn : %s interface: %s",
+                    vpnName, interfaceName);
             Log.error(errorMessage);
             throw new UnsupportedOperationException(errorMessage);
         }
@@ -557,7 +558,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
         if (localIp == null) {
             throw new UnsupportedOperationException(
                     "missing local_ip key in ovsdb:openvswitch-other-configs in operational"
-                    + " network-topology for node: " + node.getNodeId().getValue());
+                            + " network-topology for node: " + node.getNodeId().getValue());
         }
 
         return new IpAddress(localIp.toCharArray());
