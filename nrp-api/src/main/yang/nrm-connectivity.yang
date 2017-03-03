@@ -1,0 +1,899 @@
+module nrm-connectivity {
+    namespace "urn:mef:yang:nrm-connectivity";
+    prefix nrm-connectivity;
+    import tapi-connectivity {
+        prefix tapi-connectivity;
+    }
+    import tapi-common {
+        prefix tapi-common;
+    }
+    organization "Metro Ethernet Forum (MEF)";
+    contact "MEF";
+    description "none";
+    revision 2017-02-27 {
+        description "MEF NRP 1.0.alpha";
+        reference "ONF-TR-527, ONF-TR-512, ONF-TR-531, RFC 6020 and RFC 6087";
+    }
+    /***********************
+    * package main
+    **********************/
+        /***********************
+        * package object-classes
+        **********************/
+            grouping cg-eth-enni-spec {
+                leaf max-frame-size {
+                    type natural-number;
+                    description "MEF 7.3: This value limits the length of frames carried by an OVC that associates an OVC End Point at this ENNI in bytes. It is one of the ENNI Operator Multi-lateral attributes, which requires the CENs at the ENNI-N to agree on the values but may allow these values to be different.";
+                }
+                container l2cp-peering-list {
+                    uses l2cp-peering;
+                    description "MEF 7.3: This attribute represents the L2CP Peering Service defined in MEF 45 section 8.2 when applied to the ENNI. It is one of the ENNI Operator Multi-lateral attributes, which requires the CENs at the ENNI-N to agree on the values but may allow these values to be different.";
+                }
+                leaf tagged-l2cp-processing {
+                    type tagged-l2cp-processing;
+                    description "MEF 7.3: This attribute represents the Tagged L2CP Processing defined in MEF 45 section 8.3 (802.1 compliant or 802.1 non-compliant. Desired to be 802.1 compliant). It is one of the ENNI Operator Multi-lateral attributes, which requires the CENs at the ENNI-N to agree on the values but may allow these values to be different.";
+                }
+                list cg-eth-spor-sospecific-srv-attributes {
+                    key 'uuid';
+                    uses cg-eth-spor-sospecific-srv-attributes;
+                    description "none";
+                }
+                uses cg-eth-frame-aggr-trm-spec;
+                description "none";
+            }
+            container cg-eth-inni-spec {
+                leaf max-frame-size {
+                    type natural-number;
+                    description "none";
+                }
+                uses cg-eth-frame-aggr-trm-spec;
+                description "none";
+            }
+            grouping cg-eth-uni-spec {
+                leaf elmi-enabled {
+                    type boolean;
+                    description "MEF 7.3: This attribute denotes whether the ELMI is enabled or not. When the value is TRUE, the CEN MUST meet the mandatory requirements in MEF 16 that apply to the UNI-N.
+                        Note: Ethernel Local Management Interface protocol contents are defined which clearly identify MEF Service/Resource constructs like UNI and EVC, hence the attribute cannot be placed in an ethernet generic class.";
+                }
+                leaf max-frame-size {
+                    type natural-number;
+                    description "10.3: The value for the UNI Maximum Service Frame Size is a positive integer in bytes.
+                        [R71] The value of the UNI Maximum Service Frame Size MUST be at least 1522 bytes.";
+                }
+                container default-ce-vlan-id {
+                    uses vlan-id;
+                    description "Mapped from original 7.3 'untaggedAndPriorityTaggedCeVlanId'
+                        10.3: At the given UNI, the Customer Edge VLAN ID (CE-VLAN ID) can be used to identify an EVC that associates this UNI. There are 4095 CE-VLAN IDs numbered 1 through 4095. The CE-VLAN ID for a VLAN
+                        Tagged Service Frame is the value of the VLAN ID in the tag.
+                        [R73] Untagged and Priority Tagged Service Frames MUST have the same CE VLAN ID.
+                        [R74] The CE-VLAN ID for Untagged and Priority Tagged Service Frames MUST be in the range 1, 2 , …, 4094.";
+                }
+                leaf max-num-of-ce-vlan-id-per-conn-serv-end-point {
+                    type positive-integer;
+                    description "none";
+                }
+                leaf service-multiplexing-enabled {
+                    type boolean;
+                    description "7.3: When this attribute value is enabled,  there can be multiple EVCs at the UNI. This attribute can be enabled only when All-to-one bundling is disabled.
+                        10.3: Service Multiplexing can be either Enabled or Disabled.
+                        [R72] A UNI with Service Multiplexing Enabled MUST be able to support multiple EVCs.
+                        [O2] When a UNI has Service Multiplexing Enabled, Point-to-Point EVCs and Multipoint EVCs MAY be multiplexed in any combination at a UNI.";
+                }
+                leaf all-to-one-bundling-enabled {
+                    type boolean;
+                    description "7.3: When a UNI has All to One Bundling Enabled, all CE-VLAN IDs MUST map to a single EVC at the UNI. This attribute can be enabled only when Service Multiplexing and Bundling are disabled.";
+                }
+                leaf token-share-enabled {
+                    type boolean;
+                    description "MEF 6.2: This is used to indicate whether a given UNI is capable of sharing tokens across Bandwidth Profile Flows in an Envelope. The allowed values, at each UNI, are Enabled or Disabled.
+                        [R2] A UNI, with Token Share Enabled, MUST be able to support two or more Bandwidth Profile Flows in at least one Envelope for Bandwidth Profile as specified in Section 11 of MEF 10.3 [6]
+                        [D1] A UNI, with Token Share Enabled, SHOULD be able to support two or more Bandwidth Profile Flows in every Envelope at that UNI.
+                        [R3] A UNI with Token Share Disabled, MUST have exactly one Bandwidth Profile Flow per Envelope";
+                }
+                leaf l2cp-address-set {
+                    type l2cp-address-set;
+                    description "MEF 45: The L2CP Address Set Service Attribute specifies the subset of the Bridge Reserved Addresses that are filtered (i.e. L2CP Frames with this destination address are Peered or Discarded but not Passed) at a L2CP Decision Point.
+                        The basic construct of the L2CP behavioral model is a Decision Point that determines how an L2CP Frame is processed at an External Interface. L2CP Frames that enter
+                        the Decision Point from the External Interface will either be Passed to the EVC (or OVC), or Peered by redirecting the frame to a Protocol Entity, or Discarded. L2CP Frames that enter the Decision Point
+                        from the EVC (or OVC) will either be Passed to the External Interface, or Peered by redirecting the frame to a Protocol Entity, or Discarded.";
+                }
+                container l2cp-peering-list {
+                    uses l2cp-peering;
+                    description "MEF 45: The L2CP Peering Service Attribute is a list of Layer 2 Control Protocols that will be Peered by a protocol entity at a UNI, VUNI, or ENNI. Each entry in the list specifies the Protocol Identifier and the Destination Address in use by the protocol entity.";
+                }
+                container ingress-cg-eth-bwpflow {
+                    uses cg-eth-bwp-flow;
+                    description "none";
+                }
+                container egress-cg-eth-bwpflow {
+                    uses cg-eth-bwp-flow;
+                    description "none";
+                }
+                list cg-eth-envelope-list {
+                    key 'uuid';
+                    uses cg-eth-envelope;
+                    description "none";
+                }
+                uses cg-eth-frame-aggr-trm-spec;
+                description "none";
+            }
+            container cg-ety-trm-spec {
+                leaf-list physical-layer-list {
+                    type physical-layer;
+                    description "MEF 7.3: This attribute is a list of physical layers, one for each physical link implementing the UNI or ENNI. Different physical links can use different physical layers. The Physical Layer for each physical link implementing the UNI or ENNI MUST is one of the PHYs listed in IEEE Std 802.3 – 2012 but excluding 1000BASE-PX-D and 1000BASE-PX-U.
+                        G.8052: This attribute identifies the PHY type of the ETY trail termination. See clause 30.3.2.1.2 of [IEEE 802.3].
+                        IEEE 802.3: A read-only value that identifies the PHY type. The enumeration of the type is such that the value matches the clause number of this International Standard that specifies the particular PHY. The value of this attribute maps to the value of aMAUType. The enumeration “none” can only occur in a standard implementation where an MII exists and there is nothing connected. However, the attribute aMIIDetect should be used to determine whether an MII exists or not.";
+                }
+                list sync-mode-list {
+                    key 'link-id';
+                    min-elements 1;
+                    uses sync-mode-per-link;
+                    description "MEF 7.3: This attribute is a list with one item for each of the physical links. When the value of an item is 'Enabled,' the bits transmitted from the CEN to the CE on the physical link corresponding to the item can be used by the CE as a bit clock reference.
+                        G.8052: no equivalent definition
+                        IEEE 802.3: oTimeSync class (?), 1:1 with oMAU.";
+                }
+                leaf number-of-links {
+                    type positive-integer;
+                    description "none";
+                }
+                container port-convs-id-to-agg-link-map-list {
+                    uses conversation-id-to-aggregation-link-map;
+                    description "MEF 7.3: This attribute is applicable only when the UNI or ENNI resiliency attribute has the value of All Active. Its value is a Port Conversation ID to Aggregation Link Map as defined in IEEE Std 802.1AX – 2014.
+                        G.8052: no equivalent definition - likely because refers to IEEE Std 802.1AX – 2008, where Conversation-sensitive LACP was not yet defined.";
+                }
+                leaf link-oam-enabled {
+                    type boolean;
+                    description "MEF 7.3: This attribute denotes the Link OAM is enabled or not at the UNI or the ENNI. When the value of the Link OAM attribute is TRUE, Link OAM must be run on all physical links in the UNI/ENNI.";
+                }
+                leaf lag-link-meg-enabled {
+                    type boolean;
+                    description "MEF 7.3: This attribute denotes the Link Aggregation Link MEG enabled or not at the UNI or at the ENNI. When the value  is TRUE, the Service Provider or the Operator must operate the LAG Link MEG on each link in the EI.
+                        To be updated accordingly to the development of OAM model. E.g. can be replaced by explicit provisioning of MEP on LAG links.";
+                }
+                leaf link-aggregation {
+                    type interface-resiliency;
+                    description "MEF 7.3: This attribute represents the Link Aggregation for a UNI or an ENNI. Its value is one of None, 2-Link Active/Standby, All Active, or Other. In MEF 10.3 it is called UNI Resiliency. the value of All Active is added in MEF 10.3.2.
+                        G.8052: no equivalent definition found.";
+                }
+                description "none";
+            }
+            grouping cg-eth-frame-aggr-trm-spec {
+                description "none";
+            }
+            grouping cg-eth-frame-flow-cpa-aspec {
+                leaf cos-mapping-type {
+                    type cos-or-eec-mapping-type;
+                    description "MEF 7.3 (UML): The Class of Service (CoS) is used to specify ingress Bandwidth Profiles. The values of CoS is a triple of the form mapping type, SEP (Service End Point) based, PCP based or DSCP based.";
+                }
+                container source-mac-address-limit {
+                    uses source-mac-address-limit;
+                    description "MEF 10.3: Source MAC Address Limit can be either Enabled or Disabled.
+                        This attribute limits the number of source MAC Addresses that can be used in ingress Service Frames of all types over a time interval. Two independent parameters control the behavior of this attribute: N : A positive integer and t : A time interval.
+                        This attribute operates by maintaining a list of maximum length N of source MAC addresses which are aged-out of the list if not seen in a time interval t. If an ingress Service Frame arrives with a new source MAC address when the list is full, the Service Frame is discarded.
+                        MEF 7.3: This attribute limits the number of source MAC Addresses that can be used in ingress EI Frames mapped to the EVC End Point or the OVC End Point of all types over a time interval. When not present, the number of source MAC addresses is unlimited.";
+                }
+                leaf eec-mapping-type {
+                    type cos-or-eec-mapping-type;
+                    description "MEF 7.3 (UML): The Egress Equivalence Class (EEC) is used to specify Egress Bandwidth Profiles. The values of EEC is a triple of the form mapping type, SEP (Service End Point) based, PCP based or DSCP based. When _eecIdentifier is null this attrubute shall be null. Otherwise both shall be set.";
+                }
+                container agg-link-depth {
+                    uses agg-link-depth;
+                    description "MEF 7.3: 
+                        EvcEndPoint: This attribute only applies to an EVC End Point when the UNI resiliency has the value All Active. The EVC End Point Aggregation Link Depth Service Attribute value is a list of pairs of the form < VLAN ID, ,n> where the CE-VLAN ID value that is contained in the value of the EVC End Point Map and n is an integer in the range 1 to the value of the EI Number of Links n specifies the number of links in the value of the EI Port Conversation ID to Aggregation Link Map for the VLAN ID value.
+                        OvcEndPoint: This attribute only applies to an OVC End Point at ENNI when the EI Link Aggregation has the value All Active. This attribute value is a list of pairs of the form < S-VLAN ID, ,n> where the S-VLAN ID value that is contained in the value of the OVC End Point Map and n is an integer in the range 1 to the value of the EI Number of Links n specifies the number of links in the value of the EI Port Conversation ID to Aggregation Link Map for the VLAN ID value.";
+                }
+                container cg-eth-color-identifier {
+                    uses cg-eth-color-identifier;
+                    description "none";
+                }
+                leaf end-point-role {
+                    type ovc-end-point-role;
+                    description "End Point Role can be Root, Leaf for EVC End Points, Root, Leaf and Trunk for OVC End Poins.";
+                }
+                list s-vlan-id-list {
+                    key 'type';
+                    uses vlan-id-listing;
+                    description "none";
+                }
+                container ce-vlan-id-list {
+                    uses vlan-id-listing;
+                    description "ceVlanIdList maps 7.3 evcEndPointMap.
+                        MEF 7.3: This attribute provides the list of CE-VLAN IDs those map to the EVC. MEF 10.3 lists this attribute (CE-VLAN ID/EVC map) as UNI service attribute while MEF 26.2 decided to move this on as endpoint service attribute. Decided to move this one to endpoint to be consistent. MEF 45 allows this attribute to be elastic.";
+                }
+                container root-svlan-id-list {
+                    uses vlan-id-listing;
+                    description "none";
+                }
+                container leaf-svlan-id-list {
+                    uses vlan-id-listing;
+                    description "none";
+                }
+                container cg-eth-spor-sospecific-srv-attributes {
+                    uses cg-eth-spor-sospecific-srv-attributes;
+                    description "none";
+                }
+                container cg-eth-bwp-flow {
+                    uses cg-eth-bwp-flow;
+                    description "none";
+                }
+                container ingress-cg-ethbwpflow {
+                    uses cg-eth-bwp-flow;
+                    description "none";
+                }
+                list eth-cg-eth-cos-identifier {
+                    key 'uuid';
+                    uses eth-cg-eth-cos-identifier;
+                    description "none";
+                }
+                list cg-eth-eec-identifier {
+                    key 'uuid';
+                    uses cg-eth-eec-identifier;
+                    description "none";
+                }
+                list cg-eth-egress-map {
+                    key 'uuid';
+                    uses cg-eth-egress-map;
+                    description "none";
+                }
+                description "none";
+            }
+            grouping cg-eth-conn-serv-spec {
+                leaf connection-type {
+                    type connection-type;
+                    description "7.3 'connectionType' replaced by G.8052 'connectionType' attribute.";
+                }
+                leaf unicast-frame-delivery {
+                    type frame-delivery;
+                    description "none";
+                }
+                leaf multicast-frame-delivery {
+                    type frame-delivery;
+                    description "none";
+                }
+                leaf broadcast-frame-delivery {
+                    type frame-delivery;
+                    description "none";
+                }
+                leaf ce-vlan-pcp-preservation {
+                    type boolean;
+                    description "MEF 7.3 (UML): The CE-VLAN PCP preservation represents the PCP value relationship between the ingress Service Frame and its corresponding egress Service Frame(s). In MEF 10.3, it is called CE VLAN ID COS Preservation. ";
+                }
+                leaf ce-vlan-dei-preservation {
+                    type boolean;
+                    description "MEF 7.3 (UML): The CE-VLAN DEI Preservation Service Attribute for EVC/OVC can be used to preserve the value of the DEI field in VLAN Tagged Service Frames across a service. This is not inlcuded in MEF 10.3 but added in MEV 26.2. Future consideration will be included in MEF 10.x.";
+                }
+                leaf max-frame-size {
+                    type positive-integer;
+                    description "none";
+                }
+                leaf cos-name-list {
+                    type string;
+                    description "none";
+                }
+                leaf ce-vlan-id-preservation {
+                    type vlan-id-preservation;
+                    description "MEF 7.3 EVC/OVC ceVlanIdPreservation added to CgEthConnServSpec class, with the OVC type (PRESERVE/STRIP/RETAIN) as it depends on EVC/OVC decomposition performed by SOFs.
+                        MEF 7.3 defines this attribute separately in EVC and OVC. When defined in OVC, the type is more complex:
+                        This attribute describes a relationship between the format of the VLAN ID and related fields values of the frame at one External Interface and the format and VLAN ID  and related fields values of the corresponding frame at another External Interface. The value of OVC CE-VLAN ID Preservation Service Attribute can be one of PRESERVE, STRIP, or RETAIN.";
+                }
+                leaf s-vlan-pcp-preservation {
+                    type boolean;
+                    description "MEF 7.3 (UML): This attribute describes a relationship between the S-VLAN PCP value of a frame at one ENNI and the S-VLAN PCP of the corresponding frame at another ENNI supported by the Operator CEN where each ENNI has an OVC End Point that is associated by the OVC.";
+                }
+                leaf s-vlan-dei-preservation {
+                    type boolean;
+                    description "MEF 7.3 (UML): This attribute describes a relationship between the S-VLAN DEI value of a frame at one ENNI and the S-VLAN DEI of the corresponding frame at another ENNI supported by the Operator CEN where each ENNI has an OVC End Point that is associated by the OVC.";
+                }
+                leaf available-meg-level {
+                    type available-meg-level;
+                    description "none";
+                }
+                leaf l2cp-address-set {
+                    type l2cp-address-set;
+                    description "l2cpAddressSet maps 7.3 ovcL2cpAddressSet.
+                        MEF 7.3 (UML): This attribute is the L2CP Address Set Service Attribute that is defined in MEF 45 when it is applied to the OVC.";
+                }
+                container cg-eth-carrier-ethernet-sls {
+                    uses cg-eth-carrier-ethernet-sls;
+                    description "none";
+                }
+                description "none";
+            }
+            grouping cg-eth-spor-sospecific-srv-attributes {
+                leaf sp-or-so-id {
+                    type identifier45;
+                    description "none";
+                }
+                leaf token-share-enabled {
+                    type boolean;
+                    description "none";
+                }
+                leaf-list operator-conn-serv-port-list {
+                    type leafref {
+                        path '/tapi-common:context/tapi-connectivity:connectivity-service/tapi-connectivity:service-end-point/tapi-connectivity:local-id';
+                    }
+                    description "none";
+                }
+                leaf uuid {
+                    type tapi-common:universal-id;
+                    description "none";
+                }
+                list cg-eth-envelope-list {
+                    key 'uuid';
+                    uses cg-eth-envelope;
+                    description "none";
+                }
+                description "none";
+            }
+            grouping eth-cg-eth-cos-identifier {
+                leaf uuid {
+                    type tapi-common:universal-id;
+                    description "none";
+                }
+                description "none";
+            }
+            grouping cg-eth-egress-map {
+                leaf uuid {
+                    type tapi-common:universal-id;
+                    description "none";
+                }
+                description "none";
+            }
+            grouping cg-eth-color-identifier {
+                leaf uuid {
+                    type tapi-common:universal-id;
+                    description "none";
+                }
+                description "none";
+            }
+            grouping cg-eth-eec-identifier {
+                leaf uuid {
+                    type tapi-common:universal-id;
+                    description "none";
+                }
+                description "none";
+            }
+            grouping cg-eth-bwp-flow {
+                leaf uuid {
+                    type tapi-common:universal-id;
+                    description "none";
+                }
+                description "none";
+            }
+            grouping cg-eth-envelope {
+                leaf uuid {
+                    type tapi-common:universal-id;
+                    description "none";
+                }
+                list cg-eth-bwp-flow-list {
+                    key 'uuid';
+                    min-elements 1;
+                    uses cg-eth-bwp-flow;
+                    description "none";
+                }
+                description "none";
+            }
+            grouping cg-eth-carrier-ethernet-sls {
+                leaf uuid {
+                    type tapi-common:universal-id;
+                    description "none";
+                }
+                list cg-eth-sls-cos-name-entry {
+                    key 'uuid';
+                    uses cg-eth-sls-cos-name-entry;
+                    description "none";
+                }
+                description "none";
+            }
+            grouping cg-eth-sls-cos-name-entry {
+                leaf uuid {
+                    type tapi-common:universal-id;
+                    description "none";
+                }
+                list cg-eth-sls-objective-and-parameters {
+                    key 'uuid';
+                    uses cg-eth-sls-objective-and-parameters;
+                    description "none";
+                }
+                description "none";
+            }
+            grouping cg-eth-sls-objective-and-parameters {
+                leaf uuid {
+                    type tapi-common:universal-id;
+                    description "none";
+                }
+                description "none";
+            }
+
+        /***********************
+        * package diagrams
+        **********************/
+
+        /***********************
+        * package type-definitions
+        **********************/
+            typedef natural-number {
+                type uint64;
+                description "An integer >=0";
+            }
+            grouping l2cp-peering {
+                container protocol-id {
+                    uses l2cp-protocol;
+                    description "This is a L2CP Protocol Identifier.";
+                }
+                leaf destination-address {
+                    type natural-number;
+                    description "This is a Mac Address.";
+                }
+                leaf-list link-id-list {
+                    type positive-integer;
+                    description "It is possible that a protocol (e.g. ESMC) could operate on some, but not all, of the physical
+                        links. When linkId is not listed, the protocol peering applies to all members of the aggregation link.";
+                }
+                description "This is a list specifies the L2CP Protocol Identifier and the Destination Address in use by the protocol entity.";
+            }
+            typedef tagged-l2cp-processing {
+                type enumeration {
+                    enum 802-1-compliant {
+                        description "none";
+                    }
+                    enum 802-1-non-compliant {
+                        description "none";
+                    }
+                }
+                description "Either 802.1 compliant or not. Refer to MEF 45.";
+            }
+            grouping vlan-id {
+                leaf vlan-id {
+                    type positive-integer;
+                    description "This is the Vlan ID value.";
+                }
+                description "This is for VLAN ID from 1 to 4094";
+            }
+            typedef positive-integer {
+                type uint64;
+                description "An integer >0";
+            }
+            typedef l2cp-address-set {
+                type enumeration {
+                    enum cta {
+                        description "CE-Vlan Tag Aware";
+                    }
+                    enum ctb {
+                        description "CE-Vlan Tag Blind";
+                    }
+                    enum ctb2 {
+                        description "CE-Vlan Tag Blind option 2";
+                    }
+                }
+                description "This lists the L2CP Address Set. Refer to MEF 45.";
+            }
+            typedef physical-layer {
+                type enumeration {
+                    enum 10base2 {
+                        description "none";
+                    }
+                    enum 10base5 {
+                        description "none";
+                    }
+                    enum 10base-f {
+                        description "none";
+                    }
+                    enum 10base-fb {
+                        description "none";
+                    }
+                    enum 10base-fl {
+                        description "none";
+                    }
+                    enum 10base-fp {
+                        description "none";
+                    }
+                    enum 10base-t {
+                        description "none";
+                    }
+                    enum 10base-te {
+                        description "none";
+                    }
+                    enum 10broad36 {
+                        description "none";
+                    }
+                    enum 10pass-ts {
+                        description "none";
+                    }
+                    enum 100base-bx10 {
+                        description "none";
+                    }
+                    enum 100base-fx {
+                        description "none";
+                    }
+                    enum 100base-lx10 {
+                        description "none";
+                    }
+                    enum 100base-t {
+                        description "none";
+                    }
+                    enum 100base-t2 {
+                        description "none";
+                    }
+                    enum 100base-t4 {
+                        description "none";
+                    }
+                    enum 100base-tx {
+                        description "none";
+                    }
+                    enum 100base-x {
+                        description "none";
+                    }
+                    enum 1000base-bx10 {
+                        description "none";
+                    }
+                    enum 1000base-cx {
+                        description "none";
+                    }
+                    enum 1000base-kx {
+                        description "none";
+                    }
+                    enum 1000base-lx {
+                        description "none";
+                    }
+                    enum 1000base-lx10 {
+                        description "none";
+                    }
+                    enum 1000base-px10 {
+                        description "none";
+                    }
+                    enum 1000base-px20 {
+                        description "none";
+                    }
+                    enum 1000base-sx {
+                        description "none";
+                    }
+                    enum 1000base-t {
+                        description "none";
+                    }
+                    enum 1000base-x {
+                        description "none";
+                    }
+                    enum 10gbase-cx4 {
+                        description "none";
+                    }
+                    enum 10gbase-e {
+                        description "none";
+                    }
+                    enum 10gbase-er {
+                        description "none";
+                    }
+                    enum 10gbase-ew {
+                        description "none";
+                    }
+                    enum 10gbase-kr {
+                        description "none";
+                    }
+                    enum 10gbase-kx4 {
+                        description "none";
+                    }
+                    enum 10gbase-l {
+                        description "none";
+                    }
+                    enum 10gbase-lr {
+                        description "none";
+                    }
+                    enum 10gbase-lrm {
+                        description "none";
+                    }
+                    enum 10gbase-lw {
+                        description "none";
+                    }
+                    enum 10gbase-lx4 {
+                        description "none";
+                    }
+                    enum 10gbase-pr {
+                        description "none";
+                    }
+                    enum 10gbase-prx {
+                        description "none";
+                    }
+                    enum 10gbase-r {
+                        description "none";
+                    }
+                    enum 10gbase-s {
+                        description "none";
+                    }
+                    enum 10gbase-sr {
+                        description "none";
+                    }
+                    enum 10gbase-sw {
+                        description "none";
+                    }
+                    enum 10gbase-t {
+                        description "none";
+                    }
+                    enum 10gbase-w {
+                        description "none";
+                    }
+                    enum 10gbase-x {
+                        description "none";
+                    }
+                    enum 100gbase-r {
+                        description "none";
+                    }
+                    enum 100gbase-cr10 {
+                        description "none";
+                    }
+                    enum 100gbase-er4 {
+                        description "none";
+                    }
+                    enum 100gbase-lr4 {
+                        description "none";
+                    }
+                    enum 100gbase-sr10 {
+                        description "none";
+                    }
+                    enum 40gbase-r {
+                        description "none";
+                    }
+                    enum 40gbase-cr4 {
+                        description "none";
+                    }
+                    enum 40gbase--fr {
+                        description "none";
+                    }
+                    enum 40gbase-kr4 {
+                        description "none";
+                    }
+                    enum 40gbase-lr4 {
+                        description "none";
+                    }
+                    enum 40gbase-sr4 {
+                        description "none";
+                    }
+                    enum 1base5 {
+                        description "none";
+                    }
+                    enum 2base-tl {
+                        description "none";
+                    }
+                    enum 1g-epon {
+                        description "none";
+                    }
+                    enum 10g-epon {
+                        description "none";
+                    }
+                    enum 10-1g-epon {
+                        description "none";
+                    }
+                    enum 10-10g-epon {
+                        description "none";
+                    }
+                    enum other {
+                        description "none";
+                    }
+                    enum none {
+                        description "none";
+                    }
+                }
+                description "IEEE802.3 (2012) defined list excluding 1000BASE-PX-D and 1000BASE-PX-U. NONE is added with further MEF 10.3 discussion, for supporting logical interfaces.";
+            }
+            grouping sync-mode-per-link {
+                leaf link-id {
+                    type natural-number;
+                    description "This is the link ID of the link in the Aggregation Link.";
+                }
+                leaf sync-mode-enabled {
+                    type boolean;
+                    description "This attribute denotes whether the Synchronous Mode is enabled (on the link with the Link ID).";
+                }
+                description "A link may consist of one or more physical ports. This data type includes the link ID and the sync mode of the physical port associated to the link Id.";
+            }
+            typedef interface-resiliency {
+                type enumeration {
+                    enum none {
+                        description "none";
+                    }
+                    enum 2-link-active-standby {
+                        description "none";
+                    }
+                    enum all-active {
+                        description "none";
+                    }
+                    enum other {
+                        description "none";
+                    }
+                }
+                description "The method for protection, if any, against a physical link failure. Refer to MEF 10.3.2 and MEF 26.2.";
+            }
+            grouping conversation-id-to-aggregation-link-map {
+                leaf conversation-id {
+                    type natural-number;
+                    description "The conversation ID is a Vlan ID or 0 for untagged or priority tagged frame.. ";
+                }
+                leaf-list link-id-list {
+                    type natural-number;
+                    min-elements 1;
+                    description "The link ID of the aggregation link.";
+                }
+                description "This is a Port Conversation ID to Aggregation Link Map as defined in IEEE Std 802.1AX – 2014.";
+            }
+            typedef cos-or-eec-mapping-type {
+                type enumeration {
+                    enum end-point {
+                        description "Using EVC End Point or OVC End Point to map to the CoS Name as CoS ID.";
+                    }
+                    enum pcp {
+                        description "Using PCP field to map to the CoS Name as CoS ID.";
+                    }
+                    enum dscp {
+                        description "Using DSCP field to map to the CoS Name as CoS ID.";
+                    }
+                }
+                description "This lists the Class of Service identifier type, or the Equivalence Class Identifier type. ";
+            }
+            grouping source-mac-address-limit {
+                leaf limit {
+                    type natural-number;
+                    description "This attribute denotes the maximum acceptable source MAC addresses.";
+                }
+                leaf time-interval {
+                    type natural-number;
+                    description "This attribute denotes the time interval in milliseconds.";
+                }
+                description "This limits the number of source MAC Addresses that can be used in ingress external interface frames mapped to the End Point of all types over a time interval.";
+            }
+            grouping agg-link-depth {
+                container vlan-id {
+                    uses vlan-id;
+                    description "The ingress frame Vlan ID. ";
+                }
+                leaf link-depth {
+                    type positive-integer;
+                    description "The number of links for the aggregation link.";
+                }
+                description "This is a pair of <VLAN ID, link depth> indicating that a given VLAN ID maps to a given number of links in the Port Conversation ID to Aggregation Link Map.";
+            }
+            typedef ovc-end-point-role {
+                type enumeration {
+                    enum root {
+                        description "OVC End Point has role of root for the OVC.";
+                    }
+                    enum leaf {
+                        description "OVC End Point has role of leaf for the OVC.";
+                    }
+                    enum trunk {
+                        description "OVC End Point has role of trunk for the OVC.";
+                    }
+                }
+                description "The value indicates how external interface frames mapped to the  OVC End Point can be forwarded.";
+            }
+            grouping vlan-id-listing {
+                leaf type {
+                    type vlan-id-mapping-type;
+                    description "Can be LIST, or ALL, or EXCEPT.";
+                }
+                list vlan-id-list {
+                    key 'vlan-id';
+                    uses vlan-id;
+                    description "This is a list of Vlan IDs.";
+                }
+                description "The list VLAN IDs, either when type=LIST, or when type==EXCEPT (which means the VLAN IDs except the listed). When type=ALL, the vlanId list is not applicable.";
+            }
+            typedef connection-type {
+                type enumeration {
+                    enum point-to-point {
+                        description "none";
+                    }
+                    enum multipoint {
+                        description "none";
+                    }
+                    enum rooted-multipoint {
+                        description "none";
+                    }
+                }
+                description "This is for EVC or OVC connection types, including point to point, multi-point and rooted multi-point.";
+            }
+            typedef frame-delivery {
+                type enumeration {
+                    enum discard {
+                        description "Frame must be discarded.";
+                    }
+                    enum conditionally {
+                        description "Frame will be delivered with specified condition.";
+                    }
+                    enum unconditionally {
+                        description "Frame will be delivered unconditionally.";
+                    }
+                }
+                description "Service frame delivery defined in MEF 10.3. When the value is conditionally, the specific condition has to be addresses by the users. What conditions should be supported are not in the scope.";
+            }
+            typedef vlan-id-preservation {
+                type enumeration {
+                    enum preserve {
+                        description "To achieve EVC CE-VLAN ID Preservation.";
+                    }
+                    enum retain {
+                        description "C-Tag, if present, is encapsulated with the C-Tag VLAN ID value retained.";
+                    }
+                    enum strip {
+                        description "C-Tag is discarded.";
+                    }
+                }
+                description "This is for Vlan ID Preservation. Refer to MEF 26.2 section 12.7.";
+            }
+            typedef available-meg-level {
+                type enumeration {
+                    enum none {
+                        description "Indicates that SOAM EI Frames are not guaranteed to pass over this OVC at any MEG Level.";
+                    }
+                    enum 0 {
+                        description "none";
+                    }
+                    enum 1 {
+                        description "none";
+                    }
+                    enum 2 {
+                        description "none";
+                    }
+                    enum 3 {
+                        description "none";
+                    }
+                    enum 4 {
+                        description "none";
+                    }
+                    enum 5 {
+                        description "none";
+                    }
+                    enum 6 {
+                        description "none";
+                    }
+                    enum 7 {
+                        description "none";
+                    }
+                }
+                description "This enumeration is for available MEG level, can be either NONE or value 0..7.  NONE indicates that SOAM EI Frames are not guaranteed to pass over at any MEG Level.";
+            }
+            typedef identifier45 {
+                type string;
+                description "Unique by network administrative domain, containing no more than 45 characters and non-null RFC Display String but not contain the characters 0x00 through 0x1f.";
+            }
+            grouping l2cp-protocol {
+                leaf l2cp-protocol-type {
+                    type l2cp-protocol-type;
+                    description "This attribute specifies the type of L2CP protocol, i.e., LLC or EtherType.";
+                }
+                leaf llc-address-or-ether-type {
+                    type natural-number;
+                    description "This attribute specifies the LLC address or the EtherType value.";
+                }
+                leaf sub-type {
+                    type natural-number;
+                    description "This attribute specifies the subtype of the L2CP protocol.";
+                }
+                description "This data type defines a L2CP protocol (LLC address type or EtherType) with possible subtype.";
+            }
+            typedef l2cp-protocol-type {
+                type enumeration {
+                    enum ethertype {
+                        description "EtherType for L2CP, e.g., LLDP (0x88CC).";
+                    }
+                    enum llc {
+                        description "Logical Link Control sublayer address for L2CP, e.g., STP (0x42).";
+                    }
+                }
+                description "This lists the L2CP protocol types, either EtherType, or LLC Address.";
+            }
+            typedef vlan-id-mapping-type {
+                type enumeration {
+                    enum all {
+                        description "All Vlan IDs.";
+                    }
+                    enum except {
+                        description "All Vlan IDs except the listed.";
+                    }
+                    enum list {
+                        description "List of Vlan IDs.";
+                    }
+                }
+                description "Vlan ID types, ALL for all vlan IDs, LIST for a list of Vlan IDs, EXCEPT for all Vlan IDs except the listed. ";
+            }
+
+
+}
