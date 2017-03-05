@@ -25,6 +25,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 
   <properties>
     <ovsdb.version>1.4.0-SNAPSHOT</ovsdb.version>
+    <vpnservice.version>0.4.0-SNAPSHOT</vpnservice.version>
   </properties>
 
   <dependencies>
@@ -44,6 +45,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>southbound-api</artifactId>
       <version>${ovsdb.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.netvirt</groupId>
+      <artifactId>dhcpservice-api</artifactId>
+      <version>${vpnservice.version}</version>
     </dependency>
   </dependencies>
 

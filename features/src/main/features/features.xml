@@ -22,7 +22,6 @@
     description='OpenDaylight :: UniMgr :: api'>
     <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
     <feature version='${ovsdb.version}'>odl-ovsdb-southbound-api</feature>
-    <bundle>mvn:org.opendaylight.unimgr/unimgr-legato-api/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.unimgr/unimgr-api/{{VERSION}}</bundle>
   </feature>
 
@@ -56,6 +55,7 @@
     <feature version='${vpnservice.version}'>odl-netvirt-impl</feature>
     <feature version="${restconf.version}">odl-restconf</feature>
     <bundle>mvn:org.opendaylight.unimgr/unimgr-netvirt/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.unimgr/unimgr-legato-api/{{VERSION}}</bundle>
   </feature>
 
     <feature name='odl-unimgr-dlux' version='${project.version}'
