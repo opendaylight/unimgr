@@ -36,6 +36,7 @@
     description='OpenDaylight :: UniMgr'>
     <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${ovsdb.version}'>odl-ovsdb-southbound-impl</feature>
+    <feature version='${vpnservice.version}'>odl-netvirt-impl</feature>
     <feature version='${project.version}'>odl-unimgr-api</feature>
     <feature version='${project.version}'>odl-unimgr-presto-api</feature>
     <!-- TODO these features should be dependencies of drivers not unimgr

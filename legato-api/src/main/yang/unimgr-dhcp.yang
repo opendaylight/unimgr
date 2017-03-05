@@ -1,0 +1,26 @@
+module unimgr-dhcp {
+    namespace "urn:opendaylight:unimgr:unimgr-dhcp";
+    prefix "unimgr-dhcp";
+    
+    import dhcp_allocation_pool {
+        prefix dhcp;
+    }
+
+    revision "2016-12-14" {
+        description "It provides required datastore containers to handle DHCP requests
+            coming from access or external tunnel ports";
+    }
+
+    container unimgr-dhcp {
+        config true;
+        description "contains non-neutron DHCP allocation";
+        list network {
+            key "network-id";
+            leaf network-id {
+                description "unimgr network id";
+                type string;
+            }
+            uses dhcp:dhcp_allocations;
+        }
+    }
+}
