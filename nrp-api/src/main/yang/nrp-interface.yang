@@ -1,0 +1,75 @@
+module nrp-interface {
+    namespace "urn:mef:yang:nrp-interface";
+    prefix nrp-interface;
+    import tapi-connectivity {
+        prefix tapi-connectivity;
+    }
+    import tapi-common {
+        prefix tapi-common;
+    }
+    import nrm-connectivity {
+        prefix nrm-connectivity;
+    }
+    organization "Metro Ethernet Forum (MEF)";
+    contact "MEF";
+    description "none";
+    revision 2017-02-27 {
+        description "MEF NRP 1.0.alpha";
+        reference "ONF-TR-527, ONF-TR-512, ONF-TR-531, RFC 6020 and RFC 6087";
+    }
+    augment "/tapi-common:context/tapi-connectivity:connectivity-service/tapi-connectivity:service-end-point" {
+        uses nrp-cg-eth-frame-flow-cpa-aspec;
+        description "none";
+    }
+    augment "/tapi-common:context/tapi-connectivity:connectivity-service" {
+        uses nrp-cg-eth-conn-serv-spec;
+        description "none";
+    }
+    augment "/tapi-common:context/tapi-common:service-interface-point/tapi-common:layer-protocol" {
+        uses nrp-augmentation;
+        description "none";
+    }
+    /***********************
+    * package diagrams
+    **********************/
+
+    /***********************
+    * package object-classes
+    **********************/
+        grouping nrp-cg-eth-uni-spec {
+            uses nrm-connectivity:cg-eth-uni-spec;
+            description "none";
+        }
+        grouping nrp-cg-eth-inni-spec {
+            uses nrm-connectivity:cg-eth-enni-spec;
+            description "none";
+        }
+        grouping nrp-cg-eth-frame-flow-cpa-aspec {
+            uses nrm-connectivity:cg-eth-frame-flow-cpa-aspec;
+            description "none";
+        }
+        grouping nrp-cg-eth-conn-serv-spec {
+            uses nrm-connectivity:cg-eth-conn-serv-spec;
+            description "none";
+        }
+        grouping nrp-cg-eth-enni-spec {
+            uses nrm-connectivity:cg-eth-enni-spec;
+            description "none";
+        }
+        grouping nrp-augmentation {
+            container nrp-cg-eth-uni-spec {
+                uses nrp-cg-eth-uni-spec;
+                description "none";
+            }
+            container nrp-cg-eth-inni-spec {
+                uses nrp-cg-eth-inni-spec;
+                description "none";
+            }
+            container nrp-cg-eth-enni-spec {
+                uses nrp-cg-eth-enni-spec;
+                description "none";
+            }
+            description "none";
+        }
+
+}
