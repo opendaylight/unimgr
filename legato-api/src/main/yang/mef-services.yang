@@ -86,6 +86,14 @@ module mef-services {
                                         "mef-interfaces:uni-id";
                   }
                 }
+                leaf-list security-groups {
+                    type mef-types:identifier45;
+                    description "The security group ID to associate with this interface.";
+                }
+                leaf port-security-enabled {
+                    type boolean;
+                    description "The port security status. The status is enabled (true) or disabled (false).";
+                }
                 leaf ip-uni-id {
                   type mef-types:identifier45;
                 }
@@ -682,6 +690,14 @@ module mef-services {
                                             "VLAN Identifier.";
                     }
                   }
+                }
+                leaf-list security-groups {
+                    type mef-types:identifier45;
+                    description "The security group ID to associate with this interface.";
+                }
+                leaf port-security-enabled {
+                    type boolean;
+                    description "The port security status. The status is enabled (true) or disabled (false).";
                 }
                 leaf ingress-bw-profile {
                     type mef-types:identifier45;

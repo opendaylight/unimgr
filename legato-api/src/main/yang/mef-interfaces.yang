@@ -117,6 +117,7 @@ module mef-interfaces {
           list ip-uni {
             key "ip-uni-id";
             leaf ip-uni-id {
+                            description "";
               type mef-types:identifier45;
             }
             leaf ip-address {
