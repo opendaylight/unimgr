@@ -872,6 +872,37 @@ module mef-interfaces {
       }
     }
 
+    container networks {
+    list network {
+        key "network-id";
+        leaf network-id {
+            type mef-types:identifier45;
+        }
+        leaf ip-address {
+            type inet:ip-prefix;
+          }
+        list ports {
+            key "ip-uni-id";
+            leaf uni-id {
+                type leafref {
+                  path "/mef-interfaces:mef-interfaces/mef-interfaces:unis/mef-interfaces:uni/mef-interfaces:uni-id";
+                }
+              }
+              leaf ip-uni-id {
+                type leafref {
+                  path "/mef-interfaces:mef-interfaces/mef-interfaces:unis/mef-interfaces:uni/" +
+                       "mef-interfaces:ip-unis/mef-interfaces:ip-uni/mef-interfaces:ip-uni-id";
+                }
+              }
+        }
+        list external-subnets {
+            key "subnet";
+            leaf subnet {type inet:ip-prefix;}
+            leaf gateway {type inet:ip-address;}
+        }
+        }
+    }
+
     container subnets {
       list subnet {
         key "uni-id ip-uni-id subnet";
