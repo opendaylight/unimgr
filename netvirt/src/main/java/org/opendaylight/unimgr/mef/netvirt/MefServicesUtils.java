@@ -26,7 +26,7 @@ import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.serv
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.IpvcChoice;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.Evc;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.Ipvc;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.Unis;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.Networks;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.VpnElans;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.VpnElansBuilder;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.vpn.elans.Subnets;
@@ -39,8 +39,8 @@ import com.google.common.base.Optional;
 
 public class MefServicesUtils {
 
-    public static InstanceIdentifier<Unis> getIpvcUnisInstanceIdentifier() {
-        return InstanceIdentifier.builder(MefServices.class).child(MefService.class).child(Ipvc.class).child(Unis.class)
+    public static InstanceIdentifier<Networks> getIpvcNetworksInstanceIdentifier() {
+        return InstanceIdentifier.builder(MefServices.class).child(MefService.class).child(Ipvc.class).child(Networks.class)
                 .build();
     }
 

@@ -76,14 +76,14 @@ module mef-services {
       choice mef-service-choice {
         case ipvc-choice {
           container ipvc {
-            container unis {
-              list uni {
-                key "uni-id ip-uni-id";
-                leaf uni-id {
+            container networks {
+              list network {
+                key "network-id";
+                leaf network-id {
                   type leafref {
                     path "/mef-interfaces:mef-interfaces/" +
-                                        "mef-interfaces:unis/mef-interfaces:uni/" +
-                                        "mef-interfaces:uni-id";
+                                        "mef-interfaces:networks/mef-interfaces:network/" +
+                                        "mef-interfaces:network-id";
                   }
                 }
                 leaf-list security-groups {
@@ -93,9 +93,6 @@ module mef-services {
                 leaf port-security-enabled {
                     type boolean;
                     description "The port security status. The status is enabled (true) or disabled (false).";
-                }
-                leaf ip-uni-id {
-                  type mef-types:identifier45;
                 }
                 leaf ingress-bw-profile {
                     type mef-types:identifier45;

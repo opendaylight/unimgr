@@ -19,6 +19,8 @@ import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.Subnets;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.networks.Network;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.networks.network.IpUnis;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.subnets.Subnet;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.uni.ip.unis.IpUni;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.IpvcVpn;
@@ -27,7 +29,6 @@ import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.serv
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.IpvcChoice;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.Ipvc;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.VpnElans;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.unis.Uni;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.Identifier45;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -319,14 +320,27 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
         for (MefService service : mefServices.get().getMefService()) {
             if (service.getMefServiceChoice() instanceof IpvcChoice) {
                 Ipvc ipvc = ((IpvcChoice) service.getMefServiceChoice()).getIpvc();
-                if (ipvc.getUnis() == null || ipvc.getUnis().getUni() == null) {
+                if (ipvc.getNetworks() == null || ipvc.getNetworks().getNetwork() == null) {
                     continue;
                 }
-                List<Uni> unis = ipvc.getUnis().getUni();
-                for (Uni uni : unis) {
-                    if (uni.getUniId().equals(uniId) && uni.getIpUniId().equals(ipUniId)) {
-                        Log.info("Find service {} for uni {} ipuni {}", service.getSvcId(), uniId, ipUniId);
-                        return MefServicesUtils.getIpvcInstanceIdentifier(service.getSvcId());
+                List<org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.networks.Network> networks = ipvc
+                        .getNetworks().getNetwork();
+                for (org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.networks.Network netwok : networks) {
+                    Identifier45 networkId = netwok.getNetworkId();
+                    InstanceIdentifier<Network> networkInstanceIdentifier = MefInterfaceUtils.getNetworkInstanceIdentifier(networkId);
+                    Optional<Network> optionalNetwork = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, networkInstanceIdentifier);
+                    if (!optionalNetwork.isPresent()) {
+                        continue;
+                    }
+                    Network interfaceNetwork = optionalNetwork.get();
+
+
+                    List<IpUnis> ipUnis = interfaceNetwork.getIpUnis();
+                    for (IpUnis ipUni : ipUnis) {
+                        if (ipUni.getUniId().equals(uniId) && ipUni.getIpUniId().equals(ipUniId)) {
+                            Log.info("Find service {} for uni {} ipuni {}", service.getSvcId(), uniId, ipUniId);
+                            return MefServicesUtils.getIpvcInstanceIdentifier(service.getSvcId());
+                        }
                     }
                 }
             }

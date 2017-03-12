@@ -12,8 +12,11 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.genius.interfacemanager.globals.IfmConstants;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.MefInterfaces;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.Networks;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.Subnets;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.Unis;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.networks.Network;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.networks.NetworkKey;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.subnets.Subnet;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.subnets.SubnetKey;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.Uni;
@@ -78,15 +81,27 @@ public final class MefInterfaceUtils {
         return InstanceIdentifier.builder(MefInterfaces.class).child(Subnets.class).build();
     }
 
+    public static InstanceIdentifier<Networks> getNetworkListInstanceIdentifier() {
+        return InstanceIdentifier.builder(MefInterfaces.class).child(Networks.class).build();
+    }
+
     public static InstanceIdentifier<Subnet> getSubnetsInstanceIdentifier() {
         return InstanceIdentifier.builder(MefInterfaces.class).child(Subnets.class).child(Subnet.class).build();
+    }
+
+    public static InstanceIdentifier<Network> getNetworksInstanceIdentifier() {
+        return InstanceIdentifier.builder(MefInterfaces.class).child(Networks.class).child(Network.class).build();
     }
 
     public static InstanceIdentifier<Subnet> getSubnetInstanceIdentifier(Identifier45 uniId, Identifier45 ipUniId,
             IpPrefix subnet) {
         return InstanceIdentifier.builder(MefInterfaces.class).child(Subnets.class)
-
                 .child(Subnet.class, new SubnetKey(ipUniId, subnet, uniId)).build();
+    }
+
+    public static InstanceIdentifier<Network> getNetworkInstanceIdentifier(Identifier45 networkId) {
+        return InstanceIdentifier.builder(MefInterfaces.class).child(Networks.class)
+                .child(Network.class, new NetworkKey(networkId)).build();
     }
 
     public static Link getLink(DataBroker dataBroker, String uniId, LogicalDatastoreType datastoreType) {
