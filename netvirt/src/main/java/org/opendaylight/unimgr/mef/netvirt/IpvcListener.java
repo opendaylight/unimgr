@@ -12,11 +12,13 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
@@ -64,11 +66,16 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
     private OdlInterfaceRpcService odlInterfaceRpcService;
     private final SouthboundUtils southBoundUtils;
     private final org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils mdsalUtils;
+    private final NotificationPublishService notificationPublishService;
+
     private static final String LOCAL_IP = "local_ip";
+
+    // TODO: make it as service
+    private ConcurrentHashMap<String, BigInteger> portToDpn;
 
     public IpvcListener(final DataBroker dataBroker, final IUniPortManager uniPortManager,
             final ISubnetManager subnetManager, final UniQosManager uniQosManager,
-            final OdlInterfaceRpcService odlInterfaceRpcService) {
+            final OdlInterfaceRpcService odlInterfaceRpcService, final NotificationPublishService notPublishService) {
         super(dataBroker);
         this.uniPortManager = uniPortManager;
         this.subnetManager = subnetManager;
@@ -77,6 +84,8 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
         this.odlInterfaceRpcService = odlInterfaceRpcService;
         this.mdsalUtils = new org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils(dataBroker);
         this.southBoundUtils = new SouthboundUtils(mdsalUtils);
+        this.portToDpn = new ConcurrentHashMap<>();
+        this.notificationPublishService = notPublishService;
 
         registerListener();
     }
@@ -310,6 +319,11 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
             subnetManager.assignIpUniNetworks(uni.getUniId(), ipUni.getIpUniId(), ipvcId);
         }
         updateQos(uniToCreate);
+
+        for (BigInteger dpId : portToDpn.values()) {
+            NetvirtVpnUtils.refreshDpnGw(notificationPublishService, vpnName, dpId);
+        }
+
     }
 
     private void updateIpvc(DataTreeModification<Ipvc> modifiedDataObject) {
@@ -370,16 +384,15 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
         String interfaceName = null;
         String elanName = NetvirtVpnUtils.getElanNameForVpnPort(uniId, ipUniId);
 
-        String srcIpAddressStr = NetvirtVpnUtils
-                .getIpAddressFromPrefix(NetvirtVpnUtils.ipPrefixToString(ipUni.getIpAddress()));
-        IpAddress ipAddress = new IpAddress(srcIpAddressStr.toCharArray());
-        NetvirtVpnUtils.registerDirectSubnetForVpn(dataBroker, new Uuid(elanName), ipAddress);
-
         synchronized (vpnName.intern()) {
             Long vlan = ipUni.getVlan() != null ? Long.valueOf(ipUni.getVlan().getValue()) : null;
 
-            interfaceName = createElanInterface(vpnName, ipvcId, uniId, elanName, vlan, ipAddress, tx,
-                    ipUni.getSegmentationId());
+            interfaceName = createElanInterface(vpnName, ipvcId, uniId, elanName, vlan, tx, ipUni.getSegmentationId());
+
+            String portMacAddress = uni.getMacAddress().getValue();
+            NetvirtVpnUtils.registerDirectSubnetForVpn(dataBroker, vpnName, new Uuid(elanName), ipUni.getIpAddress(),
+                    interfaceName, portMacAddress);
+
             uniQosManager.mapUniPortBandwidthLimits(uniId, interfaceName, uniInService.getIngressBwProfile());
             createVpnInterface(vpnName, uni, ipUni, interfaceName, elanName, tx);
             NetvirtVpnUtils.createVpnPortFixedIp(dataBroker, vpnName, interfaceName, ipUni.getIpAddress(),
@@ -391,10 +404,9 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
     }
 
     private String createElanInterface(String vpnName, InstanceIdentifier<Ipvc> ipvcId, String uniId, String elanName,
-            Long vlan, IpAddress ipAddress, WriteTransaction tx, Long segmentationId) {
+            Long vlan, WriteTransaction tx, Long segmentationId) {
         Log.info("Adding elan instance: " + elanName);
         NetvirtUtils.updateElanInstance(elanName, tx, segmentationId);
-        NetvirtVpnUtils.registerDirectSubnetForVpn(dataBroker, new Uuid(elanName), ipAddress);
 
         Log.info("Added trunk interface for uni {} vlan: {}", uniId, vlan);
         if (vlan != null) {
@@ -417,7 +429,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
             IpUni ipUni, String interfaceName, String elanName, WriteTransaction tx) {
 
         Log.info("Adding vpn interface: " + interfaceName);
-        BigInteger dpId = NetvirtUtils.getDpnForInterface(odlInterfaceRpcService, interfaceName);
+        BigInteger dpId = getPortDpId(interfaceName);
         IpAddress nextHop = getNodeIP(dpId);
         NetvirtVpnUtils.createUpdateVpnInterface(vpnName, interfaceName, nextHop, ipUni.getIpAddress(),
                 uni.getMacAddress().getValue(), true, null, elanName, tx);
@@ -448,6 +460,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
         }
 
         synchronized (vpnName.intern()) {
+            NetvirtVpnUtils.unregisterDirectSubnetForVpn(dataBroker, vpnName, new Uuid(vpnElans.getElanId()), vpnElans.getElanPort());
             uniQosManager.unMapUniPortBandwidthLimits(uniId, vpnElans.getElanPort());
             NetvirtVpnUtils.removeLearnedVpnVipToPort(dataBroker, vpnName, vpnElans.getElanPort());
             removeVpnInterface(vpnName, vpnElans, uniId, ipUni);
@@ -514,7 +527,6 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
         String interfaceName = vpnElans.getElanPort();
 
         Log.info("Removing elan instance {} and interface {}: ", elanName, interfaceName);
-        NetvirtVpnUtils.unregisterDirectSubnetForVpn(dataBroker, new Uuid(elanName));
         NetvirtUtils.deleteElanInterface(interfaceName, tx);
         NetvirtUtils.deleteElanInstance(elanName, tx);
         MdsalUtils.commitTransaction(tx);
@@ -582,5 +594,16 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
         }
         return node;
 
+    }
+
+    private BigInteger getPortDpId(String logicalPortId) {
+        BigInteger dpId = BigInteger.ZERO;
+        if (portToDpn.containsKey(logicalPortId)) {
+            dpId = portToDpn.get(logicalPortId);
+        } else {
+            dpId = NetvirtUtils.getDpnForInterface(odlInterfaceRpcService, logicalPortId);
+            portToDpn.put(logicalPortId, dpId);
+        }
+        return dpId;
     }
 }
