@@ -205,7 +205,7 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
         }
         String portMacAddress = operUni.getMacAddress().getValue();
 
-        NetvirtVpnUtils.addDirectSubnetToVpn(dataBroker, notificationPublishService, ipvcVpn.getVpnId(),
+        NetvirtVpnUtils.publishDirectSubnetToVpn(dataBroker, notificationPublishService, ipvcVpn.getVpnId(),
                 vpnElan.getElanId(), newSubnet.getSubnet(), vpnElan.getElanPort(), portMacAddress, waitForElanInterval);
 
     }
@@ -264,7 +264,7 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
             return;
         }
 
-        NetvirtVpnUtils.removeDirectSubnetFromVpn(dataBroker, notificationPublishService, ipvcVpn.getVpnId(),
+        NetvirtVpnUtils.publishRemoveDirectSubnetFromVpn(dataBroker, notificationPublishService, ipvcVpn.getVpnId(),
                 vpnElan.getElanId(), vpnElan.getElanPort());
 
     }
