@@ -142,8 +142,8 @@ public class NetvirtVpnUtils {
     }
 
     public static void createUpdateVpnInterface(String vpnName, String interfaceName, IpAddress primaryNextHop,
-            IpPrefix ifPrefix,
-            String macAddress, boolean primary, IpPrefix gwIpAddress, String directSubnetId, WriteTransaction tx) {
+            IpPrefix ifPrefix, String macAddress, boolean primary, IpPrefix gwIpAddress, String directSubnetId,
+            WriteTransaction tx) {
         synchronized (interfaceName.intern()) {
             String ipAddress = null;
             String nextHopIp = null;
@@ -345,17 +345,32 @@ public class NetvirtVpnUtils {
         tx.delete(LogicalDatastoreType.CONFIGURATION, id);
     }
 
-    public static void registerDirectSubnetForVpn(DataBroker dataBroker, Uuid subnetName, IpAddress gwIpAddress) {
+    public static void registerDirectSubnetForVpn(DataBroker dataBroker, String vpnName, Uuid subnetName, IpPrefix interfacePrefix, String interfaceName, String portMacAddress) {
         final SubnetKey subnetkey = new SubnetKey(subnetName);
 
         final InstanceIdentifier<Subnet> subnetidentifier = InstanceIdentifier.create(Neutron.class)
                 .child(Subnets.class).child(Subnet.class, subnetkey);
 
+        String interfaceIp = NetvirtVpnUtils.getIpAddressFromPrefix(NetvirtVpnUtils.ipPrefixToString(interfacePrefix));
+        IpAddress ipAddress = new IpAddress(interfaceIp.toCharArray());
+
+        logger.info("Adding subnet {}", ipAddress);
         SubnetBuilder subnetBuilder = new SubnetBuilder();
         subnetBuilder.setIpVersion(IpVersionV4.class);
-        subnetBuilder.setGatewayIp(gwIpAddress);
+        subnetBuilder.setGatewayIp(ipAddress);
         subnetBuilder.setKey(subnetkey);
+        subnetBuilder.setNetworkId(subnetName);
         MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION, subnetidentifier, subnetBuilder.build());
+        
+        logger.info("Adding subnet {} {} to elan map", subnetName, subnetName);
+        createSubnetToNetworkMapping(dataBroker, subnetName, subnetName);
+
+        String subnetIp = getSubnetFromPrefix(interfacePrefix);
+        logger.info("Adding subnet {} {} to vpn {}", subnetName, subnetIp, vpnName);
+        updateSubnetNode(dataBroker, new Uuid(vpnName), subnetName, subnetIp, portMacAddress);
+
+        logger.info("Adding port {} to subnet {}", interfaceName, subnetName);
+        updateSubnetmapNodeWithPorts(dataBroker, subnetName, new Uuid(interfaceName), null, vpnName);
     }
 
     public static void unregisterDirectSubnetForVpn(DataBroker dataBroker, Uuid subnetName) {
@@ -366,7 +381,7 @@ public class NetvirtVpnUtils {
         MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.CONFIGURATION, subnetidentifier);
     }
 
-    public static void addDirectSubnetToVpn(DataBroker dataBroker,
+    public static void publishDirectSubnetToVpn(DataBroker dataBroker,
             final NotificationPublishService notificationPublishService, String vpnName, String subnetName,
             IpPrefix subnetIpPrefix, String interfaceName, String intfMac, int waitForElan) {
         InstanceIdentifier<ElanInstance> elanIdentifierId = NetvirtUtils.getElanInstanceInstanceIdentifier(subnetName);
@@ -380,15 +395,7 @@ public class NetvirtVpnUtils {
         }
 
         Uuid subnetId = new Uuid(subnetName);
-        logger.info("Adding subnet {} {} to elan map", subnetId, subnetId);
-        createSubnetToNetworkMapping(dataBroker, subnetId, subnetId);
-
         String subnetIp = getSubnetFromPrefix(ipPrefixToString(subnetIpPrefix));
-        logger.info("Adding subnet {} {} to vpn {}", subnetName, subnetIp, vpnName);
-        updateSubnetNode(dataBroker, new Uuid(vpnName), subnetId, subnetIp, intfMac);
-
-        logger.info("Adding port {} to subnet {}", interfaceName, subnetName);
-        updateSubnetmapNodeWithPorts(dataBroker, subnetId, new Uuid(interfaceName), null, vpnName);
 
         Optional<ElanInstance> elanInstance = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION,
                 elanIdentifierId);
@@ -399,7 +406,7 @@ public class NetvirtVpnUtils {
         logger.info("Finished Working on subnet {}", subnetName);
     }
 
-    public static void removeDirectSubnetFromVpn(DataBroker dataBroker,
+    public static void publishRemoveDirectSubnetFromVpn(DataBroker dataBroker,
             final NotificationPublishService notificationPublishService, String vpnName, String subnetName,
             String interfaceName) {
         InstanceIdentifier<ElanInstance> elanIdentifierId = InstanceIdentifier.builder(ElanInstances.class)

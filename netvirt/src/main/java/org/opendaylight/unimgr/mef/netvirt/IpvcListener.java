@@ -370,16 +370,15 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
         String interfaceName = null;
         String elanName = NetvirtVpnUtils.getElanNameForVpnPort(uniId, ipUniId);
 
-        String srcIpAddressStr = NetvirtVpnUtils
-                .getIpAddressFromPrefix(NetvirtVpnUtils.ipPrefixToString(ipUni.getIpAddress()));
-        IpAddress ipAddress = new IpAddress(srcIpAddressStr.toCharArray());
-        NetvirtVpnUtils.registerDirectSubnetForVpn(dataBroker, new Uuid(elanName), ipAddress);
-
         synchronized (vpnName.intern()) {
             Long vlan = ipUni.getVlan() != null ? Long.valueOf(ipUni.getVlan().getValue()) : null;
 
-            interfaceName = createElanInterface(vpnName, ipvcId, uniId, elanName, vlan, ipAddress, tx,
+            interfaceName = createElanInterface(vpnName, ipvcId, uniId, elanName, vlan, tx,
                     ipUni.getSegmentationId());
+              
+            String portMacAddress = uni.getMacAddress().getValue();
+            NetvirtVpnUtils.registerDirectSubnetForVpn(dataBroker, vpnName, new Uuid(elanName), ipUni.getIpAddress(), interfaceName, portMacAddress);
+
             uniQosManager.mapUniPortBandwidthLimits(uniId, interfaceName, uniInService.getIngressBwProfile());
             createVpnInterface(vpnName, uni, ipUni, interfaceName, elanName, tx);
             NetvirtVpnUtils.createVpnPortFixedIp(dataBroker, vpnName, interfaceName, ipUni.getIpAddress(),
@@ -391,10 +390,9 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
     }
 
     private String createElanInterface(String vpnName, InstanceIdentifier<Ipvc> ipvcId, String uniId, String elanName,
-            Long vlan, IpAddress ipAddress, WriteTransaction tx, Long segmentationId) {
+            Long vlan, WriteTransaction tx, Long segmentationId) {
         Log.info("Adding elan instance: " + elanName);
         NetvirtUtils.updateElanInstance(elanName, tx, segmentationId);
-        NetvirtVpnUtils.registerDirectSubnetForVpn(dataBroker, new Uuid(elanName), ipAddress);
 
         Log.info("Added trunk interface for uni {} vlan: {}", uniId, vlan);
         if (vlan != null) {
