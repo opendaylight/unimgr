@@ -568,7 +568,7 @@ public class NetvirtVpnUtils {
         builder.setSubnetId(subnetId);
         builder.setSubnetIp(subnetIp);
         builder.setVpnName(vpnName);
-        builder.setExternalVpn(true);
+        builder.setBgpVpn(true);
         builder.setElanTag(elanTag);
 
         try {
@@ -587,7 +587,7 @@ public class NetvirtVpnUtils {
 
         builder.setSubnetId(subnetId);
         builder.setVpnName(vpnName);
-        builder.setExternalVpn(true);
+        builder.setBgpVpn(true);
         builder.setElanTag(elanTag);
 
         try {
