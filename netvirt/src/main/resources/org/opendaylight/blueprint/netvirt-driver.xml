@@ -37,7 +37,8 @@
 		<argument ref="uniPortManager" />
 		<argument ref="subnetListener" />
 		<argument ref="uniQosManager" />
-		<argument ref="odlInterfaceRpcService" />		
+		<argument ref="odlInterfaceRpcService" />
+        <argument ref="notificationPublishService" />			
 	</bean>
 
 	<bean id="subnetListener" class="org.opendaylight.unimgr.mef.netvirt.SubnetListener">

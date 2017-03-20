@@ -8,6 +8,7 @@
 
 package org.opendaylight.unimgr.mef.netvirt;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,11 +45,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.arputil.rev160406.in
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.ElanInstances;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan.instances.ElanInstance;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan.instances.ElanInstanceKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.AddDpnEventBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.Adjacencies;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.AdjacenciesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.LearntVpnVipToPortData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.VpnInstanceOpData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.VpnInstanceToVpnId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.add.dpn.event.AddEventDataBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.Adjacency;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.AdjacencyBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.AdjacencyKey;
@@ -142,8 +145,8 @@ public class NetvirtVpnUtils {
     }
 
     public static void createUpdateVpnInterface(String vpnName, String interfaceName, IpAddress primaryNextHop,
-            IpPrefix ifPrefix,
-            String macAddress, boolean primary, IpPrefix gwIpAddress, String directSubnetId, WriteTransaction tx) {
+            IpPrefix ifPrefix, String macAddress, boolean primary, IpPrefix gwIpAddress, String directSubnetId,
+            WriteTransaction tx) {
         synchronized (interfaceName.intern()) {
             String ipAddress = null;
             String nextHopIp = null;
@@ -345,28 +348,55 @@ public class NetvirtVpnUtils {
         tx.delete(LogicalDatastoreType.CONFIGURATION, id);
     }
 
-    public static void registerDirectSubnetForVpn(DataBroker dataBroker, Uuid subnetName, IpAddress gwIpAddress) {
+    public static void registerDirectSubnetForVpn(DataBroker dataBroker, String vpnName, Uuid subnetName, IpPrefix interfacePrefix, String interfaceName, String portMacAddress) {
         final SubnetKey subnetkey = new SubnetKey(subnetName);
 
         final InstanceIdentifier<Subnet> subnetidentifier = InstanceIdentifier.create(Neutron.class)
                 .child(Subnets.class).child(Subnet.class, subnetkey);
 
+        String interfaceIp = NetvirtVpnUtils.getIpAddressFromPrefix(NetvirtVpnUtils.ipPrefixToString(interfacePrefix));
+        IpAddress ipAddress = new IpAddress(interfaceIp.toCharArray());
+
+        logger.info("Adding subnet {}", ipAddress);
         SubnetBuilder subnetBuilder = new SubnetBuilder();
         subnetBuilder.setIpVersion(IpVersionV4.class);
-        subnetBuilder.setGatewayIp(gwIpAddress);
+        subnetBuilder.setGatewayIp(ipAddress);
         subnetBuilder.setKey(subnetkey);
+        subnetBuilder.setNetworkId(subnetName);
         MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION, subnetidentifier, subnetBuilder.build());
+        
+        logger.info("Adding subnet {} {} to elan map", subnetName, subnetName);
+        createSubnetToNetworkMapping(dataBroker, subnetName, subnetName);
+
+        String subnetIp = getSubnetFromPrefix(interfacePrefix);
+        logger.info("Adding subnet {} {} to vpn {}", subnetName, subnetIp, vpnName);
+        updateSubnetNode(dataBroker, new Uuid(vpnName), subnetName, subnetIp, portMacAddress);
+
+        logger.info("Adding port {} to subnet {}", interfaceName, subnetName);
+        updateSubnetmapNodeWithPorts(dataBroker, subnetName, new Uuid(interfaceName), null, vpnName);
     }
 
-    public static void unregisterDirectSubnetForVpn(DataBroker dataBroker, Uuid subnetName) {
+    public static void unregisterDirectSubnetForVpn(DataBroker dataBroker,  String vpnName, Uuid subnetName,  String interfaceName) {
         final SubnetKey subnetkey = new SubnetKey(subnetName);
         final InstanceIdentifier<Subnet> subnetidentifier = InstanceIdentifier.create(Neutron.class)
                 .child(Subnets.class).child(Subnet.class, subnetkey);
 
         MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.CONFIGURATION, subnetidentifier);
+        
+
+        logger.info("Removing port {} from subnet {}", interfaceName, subnetName);
+        updateSubnetmapNodeWithPorts(dataBroker, subnetName, null, new Uuid(interfaceName), vpnName);
+
+        logger.info("Removing subnet {} from vpn {}", subnetName, vpnName);
+        removeSubnetNode(dataBroker, subnetName);
+
+        logger.info("Removing subnet {} to elan map", subnetName);
+        removeSubnetToNetworkMapping(dataBroker, subnetName);
+
+        logger.info("Finished  remove  subnet {}", subnetName);
     }
 
-    public static void addDirectSubnetToVpn(DataBroker dataBroker,
+    public static void publishDirectSubnetToVpn(DataBroker dataBroker,
             final NotificationPublishService notificationPublishService, String vpnName, String subnetName,
             IpPrefix subnetIpPrefix, String interfaceName, String intfMac, int waitForElan) {
         InstanceIdentifier<ElanInstance> elanIdentifierId = NetvirtUtils.getElanInstanceInstanceIdentifier(subnetName);
@@ -380,15 +410,7 @@ public class NetvirtVpnUtils {
         }
 
         Uuid subnetId = new Uuid(subnetName);
-        logger.info("Adding subnet {} {} to elan map", subnetId, subnetId);
-        createSubnetToNetworkMapping(dataBroker, subnetId, subnetId);
-
         String subnetIp = getSubnetFromPrefix(ipPrefixToString(subnetIpPrefix));
-        logger.info("Adding subnet {} {} to vpn {}", subnetName, subnetIp, vpnName);
-        updateSubnetNode(dataBroker, new Uuid(vpnName), subnetId, subnetIp, intfMac);
-
-        logger.info("Adding port {} to subnet {}", interfaceName, subnetName);
-        updateSubnetmapNodeWithPorts(dataBroker, subnetId, new Uuid(interfaceName), null, vpnName);
 
         Optional<ElanInstance> elanInstance = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION,
                 elanIdentifierId);
@@ -397,9 +419,27 @@ public class NetvirtVpnUtils {
         logger.info("Publish subnet {}", subnetName);
         publishSubnetAddNotification(notificationPublishService, subnetId, subnetIp, vpnName, elanTag);
         logger.info("Finished Working on subnet {}", subnetName);
+      
+    }
+    
+    public static void refreshDpnGw(final NotificationPublishService notificationPublishService, String vpnName, BigInteger dpId) {
+        
+        AddDpnEventBuilder addDpnEventBuilder = new AddDpnEventBuilder();
+        AddEventDataBuilder eventData = new AddEventDataBuilder();
+        eventData.setVpnName(vpnName);
+        eventData.setDpnId(dpId);
+        
+        addDpnEventBuilder.setAddEventData(eventData.build());
+        try {
+            logger.info("Refrehein dpId {}", dpId);
+            notificationPublishService.putNotification(addDpnEventBuilder.build());
+        } catch (InterruptedException e) {
+            logger.error("Fail to publish notification {}", addDpnEventBuilder, e);
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
-    public static void removeDirectSubnetFromVpn(DataBroker dataBroker,
+    public static void publishRemoveDirectSubnetFromVpn(DataBroker dataBroker,
             final NotificationPublishService notificationPublishService, String vpnName, String subnetName,
             String interfaceName) {
         InstanceIdentifier<ElanInstance> elanIdentifierId = InstanceIdentifier.builder(ElanInstances.class)
@@ -417,16 +457,7 @@ public class NetvirtVpnUtils {
         logger.info("Publish subnet remove {}", subnetName);
         publishSubnetRemoveNotification(notificationPublishService, subnetId, vpnName, elanTag);
 
-        logger.info("Removing port {} from subnet {}", interfaceName, subnetName);
-        updateSubnetmapNodeWithPorts(dataBroker, subnetId, null, new Uuid(interfaceName), vpnName);
-
-        logger.info("Removing subnet {} from vpn {}", subnetName, vpnName);
-        removeSubnetNode(dataBroker, new Uuid(vpnName));
-
-        logger.info("Removing subnet {} to elan map", subnetId);
-        removeSubnetToNetworkMapping(dataBroker, subnetId);
-
-        logger.info("Finished Working on subnet {}", subnetName);
+        logger.info("Finished publish remove on subnet {}", subnetName);
     }
 
     private static void createSubnetToNetworkMapping(DataBroker dataBroker, Uuid subnetId, Uuid networkId) {
@@ -523,6 +554,9 @@ public class NetvirtVpnUtils {
                     }
                     builder.setRouterId(new Uuid(vpnName));
                     builder.setPortList(portList);
+                } else {
+                    builder.setRouterId(new Uuid(vpnName));
+                    builder.setPortList(new ArrayList<>());
                 }
                 subnetmap = builder.build();
                 MDSALUtil.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION, id, subnetmap);

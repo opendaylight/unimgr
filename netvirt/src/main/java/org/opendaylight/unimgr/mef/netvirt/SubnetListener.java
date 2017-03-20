@@ -134,36 +134,37 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
     private void createNetwork(Subnet newSubnet, Identifier45 nwUniId, Identifier45 nwIpUniId) {
         String subnetStr = NetvirtVpnUtils.ipPrefixToString(newSubnet.getSubnet());
 
-        InstanceIdentifier<Ipvc> ipvcId = findService(nwUniId, nwIpUniId, getMefServices());
-        if (ipvcId == null) {
-            Log.info("Subnet Uni {} IpUNI {} is not assosiated to service", nwUniId, nwIpUniId);
-            return;
-        }
-        IpvcVpn ipvcVpn = MefServicesUtils.getOperIpvcVpn(dataBroker, ipvcId);
-        if (ipvcVpn == null || ipvcVpn.getVpnElans() == null) {
-            Log.error("Subnet Uni {} IpUNI {} is not operational", nwUniId, nwIpUniId);
-            return;
-        }
-        VpnElans vpnElan = MefServicesUtils.findVpnForNetwork(newSubnet, ipvcVpn);
-        if (vpnElan == null) {
-            Log.error("Subnet Uni {} IpUNI {} for network {} is not operational", nwUniId, nwIpUniId, subnetStr);
-            return;
-        }
-        if (MefServicesUtils.findNetwork(newSubnet, vpnElan) != null) {
-            Log.info("Network {} exists already", subnetStr);
-            return;
-        }
+        synchronized (subnetStr.intern()) {
+            InstanceIdentifier<Ipvc> ipvcId = findService(nwUniId, nwIpUniId, getMefServices());
+            if (ipvcId == null) {
+                Log.info("Subnet Uni {} IpUNI {} is not assosiated to service", nwUniId, nwIpUniId);
+                return;
+            }
+            IpvcVpn ipvcVpn = MefServicesUtils.getOperIpvcVpn(dataBroker, ipvcId);
+            if (ipvcVpn == null || ipvcVpn.getVpnElans() == null) {
+                Log.error("Subnet Uni {} IpUNI {} is not operational", nwUniId, nwIpUniId);
+                return;
+            }
+            VpnElans vpnElan = MefServicesUtils.findVpnForNetwork(newSubnet, ipvcVpn);
+            if (vpnElan == null) {
+                Log.error("Subnet Uni {} IpUNI {} for network {} is not operational", nwUniId, nwIpUniId, subnetStr);
+                return;
+            }
+            if (MefServicesUtils.findNetwork(newSubnet, vpnElan) != null) {
+                Log.info("Network {} exists already", subnetStr);
+                return;
+            }
 
-        String vpnId = ipvcVpn.getVpnId();
-        synchronized (vpnId.intern()) {
+            String vpnId = ipvcVpn.getVpnId();
             if (newSubnet.getGateway() == null) {
                 checkCreateDirectNetwork(newSubnet, ipvcVpn, ipvcId, vpnElan);
             } else {
                 createNonDirectNetwork(newSubnet, ipvcVpn, ipvcId, vpnElan);
             }
+
+            MefServicesUtils.addOperIpvcVpnElan(dataBroker, ipvcId, ipvcVpn.getVpnId(), nwUniId, nwIpUniId,
+                    vpnElan.getElanId(), vpnElan.getElanPort(), Collections.singletonList(subnetStr));
         }
-        MefServicesUtils.addOperIpvcVpnElan(dataBroker, ipvcId, ipvcVpn.getVpnId(), nwUniId, nwIpUniId,
-                vpnElan.getElanId(), vpnElan.getElanPort(), Collections.singletonList(subnetStr));
 
     }
 
@@ -205,7 +206,7 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
         }
         String portMacAddress = operUni.getMacAddress().getValue();
 
-        NetvirtVpnUtils.addDirectSubnetToVpn(dataBroker, notificationPublishService, ipvcVpn.getVpnId(),
+        NetvirtVpnUtils.publishDirectSubnetToVpn(dataBroker, notificationPublishService, ipvcVpn.getVpnId(),
                 vpnElan.getElanId(), newSubnet.getSubnet(), vpnElan.getElanPort(), portMacAddress, waitForElanInterval);
 
     }
@@ -214,7 +215,7 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
         Subnet deletedSubnet = deletedDataObject.getRootNode().getDataBefore();
         Identifier45 dlUniId = deletedSubnet.getUniId();
         Identifier45 dlIpUniId = deletedSubnet.getIpUniId();
-        InstanceIdentifier<Ipvc> ipvcId = findService(dlUniId, dlIpUniId, getMefServicesOper());
+        InstanceIdentifier<Ipvc> ipvcId = findServiceOper(dlUniId, dlIpUniId, getMefServicesOper());
         if (ipvcId == null) {
             Log.info("Subnet Uni {} IpUNI {} for deleted network is not assosiated to service", dlUniId, dlIpUniId);
             return;
@@ -225,31 +226,33 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
     private void removeNetwork(Subnet dlSubnet, Identifier45 dlUniId, Identifier45 dlIpUniId,
             InstanceIdentifier<Ipvc> ipvcId) {
         String subnetStr = NetvirtVpnUtils.ipPrefixToString(dlSubnet.getSubnet());
-        IpvcVpn ipvcVpn = MefServicesUtils.getOperIpvcVpn(dataBroker, ipvcId);
-        if (ipvcVpn == null || ipvcVpn.getVpnElans() == null) {
-            Log.error("Subnet Uni {} IpUNI {} is not operational", dlUniId, dlIpUniId);
-            return;
-        }
-        VpnElans vpnElan = MefServicesUtils.findVpnForNetwork(dlSubnet, ipvcVpn);
-        if (vpnElan == null) {
-            Log.error("Trying to remove non-operational network {}", subnetStr);
-            return;
-        }
-        if (MefServicesUtils.findNetwork(dlSubnet, vpnElan) == null) {
-            Log.error("Trying to remove non-operational network {}", subnetStr);
-            return;
-        }
+        synchronized (subnetStr.intern()) {
 
-        String vpnId = ipvcVpn.getVpnId();
-        synchronized (vpnId.intern()) {
+            IpvcVpn ipvcVpn = MefServicesUtils.getOperIpvcVpn(dataBroker, ipvcId);
+            if (ipvcVpn == null || ipvcVpn.getVpnElans() == null) {
+                Log.error("Subnet Uni {} IpUNI {} is not operational", dlUniId, dlIpUniId);
+                return;
+            }
+            VpnElans vpnElan = MefServicesUtils.findVpnForNetwork(dlSubnet, ipvcVpn);
+            if (vpnElan == null) {
+                Log.error("Trying to remove non-operational network {}", subnetStr);
+                return;
+            }
+            if (MefServicesUtils.findNetwork(dlSubnet, vpnElan) == null) {
+                Log.error("Trying to remove non-operational network {}", subnetStr);
+                return;
+            }
+
+            String vpnId = ipvcVpn.getVpnId();
             if (dlSubnet.getGateway() == null) {
                 removeDirectNetwork(dlSubnet, ipvcVpn, ipvcId);
             } else {
                 removeNonDirectNetwork(dlSubnet, ipvcVpn, ipvcId);
             }
+
+            MefServicesUtils.removeOperIpvcSubnet(dataBroker, ipvcId, ipvcVpn.getVpnId(), dlUniId, dlIpUniId,
+                    vpnElan.getElanId(), vpnElan.getElanPort(), subnetStr);
         }
-        MefServicesUtils.removeOperIpvcSubnet(dataBroker, ipvcId, ipvcVpn.getVpnId(), dlUniId, dlIpUniId,
-                vpnElan.getElanId(), vpnElan.getElanPort(), subnetStr);
     }
 
     private void removeDirectNetwork(Subnet deletedSubnet, IpvcVpn ipvcVpn, InstanceIdentifier<Ipvc> ipvcId) {
@@ -264,7 +267,7 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
             return;
         }
 
-        NetvirtVpnUtils.removeDirectSubnetFromVpn(dataBroker, notificationPublishService, ipvcVpn.getVpnId(),
+        NetvirtVpnUtils.publishRemoveDirectSubnetFromVpn(dataBroker, notificationPublishService, ipvcVpn.getVpnId(),
                 vpnElan.getElanId(), vpnElan.getElanPort());
 
     }
@@ -325,6 +328,33 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
                 List<Uni> unis = ipvc.getUnis().getUni();
                 for (Uni uni : unis) {
                     if (uni.getUniId().equals(uniId) && uni.getIpUniId().equals(ipUniId)) {
+                        Log.info("Find service {} for uni {} ipuni {}", service.getSvcId(), uniId, ipUniId);
+                        return MefServicesUtils.getIpvcInstanceIdentifier(service.getSvcId());
+                    }
+                }
+            }
+        }
+        Log.info("Uni {} IpUni {} is not assosiated with service", uniId, ipUniId);
+        return null;
+    }
+
+    private InstanceIdentifier<Ipvc> findServiceOper(Identifier45 uniId, Identifier45 ipUniId,
+            Optional<MefServices> mefServices) {
+        if (!mefServices.isPresent() || mefServices.get() == null) {
+            Log.info("Uni {} IpUni {} is not assosiated with service", uniId, ipUniId);
+            return null;
+        }
+        for (MefService service : mefServices.get().getMefService()) {
+            if (service.getMefServiceChoice() instanceof IpvcChoice) {
+                Ipvc ipvc = ((IpvcChoice) service.getMefServiceChoice()).getIpvc();
+                IpvcVpn ipvcVpn = ipvc.getAugmentation(IpvcVpn.class);
+                if (ipvcVpn == null || ipvcVpn.getVpnElans() == null) {
+                    Log.info("Uni {} IpUni {} is not assosiated with service", uniId, ipUniId);
+                    return null;
+                }
+                List<VpnElans> vpnElans = ipvcVpn.getVpnElans();
+                for (VpnElans vpnElan : vpnElans) {
+                    if (vpnElan.getUniId().equals(uniId) && vpnElan.getIpUniId().equals(ipUniId)) {
                         Log.info("Find service {} for uni {} ipuni {}", service.getSvcId(), uniId, ipUniId);
                         return MefServicesUtils.getIpvcInstanceIdentifier(service.getSvcId());
                     }
