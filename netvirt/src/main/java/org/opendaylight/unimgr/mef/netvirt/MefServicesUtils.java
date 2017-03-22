@@ -264,4 +264,21 @@ public class MefServicesUtils {
         return toReturn;
     }
 
+    public static Optional<MefService> getOpMefServiceBySvcId(DataBroker dataBroker, RetailSvcIdType svcId) {
+        InstanceIdentifier<MefService> mefServiceIdr = InstanceIdentifier.builder(MefServices.class)
+                .child(MefService.class, new MefServiceKey(svcId)).build();
+        return MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, mefServiceIdr);
+    }
+
+    public static VpnElans getVpnElanByIpUniId(List<VpnElans> vpnElansList, String ipUniId) { 
+        if (!vpnElansList.isEmpty()) {
+            for (VpnElans vpnElan : vpnElansList) {
+                if (vpnElan.getIpUniId() != null && vpnElan.getIpUniId().getValue().equals(ipUniId)) {
+                    return vpnElan;
+                }
+            }
+        }
+        return null;
+    }
+
 }

@@ -58,5 +58,9 @@
 		<argument ref="dataBroker" />
 		<argument ref="odlInterfaceRpcService" />
 	</bean>
+
+	<bean id="DhcpAllocationPoolListener" class="org.opendaylight.unimgr.mef.netvirt.DhcpAllocationPoolListener">
+		<argument ref="dataBroker" />
+	</bean>
 </blueprint>
 
