@@ -9,13 +9,22 @@
 package org.opendaylight.unimgr.mef.netvirt;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.EvcElan;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.IpvcVpn;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.MefService;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.EvcChoice;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.IpvcChoice;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.ipvc.choice.ipvc.VpnElans;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.RetailSvcIdType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.iana._if.type.rev140508.L2vlan;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpPrefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.rev140508.Interfaces;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.rev140508.interfaces.Interface;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.rev140508.interfaces.InterfaceBuilder;
@@ -31,6 +40,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rpc
 import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rpcs.rev160406.GetDpidFromInterfaceOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rpcs.rev160406.OdlInterfaceRpcService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.dhcp_allocation_pool.rev161214.DhcpAllocationPool;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.dhcp_allocation_pool.rev161214.dhcp_allocation_pool.Network;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.dhcp_allocation_pool.rev161214.dhcp_allocation_pool.NetworkKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.dhcp_allocation_pool.rev161214.dhcp_allocation_pool.network.AllocationPool;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.dhcp_allocation_pool.rev161214.dhcp_allocation_pool.network.AllocationPoolBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.dhcp_allocation_pool.rev161214.dhcp_allocation_pool.network.AllocationPoolKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInstance;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInstanceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInterface;
@@ -44,6 +59,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan.interfaces.ElanInterface;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan.interfaces.ElanInterfaceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan.interfaces.ElanInterfaceKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.unimgr.unimgr.dhcp.rev161214.unimgr.dhcp.unimgr.services.network.UnimgrAllocationPool;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.SegmentTypeVxlan;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
@@ -58,11 +74,13 @@ public class NetvirtUtils {
     private static final Logger logger = LoggerFactory.getLogger(NetvirtUtils.class);
     private static final long DEFAULT_MAC_TIMEOUT = 300;
 
-    public static void createElanInstance(DataBroker dataBroker, String instanceName, boolean isEtree, Long segmentationId) {
+    public static void createElanInstance(DataBroker dataBroker, String instanceName, boolean isEtree,
+            Long segmentationId) {
         createElanInstance(dataBroker, instanceName, isEtree, segmentationId, DEFAULT_MAC_TIMEOUT);
     }
 
-    public static void createElanInstance(DataBroker dataBroker, String instanceName, boolean isEtree, Long segmentationId, Long macTimeout) {
+    public static void createElanInstance(DataBroker dataBroker, String instanceName, boolean isEtree,
+            Long segmentationId, Long macTimeout) {
         ElanInstanceBuilder einstBuilder = createElanInstanceBuilder(instanceName, segmentationId, macTimeout);
 
         if (isEtree) {
@@ -90,7 +108,8 @@ public class NetvirtUtils {
         saveElanInstance(instanceName, tx, einstBuilder);
     }
 
-    public static void updateElanInstance(String instanceName, WriteTransaction tx, Long segmentationId, Long macTimeout) {
+    public static void updateElanInstance(String instanceName, WriteTransaction tx, Long segmentationId,
+            Long macTimeout) {
         ElanInstanceBuilder einstBuilder = createElanInstanceBuilder(instanceName, segmentationId, macTimeout);
         saveElanInstance(instanceName, tx, einstBuilder);
     }
@@ -143,8 +162,8 @@ public class NetvirtUtils {
         SplitHorizon sh = new SplitHorizonBuilder().setOverrideSplitHorizonProtection(true).build();
         ParentRefsBuilder parentRefsBuilder = new ParentRefsBuilder().setParentInterface(parentIfaceName);
         interfaceBuilder.setEnabled(true).setName(interfaceName).setType(L2vlan.class)
-                .addAugmentation(SplitHorizon.class, sh)
-                .addAugmentation(IfL2vlan.class, ifL2vlan).addAugmentation(ParentRefs.class, parentRefsBuilder.build());
+                .addAugmentation(SplitHorizon.class, sh).addAugmentation(IfL2vlan.class, ifL2vlan)
+                .addAugmentation(ParentRefs.class, parentRefsBuilder.build());
         return interfaceBuilder.build();
     }
 
@@ -156,7 +175,8 @@ public class NetvirtUtils {
         return createElanInstanceBuilder(instanceName, segmentationId, DEFAULT_MAC_TIMEOUT);
     }
 
-    private static ElanInstanceBuilder createElanInstanceBuilder(String instanceName, Long segmentationId, Long macTimeout) {
+    private static ElanInstanceBuilder createElanInstanceBuilder(String instanceName, Long segmentationId,
+            Long macTimeout) {
         if (segmentationId == null) {
             segmentationId = Long.valueOf(Math.abs((short) instanceName.hashCode()));
         }
@@ -289,13 +309,64 @@ public class NetvirtUtils {
         } catch (InterruptedException e) {
         }
     }
+
     public static void safeSleep(short sec) {
         try {
             Thread.yield();
-            Thread.sleep(1000*sec);
+            Thread.sleep(1000 * sec);
         } catch (InterruptedException e) {
         }
     }
 
+    public static void createDhcpAllocationPool(DataBroker dataBroker, UnimgrAllocationPool unimgrAllocationPool,
+            String unimgrNetworkId, RetailSvcIdType svcId) {
+        String networkId = convertNetworkToNetvirtNetwork(dataBroker, unimgrNetworkId, svcId);
+        if (networkId != null) {
+            // add allocation pool to netvirt
+            MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION,
+                    createDhcpAllocationPoolInstanceIdentifier(networkId, unimgrAllocationPool.getKey().getSubnet()),
+                    buildDhcpAllocationPool(unimgrAllocationPool));
+        } else {
+            logger.warn("no network found for svc-id {}", svcId);
+        }
+    }
+
+    public static void removeDhcpAllocationPool(DataBroker dataBroker, String unimgrNetworkId, RetailSvcIdType svcId,
+            IpPrefix subnet) {
+        String networkId = convertNetworkToNetvirtNetwork(dataBroker, unimgrNetworkId, svcId);
+        if (networkId != null) {
+            // remove allocation pool from netvirt
+            MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.CONFIGURATION,
+                    createDhcpAllocationPoolInstanceIdentifier(networkId, subnet));
+        } else {
+            logger.warn("no network found for svc-id {}", svcId);
+        }
+    }
+
+    private static String convertNetworkToNetvirtNetwork(DataBroker dataBroker, String unimgrNetworkId,
+            RetailSvcIdType svcId) {
+        Optional<MefService> optionalOpMefService = MefServicesUtils.getOpMefServiceBySvcId(dataBroker, svcId);
+        if (!optionalOpMefService.isPresent()) {
+            logger.warn("no mef-service found for svc-id {}", svcId);
+            return null;
+        }
+        MefService opMefService = optionalOpMefService.get();
+        return MefServicesUtils.getNetworkIdFromOpMefService(opMefService, unimgrNetworkId);
+    }
+
+    private static InstanceIdentifier<AllocationPool> createDhcpAllocationPoolInstanceIdentifier(String networkId,
+            IpPrefix subnet) {
+        return InstanceIdentifier.builder(DhcpAllocationPool.class).child(Network.class, new NetworkKey(networkId))
+                .child(AllocationPool.class, new AllocationPoolKey(subnet)).build();
+    }
+
+    private static AllocationPool buildDhcpAllocationPool(UnimgrAllocationPool unimgrAllocationPool) {
+        AllocationPool allocationPool = new AllocationPoolBuilder()
+                .setKey(new AllocationPoolKey(unimgrAllocationPool.getSubnet()))
+                .setSubnet(unimgrAllocationPool.getSubnet()).setAllocateFrom(unimgrAllocationPool.getAllocateFrom())
+                .setAllocateTo(unimgrAllocationPool.getAllocateTo()).setDnsServers(unimgrAllocationPool.getDnsServers())
+                .setGateway(unimgrAllocationPool.getGateway()).build();
+        return allocationPool;
+    }
 
 }

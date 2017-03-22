@@ -17,6 +17,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.subnets.Subnet;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.EvcElan;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.IpvcVpn;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.IpvcVpnBuilder;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.MefServices;
@@ -262,6 +263,38 @@ public class MefServicesUtils {
             }
         }
         return toReturn;
+    }
+
+    public static Optional<MefService> getOpMefServiceBySvcId(DataBroker dataBroker, RetailSvcIdType svcId) {
+        InstanceIdentifier<MefService> mefServiceIdr = InstanceIdentifier.builder(MefServices.class)
+                .child(MefService.class, new MefServiceKey(svcId)).build();
+        return MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL, mefServiceIdr);
+    }
+
+    public static VpnElans getVpnElanByIpUniId(List<VpnElans> vpnElansList, String ipUniId) {
+        if (!vpnElansList.isEmpty()) {
+            for (VpnElans vpnElan : vpnElansList) {
+                if (vpnElan.getIpUniId() != null && vpnElan.getIpUniId().getValue().equals(ipUniId)) {
+                    return vpnElan;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static String getNetworkIdFromOpMefService(MefService opMefService, String unimgrNetworkId) {
+        if (opMefService.getMefServiceChoice() instanceof EvcChoice) {
+            return ((EvcChoice) opMefService.getMefServiceChoice()).getEvc().getAugmentation(EvcElan.class)
+                    .getElanId();
+        } else if (opMefService.getMefServiceChoice() instanceof IpvcChoice) {
+            List<VpnElans> vpnElansList = ((IpvcChoice) opMefService.getMefServiceChoice()).getIpvc()
+                    .getAugmentation(IpvcVpn.class).getVpnElans();
+            VpnElans vpnElan = MefServicesUtils.getVpnElanByIpUniId(vpnElansList, unimgrNetworkId);
+            if (vpnElan != null) {
+                return vpnElan.getElanId();
+            }
+        }
+        return null;
     }
 
 }
