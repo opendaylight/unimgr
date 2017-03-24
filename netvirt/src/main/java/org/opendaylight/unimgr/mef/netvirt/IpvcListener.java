@@ -63,7 +63,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
     private ListenerRegistration<IpvcListener> ipvcListenerRegistration;
     @SuppressWarnings("unused")
     private final UniAwareListener uniAwareListener;
-    private OdlInterfaceRpcService odlInterfaceRpcService;
+    private final OdlInterfaceRpcService odlInterfaceRpcService;
     private final SouthboundUtils southBoundUtils;
     private final org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils mdsalUtils;
     private final NotificationPublishService notificationPublishService;
@@ -71,7 +71,7 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
     private static final String LOCAL_IP = "local_ip";
 
     // TODO: make it as service
-    private ConcurrentHashMap<String, BigInteger> portToDpn;
+    private final ConcurrentHashMap<String, BigInteger> portToDpn;
 
     public IpvcListener(final DataBroker dataBroker, final IUniPortManager uniPortManager,
             final ISubnetManager subnetManager, final UniQosManager uniQosManager,
@@ -400,6 +400,10 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
             MefServicesUtils.addOperIpvcVpnElan(ipvcId, vpnName, uniInService.getUniId(), uniInService.getIpUniId(),
                     elanName, interfaceName, null, tx);
             MdsalUtils.commitTransaction(tx);
+
+            if (uniInService.isPortSecurityEnabled() && uniInService.getSecurityGroups() != null && !uniInService.getSecurityGroups().isEmpty()) {
+                NetvirtUtils.addAclToInterface(interfaceName, uniInService.getSecurityGroups(), dataBroker.newWriteOnlyTransaction());
+            }
         }
     }
 
@@ -478,11 +482,13 @@ public class IpvcListener extends UnimgrDataTreeChangeListener<Ipvc> implements 
     private void waitForInterfaceDpnClean(String vpnName, String rd, String interfaceName) {
         InstanceIdentifier<VpnInstanceOpDataEntry> vpnId = NetvirtVpnUtils.getVpnInstanceOpDataIdentifier(rd);
         DataWaitGetter<VpnInstanceOpDataEntry> getInterfByName = (vpn) -> {
-            if (vpn.getVpnToDpnList() == null)
+            if (vpn.getVpnToDpnList() == null) {
                 return null;
+            }
             for (VpnToDpnList is : vpn.getVpnToDpnList()) {
-                if (is.getVpnInterfaces() == null)
+                if (is.getVpnInterfaces() == null) {
                     continue;
+                }
                 for (VpnInterfaces i : is.getVpnInterfaces()) {
                     if (i.getInterfaceName().equals(interfaceName)) {
                         Log.info("Waiting for deletion vpn interface from vpn to dpn list vpn : {} interface: {}",

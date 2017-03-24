@@ -87,7 +87,7 @@ module mef-services {
                   }
                 }
                 leaf-list security-groups {
-                    type mef-types:identifier45;
+                    type yang:uuid;
                     description "The security group ID to associate with this interface.";
                 }
                 leaf port-security-enabled {
@@ -692,7 +692,7 @@ module mef-services {
                   }
                 }
                 leaf-list security-groups {
-                    type mef-types:identifier45;
+                    type yang:uuid;
                     description "The security group ID to associate with this interface.";
                 }
                 leaf port-security-enabled {

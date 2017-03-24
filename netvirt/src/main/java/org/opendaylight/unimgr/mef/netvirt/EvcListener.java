@@ -105,7 +105,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
     @Override
     public void connectUni(String uniId) {
         List<RetailSvcIdType> allEvcs = MefServicesUtils.getAllEvcsServiceIds(dataBroker);
-        allEvcs = (allEvcs != null) ? allEvcs : Collections.emptyList();
+        allEvcs = allEvcs != null ? allEvcs : Collections.emptyList();
 
         for (RetailSvcIdType evcSerId : allEvcs) {
             InstanceIdentifier<Evc> evcId = MefServicesUtils.getEvcInstanceIdentifier(evcSerId);
@@ -119,8 +119,8 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
             boolean isEtree = evc.getEvcType() == EvcType.RootedMultipoint;
 
             List<Uni> toConnect = new ArrayList<>();
-            List<Uni> unis = (evc.getUnis() != null) ? evc.getUnis().getUni() : null;
-            unis = (unis != null) ? unis : Collections.emptyList();
+            List<Uni> unis = evc.getUnis() != null ? evc.getUnis().getUni() : null;
+            unis = unis != null ? unis : Collections.emptyList();
             for (Uni uni : unis) {
                 if (uni.getUniId().getValue().equals(uniId)) {
                     Log.info("Connecting Uni {} to svc id {}", uniId, evcSerId);
@@ -149,7 +149,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
     @Override
     public void disconnectUni(String uniId) {
         List<RetailSvcIdType> allEvcs = MefServicesUtils.getAllEvcsServiceIds(dataBroker);
-        allEvcs = (allEvcs != null) ? allEvcs : Collections.emptyList();
+        allEvcs = allEvcs != null ? allEvcs : Collections.emptyList();
 
         for (RetailSvcIdType evcSerId : allEvcs) {
             InstanceIdentifier<Evc> evcId = MefServicesUtils.getEvcInstanceIdentifier(evcSerId);
@@ -161,8 +161,8 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
 
             String instanceName = evc.getEvcId().getValue();
             List<Uni> toDisconnect = new ArrayList<>();
-            List<Uni> unis = (evc.getUnis() != null) ? evc.getUnis().getUni() : null;
-            unis = (unis != null) ? unis : Collections.emptyList();
+            List<Uni> unis = evc.getUnis() != null ? evc.getUnis().getUni() : null;
+            unis = unis != null ? unis : Collections.emptyList();
             for (Uni uni : unis) {
                 if (uni.getUniId().getValue().equals(uniId)) {
                     Log.info("Disconnecting Uni {} from svc id {}", uniId, evcSerId);
@@ -316,6 +316,9 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
             log.info("Creting elan interface for elan {} vlan {} interface {}", instanceName, 0, interfaceName);
             NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName, roleToInterfaceType(role),
                     isEtree);
+            if (uni.isPortSecurityEnabled() && uni.getSecurityGroups() != null && !uni.getSecurityGroups().isEmpty()) {
+                NetvirtUtils.addAclToInterface(interfaceName, uni.getSecurityGroups(), dataBroker.newWriteOnlyTransaction());
+            }
             uniQosManager.mapUniPortBandwidthLimits(uni.getUniId().getValue(), interfaceName,
                     uni.getIngressBwProfile());
             setOperEvcElanPort(evcId, instanceName, interfaceName);
@@ -337,6 +340,9 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
                 log.info("Creting elan interface for elan {} vlan {} interface {}", instanceName, 0, interfaceName);
                 NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName, roleToInterfaceType(role),
                         isEtree);
+                if (uni.isPortSecurityEnabled() && uni.getSecurityGroups() != null && !uni.getSecurityGroups().isEmpty()) {
+                    NetvirtUtils.addAclToInterface(interfaceName, uni.getSecurityGroups(), dataBroker.newWriteOnlyTransaction());
+                }
                 uniQosManager.mapUniPortBandwidthLimits(uni.getUniId().getValue(), interfaceName,
                         uni.getIngressBwProfile());
                 setOperEvcElanPort(evcId, instanceName, interfaceName);
