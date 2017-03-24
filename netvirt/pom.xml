@@ -27,7 +27,7 @@
   <!-- <name> formatting is used by autorelease to parse and notify projects on
        build failure. Please do not modify this unless you have a good reason. -->
   <name>ODL :: unimgr :: ${project.artifactId}</name>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -74,6 +74,11 @@
     <dependency>
       <groupId>org.opendaylight.netvirt</groupId>
       <artifactId>elanmanager-impl</artifactId>
+      <version>${vpnservices.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.netvirt</groupId>
+      <artifactId>aclservice-api</artifactId>
       <version>${vpnservices.version}</version>
     </dependency>
      <dependency>

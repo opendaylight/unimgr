@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.MefService;
@@ -105,7 +106,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
     @Override
     public void connectUni(String uniId) {
         List<RetailSvcIdType> allEvcs = MefServicesUtils.getAllEvcsServiceIds(dataBroker);
-        allEvcs = (allEvcs != null) ? allEvcs : Collections.emptyList();
+        allEvcs = allEvcs != null ? allEvcs : Collections.emptyList();
 
         for (RetailSvcIdType evcSerId : allEvcs) {
             InstanceIdentifier<Evc> evcId = MefServicesUtils.getEvcInstanceIdentifier(evcSerId);
@@ -119,8 +120,8 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
             boolean isEtree = evc.getEvcType() == EvcType.RootedMultipoint;
 
             List<Uni> toConnect = new ArrayList<>();
-            List<Uni> unis = (evc.getUnis() != null) ? evc.getUnis().getUni() : null;
-            unis = (unis != null) ? unis : Collections.emptyList();
+            List<Uni> unis = evc.getUnis() != null ? evc.getUnis().getUni() : null;
+            unis = unis != null ? unis : Collections.emptyList();
             for (Uni uni : unis) {
                 if (uni.getUniId().getValue().equals(uniId)) {
                     Log.info("Connecting Uni {} to svc id {}", uniId, evcSerId);
@@ -149,7 +150,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
     @Override
     public void disconnectUni(String uniId) {
         List<RetailSvcIdType> allEvcs = MefServicesUtils.getAllEvcsServiceIds(dataBroker);
-        allEvcs = (allEvcs != null) ? allEvcs : Collections.emptyList();
+        allEvcs = allEvcs != null ? allEvcs : Collections.emptyList();
 
         for (RetailSvcIdType evcSerId : allEvcs) {
             InstanceIdentifier<Evc> evcId = MefServicesUtils.getEvcInstanceIdentifier(evcSerId);
@@ -161,8 +162,8 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
 
             String instanceName = evc.getEvcId().getValue();
             List<Uni> toDisconnect = new ArrayList<>();
-            List<Uni> unis = (evc.getUnis() != null) ? evc.getUnis().getUni() : null;
-            unis = (unis != null) ? unis : Collections.emptyList();
+            List<Uni> unis = evc.getUnis() != null ? evc.getUnis().getUni() : null;
+            unis = unis != null ? unis : Collections.emptyList();
             for (Uni uni : unis) {
                 if (uni.getUniId().getValue().equals(uniId)) {
                     Log.info("Disconnecting Uni {} from svc id {}", uniId, evcSerId);
@@ -316,6 +317,11 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
             log.info("Creting elan interface for elan {} vlan {} interface {}", instanceName, 0, interfaceName);
             NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName, roleToInterfaceType(role),
                     isEtree);
+            if (uni.isPortSecurityEnabled() && uni.getSecurityGroups() != null && !uni.getSecurityGroups().isEmpty()) {
+                WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
+                NetvirtUtils.addAclToInterface(interfaceName, uni.getSecurityGroups(), tx);
+                MdsalUtils.commitTransaction(tx);
+            }
             uniQosManager.mapUniPortBandwidthLimits(uni.getUniId().getValue(), interfaceName,
                     uni.getIngressBwProfile());
             setOperEvcElanPort(evcId, instanceName, interfaceName);
@@ -337,6 +343,10 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
                 log.info("Creting elan interface for elan {} vlan {} interface {}", instanceName, 0, interfaceName);
                 NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName, roleToInterfaceType(role),
                         isEtree);
+                if (uni.isPortSecurityEnabled() && uni.getSecurityGroups() != null && !uni.getSecurityGroups().isEmpty()) {
+                    WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
+                    NetvirtUtils.addAclToInterface(interfaceName, uni.getSecurityGroups(), tx);
+                    MdsalUtils.commitTransaction(tx);                }
                 uniQosManager.mapUniPortBandwidthLimits(uni.getUniId().getValue(), interfaceName,
                         uni.getIngressBwProfile());
                 setOperEvcElanPort(evcId, instanceName, interfaceName);

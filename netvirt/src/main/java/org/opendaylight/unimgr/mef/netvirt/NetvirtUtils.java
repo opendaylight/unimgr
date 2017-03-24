@@ -9,6 +9,7 @@
 package org.opendaylight.unimgr.mef.netvirt;
 
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -29,6 +30,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.rev140508.interfaces.Interface;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.rev140508.interfaces.InterfaceBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.interfaces.rev140508.interfaces.InterfaceKey;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rev160406.IfL2vlan;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rev160406.IfL2vlanBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.interfacemanager.rev160406.ParentRefs;
@@ -46,6 +48,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.dhcp_allocation_poo
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.dhcp_allocation_pool.rev161214.dhcp_allocation_pool.network.AllocationPool;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.dhcp_allocation_pool.rev161214.dhcp_allocation_pool.network.AllocationPoolBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.dhcp_allocation_pool.rev161214.dhcp_allocation_pool.network.AllocationPoolKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.aclservice.rev160608.InterfaceAcl;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.aclservice.rev160608.InterfaceAclBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInstance;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInstanceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInterface;
@@ -165,6 +169,17 @@ public class NetvirtUtils {
                 .addAugmentation(SplitHorizon.class, sh).addAugmentation(IfL2vlan.class, ifL2vlan)
                 .addAugmentation(ParentRefs.class, parentRefsBuilder.build());
         return interfaceBuilder.build();
+    }
+
+    public static void addAclToInterface(String interfaceName, List<Uuid> securityGroups, WriteTransaction tx) {
+        InterfaceBuilder interfaceBuilder = new InterfaceBuilder();
+        interfaceBuilder.setName(interfaceName);
+        InterfaceAclBuilder interfaceAclBuilder = new InterfaceAclBuilder();
+        interfaceAclBuilder.setPortSecurityEnabled(true);
+        interfaceAclBuilder.setSecurityGroups(securityGroups);
+        interfaceAclBuilder.setAllowedAddressPairs(Collections.emptyList());
+        interfaceBuilder.addAugmentation(InterfaceAcl.class, interfaceAclBuilder.build());
+        tx.merge(LogicalDatastoreType.CONFIGURATION, getInterfaceIdentifier(interfaceName), interfaceBuilder.build());
     }
 
     private static ElanInstanceBuilder createElanInstanceBuilder(String instanceName) {
