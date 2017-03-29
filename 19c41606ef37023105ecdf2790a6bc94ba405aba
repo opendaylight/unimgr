@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_467df66d",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/MefServicesUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 6947
+      },
+      "writtenOn": "2017-03-29T14:44:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_b51a1116",
+      "revId": "19c41606ef37023105ecdf2790a6bc94ba405aba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_35d62128",
         "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/NetvirtUtils.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2017-03-28T14:23:12Z",
       "side": 1,
       "message": "extract to method which will return network id",
+      "revId": "19c41606ef37023105ecdf2790a6bc94ba405aba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_e607ca7f",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/netvirt/NetvirtUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 6947
+      },
+      "writtenOn": "2017-03-29T14:44:52Z",
+      "side": 1,
+      "message": "I didn\u0027t want to because in L2 it is extracted without an extra parameter (ip-uni-id or how I called it unimgrNetworkId) and in L3 - with.. just to avoid a method that gets a parameter that might be unused..\n\nwhat do you say?",
+      "parentUuid": "fafc7978_35d62128",
       "revId": "19c41606ef37023105ecdf2790a6bc94ba405aba",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
