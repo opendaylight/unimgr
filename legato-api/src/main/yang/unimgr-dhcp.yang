@@ -10,17 +10,3 @@ module unimgr-dhcp {
         description "It provides required datastore containers to handle DHCP requests
             coming from access or external tunnel ports";
     }
-
-    container unimgr-dhcp {
-        config true;
-        description "contains non-neutron DHCP allocation";
-        list network {
-            key "network-id";
-            leaf network-id {
-                description "unimgr network id";
-                type string;
-            }
-            uses dhcp:dhcp_allocations;
-        }
-    }
-}
