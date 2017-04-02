@@ -45,16 +45,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- dependencies to use AbstractDataBrokerTest -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-
         <!-- Testing Dependencies -->
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
