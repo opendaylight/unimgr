@@ -43,9 +43,7 @@
 
 	<bean id="subnetListener" class="org.opendaylight.unimgr.mef.netvirt.SubnetListener">
 		<argument ref="dataBroker" />
-		<argument ref="notificationPublishService" />
 		<argument ref="qwMacListener" />
-		<argument value="5" />
 	</bean>
 
 	<bean id="qwMacListener" class="org.opendaylight.unimgr.mef.netvirt.GwMacListener">
