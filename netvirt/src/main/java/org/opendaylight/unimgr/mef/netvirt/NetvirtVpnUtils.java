@@ -61,8 +61,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.vpn
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.vpn.instance.op.data.VpnInstanceOpDataEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.NetworkMaps;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.NeutronVpnPortipPortData;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.SubnetAddedToVpnBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.SubnetDeletedFromVpnBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.Subnetmaps;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.networkmaps.NetworkMap;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.neutronvpn.rev150602.networkmaps.NetworkMapBuilder;
@@ -396,70 +394,6 @@ public class NetvirtVpnUtils {
         logger.info("Finished  remove  subnet {}", subnetName);
     }
 
-    public static void publishDirectSubnetToVpn(DataBroker dataBroker,
-            final NotificationPublishService notificationPublishService, String vpnName, String subnetName,
-            IpPrefix subnetIpPrefix, String interfaceName, String intfMac, int waitForElan) {
-        InstanceIdentifier<ElanInstance> elanIdentifierId = NetvirtUtils.getElanInstanceInstanceIdentifier(subnetName);
-
-        @SuppressWarnings("resource") // AutoCloseable
-        DataWaitListener<ElanInstance> elanTagWaiter = new DataWaitListener<>(dataBroker, elanIdentifierId, 10,
-                LogicalDatastoreType.CONFIGURATION, el -> el.getElanTag());
-        if (!elanTagWaiter.waitForData()) {
-            logger.error("Trying to add invalid elan {} to vpn {}", subnetName, vpnName);
-            return;
-        }
-
-        Uuid subnetId = new Uuid(subnetName);
-        String subnetIp = getSubnetFromPrefix(ipPrefixToString(subnetIpPrefix));
-
-        Optional<ElanInstance> elanInstance = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                elanIdentifierId);
-        Long elanTag = elanInstance.get().getElanTag();
-
-        logger.info("Publish subnet {}", subnetName);
-        publishSubnetAddNotification(notificationPublishService, subnetId, subnetIp, vpnName, elanTag);
-        logger.info("Finished Working on subnet {}", subnetName);
-      
-    }
-    
-    public static void refreshDpnGw(final NotificationPublishService notificationPublishService, String vpnName, BigInteger dpId) {
-        
-        AddDpnEventBuilder addDpnEventBuilder = new AddDpnEventBuilder();
-        AddEventDataBuilder eventData = new AddEventDataBuilder();
-        eventData.setVpnName(vpnName);
-        eventData.setDpnId(dpId);
-        
-        addDpnEventBuilder.setAddEventData(eventData.build());
-        try {
-            logger.info("Refrehein dpId {}", dpId);
-            notificationPublishService.putNotification(addDpnEventBuilder.build());
-        } catch (InterruptedException e) {
-            logger.error("Fail to publish notification {}", addDpnEventBuilder, e);
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    public static void publishRemoveDirectSubnetFromVpn(DataBroker dataBroker,
-            final NotificationPublishService notificationPublishService, String vpnName, String subnetName,
-            String interfaceName) {
-        InstanceIdentifier<ElanInstance> elanIdentifierId = InstanceIdentifier.builder(ElanInstances.class)
-                .child(ElanInstance.class, new ElanInstanceKey(subnetName)).build();
-        Optional<ElanInstance> elanInstance = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION,
-                elanIdentifierId);
-        if (!elanInstance.isPresent()) {
-            logger.error("Trying to remove invalid elan {} to vpn {}", subnetName, vpnName);
-            return;
-        }
-        Long elanTag = elanInstance.get().getElanTag() != null ? elanInstance.get().getElanTag()
-                : elanInstance.get().getSegmentationId();
-        Uuid subnetId = new Uuid(subnetName);
-
-        logger.info("Publish subnet remove {}", subnetName);
-        publishSubnetRemoveNotification(notificationPublishService, subnetId, vpnName, elanTag);
-
-        logger.info("Finished publish remove on subnet {}", subnetName);
-    }
-
     private static void createSubnetToNetworkMapping(DataBroker dataBroker, Uuid subnetId, Uuid networkId) {
         InstanceIdentifier<NetworkMap> networkMapIdentifier = getNetworkMapIdentifier(networkId);
         Optional<NetworkMap> optionalNetworkMap = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION,
@@ -489,7 +423,16 @@ public class NetvirtVpnUtils {
     }
 
     protected static void updateSubnetNode(DataBroker dataBroker, Uuid vpnId, Uuid subnetId, String subnetIp,
-            String intfMac) {
+            String intfMac) {       
+        InstanceIdentifier<ElanInstance> elanIdentifierId = NetvirtUtils.getElanInstanceInstanceIdentifier(subnetId.getValue());
+        @SuppressWarnings("resource") // AutoCloseable
+        DataWaitListener<ElanInstance> elanTagWaiter = new DataWaitListener<>(dataBroker, elanIdentifierId, 10,
+                LogicalDatastoreType.CONFIGURATION, el -> el.getElanTag());
+        if (!elanTagWaiter.waitForData()) {
+            logger.error("Trying to add invalid elan {} to vpn {}", subnetId.getValue(), vpnId.getValue());
+            return;
+        }
+        
         Subnetmap subnetmap = null;
         SubnetmapBuilder builder = null;
         InstanceIdentifier<Subnetmap> id = InstanceIdentifier.builder(Subnetmaps.class)
@@ -508,6 +451,7 @@ public class NetvirtVpnUtils {
             builder.setSubnetIp(subnetIp);
             builder.setNetworkId(subnetId);
             builder.setVpnId(vpnId);
+            builder.setRouterId(vpnId);
             builder.setRouterIntfMacAddress(intfMac);
 
             subnetmap = builder.build();
@@ -591,45 +535,6 @@ public class NetvirtVpnUtils {
 
     public static InstanceIdentifier<LearntVpnVipToPort> getLearntVpnVipToPortIdentifier() {
         return InstanceIdentifier.builder(LearntVpnVipToPortData.class).child(LearntVpnVipToPort.class).build();
-    }
-
-    private static void publishSubnetAddNotification(final NotificationPublishService notificationPublishService,
-            Uuid subnetId, String subnetIp, String vpnName, Long elanTag) {
-        SubnetAddedToVpnBuilder builder = new SubnetAddedToVpnBuilder();
-
-        logger.info("publish notification called for network creation");
-
-        builder.setSubnetId(subnetId);
-        builder.setSubnetIp(subnetIp);
-        builder.setVpnName(vpnName);
-        builder.setBgpVpn(true);
-        builder.setElanTag(elanTag);
-
-        try {
-            notificationPublishService.putNotification(builder.build());
-        } catch (InterruptedException e) {
-            logger.error("Fail to publish notification {}", builder, e);
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    private static void publishSubnetRemoveNotification(final NotificationPublishService notificationPublishService,
-            Uuid subnetId, String vpnName, Long elanTag) {
-        SubnetDeletedFromVpnBuilder builder = new SubnetDeletedFromVpnBuilder();
-
-        logger.info("publish notification called for network deletion");
-
-        builder.setSubnetId(subnetId);
-        builder.setVpnName(vpnName);
-        builder.setBgpVpn(true);
-        builder.setElanTag(elanTag);
-
-        try {
-            notificationPublishService.putNotification(builder.build());
-        } catch (InterruptedException e) {
-            logger.error("Fail to publish notification {}", builder, e);
-            throw new RuntimeException(e.getMessage());
-        }
     }
 
     public static void sendArpRequest(OdlArputilService arpUtilService, IpAddress srcIpAddress, IpAddress dstIpAddress,

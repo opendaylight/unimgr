@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.Subnets;
@@ -40,16 +39,11 @@ import com.google.common.base.Optional;
 public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> implements ISubnetManager {
     private static final Logger Log = LoggerFactory.getLogger(SubnetListener.class);
     private ListenerRegistration<SubnetListener> subnetListenerRegistration;
-    private final NotificationPublishService notificationPublishService;
     private final IGwMacListener gwMacListener;
-    private final int waitForElanInterval;
 
-    public SubnetListener(final DataBroker dataBroker, final NotificationPublishService notPublishService,
-            final IGwMacListener gwMacListener, int sleepInterval) {
+    public SubnetListener(final DataBroker dataBroker, final IGwMacListener gwMacListener) {
         super(dataBroker);
-        this.notificationPublishService = notPublishService;
         this.gwMacListener = gwMacListener;
-        this.waitForElanInterval = sleepInterval;
         registerListener();
     }
 
@@ -155,9 +149,8 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
                 return;
             }
 
-            String vpnId = ipvcVpn.getVpnId();
             if (newSubnet.getGateway() == null) {
-                checkCreateDirectNetwork(newSubnet, ipvcVpn, ipvcId, vpnElan);
+                Log.trace("Direct subnet removed {}", newSubnet.getSubnet());
             } else {
                 createNonDirectNetwork(newSubnet, ipvcVpn, ipvcId, vpnElan);
             }
@@ -192,25 +185,6 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
                 subnet);
     }
 
-    private void checkCreateDirectNetwork(Subnet newSubnet, IpvcVpn ipvcVpn, InstanceIdentifier<Ipvc> ipvcId,
-            VpnElans vpnElan) {
-        if (newSubnet.getGateway() != null) {
-            return;
-        }
-
-        org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.Uni operUni = MefInterfaceUtils
-                .getUni(dataBroker, newSubnet.getUniId().getValue(), LogicalDatastoreType.OPERATIONAL);
-        if (operUni == null) {
-            Log.error("Uni {} for network {} is not operational", newSubnet.getUniId(), newSubnet.getSubnet());
-            return;
-        }
-        String portMacAddress = operUni.getMacAddress().getValue();
-
-        NetvirtVpnUtils.publishDirectSubnetToVpn(dataBroker, notificationPublishService, ipvcVpn.getVpnId(),
-                vpnElan.getElanId(), newSubnet.getSubnet(), vpnElan.getElanPort(), portMacAddress, waitForElanInterval);
-
-    }
-
     private void removeNetwork(DataTreeModification<Subnet> deletedDataObject) {
         Subnet deletedSubnet = deletedDataObject.getRootNode().getDataBefore();
         Identifier45 dlUniId = deletedSubnet.getUniId();
@@ -243,9 +217,8 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
                 return;
             }
 
-            String vpnId = ipvcVpn.getVpnId();
             if (dlSubnet.getGateway() == null) {
-                removeDirectNetwork(dlSubnet, ipvcVpn, ipvcId);
+                Log.trace("Direct subnet removed {}", dlSubnet.getSubnet());
             } else {
                 removeNonDirectNetwork(dlSubnet, ipvcVpn, ipvcId);
             }
@@ -253,23 +226,6 @@ public class SubnetListener extends UnimgrDataTreeChangeListener<Subnet> impleme
             MefServicesUtils.removeOperIpvcSubnet(dataBroker, ipvcId, ipvcVpn.getVpnId(), dlUniId, dlIpUniId,
                     vpnElan.getElanId(), vpnElan.getElanPort(), subnetStr);
         }
-    }
-
-    private void removeDirectNetwork(Subnet deletedSubnet, IpvcVpn ipvcVpn, InstanceIdentifier<Ipvc> ipvcId) {
-        if (deletedSubnet.getGateway() != null) {
-            return;
-        }
-
-        String subnetStr = NetvirtVpnUtils.ipPrefixToString(deletedSubnet.getSubnet());
-        VpnElans vpnElan = MefServicesUtils.findVpnForNetwork(deletedSubnet, ipvcVpn);
-        if (vpnElan == null) {
-            Log.error("Network {} has not been created as required, nothing to remove", subnetStr);
-            return;
-        }
-
-        NetvirtVpnUtils.publishRemoveDirectSubnetFromVpn(dataBroker, notificationPublishService, ipvcVpn.getVpnId(),
-                vpnElan.getElanId(), vpnElan.getElanPort());
-
     }
 
     private void removeNonDirectNetwork(Subnet deletedSubnet, IpvcVpn ipvcVpn, InstanceIdentifier<Ipvc> ipvcId) {
