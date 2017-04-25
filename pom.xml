@@ -65,6 +65,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <module>netvirt</module>
         <module>cisco-xr-driver</module>
         <module>ovs-driver</module>
+        <module>template-driver</module>
         <module>dlux</module>
         <module>cli</module>
         <module>karaf</module>
