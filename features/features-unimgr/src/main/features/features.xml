@@ -100,6 +100,13 @@
     <bundle>mvn:org.opendaylight.unimgr/unimgr-cisco-xr-driver/{{VERSION}}</bundle>
   </feature>
 
+  <feature name='odl-unimgr-template-driver' version='${project.version}' description='OpenDaylight :: UniMgr :: Template Driver'>
+    <feature version='${project.version}'>odl-unimgr</feature>
+    <bundle>mvn:org.opendaylight.unimgr/unimgr-template-driver/{{VERSION}}</bundle>
+  </feature>
+
+
+
   <feature name="odl-unimgr-ovs-driver" version="${project.version}" description='OpenDaylight :: UniMgr :: OVSDB Driver'>
     <feature version='${project.version}'>odl-unimgr</feature>
     <feature version="${l2switch.version}">odl-l2switch-all</feature>
