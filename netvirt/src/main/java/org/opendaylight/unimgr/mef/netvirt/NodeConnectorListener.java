@@ -8,6 +8,7 @@
 
 package org.opendaylight.unimgr.mef.netvirt;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -19,6 +20,18 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.genius.interfacemanager.globals.IfmConstants;
+import org.opendaylight.genius.mdsalutil.ActionInfo;
+import org.opendaylight.genius.mdsalutil.FlowEntity;
+import org.opendaylight.genius.mdsalutil.InstructionInfo;
+import org.opendaylight.genius.mdsalutil.MDSALUtil;
+import org.opendaylight.genius.mdsalutil.MatchInfo;
+import org.opendaylight.genius.mdsalutil.MatchInfoBase;
+import org.opendaylight.genius.mdsalutil.NwConstants;
+import org.opendaylight.genius.mdsalutil.actions.ActionPuntToController;
+import org.opendaylight.genius.mdsalutil.instructions.InstructionApplyActions;
+import org.opendaylight.genius.mdsalutil.interfaces.IMdsalApiManager;
+import org.opendaylight.netvirt.elan.utils.ElanConstants;
+import org.opendaylight.netvirt.elan.utils.ElanUtils;
 import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.Uni;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.interfaces.rev150526.mef.interfaces.unis.UniBuilder;
@@ -29,13 +42,15 @@ import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.inte
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.topology.rev150526.mef.topology.devices.device.interfaces.Interface;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.topology.rev150526.mef.topology.devices.device.interfaces.InterfaceBuilder;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.Identifier45;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.config.rev150710.ElanConfig;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.config.rev150710.ElanConfigBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflow.common.action.rev150203.actions.grouping.ActionBuilder;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -49,13 +64,16 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
     private static final String TUNNEL_PREFIX = "tun";
     private static final Logger log = LoggerFactory.getLogger(NodeConnectorListener.class);
     private static boolean generateMac = false;
+    private final IMdsalApiManager mdsalUtil;
     private final UniPortManager uniPortManager;
+
     private ListenerRegistration<NodeConnectorListener> nodeConnectorListenerRegistration;
 
-    public NodeConnectorListener(final DataBroker dataBroker, final UniPortManager uniPortManager,
+    public NodeConnectorListener(final DataBroker dataBroker, final UniPortManager uniPortManager, IMdsalApiManager mdsalUtil,
             final boolean generateMac) {
         super(dataBroker);
         this.uniPortManager = uniPortManager;
+        this.mdsalUtil = mdsalUtil;
         NodeConnectorListener.generateMac = generateMac;
         registerListener();
     }
@@ -201,6 +219,15 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
         uniBuilder.setPhysicalLayers(physicalLayersBuilder.build());
         Uni uni = uniBuilder.build();
         tx.merge(LogicalDatastoreType.OPERATIONAL, uniPath, uni, true);
+        List<MatchInfo> mkMatches = new ArrayList<>();
+        List<InstructionInfo> instructions = new ArrayList<>();
+        List<ActionInfo> actionsInfos = new ArrayList<>();
+        actionsInfos.add(new ActionPuntToController());
+        instructions.add(new InstructionApplyActions(actionsInfos));
+        FlowEntity flow = MDSALUtil.buildFlowEntity(new BigInteger(dpnId), (short)0,
+                "default" + dpnId,
+                1000, "default" + dpnId,0,0,BigInteger.ZERO,mkMatches, instructions);
+        mdsalUtil.installFlow(flow);
 
         CheckedFuture<Void, TransactionCommitFailedException> futures = tx.submit();
         try {
@@ -248,10 +275,5 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
             return;
         }
 
-        ElanConfigBuilder elanConfigBuilder = new ElanConfigBuilder();
-        elanConfigBuilder.setIntBridgeGenMac(false);
-        InstanceIdentifier<ElanConfig> id = InstanceIdentifier.builder(ElanConfig.class).build();
-
-        MdsalUtils.syncUpdate(dataBroker, LogicalDatastoreType.CONFIGURATION, id, elanConfigBuilder.build());
     }
 }
