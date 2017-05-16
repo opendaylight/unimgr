@@ -1,0 +1,28 @@
+module vbr {
+    namespace "urn:opendaylight:unimgr:vbr";
+    prefix "vbr";
+
+    import ietf-inet-types { prefix inet; revision-date "2013-07-15"; }
+    import ietf-yang-types { prefix yang; }
+
+
+    organization "HPE";
+    contact gdavid@hpe.com;
+    description "This is a demo module for vbr";
+
+    revision 2017-05-24 {
+        description "Initial revision.";
+    }
+
+    container vbr {
+        list subscribers {
+            key ip;
+            leaf ip {
+                type inet:ip-address;
+            }
+            leaf sessionId {
+                type uint8;
+            }
+        }
+    }
+}
