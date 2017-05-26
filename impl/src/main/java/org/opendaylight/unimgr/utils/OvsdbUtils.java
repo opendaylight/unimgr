@@ -223,7 +223,7 @@ public class OvsdbUtils {
         tpAugmentationBuilder.setInterfaceType(SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.get("gre"));
         if (source.getSpeed() != null) {
             final Uuid qosUuid = getQosUuid(dataBroker, source);
-            tpAugmentationBuilder.setQos(getQosUuid(dataBroker, source));
+//            tpAugmentationBuilder.setQos(getQosUuid(dataBroker, source));
             LOG.info("Updating Qos {} to termination point {}", qosUuid , bridgeName);
         }
         final TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
@@ -497,7 +497,7 @@ public class OvsdbUtils {
             final QueueList queueList = new QueueListBuilder()
                     .setKey(new QueueListKey(queueNumber))
                     .setQueueNumber(queueNumber)
-                    .setQueueUuid(queueUuid)
+//                    .setQueueUuid(queueUuid)
                     .build();
 
             final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
@@ -696,7 +696,7 @@ public class OvsdbUtils {
         tpAugmentationBuilder.setInterfaceType(null);
         if (uni.getSpeed() != null) {
             final Uuid qosUuid = getQosUuid(dataBroker, uni);
-            tpAugmentationBuilder.setQos(getQosUuid(dataBroker, uni));
+//            tpAugmentationBuilder.setQos(getQosUuid(dataBroker, uni));
             LOG.info("Updating Qos {} to termination point {}", qosUuid , bridgeName);
         }
         final TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
