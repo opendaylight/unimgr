@@ -188,11 +188,6 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>unimgr-cisco-xe-driver</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
       <artifactId>ovs-driver</artifactId>
       <version>${project.version}</version>
     </dependency>
