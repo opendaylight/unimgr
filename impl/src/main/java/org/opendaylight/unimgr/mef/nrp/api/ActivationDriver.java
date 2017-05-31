@@ -9,8 +9,9 @@ package org.opendaylight.unimgr.mef.nrp.api;
 
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceActivatorException;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.forwarding.constructs.ForwardingConstruct;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.NrpCreateConnectivityServiceAttrs;
+
+import java.util.List;
 
 /**
  * Interface of a driver that maps NRP concepts to the configuration of underlying infrastructure.
@@ -38,19 +39,23 @@ public interface ActivationDriver {
 
     /**
      * Set state for the driver for a (de)activation transaction.
-     * @param from near end
-     * @param to far end
+     * @param endPoints list of endpoint to interconnect
+     * @param serviceId connectivity service id
      * @param context context
      */
-    void initialize(FcPort from, FcPort to, ForwardingConstruct context);
+    void initialize(List<EndPoint> endPoints, String serviceId, NrpCreateConnectivityServiceAttrs context);
 
     /**
      * Performs the activation action.
+     * @throws TransactionCommitFailedException
+     * @throws ResourceActivatorException
      */
     void activate() throws TransactionCommitFailedException, ResourceActivatorException;
 
     /**
      * Performs the deactivation action.
+     * @throws TransactionCommitFailedException
+     * @throws ResourceActivatorException
      */
     void deactivate() throws TransactionCommitFailedException, ResourceActivatorException;
 

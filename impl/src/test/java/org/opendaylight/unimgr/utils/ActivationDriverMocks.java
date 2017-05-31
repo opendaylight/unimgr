@@ -9,16 +9,20 @@ package org.opendaylight.unimgr.utils;
 
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
+import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
+import org.opendaylight.unimgr.mef.nrp.impl.ActivationDriverRepoServiceImpl;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -27,40 +31,37 @@ public class ActivationDriverMocks {
     /**
      * Prepare mock {@link ActivationDriverBuilder}. The driver is produced via provided producer function. This covers
      * single port requests.
-     * @param producer to build driver
+     * @param supplier to build driver
      * @return driver builder mock
      */
-    public static ActivationDriverBuilder prepareDriver(Function<FcPort, ActivationDriver> producer) {
+    public static ActivationDriverBuilder prepareDriver(Supplier<ActivationDriver> supplier) {
         final ActivationDriverBuilder mock = mock(ActivationDriverBuilder.class);
-
-        doAnswer(inv -> {
-            FcPort port = (FcPort) inv.getArguments()[0];
-            return Optional.ofNullable(producer.apply(port));
-        }).when(mock).driverFor(any(FcPort.class), any(ActivationDriverBuilder.BuilderContext.class));
-
-        doReturn(Optional.empty()).when(mock)
-                .driverFor(any(FcPort.class), any(FcPort.class), any(ActivationDriverBuilder.BuilderContext.class));
-
+        doAnswer(inv -> Optional.ofNullable(supplier.get())).when(mock).driverFor(any(ActivationDriverBuilder.BuilderContext.class));
         return mock;
     }
 
-    /**
-     * Prepare mock {@link ActivationDriverBuilder}. The driver is produced via provided producer function.  This covers
-     * dual port requests (for internal cross-connect).
-     * @param producer to build driver
-     * @return driver builder mock
-     */
-    public static ActivationDriverBuilder prepareDriver(BiFunction<FcPort, FcPort, ActivationDriver> producer) {
-        final ActivationDriverBuilder mock = mock(ActivationDriverBuilder.class);
 
-        doAnswer(inv -> {
-            FcPort port1 = (FcPort) inv.getArguments()[0];
-            FcPort port2 = (FcPort) inv.getArguments()[1];
-            return Optional.ofNullable(producer.apply(port1, port2));
-        }).when(mock).driverFor(any(FcPort.class), any(FcPort.class), any(ActivationDriverBuilder.BuilderContext.class));
+    public static Builder builder() { return new Builder();}
 
-        doReturn(Optional.empty()).when(mock)
-                .driverFor(any(FcPort.class), any(ActivationDriverBuilder.BuilderContext.class));
-        return mock;
+    public static class Builder {
+        HashMap<UniversalId, ActivationDriver> drivers = new HashMap<>();
+
+        private Builder() {}
+
+        public Builder add(UniversalId uuid, ActivationDriver driver) {
+            drivers.put(uuid, driver);
+            return this;
+        }
+
+        public ActivationDriverRepoService build() {
+            List<ActivationDriverBuilder> builders = drivers.entrySet().stream().map(e -> {
+                ActivationDriverBuilder b = mock(ActivationDriverBuilder.class);
+                when(b.getNodeUuid()).thenReturn(e.getKey());
+                when(b.driverFor(any(ActivationDriverBuilder.BuilderContext.class))).thenReturn(Optional.of(e.getValue()));
+
+                return b;
+            }).collect(Collectors.toList());
+            return new ActivationDriverRepoServiceImpl(builders);
+        }
     }
 }

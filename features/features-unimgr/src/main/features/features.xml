@@ -11,7 +11,6 @@
   <repository>mvn:org.opendaylight.netconf/features-restconf/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.ovsdb/southbound-features/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.dlux/features-dlux/{{VERSION}}/xml/features</repository>
-  <repository>mvn:org.opendaylight.dluxapps/features-dluxapps/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.netconf/features-netconf/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.netconf/features-netconf-connector/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.genius/genius-features/{{VERSION}}/xml/features</repository>
@@ -31,18 +30,26 @@
     <bundle>mvn:org.opendaylight.unimgr/unimgr-presto-api/{{VERSION}}</bundle>
   </feature>
 
+  <feature name='odl-unimgr-nrp-tapi-api' version='${project.version}'
+           description='OpenDaylight :: UniMgr :: NRP Presto API new'>
+    <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
+    <bundle>mvn:org.opendaylight.unimgr/unimgr-nrp-tapi-api/{{VERSION}}</bundle>
+  </feature>
+
   <feature name='odl-unimgr' version='${project.version}'
     description='OpenDaylight :: UniMgr'>
-    <feature version='${controller.mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${ovsdb.version}'>odl-ovsdb-southbound-impl</feature>
     <feature version='${project.version}'>odl-unimgr-api</feature>
     <feature version='${project.version}'>odl-unimgr-presto-api</feature>
+    <feature version='${project.version}'>odl-unimgr-nrp-tapi-api</feature>
     <!-- TODO these features should be dependencies of drivers not unimgr
       itself -->
     <feature version='${netconf.version}'>odl-netconf-connector</feature>
     <feature version='${netconf.version}'>odl-netconf-connector-ssh</feature>
     <!-- FIXME deliver as a separate bundle/feature -->
     <!-- <bundle>mvn:org.opendaylight.unimgr/edgeassure-1000/{{VERSION}}</bundle> -->
+    <bundle>mvn:org.jgrapht/jgrapht-core/1.0.1</bundle>
     <bundle>mvn:org.opendaylight.unimgr/unimgr-impl/{{VERSION}}</bundle>
     <configfile finalname="${configfile.directory}/unimgr.xml">mvn:org.opendaylight.unimgr/unimgr-impl/{{VERSION}}/xml/config</configfile>
   </feature>

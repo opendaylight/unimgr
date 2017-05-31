@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
 import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 
 /**
@@ -22,21 +23,12 @@ import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forw
  */
 public interface ActivationDriverBuilder {
     /**
-     * Get driver for a single port.
-     * @param port to configure
+     * Get driver to participate in connectivity service processing.
      * @param context (de)activation context
      * @return {@link Optional#empty()} in case it cannot be instantiated for a port, driver otherwise
      */
-    Optional<ActivationDriver> driverFor(FcPort port, BuilderContext context);
-
-    /**
-     * Get driver for two ports.
-     * @param portA a-end port
-     * @param portZ z-end port
-     * @param context blackboard for recording state during driver selection
-     * @return {@link Optional#empty()} in case it cannot be instantiated for a port, driver otherwise
-     */
-    Optional<ActivationDriver> driverFor(FcPort portA, FcPort portZ, BuilderContext context);
+    Optional<ActivationDriver> driverFor(BuilderContext context);
+    UniversalId getNodeUuid();
 
     /**
      * Blackboard pattern that allows for passing the context information between

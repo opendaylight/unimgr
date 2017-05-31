@@ -13,10 +13,12 @@ import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.InterfaceHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.L2vpnHelper;
 import org.opendaylight.unimgr.mef.nrp.common.MountPointHelper;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceActivator;
+import org.opendaylight.unimgr.mef.nrp.common.ResourceActivatorException;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.asr9k.policymgr.cfg.rev150518.PolicyManager;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceActive;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
@@ -36,6 +38,8 @@ import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forw
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * Abstarct activator of VPLS-based L2 VPN on IOS-XR devices. It is responsible for handling activation and deactivation
@@ -57,22 +61,22 @@ public abstract class AbstractL2vpnActivator implements ResourceActivator {
     }
 
     @Override
-    public void activate(String nodeName, String outerName, String innerName, FcPort port, FcPort neighbor, long mtu) throws TransactionCommitFailedException {
-        java.util.Optional<PolicyManager> qosConfig = activateQos(innerName, port);
-        InterfaceConfigurations interfaceConfigurations = activateInterface(port, neighbor, mtu);
-        Pseudowires pseudowires = activatePseudowire(neighbor);
-        XconnectGroups xconnectGroups = activateXConnect(outerName, innerName, port, neighbor, pseudowires);
-        L2vpn l2vpn = activateL2Vpn(xconnectGroups);
-
-        doActivate(nodeName, outerName, innerName, interfaceConfigurations, l2vpn, qosConfig);
+    public void activate(List<EndPoint> endPoints, String serviceName) throws ResourceActivatorException, TransactionCommitFailedException {
+//        java.util.Optional<PolicyManager> qosConfig = activateQos(innerName, port);
+//        InterfaceConfigurations interfaceConfigurations = activateInterface(port, neighbor, mtu);
+//        Pseudowires pseudowires = activatePseudowire(neighbor);
+//        XconnectGroups xconnectGroups = activateXConnect(outerName, innerName, port, neighbor, pseudowires);
+//        L2vpn l2vpn = activateL2Vpn(xconnectGroups);
+//
+//        doActivate(nodeName, outerName, innerName, interfaceConfigurations, l2vpn, qosConfig);
     }
 
     @Override
-    public void deactivate(String nodeName, String outerName, String innerName, FcPort port, FcPort neighbor, long mtu) throws TransactionCommitFailedException {
-        InstanceIdentifier<P2pXconnect> xconnectId = deactivateXConnect(outerName, innerName);
-        InstanceIdentifier<InterfaceConfiguration> interfaceConfigurationId = deactivateInterface(port);
-
-        doDeactivate(nodeName, outerName, innerName, xconnectId, interfaceConfigurationId);
+    public void deactivate(List<EndPoint> endPoints, String serviceName) throws TransactionCommitFailedException, ResourceActivatorException {
+//        InstanceIdentifier<P2pXconnect> xconnectId = deactivateXConnect(outerName, innerName);
+//        InstanceIdentifier<InterfaceConfiguration> interfaceConfigurationId = deactivateInterface(port);
+//
+//        doDeactivate(nodeName, outerName, innerName, xconnectId, interfaceConfigurationId);
     }
 
     protected void doActivate(String nodeName,
