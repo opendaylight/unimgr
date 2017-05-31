@@ -67,7 +67,12 @@ public class CapabilitiesService {
             }
 
             private static boolean checkForNetconfCapability(Node node, String netconf_capability){
-                return node.getAugmentation(NetconfNode.class)
+                NetconfNode netconf = node.getAugmentation(NetconfNode.class);
+                if(netconf == null) return false;
+                if(netconf.getAvailableCapabilities() == null) return false;
+                if(netconf.getAvailableCapabilities().getAvailableCapability() == null) return false;
+
+                return netconf
                         .getAvailableCapabilities()
                         .getAvailableCapability()
                         .stream()

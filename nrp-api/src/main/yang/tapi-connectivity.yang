@@ -7,6 +7,9 @@ module tapi-connectivity {
     import tapi-topology {
         prefix tapi-topology;
     }
+    import tapi-path-computation {
+        prefix tapi-path-computation;
+    }
     organization "Metro Ethernet Forum (MEF)";
     contact "MEF";
     description "none";
@@ -173,7 +176,7 @@ module tapi-connectivity {
                 config false;
                 description "none";
             }
-            list service-end-point {
+            list end-point {
                 key 'local-id';
                 min-elements 2;
                 uses connectivity-service-end-point;
@@ -376,12 +379,16 @@ module tapi-connectivity {
                 description "none";
             }
             leaf-list include-path {
-                type string;
+                type leafref {
+                    path '/tapi-common:context/tapi-path-computation:path/tapi-path-computation:uuid';
+                }
                 config false;
                 description "none";
             }
             leaf-list exclude-path {
-                type string;
+                type leafref {
+                    path '/tapi-common:context/tapi-path-computation:path/tapi-path-computation:uuid';
+                }
                 config false;
                 description "none";
             }
@@ -543,7 +550,7 @@ module tapi-connectivity {
         rpc create-connectivity-service {
             description "none";
             input {
-                list sep {
+                list end-point {
                     min-elements 2;
                     uses connectivity-service-end-point;
                     description "none";
@@ -579,7 +586,7 @@ module tapi-connectivity {
                     type string;
                     description "none";
                 }
-                container sep {
+                container end-point {
                     uses connectivity-service-end-point;
                     description "none";
                 }

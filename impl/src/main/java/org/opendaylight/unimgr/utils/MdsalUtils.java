@@ -16,8 +16,10 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
@@ -220,6 +222,16 @@ public class MdsalUtils {
                 .child(Topology.class, new TopologyKey(port.getTopology()))
                 .child(Node.class, new NodeKey(port.getNode()))
                 .child(TerminationPoint.class, new TerminationPointKey(port.getTp()))
+                .build();
+
+        return MdsalUtils.readOptional(dataBroker, store, tpIid);
+    }
+
+    public static Optional<TerminationPoint> readTerminationPoint(DataBroker dataBroker, LogicalDatastoreType store, TopologyId topologyId, NodeId nodeId, TpId tpId) {
+        InstanceIdentifier tpIid = InstanceIdentifier.builder(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(topologyId))
+                .child(Node.class, new NodeKey(nodeId))
+                .child(TerminationPoint.class, new TerminationPointKey(tpId))
                 .build();
 
         return MdsalUtils.readOptional(dataBroker, store, tpIid);

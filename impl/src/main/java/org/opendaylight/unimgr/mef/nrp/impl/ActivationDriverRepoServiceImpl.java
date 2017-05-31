@@ -8,6 +8,7 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverAmbiguousException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverNotFoundException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
 import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,19 +61,20 @@ public class ActivationDriverRepoServiceImpl implements ActivationDriverRepoServ
         return drivers.get(0);
     }
 
-    public ActivationDriver getDriver(FcPort portA, FcPort portZ, ActivationDriverBuilder.BuilderContext context) {
-        return getDriver(x -> x.driverFor(portA, portZ, context));
-    }
-
-    public ActivationDriver getDriver(FcPort port, ActivationDriverBuilder.BuilderContext context) {
-        return getDriver(x -> x.driverFor(port, context));
-    }
-
     public void bind(ActivationDriverBuilder builder) {
         LOG.debug("builder {} bound", builder);
     }
 
     public void unbind(ActivationDriverBuilder builder) {
         LOG.debug("builder {} unbound", builder);
+    }
+
+    @Override
+    public Optional<ActivationDriver> getDriver(UniversalId uuid) {
+        ActivationDriverBuilder builder = builders.stream()
+                .filter(db -> db.getNodeUuid().equals(uuid))
+                .findFirst().orElseThrow(() -> new ActivationDriverNotFoundException(MessageFormat.format("No driver with id {0} registered", uuid)));
+        return builder.driverFor(new ActivationDriverBuilder.BuilderContext());
+
     }
 }
