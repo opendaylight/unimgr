@@ -9,6 +9,7 @@
 package org.opendaylight.unimgr.mef.nrp.impl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,8 +34,10 @@ public class ActivationTransaction {
 
     /**
      * Activate the contents of this transaction.
+     * @return result
      */
     public Result activate() {
+        if(drivers.isEmpty()) throw new IllegalStateException("at least one driver required");
         sortDrivers();
         try {
             for (ActivationDriver d: drivers) {
@@ -55,8 +58,10 @@ public class ActivationTransaction {
 
     /**
      * Deactivate the contents of this transaction.
+     * @return result
      */
     public Result deactivate() {
+        if(drivers.isEmpty()) throw new IllegalStateException("at least one driver required");
         sortDrivers();
         try {
             for (ActivationDriver d: drivers) {
@@ -84,7 +89,7 @@ public class ActivationTransaction {
     }
 
     private void sortDrivers() {
-        drivers.sort((driverA, driverB) -> driverA.priority() - driverB.priority());
+        drivers.sort(Comparator.comparingInt(ActivationDriver::priority));
     }
 
     public static class Result {
