@@ -5,18 +5,19 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator;
+package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.common.MountPointHelper;
+import org.opendaylight.unimgr.mef.nrp.common.ServicePort;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.mtus.Mtu;
@@ -27,27 +28,29 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.pseudowires.Pseudowire;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.pseudowires.pseudowire.Neighbor;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.pseudowires.pseudowire.pseudowire.content.MplsStaticLabels;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPortBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.NrpCreateConnectivityServiceEndPointAttrs;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.ConnectivityServiceEndPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Util class responsible for executing suitable assert operations on given objects.
  *
  * @author marek.ryznar@amartus.com
  */
-public class L2vpnActivatorTestUtils {
+public class L2vpnTestUtils {
 
     public static MountPointService getMockedMountPointService(Optional<DataBroker> optBroker){
         PowerMockito.mockStatic(MountPointHelper.class);
@@ -124,12 +127,8 @@ public class L2vpnActivatorTestUtils {
         assertNotNull(mtu.getOwner());
     }
 
-    public static FcPort port(String topo, String host, String port) {
-        return new FcPortBuilder()
-                .setTopology(new TopologyId(topo))
-                .setNode(new NodeId(host))
-                .setTp(new TpId(port))
-                .build();
+    public static ServicePort port(String topo, String host, String port) {
+        return new ServicePort(new TopologyId(topo), new NodeId(host), new TpId(port));
     }
 
     public static void checkDeactivated(Optional<DataBroker> optBroker, String deactivatedPort)  {
@@ -153,7 +152,7 @@ public class L2vpnActivatorTestUtils {
     private static void checkL2vpnDeactivation(CheckedFuture<Optional<L2vpn>, ReadFailedException>driverL2vpn) throws ExecutionException, InterruptedException {
         if (driverL2vpn.get().isPresent()){
             L2vpn l2vpn = driverL2vpn.get().get();
-            L2vpnActivatorTestUtils.checkL2vpn(l2vpn);
+            L2vpnTestUtils.checkL2vpn(l2vpn);
 
             XconnectGroup xconnectGroup = l2vpn.getDatabase().getXconnectGroups().getXconnectGroup().get(0);
             assertTrue(xconnectGroup.getP2pXconnects().getP2pXconnect().isEmpty());
@@ -165,12 +164,29 @@ public class L2vpnActivatorTestUtils {
     private static void checkInterfaceConfigurationDeactivation(CheckedFuture<Optional<InterfaceConfigurations>, ReadFailedException> driverInterfaceConfigurations, String deactivatedPort) throws InterruptedException, ExecutionException{
         if (driverInterfaceConfigurations.get().isPresent()){
             InterfaceConfigurations interfaceConfigurations = driverInterfaceConfigurations.get().get();
-            L2vpnActivatorTestUtils.checkInterfaceConfigurations(interfaceConfigurations);
+            L2vpnTestUtils.checkInterfaceConfigurations(interfaceConfigurations);
 
             List<InterfaceConfiguration> interfaceConfigurationList = interfaceConfigurations.getInterfaceConfiguration();
             assertFalse(interfaceConfigurationList.stream().anyMatch(x -> x.getInterfaceName().getValue().equals(deactivatedPort)));
         } else {
             fail("InterfaceConfigurations was not found.");
         }
+    }
+
+    public static List<EndPoint> mockEndpoints(String device1Name, String device2Name, String portNo1, String portNo2){
+        List<EndPoint> endPoints = new ArrayList<>();
+        endPoints.add(mockEndPoint("sip:"+device1Name+":"+portNo1));
+        endPoints.add(mockEndPoint("sip:"+device2Name+":"+portNo2));
+        return endPoints;
+    }
+
+    private static EndPoint mockEndPoint(String portName){
+        ConnectivityServiceEndPoint connectivityServiceEndPoint = mock(ConnectivityServiceEndPoint.class);
+        NrpCreateConnectivityServiceEndPointAttrs attrs = mock(NrpCreateConnectivityServiceEndPointAttrs.class);
+        //UNI port mock
+        when(connectivityServiceEndPoint.getServiceInterfacePoint())
+                .thenReturn(new UniversalId(portName));
+
+        return new EndPoint(connectivityServiceEndPoint,attrs);
     }
 }

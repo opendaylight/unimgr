@@ -9,8 +9,8 @@ package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.unimgr.mef.nrp.common.ServicePort;
 import org.opendaylight.unimgr.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.mef.nrp.specs.rev160630.AdapterSpec1;
 import org.opendaylight.yang.gen.v1.urn.mef.nrp.specs.rev160630.TerminationSpec1;
@@ -22,16 +22,11 @@ import org.opendaylight.yang.gen.v1.urn.mef.nrp.specs.rev160630.network.topology
 import org.opendaylight.yang.gen.v1.urn.mef.nrp.specs.rev160630.network.topology.topology.node.termination.point.ltp.attrs.lplist.lpspec.adapterspec.NrpEvcEndpointConnAdaptSpecAttrs;
 import org.opendaylight.yang.gen.v1.urn.mef.nrp.specs.rev160630.network.topology.topology.node.termination.point.ltp.attrs.lplist.lpspec.terminationspec.NrpUniTerminationAttrs;
 import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.TerminationPoint1;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_layerprotocol.LpSpec;
 import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_logicalterminationpoint.LpList;
 import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.network.topology.topology.node.termination.point.LtpAttrs;
 import org.opendaylight.yang.gen.v1.urn.onf.core.specs.rev160630.g_layerprotocolspec.AdapterSpec;
 import org.opendaylight.yang.gen.v1.urn.onf.core.specs.rev160630.g_layerprotocolspec.TerminationSpec;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfig;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -42,7 +37,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -54,7 +48,7 @@ public class BandwidthProfileHelperTest {
     @Test
     public void testRetrieveBandwidthProfiles() {
         //given
-        FcPort fcPort = mock(FcPort.class);
+        ServicePort servicePort = mock(ServicePort.class);
 
         IngressBwpFlow expectedIngressDefaultBwp = mock(IngressBwpFlow.class);
         EgressBwpFlow expectedEgressDefaultBwp = mock(EgressBwpFlow.class);
@@ -63,7 +57,7 @@ public class BandwidthProfileHelperTest {
         IngressBwpUni expectedIngressUniBwp = null;
         EgressBwpUni expectedEgressUniBwp = null;
 
-        DataBroker dataBroker = mockDatastore(fcPort,
+        DataBroker dataBroker = mockDatastore(servicePort,
                 Optional.ofNullable(expectedIngressDefaultBwp),
                 Optional.ofNullable(expectedEgressDefaultBwp),
                 Optional.ofNullable(expectedIngressEvcBwp),
@@ -72,7 +66,7 @@ public class BandwidthProfileHelperTest {
                 Optional.ofNullable(expectedEgressUniBwp));
 
         //when
-        List<BandwidthProfileComposition> actual  = new BandwidthProfileHelper(dataBroker, fcPort).getBandwidthProfiles();
+        List<BandwidthProfileComposition> actual  = new BandwidthProfileHelper(dataBroker, servicePort).getBandwidthProfiles();
 
         //then
         assertNotNull(actual);
@@ -100,7 +94,7 @@ public class BandwidthProfileHelperTest {
     @Test
     public void testRetrieveBandwidthProfilesNoQos() {
         //given
-        FcPort fcPort = mock(FcPort.class);
+        ServicePort fcPort = mock(ServicePort.class);
 
         DataBroker dataBroker = mockDatastore(fcPort,
                 Optional.empty(),
@@ -130,7 +124,7 @@ public class BandwidthProfileHelperTest {
     @Test
     public void testRetrieveBandwidthProfilesEmpty() {
         //given
-        FcPort fcPort = mock(FcPort.class);
+        ServicePort fcPort = mock(ServicePort.class);
 
         DataBroker dataBroker = mockDatastoreEmpty(fcPort);
 
@@ -142,7 +136,7 @@ public class BandwidthProfileHelperTest {
         assertEquals(0, actual.size());
     }
 
-    private DataBroker mockDatastore(FcPort fcPort,
+    private DataBroker mockDatastore(ServicePort servicePort,
                                      Optional<IngressBwpFlow> ingressDefaultBwp,
                                      Optional<EgressBwpFlow> egressDefaultBwp,
                                      Optional<IngressBwpFlow> ingressEvcBwp,
@@ -207,16 +201,16 @@ public class BandwidthProfileHelperTest {
         }
 
         PowerMockito.mockStatic(MdsalUtils.class);
-        when(MdsalUtils.readTerminationPoint(eq(dataBroker), eq(CONFIGURATION), eq(fcPort))).thenReturn(com.google.common.base.Optional.of(tp));
+        when(BandwidthProfileHelper.readTerminationPoint(dataBroker, CONFIGURATION, servicePort)).thenReturn(com.google.common.base.Optional.of(tp));
 
         return dataBroker;
     }
 
-    private DataBroker mockDatastoreEmpty(FcPort fcPort) {
+    private DataBroker mockDatastoreEmpty(ServicePort servicePort) {
         DataBroker dataBroker = mock(DataBroker.class);
 
         PowerMockito.mockStatic(MdsalUtils.class);
-        when(MdsalUtils.readTerminationPoint(eq(dataBroker), eq(CONFIGURATION), eq(fcPort))).thenReturn(com.google.common.base.Optional.absent());
+        when(BandwidthProfileHelper.readTerminationPoint(dataBroker, CONFIGURATION, servicePort)).thenReturn(com.google.common.base.Optional.absent());
 
         return dataBroker;
     }

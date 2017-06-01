@@ -7,6 +7,7 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper;
 
+import org.opendaylight.unimgr.mef.nrp.common.ServicePort;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceActive;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurationsBuilder;
@@ -18,7 +19,6 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109._interface.configurations._interface.configuration.L2Transport;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109._interface.configurations._interface.configuration.L2TransportBuilder;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.InterfaceName;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import java.util.LinkedList;
@@ -33,7 +33,7 @@ import java.util.Optional;
 public class InterfaceHelper {
     private List<InterfaceConfiguration> configurations;
 
-    public static InterfaceName getInterfaceName(FcPort port) {
+    public static InterfaceName getInterfaceName(ServicePort port) {
         String interfaceName = port.getTp().getValue();
 
         if(interfaceName.contains(":")) {
@@ -51,7 +51,7 @@ public class InterfaceHelper {
         configurations = new LinkedList<>();
     }
 
-    public InterfaceHelper addInterface(FcPort port, Optional<Mtus> mtus, boolean setL2Transport) {
+    public InterfaceHelper addInterface(ServicePort port, Optional<Mtus> mtus, boolean setL2Transport) {
         return addInterface(getInterfaceName(port), mtus, setL2Transport);
     }
 
