@@ -8,14 +8,11 @@
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.unimgr.mef.nrp.common.ServicePort;
 import org.opendaylight.unimgr.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4AddressNoZone;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.LoopbackAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -39,7 +36,8 @@ public class LoopbackUtils {
 
     private static final String DEFAULT_LOOPBACK = "127.0.0.1";
 
-    public static Ipv4AddressNoZone getIpv4Address(FcPort port, DataBroker dataBroker) {
+    //First, loopback address must be added with netconf device on POST request
+    public static Ipv4AddressNoZone getIpv4Address(ServicePort port, DataBroker dataBroker) {
         String loopback = null;
         NodeId nodeId = port.getNode();
         TopologyId topologyId = port.getTopology();

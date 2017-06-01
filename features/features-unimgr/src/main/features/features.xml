@@ -95,6 +95,7 @@
 
   <feature name='odl-unimgr-cisco-xr-driver' version='${project.version}' description='OpenDaylight :: UniMgr :: Cisco XR Driver'>
     <feature version='${project.version}'>odl-unimgr</feature>
+    <feature version="${netconf.version}">odl-netconf-topology</feature>
     <bundle>mvn:org.opendaylight.unimgr/cisco-xrmodels/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.unimgr/unimgr-cisco-xr-driver/{{VERSION}}</bundle>
   </feature>

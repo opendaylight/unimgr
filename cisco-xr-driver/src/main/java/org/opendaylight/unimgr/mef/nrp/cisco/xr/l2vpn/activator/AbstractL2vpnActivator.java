@@ -18,7 +18,7 @@ import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.InterfaceHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.L2vpnHelper;
 import org.opendaylight.unimgr.mef.nrp.common.MountPointHelper;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceActivator;
-import org.opendaylight.unimgr.mef.nrp.common.ResourceActivatorException;
+import org.opendaylight.unimgr.mef.nrp.common.ServicePort;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.asr9k.policymgr.cfg.rev150518.PolicyManager;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceActive;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
@@ -34,7 +34,6 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.P2pXconnectKey;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.Pseudowires;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.CiscoIosXrString;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +49,8 @@ import java.util.List;
 public abstract class AbstractL2vpnActivator implements ResourceActivator {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractL2vpnActivator.class);
+    private static final String NETCONF_TOPOLODY_NAME = "topology-netconf";
+    private static final long mtu = 1500;
 
     protected DataBroker dataBroker;
 
@@ -61,27 +62,42 @@ public abstract class AbstractL2vpnActivator implements ResourceActivator {
     }
 
     @Override
-    public void activate(List<EndPoint> endPoints, String serviceName) throws ResourceActivatorException, TransactionCommitFailedException {
-//        java.util.Optional<PolicyManager> qosConfig = activateQos(innerName, port);
-//        InterfaceConfigurations interfaceConfigurations = activateInterface(port, neighbor, mtu);
-//        Pseudowires pseudowires = activatePseudowire(neighbor);
-//        XconnectGroups xconnectGroups = activateXConnect(outerName, innerName, port, neighbor, pseudowires);
-//        L2vpn l2vpn = activateL2Vpn(xconnectGroups);
-//
-//        doActivate(nodeName, outerName, innerName, interfaceConfigurations, l2vpn, qosConfig);
+    public void activate(List<EndPoint> endPoints, String serviceId) throws TransactionCommitFailedException {
+        String innerName = getInnerName(serviceId);
+        String outerName = getOuterName(serviceId);
+        ServicePort port = null;
+        ServicePort neighbor = null;
+        for(EndPoint endPoint: endPoints){
+            if(port==null){
+                port = ServicePort.toServicePort(endPoint, NETCONF_TOPOLODY_NAME);
+            } else {
+                neighbor = ServicePort.toServicePort(endPoint, NETCONF_TOPOLODY_NAME);
+            }
+        }
+
+        java.util.Optional<PolicyManager> qosConfig = activateQos(innerName, port);
+        InterfaceConfigurations interfaceConfigurations = activateInterface(port, neighbor, mtu);
+        Pseudowires pseudowires = activatePseudowire(neighbor);
+        XconnectGroups xconnectGroups = activateXConnect(outerName, innerName, port, neighbor, pseudowires);
+        L2vpn l2vpn = activateL2Vpn(xconnectGroups);
+
+        doActivate(port.getNode().getValue(), interfaceConfigurations, l2vpn, qosConfig);
     }
 
     @Override
-    public void deactivate(List<EndPoint> endPoints, String serviceName) throws TransactionCommitFailedException, ResourceActivatorException {
-//        InstanceIdentifier<P2pXconnect> xconnectId = deactivateXConnect(outerName, innerName);
-//        InstanceIdentifier<InterfaceConfiguration> interfaceConfigurationId = deactivateInterface(port);
-//
-//        doDeactivate(nodeName, outerName, innerName, xconnectId, interfaceConfigurationId);
+    public void deactivate(List<EndPoint> endPoints, String serviceId) throws TransactionCommitFailedException {
+        String innerName = getInnerName(serviceId);
+        String outerName = getOuterName(serviceId);
+        ServicePort port = ServicePort.toServicePort(endPoints.stream().findFirst().get(), NETCONF_TOPOLODY_NAME);
+
+        InstanceIdentifier<P2pXconnect> xconnectId = deactivateXConnect(outerName, innerName);
+        InstanceIdentifier<InterfaceConfiguration> interfaceConfigurationId = deactivateInterface(port);
+
+        doDeactivate(port.getNode().getValue(), xconnectId, interfaceConfigurationId);
     }
 
+    // for now QoS is ignored
     protected void doActivate(String nodeName,
-                              String outerName,
-                              String innerName,
                               InterfaceConfigurations interfaceConfigurations,
                               L2vpn l2vpn,
                               java.util.Optional<PolicyManager> qosConfig) throws TransactionCommitFailedException {
@@ -99,8 +115,6 @@ public abstract class AbstractL2vpnActivator implements ResourceActivator {
     }
 
     protected void doDeactivate(String nodeName,
-                                String outerName,
-                                String innerName,
                                 InstanceIdentifier<P2pXconnect> xconnectId,
                                 InstanceIdentifier<InterfaceConfiguration> interfaceConfigurationId) throws TransactionCommitFailedException {
 
@@ -116,13 +130,13 @@ public abstract class AbstractL2vpnActivator implements ResourceActivator {
         transaction.submit().checkedGet();
     }
 
-    protected abstract java.util.Optional<PolicyManager> activateQos(String name, FcPort port);
+    protected abstract java.util.Optional<PolicyManager> activateQos(String name, ServicePort port);
 
-    protected abstract InterfaceConfigurations activateInterface(FcPort portA, FcPort portZ, long mtu);
+    protected abstract InterfaceConfigurations activateInterface(ServicePort portA, ServicePort portZ, long mtu);
 
-    protected abstract Pseudowires activatePseudowire(FcPort neighbor);
+    protected abstract Pseudowires activatePseudowire(ServicePort neighbor);
 
-    protected abstract XconnectGroups activateXConnect(String outerName, String innerName, FcPort portA, FcPort portZ, Pseudowires pseudowires);
+    protected abstract XconnectGroups activateXConnect(String outerName, String innerName, ServicePort portA, ServicePort portZ, Pseudowires pseudowires);
 
     protected abstract L2vpn activateL2Vpn(XconnectGroups xconnectGroups);
 
@@ -135,9 +149,12 @@ public abstract class AbstractL2vpnActivator implements ResourceActivator {
                 .build();
     }
 
-    private InstanceIdentifier<InterfaceConfiguration> deactivateInterface(FcPort port) {
+    private InstanceIdentifier<InterfaceConfiguration> deactivateInterface(ServicePort port) {
         return InstanceIdentifier.builder(InterfaceConfigurations.class)
                 .child(InterfaceConfiguration.class, new InterfaceConfigurationKey(new InterfaceActive("act"), InterfaceHelper.getInterfaceName(port)))
                 .build();
     }
+
+    protected abstract String getInnerName(String serviceId);
+    protected abstract String getOuterName(String serviceId);
 }

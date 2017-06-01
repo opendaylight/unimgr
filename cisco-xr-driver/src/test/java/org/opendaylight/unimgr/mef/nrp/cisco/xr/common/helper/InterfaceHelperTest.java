@@ -7,10 +7,10 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper;
 
-import java.util.Optional;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.MtuUtils;
+import org.opendaylight.unimgr.mef.nrp.common.ServicePort;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.Mtus;
@@ -18,10 +18,10 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.InterfaceConfiguration3;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.CiscoIosXrString;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.InterfaceName;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -38,7 +38,7 @@ public class InterfaceHelperTest {
         TpId tp = Mockito.mock(TpId.class);
         Mockito.when(tp.getValue()).thenReturn(interfaceName);
 
-        FcPort port = Mockito.mock(FcPort.class);
+        ServicePort port = Mockito.mock(ServicePort.class);
         Mockito.when(port.getTp()).thenReturn(tp);
 
         InterfaceName expected = new InterfaceName(interfaceName);
@@ -58,7 +58,7 @@ public class InterfaceHelperTest {
         TpId tp = Mockito.mock(TpId.class);
         Mockito.when(tp.getValue()).thenReturn(interfaceName);
 
-        FcPort port = Mockito.mock(FcPort.class);
+        ServicePort port = Mockito.mock(ServicePort.class);
         Mockito.when(port.getTp()).thenReturn(tp);
 
         InterfaceName expected = new InterfaceName("GigabitEthernet0/0/1");
