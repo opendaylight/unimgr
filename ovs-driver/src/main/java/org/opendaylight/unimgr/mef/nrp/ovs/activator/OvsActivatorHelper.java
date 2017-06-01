@@ -7,13 +7,13 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs.activator;
 
+import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
 import org.opendaylight.unimgr.mef.nrp.ovs.exception.VlanNotSetException;
 import org.opendaylight.unimgr.mef.nrp.ovs.transaction.TopologyTransaction;
 import org.opendaylight.unimgr.mef.nrp.ovs.util.VlanUtils;
 import org.opendaylight.unimgr.utils.NullAwareDatastoreGetter;
-import org.opendaylight.yang.gen.v1.urn.mef.unimgr.ext.rev160725.FcPort1;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.nrp.create.connectivity.service.end.point.attrs.NrpCgEthFrameFlowCpaAspec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
@@ -31,17 +31,20 @@ import java.util.Map;
  */
 class OvsActivatorHelper {
     private List<NullAwareDatastoreGetter<Node>> nodes;
-    private FcPort flowPoint;
+    private EndPoint endPoint;
+    private String tpName;
     private Map<String, String> portMap;
 
-    private static final String CTAG_VLAN_ID_NOT_SET_ERROR_MESSAGE = "C-Tag VLAN Id not set for termination point '%s'.";
-    private static final String FC_PORT_NOT_AUGMENTED_ERROR_MESSAGE = "Forwarding Construct port '%s' does not have '%s' augmentation.";
+    private static final String CTAG_VLAN_ID_NOT_SET_ERROR_MESSAGE = "C-Tag VLAN Id not set for End Point '%s'.";
+    private static final String ATTRS_NOT_SET_ERROR_MESSAGE = "End Point '%s' does not have '%s' set.";
+
 
     private static final Logger LOG = LoggerFactory.getLogger(OvsActivatorHelper.class);
 
-    OvsActivatorHelper(TopologyTransaction topologyTransaction, FcPort flowPoint) {
+    OvsActivatorHelper(TopologyTransaction topologyTransaction, EndPoint endPoint) {
         this.nodes = topologyTransaction.readNodes();
-        this.flowPoint = flowPoint;
+        this.endPoint = endPoint;
+        tpName = getPortName(endPoint.getEndpoint().getServiceInterfacePoint().getValue());
         this.portMap = createPortMap(nodes);
     }
 
@@ -50,21 +53,21 @@ class OvsActivatorHelper {
      *
      * @return Integer with VLAN Id
      */
-    int getServiceVlanId() throws ResourceNotAvailableException {
-        FcPort1 fcPort1 = flowPoint.getAugmentation(FcPort1.class);
-        String tpName = flowPoint.getTp().getValue();
+    int getCeVlanId() throws ResourceNotAvailableException {
 
-        if (fcPort1 != null) {
-            if (fcPort1.getCTagVlanId() != null) {
-                return fcPort1.getCTagVlanId().getValue().intValue();
+        if( (endPoint.getAttrs() != null) && (endPoint.getAttrs().getNrpCgEthFrameFlowCpaAspec()!=null) ){
+            NrpCgEthFrameFlowCpaAspec attr = endPoint.getAttrs().getNrpCgEthFrameFlowCpaAspec();
+            if( (attr.getCeVlanIdList()!=null) && !(attr.getCeVlanIdList().getVlanIdList().isEmpty()) ){
+                //for now we support only one CE VLAN
+                return attr.getCeVlanIdList().getVlanIdList().get(0).getVlanId().getValue().intValue();
             } else {
                 LOG.warn(String.format(CTAG_VLAN_ID_NOT_SET_ERROR_MESSAGE, tpName));
                 throw new VlanNotSetException(String.format(CTAG_VLAN_ID_NOT_SET_ERROR_MESSAGE, tpName));
             }
         } else {
-            String fcPort1ClassName = FcPort1.class.toString();
-            LOG.warn(String.format(FC_PORT_NOT_AUGMENTED_ERROR_MESSAGE, tpName, fcPort1ClassName));
-            throw new ResourceNotAvailableException(String.format(FC_PORT_NOT_AUGMENTED_ERROR_MESSAGE, tpName, fcPort1ClassName));
+            String className = NrpCgEthFrameFlowCpaAspec.class.toString();
+            LOG.warn(String.format(ATTRS_NOT_SET_ERROR_MESSAGE, tpName, className));
+            throw new ResourceNotAvailableException(String.format(ATTRS_NOT_SET_ERROR_MESSAGE, tpName, className));
         }
     }
 
@@ -75,7 +78,7 @@ class OvsActivatorHelper {
      */
     int getInternalVlanId() throws ResourceNotAvailableException {
         VlanUtils vlanUtils = new VlanUtils(nodes);
-        int serviceVlanId = getServiceVlanId();
+        int serviceVlanId = getCeVlanId();
 
         if (vlanUtils.isVlanInUse(serviceVlanId)) {
             LOG.debug("VLAN ID = '" + serviceVlanId + "' already in use.");
@@ -92,7 +95,7 @@ class OvsActivatorHelper {
      * @return String with port name
      */
     String getOpenFlowPortName() {
-        return portMap.get(flowPoint.getTp().getValue());
+        return portMap.get(tpName);
     }
 
     private Map<String, String> createPortMap(List<NullAwareDatastoreGetter<Node>> nodes) {
@@ -108,5 +111,10 @@ class OvsActivatorHelper {
             }
         }
         return portMap;
+    }
+
+    protected static String getPortName(String sip){
+        String[] tab = sip.split(":");
+        return tab[tab.length-1];
     }
 }

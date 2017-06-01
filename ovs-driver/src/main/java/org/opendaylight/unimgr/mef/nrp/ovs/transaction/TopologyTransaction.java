@@ -86,6 +86,24 @@ public class TopologyTransaction {
         throw new ResourceNotAvailableException(String.format(NODE_NOT_FOUND_ERROR_MESSAGE, portName));
     }
 
+    public Node readNodeOF(String ofportName) throws ResourceNotAvailableException {
+        String ofNodeName = ofportName.split(":")[0]+":"+ofportName.split(":")[1];
+        Nodes nodes = readOpenFLowTopology(dataBroker);
+        if(nodes != null){
+            for(Node node: nodes.getNode()){
+                if(node.getId().getValue().equals(ofNodeName)){
+                    return node;
+                }
+            }
+        } else {
+            LOG.warn(String.format(NODE_NOT_FOUND_ERROR_MESSAGE, "OpenFlow"));
+            throw new ResourceNotAvailableException(String.format(NODE_NOT_FOUND_ERROR_MESSAGE, "OpenFlow"));
+        }
+
+        LOG.warn(String.format(NODE_NOT_FOUND_ERROR_MESSAGE, ofportName));
+        throw new ResourceNotAvailableException(String.format(NODE_NOT_FOUND_ERROR_MESSAGE, ofportName));
+    }
+
     /**
      * Returns links associated with specified node
      *
@@ -131,5 +149,10 @@ public class TopologyTransaction {
 
     private InstanceIdentifier<Nodes> getNodesInstanceId() {
         return InstanceIdentifier.builder(Nodes.class).build();
+    }
+
+    public static Nodes readOpenFLowTopology(DataBroker dataBroker){
+        InstanceIdentifier instanceIdentifier = InstanceIdentifier.builder(Nodes.class).build();
+        return (Nodes) MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION,instanceIdentifier);
     }
 }

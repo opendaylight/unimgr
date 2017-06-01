@@ -16,4 +16,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
             <argument ref="dataBroker" />
         </bean>
     </service>
+    <bean id="topologyHandler" class="org.opendaylight.unimgr.mef.nrp.ovs.tapi.TopologyDataHandler" init-method="init" destroy-method="close">
+        <argument ref="dataBroker" />
+    </bean>
 </blueprint>
