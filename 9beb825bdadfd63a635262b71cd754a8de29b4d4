@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3afa9182_d26452e7",
+        "filename": "ovs-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/ovs/activator/OvsActivatorHelper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 2531
+      },
+      "writtenOn": "2017-06-02T10:30:11Z",
+      "side": 1,
+      "message": "in future we should refactor it - there is no need to have port map as class attribute as we always use the same tpNAme per given map instance",
+      "revId": "9beb825bdadfd63a635262b71cd754a8de29b4d4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
