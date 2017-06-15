@@ -10,19 +10,19 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-parent</artifactId>
-    <version>0.5.4-SNAPSHOT</version>
+    <version>0.5.4-Boron-SR4</version>
     <relativePath />
   </parent>
 
   <properties>
-    <genius.version>0.1.4-SNAPSHOT</genius.version>
-    <vpnservices.version>0.3.4-SNAPSHOT</vpnservices.version>
+    <genius.version>0.1.4-Boron-SR4</genius.version>
+    <vpnservices.version>0.3.4-Boron-SR4</vpnservices.version>
   </properties>
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>unimgr-netvirt</artifactId>
-  <version>0.1.4-SNAPSHOT</version>
+  <version>0.1.4-Boron-SR4</version>
   <packaging>bundle</packaging>
   <build>
     <plugins>
