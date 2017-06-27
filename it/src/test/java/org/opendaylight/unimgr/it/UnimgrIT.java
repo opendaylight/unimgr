@@ -106,7 +106,7 @@ public class UnimgrIT extends AbstractMdsalTestBase {
     public MavenUrlReference getFeatureRepo() {
         return maven()
                 .groupId("org.opendaylight.unimgr")
-                .artifactId("unimgr-features")
+                .artifactId("features4-unimgr")
                 .classifier("features")
                 .type("xml")
                 .versionAsInProject();
