@@ -27,7 +27,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <properties>
     <skipITs>false</skipITs>
     <karaf.distro.groupId>org.opendaylight.unimgr</karaf.distro.groupId>
-    <karaf.distro.artifactId>unimgr-karaf</karaf.distro.artifactId>
+    <karaf.distro.artifactId>unimgr-karaf4</karaf.distro.artifactId>
     <karaf.distro.version>${project.version}</karaf.distro.version>
     <karaf.distro.type>zip</karaf.distro.type>
   </properties>
