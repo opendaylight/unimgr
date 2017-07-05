@@ -7,29 +7,10 @@
  */
 package org.opendaylight.unimgr.mef.nrp.impl;
 
-import com.google.common.base.Optional;
-import org.junit.Before;
-import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
-import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.Context;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.TerminationDirection;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.Context1;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.node.OwnedNodeEdgePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.node.OwnedNodeEdgePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.node.OwnedNodeEdgePointKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.NodeKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.context.Topology;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.context.TopologyKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,7 +20,28 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
+import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.Context;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.TerminationDirection;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.Context1;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePointKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.Topology;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.Node;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.NodeKey;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+
+import com.google.common.base.Optional;
 
 /**
  * @author marek.ryznar@amartus.com

@@ -8,31 +8,30 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl.ext;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.function.Consumer;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.impl.AbstractTestWithTopo;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm_connectivity.rev170227.NaturalNumber;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.LayerProtocol1;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.context.attrs.ServiceInterfacePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.service._interface.point.LayerProtocol;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.node.OwnedNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef_types.rev170531.NaturalNumber;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.LayerProtocol1;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.service._interface.point.g.LayerProtocol;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePoint;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.AddSipInput;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.AddSipInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.UniSpecBuilder;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.EnniSpecBuilder;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.InniSpecBuilder;
+import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.UniSpecBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-
-import java.math.BigInteger;
-import java.util.function.Consumer;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -130,7 +129,7 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
                     new EnniSpecBuilder()
                         .setEnniSpec(
                                 new org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.enni.spec.EnniSpecBuilder()
-                                        .setMaxFrameSize(new NaturalNumber(new BigInteger("1000")))
+                                        .setMaxFrameSize(new NaturalNumber(new Long(1000)))
                                         .build())
                     .build());
             break;

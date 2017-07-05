@@ -7,6 +7,14 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.driver;
 
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiConsumer;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -18,13 +26,10 @@ import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnLocalConnec
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnP2pConnectActivator;
 import org.opendaylight.unimgr.utils.DriverConstants;
 import org.opendaylight.unimgr.utils.SipHandler;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.NrpCreateConnectivityServiceAttrs;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.NrpConnectivityServiceAttrsG;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.function.BiConsumer;
 
 /**
  * @author marek.ryznar@amartus.com
@@ -58,7 +63,7 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
             }
 
             @Override
-            public void initialize(List<EndPoint> endPoints, String serviceId, NrpCreateConnectivityServiceAttrs context) {
+            public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrsG context) {
                 this.endPoints = endPoints;
                 this.serviceId = serviceId;
 

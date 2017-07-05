@@ -7,31 +7,36 @@
  */
 package org.opendaylight.unimgr.mef.nrp.impl;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import org.opendaylight.controller.md.sal.binding.api.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.Context;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.Context1;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.node.OwnedNodeEdgePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.context.Topology;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.context.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.Context;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.Context1;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.Topology;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.TopologyKey;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 
 /**
  * TopologyDataHandler listens to presto system topology and propagate significant changes to presto system topology.

@@ -7,8 +7,11 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import static org.junit.Assert.fail;
+
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,7 +23,6 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
-import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.L2vpnTestUtils;
 import org.opendaylight.unimgr.mef.nrp.common.MountPointHelper;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
@@ -36,10 +38,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
-import static org.junit.Assert.fail;
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 
 /**
  * @author marek.ryznar@amartus.com

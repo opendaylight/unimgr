@@ -8,31 +8,34 @@
 
 package org.opendaylight.unimgr.mef.nrp.template.tapi;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
-import org.opendaylight.unimgr.mef.nrp.template.TemplateConstants;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm_connectivity.rev170227.NaturalNumber;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.LayerProtocol1;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.LayerProtocol1Builder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.nrp.layer.protocol.attrs.NrpCgEthUniSpecBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.*;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.context.attrs.ServiceInterfacePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.context.attrs.ServiceInterfacePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.service._interface.point.LayerProtocol;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.service._interface.point.LayerProtocolBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.node.OwnedNodeEdgePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.node.OwnedNodeEdgePointBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
+import org.opendaylight.unimgr.mef.nrp.template.TemplateConstants;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef_types.rev170531.NaturalNumber;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.LayerProtocol1;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.LayerProtocol1Builder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.nrp.layer.protocol.attrs.g.NrpCgEthUniSpecBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.LayerProtocolName;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.PortDirection;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.PortRole;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.TerminationDirection;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.service._interface.point.g.LayerProtocol;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.service._interface.point.g.LayerProtocolBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePointBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -96,7 +99,7 @@ public class TopologyDataHandler {
                 .addAugmentation(LayerProtocol1.class, new LayerProtocol1Builder()
                         .setNrpCgEthUniSpec(
                                 new NrpCgEthUniSpecBuilder()
-                                        .setMaxFrameSize(new NaturalNumber(new BigInteger("1703")))
+                                        .setMaxFrameSize(new NaturalNumber(new Long(1703)))
                                         .build()
                         ).build()
                 ).build();
@@ -109,7 +112,7 @@ public class TopologyDataHandler {
         return Arrays.stream(indexes).mapToObj(idx -> new OwnedNodeEdgePointBuilder()
                 .setUuid(new UniversalId(TemplateConstants.DRIVER_ID + ":nep" + idx))
                 .setLayerProtocol(Collections.singletonList(
-                        new org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.node.edge.point.LayerProtocolBuilder()
+                        new org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.edge.point.g.LayerProtocolBuilder()
                             .setLocalId("eth")
                             .setLayerProtocolName(LayerProtocolName.Eth)
                             .build()))

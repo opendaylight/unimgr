@@ -8,9 +8,9 @@
 
 package org.opendaylight.unimgr.mef.nrp.api;
 
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
-
 import java.util.Optional;
+
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
 
 /**
  * This interface is used to request an ActivationDriver for a given MEF service fragment.

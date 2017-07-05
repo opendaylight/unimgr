@@ -7,7 +7,12 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs.tapi;
 
-import com.google.common.base.Optional;
+import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -16,9 +21,9 @@ import org.opendaylight.unimgr.mef.nrp.impl.NrpInitializer;
 import org.opendaylight.unimgr.mef.nrp.ovs.DataStoreTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.OpenFlowTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.OvsdbTopologyTestUtils;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.Context;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.Context1;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.Context;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.Context1;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnectorBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.PortNumberUni;
@@ -32,11 +37,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
-import static org.junit.Assert.fail;
+import com.google.common.base.Optional;
 
 /**
  * @author marek.ryznar@amartus.com
@@ -161,11 +162,11 @@ public class TopologyDataHandlerTestUtils {
         }
     }
 
-    protected org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.Node readOvsNode(){
+    protected org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.Node readOvsNode(){
         return DataStoreTestUtils.read(getNodeIid(),dataBroker);
     }
 
-    protected List<org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.context.attrs.ServiceInterfacePoint> readSips(){
+    protected List<org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePoint> readSips(){
         ReadWriteTransaction readWriteTransaction = dataBroker.newReadWriteTransaction();
         try {
             Optional<Context> opt = readWriteTransaction.read(LogicalDatastoreType.OPERATIONAL, InstanceIdentifier.create(Context.class)).checkedGet();
@@ -182,14 +183,14 @@ public class TopologyDataHandlerTestUtils {
 
     private static InstanceIdentifier getNodeIid(){
         return getTopoIid()
-                .child(org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.Node.class,
-                        new org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.NodeKey(new UniversalId(ovsNodeId)));
+                .child(org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.Node.class,
+                        new org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.NodeKey(new UniversalId(ovsNodeId)));
     }
 
     private static InstanceIdentifier getTopoIid(){
         return InstanceIdentifier.create(Context.class)
                 .augmentation(Context1.class)
-                .child(org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.context.Topology.class,
-                        new org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.context.TopologyKey(new UniversalId(prestoNrpTopoId)));
+                .child(org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.Topology.class,
+                        new org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.TopologyKey(new UniversalId(prestoNrpTopoId)));
     }
 }

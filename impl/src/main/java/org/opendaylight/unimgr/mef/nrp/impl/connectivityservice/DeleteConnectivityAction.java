@@ -8,6 +8,16 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 
+import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
+
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -15,29 +25,24 @@ import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.impl.ActivationTransaction;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.Context1;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.DeleteConnectivityServiceInput;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.DeleteConnectivityServiceOutput;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.DeleteConnectivityServiceOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connection.Route;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connectivity.context.Connection;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connectivity.context.ConnectionKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connectivity.context.ConnectivityService;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connectivity.context.ConnectivityServiceKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.delete.connectivity.service.output.Service;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.delete.connectivity.service.output.ServiceBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.Context1;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.DeleteConnectivityServiceInput;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.DeleteConnectivityServiceOutput;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.DeleteConnectivityServiceOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connection.g.Route;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.Connection;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectionKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectivityService;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectivityServiceKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.delete.connectivity.service.output.Service;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.delete.connectivity.service.output.ServiceBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
-
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -157,13 +162,13 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
                 .flatMap(c -> {
                     UniversalId nodeId = c.getNode();
                     return c.getConnectionEndPoint().stream().map(cep -> {
-                        Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connectivity.service.EndPoint> optEndPoint = Optional.empty();
+                        Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.service.g.EndPoint> optEndPoint = Optional.empty();
                         if(cs.getEndPoint() != null){
                             optEndPoint = cs.getEndPoint().stream()
                                     .filter(endPoint1 -> endPoint1.getServiceInterfacePoint().getValue().contains(cep.getServerNodeEdgePoint().getValue()))
                                     .findFirst();
                         }
-                        org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connectivity.service.EndPoint endPoint =
+                        org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.service.g.EndPoint endPoint =
                                 optEndPoint.isPresent() ? optEndPoint.get() : null;
                         EndPoint ep = new EndPoint(endPoint, null).setSystemNepUuid(cep.getServerNodeEdgePoint());
                         return new Pair(nodeId, ep);

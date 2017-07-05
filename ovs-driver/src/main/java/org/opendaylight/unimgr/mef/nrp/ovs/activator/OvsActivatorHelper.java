@@ -7,22 +7,22 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs.activator;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
 import org.opendaylight.unimgr.mef.nrp.ovs.exception.VlanNotSetException;
 import org.opendaylight.unimgr.mef.nrp.ovs.transaction.TopologyTransaction;
 import org.opendaylight.unimgr.mef.nrp.ovs.util.VlanUtils;
 import org.opendaylight.unimgr.utils.NullAwareDatastoreGetter;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.nrp.create.connectivity.service.end.point.attrs.NrpCgEthFrameFlowCpaAspec;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.nrp.connectivity.service.end.point.attrs.g.NrpCgEthFrameFlowSpec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Helper class for OvsDriver activation.
@@ -55,17 +55,17 @@ class OvsActivatorHelper {
      */
     int getCeVlanId() throws ResourceNotAvailableException {
 
-        if( (endPoint.getAttrs() != null) && (endPoint.getAttrs().getNrpCgEthFrameFlowCpaAspec()!=null) ){
-            NrpCgEthFrameFlowCpaAspec attr = endPoint.getAttrs().getNrpCgEthFrameFlowCpaAspec();
-            if( (attr.getCeVlanIdList()!=null) && !(attr.getCeVlanIdList().getVlanIdList().isEmpty()) ){
+        if( (endPoint.getAttrs() != null) && (endPoint.getAttrs().getNrpCgEthFrameFlowSpec()!=null) ){
+            NrpCgEthFrameFlowSpec attr = endPoint.getAttrs().getNrpCgEthFrameFlowSpec();
+            if( (attr.getCeVlanIdListOrUntag()!=null) && !(attr.getCeVlanIdListOrUntag().getVlanIdList().isEmpty()) ){
                 //for now we support only one CE VLAN
-                return attr.getCeVlanIdList().getVlanIdList().get(0).getVlanId().getValue().intValue();
+                return attr.getCeVlanIdListOrUntag().getVlanIdList().get(0).getVlanId().getValue().intValue();
             } else {
                 LOG.warn(String.format(CTAG_VLAN_ID_NOT_SET_ERROR_MESSAGE, tpName));
                 throw new VlanNotSetException(String.format(CTAG_VLAN_ID_NOT_SET_ERROR_MESSAGE, tpName));
             }
         } else {
-            String className = NrpCgEthFrameFlowCpaAspec.class.toString();
+            String className = NrpCgEthFrameFlowSpec.class.toString();
             LOG.warn(String.format(ATTRS_NOT_SET_ERROR_MESSAGE, tpName, className));
             throw new ResourceNotAvailableException(String.format(ATTRS_NOT_SET_ERROR_MESSAGE, tpName, className));
         }

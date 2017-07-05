@@ -13,108 +13,94 @@ module nrp-interface {
     organization "Metro Ethernet Forum (MEF)";
     contact "MEF";
     description "none";
-    revision 2017-02-27 {
+    revision 2017-05-31 {
         description "MEF NRP 1.0.alpha";
         reference "ONF-TR-527, ONF-TR-512, ONF-TR-531, RFC 6020 and RFC 6087";
     }
-    augment "/tapi-common:context/tapi-common:service-interface-point/tapi-common:layer-protocol" {
-        uses nrp-layer-protocol-attrs;
-        description "none";
-    }
-    augment "/tapi-connectivity:create-connectivity-service/tapi-connectivity:input" {
-        uses nrp-create-connectivity-service-attrs;
-        description "none";
+    augment "/tapi-connectivity:create-connectivity-service/tapi-connectivity:output/tapi-connectivity:service/tapi-connectivity:end-point" {
+        uses nrp-connectivity-service-end-point-attrs-g;
+            description "none";
     }
     augment "/tapi-common:context/tapi-connectivity:connectivity-service" {
-        uses nrp-connectivity-service-attrs;
-        description "none";
-    }
-    augment "/tapi-common:context/tapi-connectivity:connectivity-service/tapi-connectivity:end-point" {
-        uses nrp-connectivity-service-end-point-attrs;
-        description "none";
+        uses nrp-connectivity-service-attrs-g;
+            description "none";
     }
     augment "/tapi-connectivity:create-connectivity-service/tapi-connectivity:input/tapi-connectivity:end-point" {
-        uses nrp-create-connectivity-service-end-point-attrs;
-        description "none";
+        uses nrp-connectivity-service-end-point-attrs-g;
+            description "none";
+    }
+    augment "/tapi-common:context/tapi-connectivity:connectivity-service/tapi-connectivity:end-point" {
+        uses nrp-connectivity-service-end-point-attrs-g;
+            description "none";
+    }
+    augment "/tapi-connectivity:create-connectivity-service/tapi-connectivity:input" {
+        uses nrp-connectivity-service-attrs-g;
+            description "none";
+    }
+    augment "/tapi-connectivity:create-connectivity-service/tapi-connectivity:output/tapi-connectivity:service" {
+        uses nrp-connectivity-service-attrs-g;
+            description "none";
+    }
+    augment "/tapi-common:context/tapi-common:service-interface-point/tapi-common:layer-protocol" {
+        uses nrp-layer-protocol-attrs-g;
+            description "none";
+    }
+    augment "/tapi-connectivity:create-connectivity-service/tapi-connectivity:input/tapi-connectivity:end-point" {
+        uses nrp-layer-protocol-attrs-g;
+            description "none";
     }
     /***********************
     * package diagrams
-    **********************/
+    **********************/ 
 
     /***********************
     * package object-classes
-    **********************/
-        grouping nrp-cg-eth-uni-spec {
-            uses nrm-connectivity:cg-eth-uni-spec;
+    **********************/ 
+        grouping nrp-cg-eth-uni-spec-g {
+            uses nrm-connectivity:cg-eth-uni-spec-g;
             description "none";
         }
-        grouping nrp-cg-eth-inni-spec {
-            uses nrm-connectivity:cg-eth-inni-spec;
+        grouping nrp-cg-eth-inni-spec-g {
+            uses nrm-connectivity:cg-eth-inni-spec-g;
             description "none";
         }
-        grouping nrp-cg-eth-frame-flow-cpa-aspec {
-            uses nrm-connectivity:cg-eth-frame-flow-cpa-aspec;
+        grouping nrp-cg-eth-frame-flow-spec-g {
+            uses nrm-connectivity:cg-eth-frame-flow-spec-g;
             description "none";
         }
-        grouping nrp-cg-eth-conn-serv-spec {
-            uses nrm-connectivity:cg-eth-conn-serv-spec;
+        grouping nrp-cg-eth-conn-serv-spec-g {
+            uses nrm-connectivity:cg-eth-conn-serv-spec-g;
             description "none";
         }
-        grouping nrp-cg-eth-enni-spec {
-            uses nrm-connectivity:cg-eth-enni-spec;
+        grouping nrp-cg-eth-enni-spec-g {
+            uses nrm-connectivity:cg-eth-enni-spec-g;
             description "none";
         }
-        grouping nrp-layer-protocol-attrs {
+        grouping nrp-layer-protocol-attrs-g {
             container nrp-cg-eth-uni-spec {
-                uses nrp-cg-eth-uni-spec;
+                uses nrp-cg-eth-uni-spec-g;
                 description "none";
             }
             container nrp-cg-eth-inni-spec {
-                uses nrp-cg-eth-inni-spec;
+                uses nrp-cg-eth-inni-spec-g;
                 description "none";
             }
             container nrp-cg-eth-enni-spec {
-                uses nrp-cg-eth-enni-spec;
+                uses nrp-cg-eth-enni-spec-g;
                 description "none";
             }
             description "none";
         }
-        grouping nrp-create-connectivity-service-attrs {
+        grouping nrp-connectivity-service-attrs-g {
             container nrp-cg-eth-conn-serv-spec {
-                uses nrp-cg-eth-conn-serv-spec;
+                uses nrp-cg-eth-conn-serv-spec-g;
                 description "none";
             }
             description "none";
         }
-        grouping nrp-connectivity-service-attrs {
-            container nrp-cg-eth-conn-serv-spec {
-                uses nrp-cg-eth-conn-serv-spec;
-                description "none";
-            }
-            description "none";
-        }
-        grouping nrp-connectivity-service-end-point-attrs {
-            container nrp-cg-eth-frame-flow-cpa-aspec {
-                uses nrp-cg-eth-frame-flow-cpa-aspec;
-                description "none";
-            }
-            description "none";
-        }
-        grouping nrp-create-connectivity-service-end-point-attrs {
-            container nrp-cg-eth-frame-flow-cpa-aspec {
-                uses nrp-cg-eth-frame-flow-cpa-aspec;
-                description "none";
-            }
-            container nrp-cg-eth-enni-spec {
-                uses nrp-cg-eth-enni-spec;
-                description "none";
-            }
-            container nrp-cg-eth-inni-spec {
-                uses nrp-cg-eth-inni-spec;
-                description "none";
-            }
-            container nrp-cg-eth-uni-spec {
-                uses nrp-cg-eth-uni-spec;
+        grouping nrp-connectivity-service-end-point-attrs-g {
+            container nrp-cg-eth-frame-flow-spec {
+                uses nrp-cg-eth-frame-flow-spec-g;
                 description "none";
             }
             description "none";

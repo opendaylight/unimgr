@@ -7,6 +7,9 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs.driver;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
@@ -15,11 +18,8 @@ import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
 import org.opendaylight.unimgr.mef.nrp.ovs.activator.OvsActivator;
 import org.opendaylight.unimgr.mef.nrp.ovs.tapi.TopologyDataHandler;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.NrpCreateConnectivityServiceAttrs;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
-
-import java.util.List;
-import java.util.Optional;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.NrpConnectivityServiceAttrsG;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
 
 /**
  * @author marek.ryznar@amartus.com
@@ -49,7 +49,7 @@ public class OvsDriver implements ActivationDriverBuilder {
             }
 
             @Override
-            public void initialize(List<EndPoint> endPoints, String serviceId, NrpCreateConnectivityServiceAttrs context) {
+            public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrsG context) {
                 this.endPoints = endPoints;
                 this.serviceId = serviceId;
             }

@@ -8,21 +8,21 @@
 
 package org.opendaylight.unimgr.mef.nrp.api;
 
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.NrpCreateConnectivityServiceEndPointAttrs;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.ConnectivityServiceEndPoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.NrpConnectivityServiceEndPointAttrsG;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.ConnectivityServiceEndPointG;
 
 /**
- * @see ConnectivityServiceEndPoint
+ * @see ConnectivityServiceEndPointG
  * @author bartosz.michalik@amartus.com
  */
 public class EndPoint {
-    private final ConnectivityServiceEndPoint endpoint;
+    private final ConnectivityServiceEndPointG endpoint;
     /**
      * Optional attributes
      * (likely to change to different implementation)
      */
-    private final NrpCreateConnectivityServiceEndPointAttrs attrs;
+    private final NrpConnectivityServiceEndPointAttrsG attrs;
 
     private UniversalId systemNepUuid;
 
@@ -31,7 +31,7 @@ public class EndPoint {
      * @param endpoint endpoint data
      * @param attrs associated NRP attributes
      */
-    public EndPoint(ConnectivityServiceEndPoint endpoint, NrpCreateConnectivityServiceEndPointAttrs attrs) {
+    public EndPoint(ConnectivityServiceEndPointG endpoint, NrpConnectivityServiceEndPointAttrsG attrs) {
         this.endpoint = endpoint;
         this.attrs = attrs;
     }
@@ -40,7 +40,7 @@ public class EndPoint {
      *
      * @return endpoints
      */
-    public ConnectivityServiceEndPoint getEndpoint() {
+    public ConnectivityServiceEndPointG getEndpoint() {
         return endpoint;
     }
 
@@ -48,7 +48,7 @@ public class EndPoint {
      *
      * @return attributes
      */
-    public NrpCreateConnectivityServiceEndPointAttrs getAttrs() {
+    public NrpConnectivityServiceEndPointAttrsG getAttrs() {
         return attrs;
     }
 

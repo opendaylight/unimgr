@@ -8,6 +8,9 @@
 
 package org.opendaylight.unimgr.mef.nrp.template.tapi;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
@@ -15,9 +18,7 @@ import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.impl.AbstractTestWithTopo;
 import org.opendaylight.unimgr.mef.nrp.template.TemplateConstants;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.context.Topology;
-
-import static org.junit.Assert.*;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.Topology;
 
 /**
  * A simple integration test to look at the handler

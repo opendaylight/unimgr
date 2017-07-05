@@ -8,6 +8,13 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl.decomposer;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
@@ -20,16 +27,12 @@ import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.api.Subrequrest;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.OperationalState;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.context.Topology;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.OperationalState;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.Topology;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author bartosz.michalik@amartus.com
