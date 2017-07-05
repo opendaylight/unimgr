@@ -8,6 +8,21 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
@@ -25,29 +40,29 @@ import org.opendaylight.unimgr.mef.nrp.impl.AbstractTestWithTopo;
 import org.opendaylight.unimgr.mef.nrp.impl.ConnectivityServiceIdResourcePool;
 import org.opendaylight.unimgr.mef.nrp.impl.decomposer.BasicDecomposer;
 import org.opendaylight.unimgr.utils.ActivationDriverMocks;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.PortRole;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.TerminationDirection;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.*;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connection.*;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connection.ConnectionEndPoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connectivity.context.*;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connectivity.context.Connection;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connectivity.context.ConnectivityService;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.create.connectivity.service.input.EndPoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.create.connectivity.service.input.EndPointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.PortRole;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.TerminationDirection;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.Context1;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.CreateConnectivityServiceInput;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.CreateConnectivityServiceInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.CreateConnectivityServiceOutput;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.DeleteConnectivityServiceInput;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.DeleteConnectivityServiceInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.DeleteConnectivityServiceOutput;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connection.g.ConnectionEndPoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connection.g.ConnectionEndPointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connection.g.RouteBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.Connection;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectionBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectionKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectivityService;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectivityServiceBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectivityServiceKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.create.connectivity.service.input.EndPoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.create.connectivity.service.input.EndPointBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -175,14 +190,14 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
                 .build()).collect(Collectors.toList());
     }
 
-    private org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connectivity.context.ConnectivityService cs(String csId, UniversalId connectionId) {
+    private org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectivityService cs(String csId, UniversalId connectionId) {
         return new ConnectivityServiceBuilder()
                 .setUuid(new UniversalId(csId))
                 .setConnection(Arrays.asList(connectionId))
                 .build();
     }
 
-    private org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connectivity.context.Connection c(String nodeUuid, List<UniversalId> route, String... neps) {
+    private org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.Connection c(String nodeUuid, List<UniversalId> route, String... neps) {
         ConnectionBuilder builder = new ConnectionBuilder()
                 .setUuid(new UniversalId("c:" + nodeUuid))
                 .setNode(new UniversalId(nodeUuid))
@@ -198,7 +213,7 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         return builder.build();
     }
 
-    private org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connectivity.context.Connection c(String nodeUuid, String... neps) {
+    private org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.Connection c(String nodeUuid, String... neps) {
         return c(nodeUuid, Collections.emptyList(), neps);
     }
 

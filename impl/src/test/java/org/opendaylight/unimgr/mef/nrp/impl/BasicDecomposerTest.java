@@ -8,18 +8,20 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.unimgr.mef.nrp.api.Subrequrest;
 import org.opendaylight.unimgr.mef.nrp.impl.decomposer.BasicDecomposer;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.OperationalState;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.OperationalState;
 import org.opendaylight.yangtools.yang.common.OperationFailedException;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.Assert.*;
 
 /**
  * @author bartosz.michalik@amartus.com

@@ -7,20 +7,20 @@
  */
 package org.opendaylight.unimgr.mef.nrp.impl;
 
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.opendaylight.unimgr.utils.ActivationDriverMocks.prepareDriver;
+
+import java.util.Collections;
+import java.util.Optional;
+
 import org.junit.Test;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverNotFoundException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
-
-import java.util.Collections;
-import java.util.Optional;
-
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.opendaylight.unimgr.utils.ActivationDriverMocks.prepareDriver;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
 
 /**
  * @author bartosz.michalik@amartus.com

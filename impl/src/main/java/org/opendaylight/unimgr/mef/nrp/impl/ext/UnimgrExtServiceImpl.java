@@ -8,42 +8,47 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl.ext;
 
-import com.google.common.base.Optional;
+import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.LayerProtocol1;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.LayerProtocol1Builder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.nrp.layer.protocol.attrs.NrpCgEthEnniSpecBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.nrp.layer.protocol.attrs.NrpCgEthInniSpecBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.nrp.layer.protocol.attrs.NrpCgEthUniSpecBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.LayerProtocolName;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.context.attrs.ServiceInterfacePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.service._interface.point.LayerProtocol;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.service._interface.point.LayerProtocolBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.node.OwnedNodeEdgePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.node.OwnedNodeEdgePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.node.OwnedNodeEdgePointKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.LayerProtocol1;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.LayerProtocol1Builder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.nrp.layer.protocol.attrs.g.NrpCgEthEnniSpecBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.nrp.layer.protocol.attrs.g.NrpCgEthInniSpecBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.nrp.layer.protocol.attrs.g.NrpCgEthUniSpecBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.LayerProtocolName;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.service._interface.point.g.LayerProtocol;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.service._interface.point.g.LayerProtocolBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePointKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.Node;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.AddSipInput;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.UnimgrExtService;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.SipType;
-import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.UniSpec;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.EnniSpec;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.InniSpec;
+import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.UniSpec;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
-import java.text.MessageFormat;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.*;
+import com.google.common.base.Optional;
 
 /**
  * @author bartosz.michalik@amartus.com

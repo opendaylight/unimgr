@@ -8,11 +8,11 @@
 
 package org.opendaylight.unimgr.mef.nrp.api;
 
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.CreateConnectivityServiceInput;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.CreateConnectivityServiceInput;
 
 /**
  * @author bartosz.michalik@amartus.com

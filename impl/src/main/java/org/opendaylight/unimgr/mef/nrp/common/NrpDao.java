@@ -7,39 +7,40 @@
  */
 package org.opendaylight.unimgr.mef.nrp.common;
 
-import com.google.common.base.Optional;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.Context;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.context.attrs.ServiceInterfacePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.context.attrs.ServiceInterfacePointKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connectivity.context.Connection;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connectivity.context.ConnectionKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connectivity.context.ConnectivityService;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.connectivity.context.ConnectivityServiceKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.Context1;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.NodeEdgePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.node.OwnedNodeEdgePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.node.OwnedNodeEdgePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.node.OwnedNodeEdgePointKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.NodeKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.context.Topology;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.context.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.Context;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePointKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.Connection;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectionKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectivityService;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectivityServiceKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.Context1;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.get.node.edge.point.details.output.NodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePointKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.Topology;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.Node;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Stream;
+import com.google.common.base.Optional;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -203,7 +204,7 @@ public class NrpDao  {
 
     public ConnectivityService getConnectivityService(UniversalId id) {
         try {
-            return rtx.read(LogicalDatastoreType.OPERATIONAL, ctx().augmentation(org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.Context1.class).child(ConnectivityService.class, new ConnectivityServiceKey(id)))
+            return rtx.read(LogicalDatastoreType.OPERATIONAL, ctx().augmentation(org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.Context1.class).child(ConnectivityService.class, new ConnectivityServiceKey(id)))
                     .checkedGet().orNull();
 
         } catch (ReadFailedException e) {
@@ -223,7 +224,7 @@ public class NrpDao  {
 
     public Connection getConnection(UniversalId connectionId) {
         try {
-            return rtx.read(LogicalDatastoreType.OPERATIONAL, ctx().augmentation(org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.Context1.class).child(Connection.class, new ConnectionKey(connectionId)))
+            return rtx.read(LogicalDatastoreType.OPERATIONAL, ctx().augmentation(org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.Context1.class).child(Connection.class, new ConnectionKey(connectionId)))
                     .checkedGet().orNull();
 
         } catch (ReadFailedException e) {

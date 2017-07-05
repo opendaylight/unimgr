@@ -8,6 +8,13 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl;
 
+import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_SYSTEM_TOPO;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.junit.Before;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -15,26 +22,19 @@ import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.ForwardingDirection;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.LayerProtocolName;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.OperationalState;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.context.attrs.ServiceInterfacePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.ConnectivityServiceEndPoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.create.connectivity.service.input.EndPointBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.link.StateBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.node.OwnedNodeEdgePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.Link;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.LinkBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.LinkKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.Node;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_SYSTEM_TOPO;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.ForwardingDirection;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.LayerProtocolName;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.OperationalState;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.ConnectivityServiceEndPointG;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.create.connectivity.service.input.EndPointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.link.g.StateBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.Link;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.LinkBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.LinkKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.Node;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -51,7 +51,7 @@ public abstract class AbstractTestWithTopo extends AbstractDataBrokerTest {
     }
 
     protected EndPoint ep(String nepId) {
-        ConnectivityServiceEndPoint ep = new EndPointBuilder()
+        ConnectivityServiceEndPointG ep = new EndPointBuilder()
                 .setLocalId("ep_" + nepId)
                 .setServiceInterfacePoint(new UniversalId("sip:" + nepId))
                 .build();

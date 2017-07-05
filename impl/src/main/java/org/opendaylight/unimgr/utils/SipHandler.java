@@ -7,7 +7,7 @@
  */
 package org.opendaylight.unimgr.utils;
 
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
 
 /**
  * @author marek.ryznar@amartus.com

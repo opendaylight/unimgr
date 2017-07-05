@@ -8,31 +8,35 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_CTX;
+import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_EXT_TOPO;
+import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_SYSTEM_TOPO;
+
+import java.util.Arrays;
+import java.util.Collections;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.Context;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.ContextBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.LayerProtocolName;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.NodeKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.context.TopologyBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.context.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.Context;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.ContextBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.LayerProtocolName;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.Topology;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.TopologyBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.Node;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.NodeKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Collections;
-
-import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.*;
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -57,8 +61,8 @@ public class NrpInitializer {
             log.info("initialize Presto NRP context");
             Context ctx = new ContextBuilder()
                     .setUuid(new UniversalId(PRESTO_CTX))
-                    .addAugmentation(org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.Context1.class, context())
-                    .addAugmentation(org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.Context1.class, connCtx())
+                    .addAugmentation(org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.Context1.class, context())
+                    .addAugmentation(org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.Context1.class, connCtx())
                     .build();
             tx.put(LogicalDatastoreType.OPERATIONAL, ctxId, ctx);
             try {
@@ -71,18 +75,18 @@ public class NrpInitializer {
         }
     }
 
-    private org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.Context1 context() {
-        return new org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.Context1Builder()
+    private org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.Context1 context() {
+        return new org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.Context1Builder()
                 .setTopology(Arrays.asList(systemTopo(), extTopo()))
                 .build();
     }
 
-    private org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.Context1 connCtx() {
-        return new org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.Context1Builder()
+    private org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.Context1 connCtx() {
+        return new org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.Context1Builder()
                 .build();
     }
 
-    private org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.context.Topology extTopo() {
+    private Topology extTopo() {
         UniversalId topoId = new UniversalId(PRESTO_EXT_TOPO);
         log.debug("Adding {}", PRESTO_EXT_TOPO);
         return new TopologyBuilder()
@@ -104,7 +108,7 @@ public class NrpInitializer {
                 .build();
     }
 
-    private org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170227.topology.context.Topology systemTopo() {
+    private Topology systemTopo() {
         UniversalId topoId = new UniversalId(PRESTO_SYSTEM_TOPO);
         log.debug("Adding {}", PRESTO_SYSTEM_TOPO);
         return new TopologyBuilder()

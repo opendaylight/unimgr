@@ -7,7 +7,8 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util;
 
-import com.google.common.util.concurrent.CheckedFuture;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +17,7 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.L2vpnTestUtils;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnTestUtils;
 import org.opendaylight.unimgr.mef.nrp.common.ServicePort;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
@@ -32,7 +33,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.assertEquals;
+import com.google.common.util.concurrent.CheckedFuture;
 
 /**
  * @author marek.ryznar@amartus.com

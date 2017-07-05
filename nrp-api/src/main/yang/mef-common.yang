@@ -1,0 +1,346 @@
+module mef-common {
+    namespace "urn:mef:yang:MEF_Common";
+    prefix mef-common;
+    import mef-common-types {
+        prefix mef-common-types;
+    }
+    organization "Metro Ethernet Forum (MEF)";
+    contact "MEF";
+    description "none";
+    revision 2017-05-31 {
+        description "MEF NRP 1.0.alpha";
+        reference "ONF-TR-527, ONF-TR-512, ONF-TR-531, RFC 6020 and RFC 6087";
+    }
+
+    typedef real {
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+
+    /***********************
+    * package diagrams
+    **********************/ 
+
+    /***********************
+    * package object-classes
+    **********************/ 
+        /***********************
+        * package bwp
+        **********************/ 
+            grouping bwp-flow-g {
+                leaf rank {
+                    type mef-common-types:positive-integer;
+                    description "This attribute denotes the rank of the bandwidth profile flow in the envelope.";
+                }
+                leaf cir {
+                    type mef-common-types:natural-number;
+                    description "This attribute denotes the Committed Information Rate that limits the average rate of frames that will be declared Green. In bits per second.";
+                }
+                leaf cir-max {
+                    type mef-common-types:natural-number;
+                    description "This attribute denotes the maximum Committed Information Rate that limits the rate of tokens added to the committed token bucket. In bits per second.";
+                }
+                leaf cbs {
+                    type mef-common-types:natural-number;
+                    description "This attribute denotes the Committed Burst Size that limits the maximum number of bytes available for a burst of frames that will be declared Green, in bytes,";
+                }
+                leaf eir {
+                    type mef-common-types:natural-number;
+                    description "This attribute denotes the Excess Information Rate that limits the average rate of frames that will be declared Yellow, in bits per second.";
+                }
+                leaf eir-max {
+                    type mef-common-types:natural-number;
+                    description "This attribute denotes the Maximum Excess Information Rate that Limits the rate of tokens added to the excess token bucket, in bits per second.";
+                }
+                leaf ebs {
+                    type mef-common-types:natural-number;
+                    description "This attribute denotes the Excessive Burst Size that limits the maximum number of bytes available for a burst of frames that will be declared Yellow, in bytes.";
+                }
+                leaf coupling-flag {
+                    type boolean;
+                    description "This attribute denotes the Coupling Flag that Determines if overflow Green tokens can be used as Yellow tokens. FALSE for 0 (overflow green tokens are discarded) and TRUE for 1 (overflow green tokens can be used as yellow tokens)";
+                }
+                leaf color-mode {
+                    type mef-common-types:color-mode;
+                    description "This attribute denotes the Color Mode that Indicates whether the Color Identifier of the frame is considered by the Bandwidth Profile Algorithm.";
+                }
+                leaf token-request-offset {
+                    type mef-common-types:natural-number;
+                    description "This attribute adjusts the number of tokens requested for each external interface frame.";
+                }
+                description "The BwpFlow object class represents the Bandwidth Profile Flow which includes the bandwidth profile parameters such as CIR, CIR Max, EIR, EIR Max, CBS, EBS, Coupling Flag, Color Mode, etc.  The BwpFlow object class is associated with OperatorUni, ServiceProviderUni, VUNI, CosIdentifier, EecIdentifier, and Envelope, etc. ";
+            }
+            grouping envelope-g {
+                leaf envelope-id {
+                    type mef-common-types:identifier45;
+                    description "This attribute is a string that identifies the Envelope.";
+                }
+                leaf coupling-flag-for-index-zero {
+                    type boolean;
+                    description "This attribute denotes the coupling flag for index zero. FALSE for NO and TRUE for YES (overflow Green tokens can be used as Yellow tokens)";
+                }
+                description "The Envelope object class represents the UNI/ENNI service attribute Envelope, which is a bandwidth profile parameter that consists of an envelope ID and an envelope coupling flag (0) that controls conversion of unused green tokens into yellow tokens in the bandwidth profile algorithm. The Envelope object class is associated with UNI (via OperatorUni or ServiceProviderUni), ENNI (via EnniService), and BwpFlow(s), etc. ";
+            }
+
+        /***********************
+        * package color-identifier
+        **********************/ 
+            grouping color-identifier-g {
+                leaf color-field-type {
+                    type mef-common-types:color-field-type;
+                    description "This attribute determines which conditional package (among EVC/OVC End Point, PCP, DEI or DSCP) to be used as the Color Identifier.";
+                }
+                container sep-color-pac {
+                    uses sep-color-id-pac-g;
+                    description "This attribute represents the relationship between the ColorIdentifier and the SepColorIdPac (representing the choice that maps EVC End Point or OVC End Point to Color).";
+                }
+                container dei-color-pac {
+                    uses dei-color-id-pac-g;
+                    description "This attribute represents the relationship between the ColorIdentifier and the DeiColorIdPac (representing the choice that maps Vlan tag DEI to Color).";
+                }
+                container pcp-color-pac {
+                    uses pcp-color-id-pac-g;
+                    description "This attribute represents the relationship between the ColorIdentifier and the PcpColorIdPac (representing the choice that maps Vlan tag PCPs to Color).";
+                }
+                list dcsp-color-pac {
+                    key 'ip-version';
+                    max-elements 2;
+                    uses dscp-color-id-pac-g;
+                    description "This attribute represents the relationship between the ColorIdentifier and the DscpColorIdPac (representing the choice that maps DSCP values to Color).";
+                }
+                description "The ColorIdentifier object class represents the Color Identifier. The Color Identifier is a pair of the form <F, M> where F is a field in the ingress EI Frame and M is a mapping between each possible value of the field F and a Color. The ColorIdentifier object class is associated with CarrierEthernetServiceEndPoint (EvcEndPoint or OvcEndPoint), in addition to the different field F, such as SepColorIdPac, PcpColorIdPac, DeiColorIdPac, and DscpColorIdPac, etc.";
+            }
+            grouping dei-color-id-pac-g {
+                description "The DeiColorIdPac object class represents the Color Identifier that maps the vlan tag (S tag or C tag) DEI value to Color, DEI=0 for green color and DEI=1 for yellow color. For an EVC End Point or an OVC End Point at UNI or in a VUNI, the DEI value is from C-Tag ingress EI frames. For an OVC End Point at an ENNI and not in a VUNI, the DEI value is from S-Tag of the ingress EI frames. ";
+            }
+            grouping dscp-color-id-pac-g {
+                leaf ip-version {
+                    type mef-common-types:ip-version;
+                    description "This attribute denotes which IP version is used. It can be IPV4, IPV6 or IPV4_AND_IPV6.";
+                }
+                leaf-list dscp-value-for-green-list {
+                    type mef-common-types:natural-number;
+                    max-elements 64;
+                    description "This attribute provides a list DSCP values map to the green ingress EI frames. The dscpValueForGreenList and the dscpValueForYellowList must disjoint and the union of the two lists must include all possible DSCP values.";
+                }
+                leaf-list dscp-value-for-yellow-list {
+                    type mef-common-types:natural-number;
+                    max-elements 64;
+                    description "This attribute provides a list DSCP values map to the yellow ingress EI frames. The dscpValueForGreenList and the dscpValueForYellowList must disjoint and the union of the two lists must include all possible DSCP values.";
+                }
+                description "The DscpColorIdPac object class represents the Color Identifier that maps DSCP (IPv4 or IPv6) values to Color.";
+            }
+            grouping pcp-color-id-pac-g {
+                leaf-list pcp-value-for-green-list {
+                    type mef-common-types:natural-number;
+                    max-elements 8;
+                    description "This attribute provides a list PCP values map to the green ingress EI frames. The pcpValueForGreenList and the pcpValueForYellowList must disjoint and the union of the two lists must include all possible PCP values. ";
+                }
+                leaf-list pcp-value-for-yellow-list {
+                    type mef-common-types:natural-number;
+                    max-elements 8;
+                    description "This attribute provides a list PCP values map to the yellow ingress EI frames. The pcpValueForGreenList and the pcpValueForYellowList must disjoint and the union of the two lists must include all possible PCP values. ";
+                }
+                description "The PcpColorIdPac object class represents the Color Identifier that maps vlan tag (S tag or C tag) PCP values to Color. For an EVC End Point or an OVC End Point at UNI or in a VUNI, the PCP values are from C-Tag ingress EI frames. For an OVC End Point at an ENNI and not in a VUNI, the PCP values are from S-Tag of the ingress EI frames. ";
+            }
+            grouping sep-color-id-pac-g {
+                leaf color {
+                    type mef-common-types:frame-color;
+                    description "This attribute denotes the color of the EI frame, green or yellow.";
+                }
+                description "The SepColorIdPac represents the Color Identifier that maps to the EVC End Point or the OVC End Point to Color.";
+            }
+
+        /***********************
+        * package cos-identifier
+        **********************/ 
+            grouping cos-identifier-g {
+                leaf cos-name {
+                    type string;
+                    description "This attribute denotes the Class of Service name that the CosIdentifier map to.";
+                }
+                list l2cp-protocol-list {
+                    key 'l2cp-protocol-type';
+                    uses mef-common-types:l2cp-protocol-g;
+                    description "This attribute lists the L2CP Protocols that map to the Class of Service Name.";
+                }
+                container sep-cos-id-pac {
+                    uses sep-cos-id-pac-g;
+                    description "This attribute represents the relationship between the CosIdentifier and the SepCosIdPac when the cosMappingType of EvcEndPoint or OvcEndPoint is END_POINT and the cosName is not only for L2CP.";
+                }
+                container pcp-cos-id-pac {
+                    uses pcp-cos-id-pac-g;
+                    description "This attribute represents the relationship between the CosIdentifier and the PcpCosIdPac  when the cosMappingType of EvcEndPoint or OvcEndPoint is PCP and the cosName is not only for L2CP.";
+                }
+                list dscp-cos-id-pac {
+                    key 'ip-version';
+                    max-elements 2;
+                    uses dscp-cos-id-pac-g;
+                    description "This attribute represents the relationship between the CosIdentifier and the DespCosIdPac when the cosMappingType of EvcEndPoint or OvcEndPoint is DSCP and the cosName is not only for L2CP.";
+                }
+                container ingress-bwp-per-cos {
+                    uses bwp-flow-g;
+                    description "This attribute represents the relationship between the CosIdentifier and the BwpFlow, for ingress bandwidth profile per CoS Name.";
+                }
+                description "The CosIdentifier object class represents the Class of Service Identifier. Each ingress EI Frame mapped to the given EVC/OVC End Point has a single Class of Service. The Class of Service can be determined from inspection of the content of the ingress EI Frame. It is associated with the SepCosIdPac, or the PcpCosIdPac, or the DscpCosIdPac (when the Class of Service Identifier mapping type is Service End Point, or PCP values, or DSCP values respectively). EI Frames of L2CP protocols may be identified by a Class of Service Identifier, mapping to specific CoS Name.";
+            }
+            grouping dscp-cos-id-pac-g {
+                leaf-list dscp-value-list {
+                    type mef-common-types:natural-number;
+                    min-elements 1;
+                    max-elements 64;
+                    description "This attribute is a list of DSCP values that maps to a CoS Name.";
+                }
+                leaf ip-version {
+                    type mef-common-types:ip-version;
+                    description "This attribute denotes the IP version for the DSCP. It can be IPV4, IPV6 or IPV4_AND_IPV6.";
+                }
+                description "The DscpCosIdPac object class represents CoS Identifier that maps the IP DSCP values to the Class of Service Name(s). It can map a list of DSCP values to two different Class of Service Names, one for ingress EI Frames carrying an IPv4 packet and a different one for ingress EI Frames carrying an IPv6 packet. It also can map a list of DSCP values (both IPv4 and IPv6) to one Class of Service Name.";
+            }
+            grouping pcp-cos-id-pac-g {
+                leaf-list pcp-value-list {
+                    type mef-common-types:natural-number;
+                    min-elements 1;
+                    max-elements 8;
+                    description "This attribute is a list of PCP values that map to the CoS Name. ";
+                }
+                description "The PcpCosIdPac object class represents CoS Identifier that maps a list of PCP values to a Class of Service Name. For an EVC End Point or an OVC End Point at UNI or in a VUNI, the PCP values are from C-Tag ingress EI frames. For an OVC End Point at an ENNI and not in a VUNI, the PCP values are from S-Tag of the ingress EI frames. ";
+            }
+            grouping sep-cos-id-pac-g {
+                description "The SepCosIdPac represents the CoS Identifier that maps the EVC End Point or the OVC End Point to a Class of Service Name. ";
+            }
+
+        /***********************
+        * package eec-identifier
+        **********************/ 
+            grouping dscp-eec-id-pac-g {
+                leaf ip-version {
+                    type mef-common-types:ip-version;
+                    description "This attribute specifies the IP version for the DSCP. It can be IPV4, IPV6 or IPV4_AND_IPV6.";
+                }
+                leaf-list dscp-value-list {
+                    type mef-common-types:natural-number;
+                    min-elements 1;
+                    max-elements 64;
+                    description "This attribute is a list of DSCP values that maps to the EEC Name. ";
+                }
+                description "The DscpEecIdPac object class represents Egress Equivalence Class Identifier that maps the IP DSCP values to the Egress Equivalence Class Name(s). It can map a list of DSCP values to two different Egress Equivalence Class Names, one for ingress EI Frames carrying an IPv4 packet and a different one for ingress EI Frames carrying an IPv6 packet. It also can map a list of DSCP values (both IPv4 and IPv6 packets) to an Egress Equivalence Class Name.";
+            }
+            grouping eec-identifier-g {
+                leaf eec-name {
+                    type string;
+                    description "This attribute denotes the Egress Equivalence Class Name that the EecIdentifier maps to.";
+                }
+                list l2cp-protocol-list {
+                    key 'l2cp-protocol-type';
+                    uses mef-common-types:l2cp-protocol-g;
+                    description "This attribute lists the L2CP Protocols that map to the Egress Equivalence Class Name.";
+                }
+                container sep-eec-id-pac {
+                    uses sep-eec-id-pac-g;
+                    description "This attribute represents the relationship between the EecIdentifier and a SepEecIdPac when the eecMappingType of EvcEndPoint or OvcEndPoint is END_POINT and the eecName is not only for L2CP. This not addressed in MEF 10.3 but can be future consideration.";
+                }
+                container pcp-eec-id-pac {
+                    uses pcp-eec-id-pac-g;
+                    description "This attribute represents the relationship between the EecIdentifier and a PcpEecIdPac when the eecMappingType of EvcEndPoint or OvcEndPoint is PCP and the eecName is not only for L2CP.";
+                }
+                list dscp-eec-id-pac {
+                    key 'ip-version';
+                    max-elements 2;
+                    uses dscp-eec-id-pac-g;
+                    description "This attribute represents the relationship between the EecIdentifier and a DscpEecIdPac when the eecMappingType of EvcEndPoint or OvcEndPoint is DSCP and the eecName is not only for L2CP.";
+                }
+                container egress-bwp-per-eec {
+                    uses bwp-flow-g;
+                    description "This attribute represents the relationship between the EecIdentifier and the BwpFlow, for egress bandwidth profile per EEC Name.";
+                }
+                description "The EecIdentifier object class represents the Egress Equivalence Class Identifier. Each egress EI Frame mapped to the given EVC/OVC End Point has a single Egress Equivalence Class. 
+The Egress Equivalence Class can be determined from inspection of the content of the egress EI Frame. It is associated with the SepCosIdPac, or the PcpCosIdPac, or the DscpCosIdPac (representing mapping to EVC/OVC End Point, or PCP, or DSCP respectively). EI Frames of L2CP protocols may be identified by an Egress Equivalence Class Identifier, mapping to specific Egress Equivalence Class Name.";
+            }
+            grouping pcp-eec-id-pac-g {
+                leaf-list pcp-value-list {
+                    type mef-common-types:natural-number;
+                    min-elements 1;
+                    max-elements 8;
+                    description "This attribute provides a list of PCP values that map to the Egress Equivalence Class Name.";
+                }
+                description "The PcpEecIdPac object class represents Egress Equivalence Class Identifier that maps a list of PCP values to Egress Equivalence Class Name. For an EVC End Point or an OVC End Point at UNI or in a VUNI, the PCP values are from C-Tag egress EI frames. For an OVC End Point at an ENNI and not in a VUNI, the PCP values are from S-Tag of the egress EI frames";
+            }
+            grouping sep-eec-id-pac-g {
+                description "The SepEecIdPac represents the Egress Equivalence Class Identifier that maps the EVC End Point or the OVC End Point to an Egress Equivalence Class Name.";
+            }
+
+        /***********************
+        * package egress-map
+        **********************/ 
+            grouping cos-name-and-color-to-dei-pac-g {
+                leaf ingress-cos-name {
+                    type string;
+                    description "This attribute denotes the ingress CoS name.";
+                }
+                leaf ingress-color {
+                    type mef-common-types:frame-color;
+                    description "This attribute denotes the ingress frame color as one of the determined factor for Egress Map. ";
+                }
+                leaf dei-value {
+                    type mef-common-types:dei-or-discard;
+                    description "This attribute denotes the egress frame DEI value, mapped from ingress CoS Name and ingress frame color. ";
+                }
+                description "The CosNameAndColorToDeiPac object class represents the Egress Map that maps from CoS Name and Ingress Color to DEI.";
+            }
+            grouping cos-name-and-color-to-pcp-pac-g {
+                leaf ingress-cos-name {
+                    type string;
+                    description "This attribute denotes the ingress CoS name.";
+                }
+                leaf ingress-color {
+                    type mef-common-types:frame-color;
+                    description "This attribute denotes the ingress frame color as one of the determined factor for Egress Map. ";
+                }
+                leaf pcp-value {
+                    type mef-common-types:pcp-or-discard;
+                    description "This attribute denotes the egress frame PCP value, mapped from ingress CoS name and ingress frame color. ";
+                }
+                description "The CosNameAndColorToPcpPac object class represents the Egress Map that maps from CoS Name and Ingress Color to PCP.";
+            }
+            grouping cos-name-to-pcp-pac-g {
+                leaf ingress-cos-name {
+                    type string;
+                    description "This attribute denotes the ingress CoS name.";
+                }
+                leaf pcp-value {
+                    type mef-common-types:pcp-or-discard;
+                    description "This attribute denotes the egress frame PCP value, mapped from ingress CoS Name and ingress frame color. ";
+                }
+                description "The CosNameToPcpPac object class represents the Egress Map that maps from CoS Name to PCP.";
+            }
+            grouping egress-map-g {
+                leaf egress-map-type {
+                    type mef-common-types:egress-map-type;
+                    description "This attribute determines which form to take to apply for egress frame color indication, among CoS name and Ingress Color to C-Tag PCP, or CoS name and Ingress Color to S-Tag PCP, or CoS Name and Ingress Color to C-Tag DEI, or CoS Name and Ingress Color to S-Tag DEI, or CoS Name to C-Tag PCP, or CoS Name to S-Tag PCP.";
+                }
+                list cos-name-and-color-to-dei-pac-list {
+                    key 'ingress-cos-name ingress-color';
+                    uses cos-name-and-color-to-dei-pac-g;
+                    description "This attribute represents the relationship between the EgressMap and the CosNameAndColorToDeiPac (representing the attribute set for using CoS Name and ingress color to egress DEI mapping).";
+                }
+                list cos-name-to-pcp-pac-list {
+                    key 'ingress-cos-name';
+                    uses cos-name-to-pcp-pac-g;
+                    description "This attribute represents the relationship between the EgressMap and the CosNameToPcpPac (representing the attribute set for using CoS Name to egress PCP mapping).";
+                }
+                list cos-name-and-color-to-pcp-pac-list {
+                    key 'ingress-color';
+                    uses cos-name-and-color-to-pcp-pac-g;
+                    description "This attribute represents the relationship between the EgressMap and the CosNameAndColorToPcpPac (representing the attribute set for using CoS Name and ingress color to egress PCP mapping).";
+                }
+                description "The EgressMap object class represents the Egress Map that is a set of mappings that determine the content of the S-Tag or C-Tag of an egress EI Frame. It is associated with EvcEndPoint or OvcEndPoint.";
+            }
+
+
+    /***********************
+    * package associations
+    **********************/ 
+
+}

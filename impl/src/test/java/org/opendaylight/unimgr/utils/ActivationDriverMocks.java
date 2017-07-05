@@ -7,11 +7,10 @@
  */
 package org.opendaylight.unimgr.utils;
 
-import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
-import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
-import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
-import org.opendaylight.unimgr.mef.nrp.impl.ActivationDriverRepoServiceImpl;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,10 +18,11 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
+import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
+import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
+import org.opendaylight.unimgr.mef.nrp.impl.ActivationDriverRepoServiceImpl;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
 
 /**
  * @author bartosz.michalik@amartus.com

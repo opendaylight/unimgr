@@ -28,15 +28,15 @@ module unimgr-ext {
             }
             choice sip-type {
                 container uni-spec {
-                    uses nrp-interface:nrp-cg-eth-uni-spec;
+                    uses nrp-interface:nrp-cg-eth-uni-spec-g;
                     description "none";
                 }
                 container inni-spec {
-                    uses nrp-interface:nrp-cg-eth-inni-spec;
+                    uses nrp-interface:nrp-cg-eth-inni-spec-g;
                     description "none";
                 }
                 container enni-spec {
-                    uses nrp-interface:nrp-cg-eth-enni-spec;
+                    uses nrp-interface:nrp-cg-eth-enni-spec-g;
                     description "none";
                 }
             }

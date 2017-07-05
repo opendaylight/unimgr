@@ -21,8 +21,7 @@ import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverAmbiguousException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverNotFoundException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -7,6 +7,20 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs.activator;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -20,13 +34,13 @@ import org.opendaylight.unimgr.mef.nrp.ovs.OpenFlowTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.OvsdbTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.util.OpenFlowUtils;
 import org.opendaylight.unimgr.utils.MdsalUtils;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm_connectivity.rev170227.PositiveInteger;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm_connectivity.rev170227.cg.eth.frame.flow.cpa.aspec.CeVlanIdList;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm_connectivity.rev170227.vlan.id.listing.VlanIdList;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.NrpCreateConnectivityServiceEndPointAttrs;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170227.nrp.create.connectivity.service.end.point.attrs.NrpCgEthFrameFlowCpaAspec;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170227.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170227.ConnectivityServiceEndPoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef_types.rev170531.PositiveInteger;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef_types.rev170531.vlan.id.listing.g.VlanIdList;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm_connectivity.rev170531.cg.eth.frame.flow.spec.g.CeVlanIdListOrUntag;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.NrpConnectivityServiceEndPointAttrsG;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.nrp.connectivity.service.end.point.attrs.g.NrpCgEthFrameFlowSpec;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.ConnectivityServiceEndPointG;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
@@ -36,17 +50,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author marek.ryznar@amartus.com
@@ -170,8 +173,8 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
     }
 
     private EndPoint mockEndPoint(String portName){
-        ConnectivityServiceEndPoint connectivityServiceEndPoint = mock(ConnectivityServiceEndPoint.class);
-        NrpCreateConnectivityServiceEndPointAttrs attrs = mock(NrpCreateConnectivityServiceEndPointAttrs.class);
+        ConnectivityServiceEndPointG connectivityServiceEndPoint = mock(ConnectivityServiceEndPointG.class);
+        NrpConnectivityServiceEndPointAttrsG attrs = mock(NrpConnectivityServiceEndPointAttrsG.class);
         //UNI port mock
         when(connectivityServiceEndPoint.getServiceInterfacePoint())
                 .thenReturn(new UniversalId(portName));
@@ -184,15 +187,15 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
         List<VlanIdList> vlanIds = new ArrayList<>();
         vlanIds.add(vlanIdList);
 
-        CeVlanIdList ceVlanIdList = mock(CeVlanIdList.class);
+        CeVlanIdListOrUntag ceVlanIdList = mock(CeVlanIdListOrUntag.class);
         when(ceVlanIdList.getVlanIdList())
                 .thenReturn(vlanIds);
 
-        NrpCgEthFrameFlowCpaAspec nrpCgEthFrameFlowCpaAspec = mock(NrpCgEthFrameFlowCpaAspec.class);
-        when(nrpCgEthFrameFlowCpaAspec.getCeVlanIdList())
+        NrpCgEthFrameFlowSpec nrpCgEthFrameFlowCpaAspec = mock(NrpCgEthFrameFlowSpec.class);
+        when(nrpCgEthFrameFlowCpaAspec.getCeVlanIdListOrUntag())
                 .thenReturn(ceVlanIdList);
 
-        when(attrs.getNrpCgEthFrameFlowCpaAspec())
+        when(attrs.getNrpCgEthFrameFlowSpec())
                 .thenReturn(nrpCgEthFrameFlowCpaAspec);
 
         return new EndPoint(connectivityServiceEndPoint,attrs);
