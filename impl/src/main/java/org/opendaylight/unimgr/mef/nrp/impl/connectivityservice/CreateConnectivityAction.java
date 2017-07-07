@@ -22,6 +22,7 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
+import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
 import org.opendaylight.unimgr.mef.nrp.api.RequestValidator;
 import org.opendaylight.unimgr.mef.nrp.api.Subrequrest;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
@@ -123,7 +124,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         }
     }
 
-    private ActivationTransaction prepareTransaction(String serviceId) {
+    private ActivationTransaction prepareTransaction(String serviceId) throws FailureResult {
         log.debug("decompose request");
         decomposedRequest = service.getDecomposer().decompose(endpoints, null);
 

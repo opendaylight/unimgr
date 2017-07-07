@@ -22,5 +22,5 @@ public interface RequestDecomposer {
      * @param constraint on decoposition
      * @return list of subrequests - one per driver
      */
-    List<Subrequrest> decompose(List<EndPoint> endpoints, Constraints constraint);
+    List<Subrequrest> decompose(List<EndPoint> endpoints, Constraints constraint) throws FailureResult;
 }

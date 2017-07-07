@@ -8,15 +8,16 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl.decomposer;
 
+import java.util.List;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.unimgr.mef.nrp.api.Constraints;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
+import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
 import org.opendaylight.unimgr.mef.nrp.api.RequestDecomposer;
 import org.opendaylight.unimgr.mef.nrp.api.Subrequrest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 /**
  * Basic graph based request decomposer
@@ -40,7 +41,7 @@ public class BasicDecomposer implements RequestDecomposer {
      * @return
      */
     @Override
-    public List<Subrequrest> decompose(List<EndPoint> endpoints, Constraints constraint) {
+    public List<Subrequrest> decompose(List<EndPoint> endpoints, Constraints constraint) throws FailureResult {
         return new DecompositionAction(endpoints, broker).decompose();
     }
 
