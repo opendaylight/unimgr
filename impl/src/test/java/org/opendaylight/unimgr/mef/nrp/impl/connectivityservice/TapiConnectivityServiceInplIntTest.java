@@ -10,6 +10,7 @@ package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -50,6 +51,11 @@ import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.Crea
 import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.DeleteConnectivityServiceInput;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.DeleteConnectivityServiceInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.DeleteConnectivityServiceOutput;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.GetConnectionDetailsInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.GetConnectionDetailsOutput;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.GetConnectivityServiceDetailsInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.GetConnectivityServiceDetailsOutput;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.GetConnectivityServiceListOutput;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connection.g.ConnectionEndPoint;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connection.g.ConnectionEndPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connection.g.RouteBuilder;
@@ -149,18 +155,7 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
     @Test
     public void testServiceDeactivationWithSingleDriver() throws ExecutionException, InterruptedException, TransactionCommitFailedException, ReadFailedException, ResourceActivatorException {
         //having
-        ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
-        n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
-        Connection system = c(uuid1, uuid1 + ":1", uuid1 + ":2");
-        Connection global = c(TapiConstants.PRESTO_ABSTRACT_NODE, Collections.singletonList(system.getUuid()), uuid1 + ":1", uuid1 + ":2");
-        ConnectivityService cs = cs("some-service", global.getUuid());
-
-        InstanceIdentifier<Context1> connectivityCtx = NrpDao.ctx().augmentation(Context1.class);
-
-        tx.put(LogicalDatastoreType.OPERATIONAL, connectivityCtx.child(Connection.class,  new ConnectionKey(system.getUuid())), system);
-        tx.put(LogicalDatastoreType.OPERATIONAL, connectivityCtx.child(Connection.class,  new ConnectionKey(global.getUuid())), global);
-        tx.put(LogicalDatastoreType.OPERATIONAL, connectivityCtx.child(ConnectivityService.class,  new ConnectivityServiceKey(cs.getUuid())), cs);
-        tx.submit().checkedGet();
+        createConnectivityService();
 
         //when
         DeleteConnectivityServiceInput input = new DeleteConnectivityServiceInputBuilder().setServiceIdOrName("some-service").build();
@@ -176,6 +171,160 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         assertEquals(0, connCtx.getConnectivityService().size());
     }
 
+    @Test
+    public void testGetServiceListEmpty() throws InterruptedException, ExecutionException {
+        //having
+        //when
+        RpcResult<GetConnectivityServiceListOutput> result =
+                connectivityService.getConnectivityServiceList().get();
+        //then
+        assertTrue(result.isSuccessful());
+        assertEquals(0, result.getResult().getService().size());
+    }
+
+
+    @Test
+    public void testGetServiceList() throws TransactionCommitFailedException, InterruptedException, ExecutionException {
+        //having
+        createConnectivityService();
+
+        //when
+        RpcResult<GetConnectivityServiceListOutput> result =
+                connectivityService.getConnectivityServiceList().get();
+
+        //then
+        assertTrue(result.isSuccessful());
+        assertEquals(1, result.getResult().getService().size());
+    }
+
+
+    @Test
+    public void testGetServiceDetailsNullInput() throws InterruptedException, ExecutionException {
+        //having
+
+        //when
+        GetConnectivityServiceDetailsInputBuilder builder =
+                new GetConnectivityServiceDetailsInputBuilder();
+        RpcResult<GetConnectivityServiceDetailsOutput> result =
+                connectivityService.getConnectivityServiceDetails(builder.build()).get();
+
+        //then
+        assertFalse(result.isSuccessful());
+        assertEquals(1, result.getErrors().size());
+    }
+
+    @Test
+    public void testGetServiceDetailsBadInput() throws InterruptedException, ExecutionException {
+        //having
+
+        //when
+        GetConnectivityServiceDetailsInputBuilder builder =
+                new GetConnectivityServiceDetailsInputBuilder();
+        builder.setServiceIdOrName("missing-service");
+        RpcResult<GetConnectivityServiceDetailsOutput> result =
+                connectivityService.getConnectivityServiceDetails(builder.build()).get();
+
+        //then
+        assertFalse(result.isSuccessful());
+        assertEquals(1, result.getErrors().size());
+    }
+
+    @Test
+    public void testGetServiceDetails() throws InterruptedException, ExecutionException, TransactionCommitFailedException {
+        //having
+        createConnectivityService();
+
+        //when
+        GetConnectivityServiceDetailsInputBuilder builder =
+                new GetConnectivityServiceDetailsInputBuilder();
+        builder.setServiceIdOrName("some-service");
+        RpcResult<GetConnectivityServiceDetailsOutput> result =
+                connectivityService.getConnectivityServiceDetails(builder.build()).get();
+
+        //then
+        assertTrue(result.isSuccessful());
+        assertNotNull(result.getResult().getService());
+    }
+
+    @Test
+    public void getGetConnectionDetailsNullInput() throws InterruptedException, ExecutionException {
+        //having
+
+        //when
+        GetConnectionDetailsInputBuilder builder =
+                new GetConnectionDetailsInputBuilder();
+        RpcResult<GetConnectionDetailsOutput> result =
+                connectivityService.getConnectionDetails(builder.build()).get();
+
+        //then
+        assertFalse(result.isSuccessful());
+        assertEquals(1, result.getErrors().size());
+    }
+
+    @Test
+    public void getGetConnectionDetailsBadServiceName() throws InterruptedException, ExecutionException {
+        //having
+
+        //when
+        GetConnectionDetailsInputBuilder builder =
+                new GetConnectionDetailsInputBuilder();
+        builder.setServiceIdOrName("missing-service");
+        RpcResult<GetConnectionDetailsOutput> result =
+                connectivityService.getConnectionDetails(builder.build()).get();
+
+        //then
+        assertFalse(result.isSuccessful());
+        assertEquals(1, result.getErrors().size());
+    }
+
+    @Test
+    public void getGetConnectionDetailsBadConnectionName() throws InterruptedException, ExecutionException {
+        //having
+
+        //when
+        GetConnectionDetailsInputBuilder builder =
+                new GetConnectionDetailsInputBuilder();
+        builder.setConnectionIdOrName("missing-connection");
+        RpcResult<GetConnectionDetailsOutput> result =
+                connectivityService.getConnectionDetails(builder.build()).get();
+
+        //then
+        assertFalse(result.isSuccessful());
+        assertEquals(1, result.getErrors().size());
+    }
+
+    @Test
+    public void getGetConnectionDetailsByServiceName() throws InterruptedException, ExecutionException, TransactionCommitFailedException {
+        //having
+        createConnectivityService();
+
+        //when
+        GetConnectionDetailsInputBuilder builder =
+                new GetConnectionDetailsInputBuilder();
+        builder.setServiceIdOrName("some-service");
+        RpcResult<GetConnectionDetailsOutput> result =
+                connectivityService.getConnectionDetails(builder.build()).get();
+
+        //then
+        assertTrue(result.isSuccessful());
+        assertNotNull(result.getResult().getConnection());
+    }
+
+
+    private void createConnectivityService() throws TransactionCommitFailedException {
+        ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
+        n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
+        Connection system = c(uuid1, uuid1 + ":1", uuid1 + ":2");
+        Connection global = c(TapiConstants.PRESTO_ABSTRACT_NODE, Collections.singletonList(system.getUuid()), uuid1 + ":1", uuid1 + ":2");
+        ConnectivityService cs = cs("some-service", global.getUuid());
+
+        InstanceIdentifier<Context1> connectivityCtx = NrpDao.ctx().augmentation(Context1.class);
+
+        tx.put(LogicalDatastoreType.OPERATIONAL, connectivityCtx.child(Connection.class,  new ConnectionKey(system.getUuid())), system);
+        tx.put(LogicalDatastoreType.OPERATIONAL, connectivityCtx.child(Connection.class,  new ConnectionKey(global.getUuid())), global);
+        tx.put(LogicalDatastoreType.OPERATIONAL, connectivityCtx.child(ConnectivityService.class,  new ConnectivityServiceKey(cs.getUuid())), cs);
+        tx.submit().checkedGet();
+    }
 
 
     private void verifyConnection(Connection connection) {

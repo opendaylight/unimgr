@@ -55,6 +55,7 @@ import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.crea
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,6 +121,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
             log.warn("Exception in create connectivity service", e);
             return RpcResultBuilder
                     .<CreateConnectivityServiceOutput>failed()
+                    .withError(ErrorType.APPLICATION, e.getMessage())
                     .build();
         }
     }
