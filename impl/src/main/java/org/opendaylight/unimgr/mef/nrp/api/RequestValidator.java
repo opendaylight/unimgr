@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.CreateConnectivityServiceInput;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.CreateConnectivityServiceInput;
 
 /**
  * @author bartosz.michalik@amartus.com

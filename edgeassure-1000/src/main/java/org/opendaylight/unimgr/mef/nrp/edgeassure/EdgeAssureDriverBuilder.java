@@ -19,8 +19,8 @@ import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.common.FixedServiceNaming;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.NrpConnectivityServiceAttrsG;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.NrpConnectivityServiceAttrs;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
 
 /**
  * Fake driver builder;
@@ -53,7 +53,7 @@ public class EdgeAssureDriverBuilder implements ActivationDriverBuilder {
             }
 
             @Override
-            public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrsG context) {
+            public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context) {
                 this.endPoints = endPoints;
                 this.serviceId = serviceId;
             }
@@ -79,7 +79,7 @@ public class EdgeAssureDriverBuilder implements ActivationDriverBuilder {
     }
 
     @Override
-    public UniversalId getNodeUuid() {
+    public Uuid getNodeUuid() {
         return null;
     }
 }

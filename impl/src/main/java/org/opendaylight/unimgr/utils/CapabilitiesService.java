@@ -117,7 +117,7 @@ public class CapabilitiesService {
         }
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(CapabilitiesService.class);
+    private static final Logger LO = LoggerFactory.getLogger(CapabilitiesService.class);
 
     private DataBroker dataBroker;
 
@@ -146,7 +146,7 @@ public class CapabilitiesService {
         try {
             result = nodeFuture.checkedGet();
         } catch (final ReadFailedException e) {
-            LOG.error("Unable to read node with Iid {}", nodeIid, e);
+            LO.error("Unable to read node with Iid {}", nodeIid, e);
         }
 
         return result;

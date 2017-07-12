@@ -20,7 +20,7 @@ import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverNotFoundException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -31,14 +31,14 @@ public class ActivationDriverRepoServiceImplTest {
     public void testEmptyBuilderList() throws Exception {
 
         ActivationDriverRepoService driverRepo = new ActivationDriverRepoServiceImpl(Collections.emptyList());
-        driverRepo.getDriver(new UniversalId("non-existing"));
+        driverRepo.getDriver(new Uuid("non-existing"));
     }
 
 
     @Test
     public void testMatchingByUuid() throws Exception {
 
-        final UniversalId uuid = new UniversalId("aDriver");
+        final Uuid uuid = new Uuid("aDriver");
 
         final ActivationDriver driver = mock(ActivationDriver.class);
 
@@ -51,7 +51,7 @@ public class ActivationDriverRepoServiceImplTest {
 
         final Optional<ActivationDriver> driver1 = driverRepo.getDriver(uuid);
         try {
-            driverRepo.getDriver(new UniversalId("otherDriver"));
+            driverRepo.getDriver(new Uuid("otherDriver"));
         } catch(ActivationDriverNotFoundException expected) {}
 
         assertTrue(driver1.isPresent());

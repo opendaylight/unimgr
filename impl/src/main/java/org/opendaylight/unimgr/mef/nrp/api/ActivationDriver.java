@@ -11,7 +11,7 @@ import java.util.List;
 
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceActivatorException;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.NrpConnectivityServiceAttrsG;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.NrpConnectivityServiceAttrs;
 
 /**
  * Interface of a driver that maps NRP concepts to the configuration of underlying infrastructure.
@@ -43,7 +43,7 @@ public interface ActivationDriver {
      * @param serviceId connectivity service id
      * @param context context
      */
-    void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrsG context);
+    void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context);
 
     /**
      * Performs the activation action.

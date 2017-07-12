@@ -44,14 +44,14 @@ import com.google.common.util.concurrent.CheckedFuture;
 
 public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUnimgrConsoleProvider {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UnimgrProvider.class);
+    private static final Logger LO = LoggerFactory.getLogger(UnimgrProvider.class);
     private DataBroker dataBroker;
     private EvcDataTreeChangeListener evcListener;
     private OvsNodeDataTreeChangeListener ovsListener;
     private UniDataTreeChangeListener uniListener;
 
     public UnimgrProvider(DataBroker dataBroker) {
-        LOG.info("Unimgr provider initialized");
+        LO.info("Unimgr provider initialized");
         this.dataBroker = dataBroker;
     }
 
@@ -100,7 +100,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
                 transaction.cancel();
             }
         } catch (final Exception e) {
-            LOG.error("Error initializing unimgr topology", e);
+            LO.error("Error initializing unimgr topology", e);
         }
     }
 
@@ -117,7 +117,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
                 transaction.cancel();
             }
         } catch (final Exception e) {
-            LOG.error("Error initializing unimgr topology {}", e);
+            LO.error("Error initializing unimgr topology {}", e);
         }
     }
 
@@ -135,7 +135,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
      * Initialization method for UnimgrProvider, used by blueprint.
      */
     public void init() {
-        LOG.info("UnimgrProvider Session Initiated");
+        LO.info("UnimgrProvider Session Initiated");
 
         // Register the data trees change listener
         uniListener = new UniDataTreeChangeListener(dataBroker);
@@ -156,7 +156,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
 
     @Override
     public void close() throws Exception {
-        LOG.info("UnimgrProvider Closed");
+        LO.info("UnimgrProvider Closed");
         uniListener.close();
         evcListener.close();
         ovsListener.close();
@@ -191,7 +191,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
     public boolean updateUni(final UniAugmentation uni) {
         // Remove the old UNI with IpAdress and create a new one with updated informations
         if (uni != null) {
-            LOG.trace("UNI updated {}.", uni.getIpAddress().getIpv4Address());
+            LO.trace("UNI updated {}.", uni.getIpAddress().getIpv4Address());
             final InstanceIdentifier<?> uniIID = UnimgrMapper.getUniIid(dataBroker,
                     uni.getIpAddress(), LogicalDatastoreType.OPERATIONAL);
             Node ovsdbNode;
@@ -201,7 +201,7 @@ public class UnimgrProvider implements BindingAwareProvider, AutoCloseable, IUni
                         LogicalDatastoreType.OPERATIONAL, ovsdbNodeRef.getValue()).get();
 
                 UniUtils.updateUniNode(LogicalDatastoreType.OPERATIONAL, uniIID, uni, ovsdbNode, dataBroker);
-                LOG.trace("UNI updated {}.", uni.getIpAddress().getIpv4Address());
+                LO.trace("UNI updated {}.", uni.getIpAddress().getIpv4Address());
             } else {
                 final Optional<Node> optionalOvsdbNode = OvsdbUtils.findOvsdbNode(dataBroker, uni);
                 ovsdbNode = optionalOvsdbNode.get();

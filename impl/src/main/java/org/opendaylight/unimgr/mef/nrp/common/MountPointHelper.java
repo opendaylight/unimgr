@@ -27,7 +27,7 @@ public class MountPointHelper {
 
     /**
      * Find a node's NETCONF mount point and then retrieve its DataBroker.
-     * e.g.
+     * e.
      * http://localhost:8080/restconf/config/network-topology:network-topology/
      *        topology/topology-netconf/node/{nodeName}/yang-ext:mount/
      */

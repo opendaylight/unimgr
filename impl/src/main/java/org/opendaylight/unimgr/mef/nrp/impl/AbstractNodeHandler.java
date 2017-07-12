@@ -24,12 +24,12 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.Context;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.Context1;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.Topology;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Context;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.Context1;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.context.Topology;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.context.TopologyKey;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -44,11 +44,11 @@ import com.google.common.util.concurrent.Futures;
  * @author marek.ryznar@amartus.com
  */
 public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractNodeHandler.class);
+    private static final Logger LO = LoggerFactory.getLogger(AbstractNodeHandler.class);
     private static final InstanceIdentifier NRP_TOPOLOGY_SYSTEM_IID = InstanceIdentifier
             .create(Context.class)
             .augmentation(Context1.class)
-            .child(Topology.class, new TopologyKey(new UniversalId(TapiConstants.PRESTO_SYSTEM_TOPO)));
+            .child(Topology.class, new TopologyKey(new Uuid(TapiConstants.PRESTO_SYSTEM_TOPO)));
     private ListenerRegistration<AbstractNodeHandler> registration;
 
     private final DataBroker dataBroker;
@@ -102,12 +102,12 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
 
             @Override
             public void onSuccess(@Nullable Void result) {
-                LOG.info("Abstract TAPI node upadate successful");
+                LO.info("Abstract TAPI node upadate successful");
             }
 
             @Override
             public void onFailure(Throwable t) {
-                LOG.warn("Abstract TAPI node upadate failed due to an error", t);
+                LO.warn("Abstract TAPI node upadate failed due to an error", t);
             }
         });
     }

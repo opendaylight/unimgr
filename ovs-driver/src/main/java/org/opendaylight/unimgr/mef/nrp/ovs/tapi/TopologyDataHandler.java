@@ -30,16 +30,16 @@ import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
 import org.opendaylight.unimgr.mef.nrp.ovs.transaction.TopologyTransaction;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.LifecycleState;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.TerminationDirection;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePointKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.service._interface.point.g.StateBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePointKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.LifecycleState;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.TerminationDirection;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.context.attrs.ServiceInterfacePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.context.attrs.ServiceInterfacePointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.context.attrs.ServiceInterfacePointKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.service._interface.point.StateBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePointKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeInternal;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -209,8 +209,8 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         dao.updateNep(OVS_NODE, nep(nepName, sip.getUuid()));
     }
 
-    private OwnedNodeEdgePoint nep(String nepName, UniversalId sipUuid) {
-        UniversalId uuid = new UniversalId(nepName);
+    private OwnedNodeEdgePoint nep(String nepName, Uuid sipUuid) {
+        Uuid uuid = new Uuid(nepName);
         return new OwnedNodeEdgePointBuilder()
                 .setUuid(uuid)
                 .setKey(new OwnedNodeEdgePointKey(uuid))
@@ -219,18 +219,18 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
     }
 
     private ServiceInterfacePoint createSip(String nep) {
-        UniversalId uuid = new UniversalId( "sip" + DELIMETER + nep);
+        Uuid uuid = new Uuid( "sip" + DELIMETER + nep);
         return new ServiceInterfacePointBuilder()
                 .setUuid(uuid)
                 .setKey(new ServiceInterfacePointKey(uuid))
                 .setState(new StateBuilder().setLifecycleState(LifecycleState.Installed).build())
-                .setDirection(TerminationDirection.Bidirectional)
+// TODO donaldh .setDirection(TerminationDirection.Bidirectional)
                 .build();
     }
 
     private OwnedNodeEdgePoint createNep(String nepId){
         OwnedNodeEdgePointBuilder tpBuilder = new OwnedNodeEdgePointBuilder();
-        UniversalId tpId = new UniversalId(OVS_NODE + DELIMETER + nepId);
+        Uuid tpId = new Uuid(OVS_NODE + DELIMETER + nepId);
         return tpBuilder
                 .setUuid(tpId)
                 .setKey(new OwnedNodeEdgePointKey(tpId))

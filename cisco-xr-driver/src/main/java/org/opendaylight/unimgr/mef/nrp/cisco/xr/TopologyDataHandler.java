@@ -45,15 +45,14 @@ import org.opendaylight.unimgr.utils.DriverConstants;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfigurationKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.LayerProtocolName;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.TerminationDirection;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.service._interface.point.g.LayerProtocolBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePointKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Eth;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.context.attrs.ServiceInterfacePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.context.attrs.ServiceInterfacePointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.service._interface.point.LayerProtocolBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePointKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.network.topology.topology.topology.types.TopologyNetconf;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
@@ -192,10 +191,13 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         toTp(added).forEach(nep -> {
 
             ServiceInterfacePoint sip = new ServiceInterfacePointBuilder()
-                    .setUuid(new UniversalId("sip:" + nep.getUuid().getValue()))
+                    .setUuid(new Uuid("sip:" + nep.getUuid().getValue()))
 //                    .setState(St)
-                    .setDirection(TerminationDirection.Bidirectional)
-                    .setLayerProtocol(Collections.singletonList(new LayerProtocolBuilder().setLocalId("eth").setLayerProtocolName(LayerProtocolName.Eth).build()))
+// TODO donaldh     .setDirection(TerminationDirection.Bidirectional)
+                    .setLayerProtocol(Collections.singletonList(new LayerProtocolBuilder()
+                            .setLocalId("eth")
+                            .setLayerProtocolName(Eth.class)
+                            .build()))
                     .build();
             dao.addSip(sip);
             nep = new OwnedNodeEdgePointBuilder(nep).setMappedServiceInterfacePoint(Collections.singletonList(sip.getUuid())).build();
@@ -247,7 +249,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
                                     InterfaceConfigurationKey ikey = i.getKey();
                                     log.debug("found {} interface", ikey);
 
-                                    UniversalId tpId = new UniversalId(cn.getNodeId().getValue() + ":" + ikey.getInterfaceName().getValue());
+                                    Uuid tpId = new Uuid(cn.getNodeId().getValue() + ":" + ikey.getInterfaceName().getValue());
                                     return tpBuilder
                                             .setUuid(tpId)
                                             .setKey(new OwnedNodeEdgePointKey(tpId))

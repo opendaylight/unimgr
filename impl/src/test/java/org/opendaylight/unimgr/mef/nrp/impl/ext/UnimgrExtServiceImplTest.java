@@ -20,12 +20,12 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.impl.AbstractTestWithTopo;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.mef_types.rev170531.NaturalNumber;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.LayerProtocol1;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.service._interface.point.g.LayerProtocol;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.types.rev170712.NaturalNumber;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.LayerProtocol1;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.ServiceInterfacePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.service._interface.point.LayerProtocol;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePoint;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.AddSipInput;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.AddSipInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.EnniSpecBuilder;
@@ -69,7 +69,7 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
             LayerProtocol lp = sip.getLayerProtocol().get(0);
             LayerProtocol1 lpAug = lp.getAugmentation(LayerProtocol1.class);
             assertNotNull(lpAug);
-            assertNotNull(lpAug.getNrpCgEthEnniSpec());
+            assertNotNull(lpAug.getNrpCarrierEthEnniNResource());
         });
     }
 
@@ -114,8 +114,8 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
     private AddSipInput input(String nepId, SipType type) {
 
         AddSipInputBuilder sipBuilder = new AddSipInputBuilder()
-                .setNepId(new UniversalId(nepId))
-                .setNodeId(new UniversalId(nodeId));
+                .setNepId(new Uuid(nepId))
+                .setNodeId(new Uuid(nodeId));
 
         if(type == null) return sipBuilder.build();
 

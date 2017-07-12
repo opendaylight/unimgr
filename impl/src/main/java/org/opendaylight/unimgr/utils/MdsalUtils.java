@@ -36,7 +36,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 
 public class MdsalUtils {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MdsalUtils.class);
+    private static final Logger LO = LoggerFactory.getLogger(MdsalUtils.class);
 
     private MdsalUtils() {
         throw new AssertionError("Instantiating utility class.");
@@ -63,11 +63,11 @@ public class MdsalUtils {
             if (optionalDataObject.isPresent()) {
                 result = optionalDataObject.get();
             } else {
-                LOG.debug("{}: Failed to read {}",
+                LO.debug("{}: Failed to read {}",
                         Thread.currentThread().getStackTrace()[1], path);
             }
         } catch (final ReadFailedException e) {
-            LOG.warn("Failed to read {} ", path, e);
+            LO.warn("Failed to read {} ", path, e);
         }
         transaction.close();
         return result;
@@ -91,7 +91,7 @@ public class MdsalUtils {
         try {
             optionalDataObject = future.checkedGet();
         } catch (final ReadFailedException e) {
-            LOG.warn("Failed to read {} ", path, e);
+            LO.warn("Failed to read {} ", path, e);
         }
 
         transaction.close();
@@ -114,7 +114,7 @@ public class MdsalUtils {
         try {
             return nodeFuture.checkedGet();
         } catch (final ReadFailedException e) {
-            LOG.error("Unable to read node with Iid {}", nodeIid, e);
+            LO.error("Unable to read node with Iid {}", nodeIid, e);
         }
         return Optional.absent();
     }
@@ -136,7 +136,7 @@ public class MdsalUtils {
         try {
             return nodeFuture.checkedGet();
         } catch (final ReadFailedException e) {
-            LOG.info("Unable to read node with Iid {}", nodeIid, e);
+            LO.info("Unable to read node with Iid {}", nodeIid, e);
         }
         return Optional.absent();
     }
@@ -150,7 +150,7 @@ public class MdsalUtils {
     public static boolean deleteNode(DataBroker dataBroker,
                                   InstanceIdentifier<?> genericNode,
                                   LogicalDatastoreType store) {
-        LOG.info("Received a request to delete node {}", genericNode);
+        LO.info("Received a request to delete node {}", genericNode);
         boolean result = false;
         final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
         transaction.delete(store, genericNode);
@@ -158,7 +158,7 @@ public class MdsalUtils {
             transaction.submit().checkedGet();
             result = true;
         } catch (final TransactionCommitFailedException e) {
-            LOG.error("Unable to remove node with Iid {} from store {}", genericNode, store, e);
+            LO.error("Unable to remove node with Iid {} from store {}", genericNode, store, e);
         }
         return result;
     }
@@ -179,7 +179,7 @@ public class MdsalUtils {
         try {
             return linkFuture.checkedGet();
         } catch (final ReadFailedException e) {
-            LOG.info("Unable to read node with Iid {}", linkIid, e);
+            LO.info("Unable to read node with Iid {}", linkIid, e);
         }
         return Optional.absent();
     }
@@ -205,7 +205,7 @@ public class MdsalUtils {
         try {
             return topologyFuture.checkedGet();
         } catch (final ReadFailedException e) {
-            LOG.info("Unable to read topology with Iid {}", topologyInstanceId, e);
+            LO.info("Unable to read topology with Iid {}", topologyInstanceId, e);
         }
         return Optional.absent();
     }

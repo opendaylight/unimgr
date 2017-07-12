@@ -17,24 +17,24 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.Context;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePointKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.Connection;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectionKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectivityService;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectivityServiceKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.Context1;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.get.node.edge.point.details.output.NodeEdgePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePointKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.Topology;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.TopologyKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.Node;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Context;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.context.attrs.ServiceInterfacePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.context.attrs.ServiceInterfacePointKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.Connection;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.ConnectionKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.ConnectivityService;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.ConnectivityServiceKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.Context1;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.get.node.edge.point.details.output.NodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePointKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.context.Topology;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.context.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
@@ -64,7 +64,7 @@ public class NrpDao  {
 
     public Node createSystemNode(String nodeId, List<OwnedNodeEdgePoint> neps) {
         verifyTx();
-        UniversalId uuid = new UniversalId(nodeId);
+        Uuid uuid = new Uuid(nodeId);
         Node node = new NodeBuilder()
                 .setKey(new NodeKey(uuid))
                 .setUuid(uuid)
@@ -84,23 +84,23 @@ public class NrpDao  {
      * @param nep nep to update
      */
     public void updateNep(String nodeId, OwnedNodeEdgePoint nep) {
-        updateNep(new UniversalId(nodeId), nep);
+        updateNep(new Uuid(nodeId), nep);
     }
 
-    public void updateNep(UniversalId nodeId, OwnedNodeEdgePoint nep) {
+    public void updateNep(Uuid nodeId, OwnedNodeEdgePoint nep) {
         InstanceIdentifier<OwnedNodeEdgePoint> nodeIdent = node(nodeId).child(OwnedNodeEdgePoint.class, new OwnedNodeEdgePointKey(nep.getUuid()));
         tx.put(LogicalDatastoreType.OPERATIONAL, nodeIdent, nep);
     }
 
     public void removeNep(String nodeId, String nepId, boolean removeSips) {
         verifyTx();
-        InstanceIdentifier<OwnedNodeEdgePoint> nepIdent = node(nodeId).child(OwnedNodeEdgePoint.class, new OwnedNodeEdgePointKey(new UniversalId(nepId)));
+        InstanceIdentifier<OwnedNodeEdgePoint> nepIdent = node(nodeId).child(OwnedNodeEdgePoint.class, new OwnedNodeEdgePointKey(new Uuid(nepId)));
         try {
             Optional<OwnedNodeEdgePoint> opt = tx.read(LogicalDatastoreType.OPERATIONAL, nepIdent).checkedGet();
             if(opt.isPresent()) {
                 tx.delete(LogicalDatastoreType.OPERATIONAL,nepIdent);
                 if(removeSips){
-                    List<UniversalId> sips = opt.get().getMappedServiceInterfacePoint();
+                    List<Uuid> sips = opt.get().getMappedServiceInterfacePoint();
                     removeSips(sips == null ? null : sips.stream());
                 }
             }
@@ -117,12 +117,12 @@ public class NrpDao  {
     }
 
     public OwnedNodeEdgePoint readNep(String nodeId, String nepId) throws ReadFailedException {
-        KeyedInstanceIdentifier<OwnedNodeEdgePoint, OwnedNodeEdgePointKey> nepKey = node(nodeId).child(OwnedNodeEdgePoint.class, new OwnedNodeEdgePointKey(new UniversalId(nepId)));
+        KeyedInstanceIdentifier<OwnedNodeEdgePoint, OwnedNodeEdgePointKey> nepKey = node(nodeId).child(OwnedNodeEdgePoint.class, new OwnedNodeEdgePointKey(new Uuid(nepId)));
         return rtx.read(LogicalDatastoreType.OPERATIONAL, nepKey).checkedGet().orNull();
     }
 
     public boolean hasSip(String nepId) {
-        UniversalId universalId = new UniversalId("sip:" + nepId);
+        Uuid universalId = new Uuid("sip:" + nepId);
         try {
             return rtx.read(LogicalDatastoreType.OPERATIONAL,
                     ctx().child(ServiceInterfacePoint.class, new ServiceInterfacePointKey(universalId))).checkedGet().isPresent();
@@ -148,22 +148,22 @@ public class NrpDao  {
     public static InstanceIdentifier<Topology> topo(String topoId) {
         return ctx()
                 .augmentation(Context1.class)
-                .child(Topology.class, new TopologyKey(new UniversalId(topoId)));
+                .child(Topology.class, new TopologyKey(new Uuid(topoId)));
     }
 
     public static InstanceIdentifier<Node> node(String nodeId) {
-        return node(new UniversalId(nodeId));
+        return node(new Uuid(nodeId));
     }
 
-    public static InstanceIdentifier<Node> node(UniversalId nodeId) {
+    public static InstanceIdentifier<Node> node(Uuid nodeId) {
         return topo(TapiConstants.PRESTO_SYSTEM_TOPO).child(Node.class, new NodeKey(nodeId));
     }
 
     public static InstanceIdentifier<Node> abstractNode() {
-        return topo(TapiConstants.PRESTO_EXT_TOPO).child(Node.class, new NodeKey(new UniversalId(TapiConstants.PRESTO_ABSTRACT_NODE)));
+        return topo(TapiConstants.PRESTO_EXT_TOPO).child(Node.class, new NodeKey(new Uuid(TapiConstants.PRESTO_ABSTRACT_NODE)));
     }
 
-    public void removeSips(Stream<UniversalId>  uuids) {
+    public void removeSips(Stream<Uuid>  uuids) {
         verifyTx();
         if(uuids == null) return ;
         uuids.forEach(sip -> {
@@ -205,7 +205,7 @@ public class NrpDao  {
     public List<ConnectivityService> getConnectivityServiceList() {
         try {
             return rtx.read(LogicalDatastoreType.OPERATIONAL,
-                    ctx().augmentation(org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.Context1.class))
+                    ctx().augmentation(org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.Context1.class))
                     .checkedGet().orNull().getConnectivityService();
         } catch (ReadFailedException e) {
             log.warn("reading connectivity services failed", e);
@@ -213,9 +213,9 @@ public class NrpDao  {
         }
     }
 
-    public ConnectivityService getConnectivityService(UniversalId id) {
+    public ConnectivityService getConnectivityService(Uuid id) {
         try {
-            return rtx.read(LogicalDatastoreType.OPERATIONAL, ctx().augmentation(org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.Context1.class).child(ConnectivityService.class, new ConnectivityServiceKey(id)))
+            return rtx.read(LogicalDatastoreType.OPERATIONAL, ctx().augmentation(org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.Context1.class).child(ConnectivityService.class, new ConnectivityServiceKey(id)))
                     .checkedGet().orNull();
 
         } catch (ReadFailedException e) {
@@ -225,17 +225,17 @@ public class NrpDao  {
     }
 
     public ServiceInterfacePoint getSip(String sipId) throws ReadFailedException {
-        KeyedInstanceIdentifier<ServiceInterfacePoint, ServiceInterfacePointKey> key = ctx().child(ServiceInterfacePoint.class, new ServiceInterfacePointKey(new UniversalId(sipId)));
+        KeyedInstanceIdentifier<ServiceInterfacePoint, ServiceInterfacePointKey> key = ctx().child(ServiceInterfacePoint.class, new ServiceInterfacePointKey(new Uuid(sipId)));
         return rtx.read(LogicalDatastoreType.OPERATIONAL, key).checkedGet().orNull();
     }
 
     public ConnectivityService getConnectivityService(String id) {
-        return getConnectivityService(new UniversalId(id));
+        return getConnectivityService(new Uuid(id));
     }
 
-    public Connection getConnection(UniversalId connectionId) {
+    public Connection getConnection(Uuid connectionId) {
         try {
-            return rtx.read(LogicalDatastoreType.OPERATIONAL, ctx().augmentation(org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.Context1.class).child(Connection.class, new ConnectionKey(connectionId)))
+            return rtx.read(LogicalDatastoreType.OPERATIONAL, ctx().augmentation(org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.Context1.class).child(Connection.class, new ConnectionKey(connectionId)))
                     .checkedGet().orNull();
 
         } catch (ReadFailedException e) {

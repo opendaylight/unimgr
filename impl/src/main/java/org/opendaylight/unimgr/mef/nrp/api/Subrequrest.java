@@ -10,21 +10,21 @@ package org.opendaylight.unimgr.mef.nrp.api;
 
 import java.util.List;
 
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
 
 /**
  * @author bartosz.michalik@amartus.com
  */
 public class Subrequrest {
-    final UniversalId nodeUuid;
+    final Uuid nodeUuid;
     final List<EndPoint> endpoints;
 
-    public Subrequrest(UniversalId nodeUuid, List<EndPoint> endpoints) {
+    public Subrequrest(Uuid nodeUuid, List<EndPoint> endpoints) {
         this.nodeUuid = nodeUuid;
         this.endpoints = endpoints;
     }
 
-    public UniversalId getNodeUuid() {
+    public Uuid getNodeUuid() {
         return nodeUuid;
     }
 

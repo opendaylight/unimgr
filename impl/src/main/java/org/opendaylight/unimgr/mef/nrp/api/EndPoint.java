@@ -8,30 +8,30 @@
 
 package org.opendaylight.unimgr.mef.nrp.api;
 
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.NrpConnectivityServiceEndPointAttrsG;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.ConnectivityServiceEndPointG;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.NrpConnectivityServiceEndPointAttrs;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.ConnectivityServiceEndPoint;
 
 /**
- * @see ConnectivityServiceEndPointG
+ * @see ConnectivityServiceEndPoint
  * @author bartosz.michalik@amartus.com
  */
 public class EndPoint {
-    private final ConnectivityServiceEndPointG endpoint;
+    private final ConnectivityServiceEndPoint endpoint;
     /**
      * Optional attributes
      * (likely to change to different implementation)
      */
-    private final NrpConnectivityServiceEndPointAttrsG attrs;
+    private final NrpConnectivityServiceEndPointAttrs attrs;
 
-    private UniversalId systemNepUuid;
+    private Uuid systemNepUuid;
 
     /**
      * Initialize endpoint
      * @param endpoint endpoint data
      * @param attrs associated NRP attributes
      */
-    public EndPoint(ConnectivityServiceEndPointG endpoint, NrpConnectivityServiceEndPointAttrsG attrs) {
+    public EndPoint(ConnectivityServiceEndPoint endpoint, NrpConnectivityServiceEndPointAttrs attrs) {
         this.endpoint = endpoint;
         this.attrs = attrs;
     }
@@ -40,7 +40,7 @@ public class EndPoint {
      *
      * @return endpoints
      */
-    public ConnectivityServiceEndPointG getEndpoint() {
+    public ConnectivityServiceEndPoint getEndpoint() {
         return endpoint;
     }
 
@@ -48,15 +48,15 @@ public class EndPoint {
      *
      * @return attributes
      */
-    public NrpConnectivityServiceEndPointAttrsG getAttrs() {
+    public NrpConnectivityServiceEndPointAttrs getAttrs() {
         return attrs;
     }
 
-    public UniversalId getSystemNepUuid() {
+    public Uuid getSystemNepUuid() {
         return systemNepUuid;
     }
 
-    public EndPoint setSystemNepUuid(UniversalId systemNepUuid) {
+    public EndPoint setSystemNepUuid(Uuid systemNepUuid) {
         this.systemNepUuid = systemNepUuid;
         return this;
     }

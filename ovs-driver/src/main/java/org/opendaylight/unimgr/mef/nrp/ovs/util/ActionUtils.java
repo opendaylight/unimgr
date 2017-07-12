@@ -149,7 +149,7 @@ class ActionUtils {
     }
 
     /**
-     * Returns port number basing on openflow port name (e.g. 4 will be returned from 'openflow:3:4')
+     * Returns port number basing on openflow port name (e. 4 will be returned from 'openflow:3:4')
      *
      * @param portName string containing port name
      * @return port number

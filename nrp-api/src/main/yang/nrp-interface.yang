@@ -1,5 +1,5 @@
 module nrp-interface {
-    namespace "urn:mef:yang:NRP_Interface";
+    namespace "urn:mef:yang:nrp-interface";
     prefix nrp-interface;
     import tapi-connectivity {
         prefix tapi-connectivity;
@@ -12,95 +12,99 @@ module nrp-interface {
     }
     organization "Metro Ethernet Forum (MEF)";
     contact "MEF";
-    description "none";
-    revision 2017-05-31 {
-        description "MEF NRP 1.0.alpha";
+    description "MEF NRP Classes
+        MEF NRM Classes
+        MEF-Types Enumerations
+        MEF-Common Classes";
+    revision 2017-07-12 {
+        description "MEF NRP 1.0.cfc4";
         reference "ONF-TR-527, ONF-TR-512, ONF-TR-531, RFC 6020 and RFC 6087";
     }
     augment "/tapi-connectivity:create-connectivity-service/tapi-connectivity:output/tapi-connectivity:service/tapi-connectivity:end-point" {
-        uses nrp-connectivity-service-end-point-attrs-g;
-            description "none";
+        uses nrp-connectivity-service-end-point-attrs;
+        description "none";
     }
     augment "/tapi-common:context/tapi-connectivity:connectivity-service" {
-        uses nrp-connectivity-service-attrs-g;
-            description "none";
+        uses nrp-connectivity-service-attrs;
+        description "none";
     }
     augment "/tapi-connectivity:create-connectivity-service/tapi-connectivity:input/tapi-connectivity:end-point" {
-        uses nrp-connectivity-service-end-point-attrs-g;
-            description "none";
+        uses nrp-connectivity-service-end-point-attrs;
+        description "none";
     }
     augment "/tapi-common:context/tapi-connectivity:connectivity-service/tapi-connectivity:end-point" {
-        uses nrp-connectivity-service-end-point-attrs-g;
-            description "none";
+        uses nrp-connectivity-service-end-point-attrs;
+        description "none";
     }
     augment "/tapi-connectivity:create-connectivity-service/tapi-connectivity:input" {
-        uses nrp-connectivity-service-attrs-g;
-            description "none";
+        uses nrp-connectivity-service-attrs;
+        description "none";
     }
     augment "/tapi-connectivity:create-connectivity-service/tapi-connectivity:output/tapi-connectivity:service" {
-        uses nrp-connectivity-service-attrs-g;
-            description "none";
+        uses nrp-connectivity-service-attrs;
+        description "none";
     }
     augment "/tapi-common:context/tapi-common:service-interface-point/tapi-common:layer-protocol" {
-        uses nrp-layer-protocol-attrs-g;
-            description "none";
+        uses nrp-layer-protocol-attrs;
+        description "none";
     }
     augment "/tapi-connectivity:create-connectivity-service/tapi-connectivity:input/tapi-connectivity:end-point" {
-        uses nrp-layer-protocol-attrs-g;
-            description "none";
+        uses nrp-layer-protocol-attrs;
+        description "none";
     }
     /***********************
     * package diagrams
-    **********************/ 
+    **********************/
 
     /***********************
     * package object-classes
-    **********************/ 
-        grouping nrp-cg-eth-uni-spec-g {
-            uses nrm-connectivity:cg-eth-uni-spec-g;
-            description "none";
+    **********************/
+        grouping nrp-carrier-eth-uni-n-resource-attrs {
+            uses nrm-connectivity:carrier-eth-uni-n-resource;
+            description "NrpCarrierEthUniResource is the network resource object representation that is mapped from MEF SCA_UNI object. The attributes support the necessary functionality of UNI. The NrpCarrierEthUniNResource is sub-classed from NRM CarrierEthUniResource.  The NrpCarrierEthUniNResource is associated with ONF TAPI ServiceInterfacePoint using LayerProtocol augmentation (NrpLayerProtocolAttrs).";
         }
-        grouping nrp-cg-eth-inni-spec-g {
-            uses nrm-connectivity:cg-eth-inni-spec-g;
-            description "none";
+        grouping nrp-carrier-eth-inni-n-resource-attrs {
+            uses nrm-connectivity:carrier-eth-inni-n-resource;
+            description "NrpCarrierEthInniNResource is the network resource object representation that represents a device edge vertices associated to another device edge vertices through a link/edge within a common ICM domain. The attributes support the necessary functionality of INNI. The NrpCarrierEthInniNResource is sub-classed from NRM CarrierEthInniNResource. The NrpCarrierEthInniNResource is associated with ONF TAPI ServiceInterfacePoint using LayerProtocol augmentation (NrpLayerProtocolAttrs).";
         }
-        grouping nrp-cg-eth-frame-flow-spec-g {
-            uses nrm-connectivity:cg-eth-frame-flow-spec-g;
-            description "none";
+        grouping nrp-carrier-eth-connectivity-end-point-resource-attrs {
+            uses nrm-connectivity:carrier-eth-connectivity-end-point-resource;
+            description "NrpCarrierEthConnectivityEndPointResource is the network resource object representation that is mapped from MEF SCA_EvcEndPoint/SCA_OvcEndPoint. The attributes support the necessary functionality of EVC and OVC End Points. The NrpCarrierEthConnectivityEndPointResource is sub classed from NRM CarrierEthConnectivityEndPointResource. The NrpCarrierEthConnectivityEndPointResource is associated with NrpConnectivityServiceEndPointAttrs. NrpConnectivityServiceEndPointAttrs is an augmentation of ONF TAPI ConnectivityServiceEndPoint.";
         }
-        grouping nrp-cg-eth-conn-serv-spec-g {
-            uses nrm-connectivity:cg-eth-conn-serv-spec-g;
-            description "none";
+        grouping nrp-carrier-eth-connectivity-resource-attrs {
+            uses nrm-connectivity:carrier-eth-connectivity-resource;
+            description "NrpCarrierEthConnectivityResource is the network resource object representation that is mapped from MEF SCA_EVC/OVC object. The attributes support the necessary functionality of EVC or OVC. The NrpCarrierEthConnectivityResource is sub-classed from NRM CarrierEthConnectivityResource. The CarrierEthConnectivity is associated with ONF TAPI ConnectivityService object.";
         }
-        grouping nrp-cg-eth-enni-spec-g {
-            uses nrm-connectivity:cg-eth-enni-spec-g;
-            description "none";
+        grouping nrp-carrier-eth-enni-n-resource-attrs {
+            uses nrm-connectivity:carrier-eth-enni-n-resource;
+            description "NrpCarrierEthEnniNResource is the network resource object representation that is mapped from MEF SCA_ENNI object. The attributes support the necessary functionality of ENNI. The NrpCarrierEthEnniNResource is sub-classed from NRM CarrierEthEnniNResource. The NrpCarrierEthEnniNResource is associated with ONF TAPI ServiceInterfacePoint using LayerProtocol augmentation (NrpLayerProtocolAttrs).
+                ";
         }
-        grouping nrp-layer-protocol-attrs-g {
-            container nrp-cg-eth-uni-spec {
-                uses nrp-cg-eth-uni-spec-g;
+        grouping nrp-layer-protocol-attrs {
+            container nrp-carrier-eth-uni-n-resource {
+                uses nrp-carrier-eth-uni-n-resource-attrs;
                 description "none";
             }
-            container nrp-cg-eth-inni-spec {
-                uses nrp-cg-eth-inni-spec-g;
+            container nrp-carrier-eth-inni-n-resource {
+                uses nrp-carrier-eth-inni-n-resource-attrs;
                 description "none";
             }
-            container nrp-cg-eth-enni-spec {
-                uses nrp-cg-eth-enni-spec-g;
-                description "none";
-            }
-            description "none";
-        }
-        grouping nrp-connectivity-service-attrs-g {
-            container nrp-cg-eth-conn-serv-spec {
-                uses nrp-cg-eth-conn-serv-spec-g;
+            container nrp-carrier-eth-enni-n-resource {
+                uses nrp-carrier-eth-enni-n-resource-attrs;
                 description "none";
             }
             description "none";
         }
-        grouping nrp-connectivity-service-end-point-attrs-g {
-            container nrp-cg-eth-frame-flow-spec {
-                uses nrp-cg-eth-frame-flow-spec-g;
+        grouping nrp-connectivity-service-attrs {
+            container nrp-carrie-eth-connectivity-resource {
+                uses nrp-carrier-eth-connectivity-resource-attrs;
+                description "none";
+            }
+            description "none";
+        }
+        grouping nrp-connectivity-service-end-point-attrs {
+            container nrp-carrier-eth-connectivity-end-point-resource {
+                uses nrp-carrier-eth-connectivity-end-point-resource-attrs;
                 description "none";
             }
             description "none";

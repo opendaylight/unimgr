@@ -27,7 +27,7 @@ import org.opendaylight.yang.gen.v1.http.www.microsemi.com.microsemi.edge.assure
 import org.opendaylight.yang.gen.v1.http.www.microsemi.com.microsemi.edge.assure.msea.uni.evc.service.rev160317.mef.services.uni.Evc;
 import org.opendaylight.yang.gen.v1.http.www.microsemi.com.microsemi.edge.assure.msea.uni.evc.service.rev160317.mef.services.uni.EvcBuilder;
 import org.opendaylight.yang.gen.v1.http.www.microsemi.com.microsemi.edge.assure.msea.uni.evc.service.rev160317.mef.services.uni.EvcKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +48,7 @@ public class EdgeAssureActivator implements ResourceActivator {
     @Override
     public void activate(List<EndPoint> endPoints, String serviceName) throws ResourceNotAvailableException, TransactionCommitFailedException {
         log.info("Activation called on EdgeAssureActivator");
-        UniversalId sip = endPoints.get(0).getEndpoint().getServiceInterfacePoint();
+        Uuid sip = endPoints.get(0).getEndpoint().getServiceInterfacePoint();
         String nodeName = SipHandler.getDeviceName(sip);
         long evcId = 1;
 

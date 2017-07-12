@@ -41,7 +41,7 @@ import com.google.common.base.Optional;
 
 public class EvcUtils {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EvcUtils.class);
+    private static final Logger LO = LoggerFactory.getLogger(EvcUtils.class);
 
     /**
      * Delete EVC data from configuration datastore.
@@ -87,7 +87,7 @@ public class EvcUtils {
                 }
             }
         } else {
-            LOG.info("Unable to retrieve UNI from the EVC.");
+            LO.info("Unable to retrieve UNI from the EVC.");
         }
     }
 
@@ -174,10 +174,10 @@ public class EvcUtils {
                 transaction.submit();
                 return true;
             } else {
-                LOG.info("EvcLink is not present: " + optionalEvcLink.get().getKey());
+                LO.info("EvcLink is not present: " + optionalEvcLink.get().getKey());
             }
         } else {
-            LOG.info("Invalid instance identifiers for sourceUni and destUni.");
+            LO.info("Invalid instance identifiers for sourceUni and destUni.");
         }
         return false;
     }

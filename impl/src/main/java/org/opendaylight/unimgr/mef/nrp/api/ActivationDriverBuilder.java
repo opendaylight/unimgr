@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
 
 /**
  * Driver builder that can provide stateful driver that are used in NRP forwarding construct transaction.
@@ -27,7 +27,7 @@ public interface ActivationDriverBuilder {
      * @return {@link Optional#empty()} in case it cannot be instantiated for a port, driver otherwise
      */
     Optional<ActivationDriver> driverFor(BuilderContext context);
-    UniversalId getNodeUuid();
+    Uuid getNodeUuid();
 
     /**
      * Blackboard pattern that allows for passing the context information between

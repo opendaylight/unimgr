@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 
 public class NullAwareDatastoreGetter<T> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NullAwareDatastoreGetter.class);
+    private static final Logger LO = LoggerFactory.getLogger(NullAwareDatastoreGetter.class);
 
     private Optional<T> dataOptional;
 
@@ -75,9 +75,9 @@ public class NullAwareDatastoreGetter<T> {
 
     private void logDataOptionalStatus(Function <?, ?> function) {
         if(dataOptional.isPresent()) {
-            LOG.trace("Before collection of: " + function.toString() + ", currently collected data is non-null: " + dataOptional.get().toString());
+            LO.trace("Before collection of: " + function.toString() + ", currently collected data is non-null: " + dataOptional.get().toString());
         } else {
-            LOG.debug("Null value encountered during collection of: " + function.toString());
+            LO.debug("Null value encountered during collection of: " + function.toString());
         }
     }
 }

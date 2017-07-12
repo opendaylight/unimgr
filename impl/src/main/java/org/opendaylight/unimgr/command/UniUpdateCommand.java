@@ -27,7 +27,7 @@ import com.google.common.base.Preconditions;
 
 public class UniUpdateCommand extends AbstractCommand<Node> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UniUpdateCommand.class);
+    private static final Logger LO = LoggerFactory.getLogger(UniUpdateCommand.class);
 
     public UniUpdateCommand(final DataBroker dataBroker, final DataTreeModification<Node> updatedUniNode) {
         super(dataBroker, updatedUniNode);
@@ -50,13 +50,13 @@ public class UniUpdateCommand extends AbstractCommand<Node> {
                             formerUniIp, updatedUniIp, uniKey);
             Node ovsdbNode;
             if (updatedUni.getOvsdbNodeRef() != null) {
-                LOG.info("OVSDB NODE ref retreive for updated UNI {}", updatedUni.getOvsdbNodeRef());
+                LO.info("OVSDB NODE ref retreive for updated UNI {}", updatedUni.getOvsdbNodeRef());
                 final OvsdbNodeRef ovsdbNodeRef = updatedUni.getOvsdbNodeRef();
                 final Optional<Node> optOvsdbNode =
                         MdsalUtils.readNode(dataBroker,LogicalDatastoreType.OPERATIONAL, ovsdbNodeRef.getValue());
                 if (optOvsdbNode.isPresent()) {
                     ovsdbNode = optOvsdbNode.get();
-                    LOG.info("Retrieved the OVSDB node {}", ovsdbNode.getNodeId());
+                    LO.info("Retrieved the OVSDB node {}", ovsdbNode.getNodeId());
                     // Update QoS entries to ovsdb if speed is configured to UNI node
                     if (updatedUni.getSpeed() != null) {
                         OvsdbUtils.createQoSForOvsdbNode(dataBroker, updatedUni);
@@ -66,7 +66,7 @@ public class UniUpdateCommand extends AbstractCommand<Node> {
                 }  else {
                     // This should never happen, because on creation,
                     // the UNI is assigned and OVSDB node
-                    LOG.error("OVSDB node not found for UNI {}, but got OVSDB ref {}", uniKey,
+                    LO.error("OVSDB node not found for UNI {}, but got OVSDB ref {}", uniKey,
                             updatedUni.getOvsdbNodeRef());
                     return;
                 }
@@ -74,7 +74,7 @@ public class UniUpdateCommand extends AbstractCommand<Node> {
                 final Optional<Node> optOvsdbNode = OvsdbUtils.findOvsdbNode(dataBroker, updatedUni);
                 if (optOvsdbNode.isPresent()) {
                     ovsdbNode = optOvsdbNode.get();
-                    LOG.info("Retrieved the OVSDB node {}", ovsdbNode.getNodeId());
+                    LO.info("Retrieved the OVSDB node {}", ovsdbNode.getNodeId());
                     // Update QoS entries to ovsdb if speed is configured to UNI node
                     if (updatedUni.getSpeed() != null) {
                         OvsdbUtils.createQoSForOvsdbNode(dataBroker, updatedUni);
@@ -84,11 +84,11 @@ public class UniUpdateCommand extends AbstractCommand<Node> {
                 } else {
                     // This should never happen, because on creation,
                     // the UNI is assigned and OVSDB node
-                    LOG.error("OVSDB node not found for UNI {}", uniKey);
+                    LO.error("OVSDB node not found for UNI {}", uniKey);
                     return;
                 }
             }
-            LOG.info("UNI {} updated", uniKey);
+            LO.info("UNI {} updated", uniKey);
         }
     }
 }

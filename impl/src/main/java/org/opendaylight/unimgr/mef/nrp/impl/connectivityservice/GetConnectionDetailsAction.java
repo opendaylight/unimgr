@@ -12,13 +12,13 @@ import java.util.concurrent.Callable;
 
 import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.GetConnectionDetailsInput;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.GetConnectionDetailsOutput;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.GetConnectionDetailsOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.Connection;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectivityService;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.get.connection.details.output.ConnectionBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.GetConnectionDetailsInput;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.GetConnectionDetailsOutput;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.GetConnectionDetailsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.Connection;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.ConnectivityService;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.get.connection.details.output.ConnectionBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -53,7 +53,7 @@ public class GetConnectionDetailsAction implements Callable<RpcResult<GetConnect
                 connectionId = cs.getConnection().get(0).getValue();
             }
 
-            Connection connection = nrpDao.getConnection(new UniversalId(connectionId));
+            Connection connection = nrpDao.getConnection(new Uuid(connectionId));
             if (connection == null) {
                 throw new FailureResult("There is no connection with id {0}", connectionId);
             }

@@ -14,11 +14,11 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.GetConnectivityServiceListOutput;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.GetConnectivityServiceListOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectivityService;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.get.connectivity.service.list.output.Service;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.get.connectivity.service.list.output.ServiceBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.GetConnectivityServiceListOutput;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.GetConnectivityServiceListOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.ConnectivityService;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.get.connectivity.service.list.output.Service;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.get.connectivity.service.list.output.ServiceBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 

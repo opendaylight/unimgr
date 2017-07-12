@@ -17,7 +17,7 @@ import org.opendaylight.unimgr.mef.nrp.ovs.exception.VlanNotSetException;
 import org.opendaylight.unimgr.mef.nrp.ovs.transaction.TopologyTransaction;
 import org.opendaylight.unimgr.mef.nrp.ovs.util.VlanUtils;
 import org.opendaylight.unimgr.utils.NullAwareDatastoreGetter;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.nrp.connectivity.service.end.point.attrs.g.NrpCgEthFrameFlowSpec;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.nrp.connectivity.service.end.point.attrs.NrpCarrierEthConnectivityEndPointResource;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
@@ -55,17 +55,17 @@ class OvsActivatorHelper {
      */
     int getCeVlanId() throws ResourceNotAvailableException {
 
-        if( (endPoint.getAttrs() != null) && (endPoint.getAttrs().getNrpCgEthFrameFlowSpec()!=null) ){
-            NrpCgEthFrameFlowSpec attr = endPoint.getAttrs().getNrpCgEthFrameFlowSpec();
-            if( (attr.getCeVlanIdListOrUntag()!=null) && !(attr.getCeVlanIdListOrUntag().getVlanIdList().isEmpty()) ){
+        if( (endPoint.getAttrs() != null) && (endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource() != null) ) {
+            NrpCarrierEthConnectivityEndPointResource attr = endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource();
+            if( (attr.getCeVlanIdListAndUntag()!=null) && !(attr.getCeVlanIdListAndUntag().getVlanId().isEmpty()) ){
                 //for now we support only one CE VLAN
-                return attr.getCeVlanIdListOrUntag().getVlanIdList().get(0).getVlanId().getValue().intValue();
+                return attr.getCeVlanIdListAndUntag().getVlanId().get(0).getVlanId().getValue().intValue();
             } else {
                 LOG.warn(String.format(CTAG_VLAN_ID_NOT_SET_ERROR_MESSAGE, tpName));
                 throw new VlanNotSetException(String.format(CTAG_VLAN_ID_NOT_SET_ERROR_MESSAGE, tpName));
             }
         } else {
-            String className = NrpCgEthFrameFlowSpec.class.toString();
+            String className = NrpCarrierEthConnectivityEndPointResource.class.toString();
             LOG.warn(String.format(ATTRS_NOT_SET_ERROR_MESSAGE, tpName, className));
             throw new ResourceNotAvailableException(String.format(ATTRS_NOT_SET_ERROR_MESSAGE, tpName, className));
         }
@@ -90,7 +90,7 @@ class OvsActivatorHelper {
     }
 
     /**
-     * Returns port name in openflow plugin convention (e.g. openflow:1:4)
+     * Returns port name in openflow plugin convention (e. openflow:1:4)
      *
      * @return String with port name
      */

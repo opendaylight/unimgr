@@ -28,7 +28,7 @@ import com.google.common.base.Optional;
 
 public class UniAddCommand extends AbstractCommand<Node> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UniAddCommand.class);
+    private static final Logger LO = LoggerFactory.getLogger(UniAddCommand.class);
 
     public UniAddCommand(final DataBroker dataBroker, final DataTreeModification<Node> newUniNode) {
         super(dataBroker, newUniNode);
@@ -42,7 +42,7 @@ public class UniAddCommand extends AbstractCommand<Node> {
             final Node uniNode = dataObject.getRootNode().getDataAfter();
             final UniAugmentation uni = uniNode.getAugmentation(UniAugmentation.class);
             if (uni != null) {
-                LOG.info("New UNI created {}.", uni.getIpAddress().getIpv4Address());
+                LO.info("New UNI created {}.", uni.getIpAddress().getIpv4Address());
                 // We assume the ovs is in active mode tcp:ipAddress:6640
                 if (uni.getOvsdbNodeRef() != null) {
                     final OvsdbNodeRef ovsdbNodeRef = uni.getOvsdbNodeRef();
@@ -50,14 +50,14 @@ public class UniAddCommand extends AbstractCommand<Node> {
                                                                        LogicalDatastoreType.OPERATIONAL,
                                                                        ovsdbNodeRef.getValue());
                     if (!optionalNode.isPresent()) {
-                        LOG.info("Invalid OVSDB node instance identifier specified, "
+                        LO.info("Invalid OVSDB node instance identifier specified, "
                                + "attempting to retrieve the node.");
                         final Optional<Node> optionalOvsdbNode = OvsdbUtils.findOvsdbNode(dataBroker,
                                                                                      uni);
                         Node ovsdbNode;
                         if (optionalOvsdbNode.isPresent()) {
                             ovsdbNode = optionalOvsdbNode.get();
-                            LOG.info("Retrieved the OVSDB node {}", ovsdbNode.getNodeId());
+                            LO.info("Retrieved the OVSDB node {}", ovsdbNode.getNodeId());
                             // Update QoS entries to ovsdb if speed is configured to UNI node
                             if (uni.getSpeed() != null) {
                                 OvsdbUtils.createQoSForOvsdbNode(dataBroker, uni);
@@ -70,7 +70,7 @@ public class UniAddCommand extends AbstractCommand<Node> {
                         } else {
                             ovsdbNode = OvsdbUtils.createOvsdbNode(dataBroker,
                                                                     uni);
-                            LOG.info("Could not retrieve the OVSDB node,"
+                            LO.info("Could not retrieve the OVSDB node,"
                                    + " created a new one: {}", ovsdbNode.getNodeId());
                             UniUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION,
                                                       uniKey,
@@ -88,7 +88,7 @@ public class UniAddCommand extends AbstractCommand<Node> {
                     if (optionalOvsdbNode.isPresent()) {
                         ovsdbNode = optionalOvsdbNode.get();
                         final InstanceIdentifier<Node> ovsdbIid = UnimgrMapper.getOvsdbNodeIid(ovsdbNode.getNodeId());
-                        LOG.info("Retrieved the OVSDB node");
+                        LO.info("Retrieved the OVSDB node");
                         // Update QoS entries to ovsdb if speed is configured to UNI node
                         if (uni.getSpeed() != null) {
                             OvsdbUtils.createQoSForOvsdbNode(dataBroker, uni);
@@ -107,7 +107,7 @@ public class UniAddCommand extends AbstractCommand<Node> {
                         ovsdbNode = OvsdbUtils.createOvsdbNode(dataBroker,
                                                                 uni);
                         if (ovsdbNode != null) {
-                            LOG.info("Could not retrieve the OVSDB node,"
+                            LO.info("Could not retrieve the OVSDB node,"
                                     + "created a new one: {}", ovsdbNode.getNodeId());
                             UniUtils.updateUniNode(LogicalDatastoreType.CONFIGURATION,
                                                        uniKey,

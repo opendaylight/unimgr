@@ -1,5 +1,5 @@
 module nrm-connectivity {
-    namespace "urn:mef:yang:NRM_Connectivity";
+    namespace "urn:mef:yang:nrm-connectivity";
     prefix nrm-connectivity;
     import tapi-common {
         prefix tapi-common;
@@ -13,266 +13,274 @@ module nrm-connectivity {
     organization "Metro Ethernet Forum (MEF)";
     contact "MEF";
     description "none";
-    revision 2017-05-31 {
-        description "MEF NRP 1.0.alpha";
+    revision 2017-07-12 {
+        description "MEF NRP 1.0.cfc4";
         reference "ONF-TR-527, ONF-TR-512, ONF-TR-531, RFC 6020 and RFC 6087";
     }
     /***********************
     * package main
-    **********************/ 
+    **********************/
         /***********************
         * package object-classes
-        **********************/ 
-            grouping cg-eth-enni-spec-g {
-                container l2cp-peering-list {
-                    uses mef-common-types:l2cp-peering-g;
-                    description "MEF 7.3: This attribute represents the L2CP Peering Service defined in MEF 45 section 8.2 when applied to the ENNI. It is one of the ENNI Operator Multi-lateral attributes, which requires the CENs at the ENNI-N to agree on the values but may allow these values to be different.";
-                }
+        **********************/
+            grouping carrier-eth-enni-n-resource {
                 leaf tagged-l2cp-processing {
                     type mef-common-types:tagged-l2cp-processing;
-                    description "MEF 7.3: This attribute represents the Tagged L2CP Processing defined in MEF 45 section 8.3 (802.1 compliant or 802.1 non-compliant. Desired to be 802.1 compliant). It is one of the ENNI Operator Multi-lateral attributes, which requires the CENs at the ENNI-N to agree on the values but may allow these values to be different.";
+                    description "This attribute represents the Tagged L2CP Processing defined in MEF 45 section 8.3 (IEEE 802.1 compliant or 802.1 non-compliant. Desired to be 802.1 compliant). It is one of the ENNI Operator Multi-lateral attributes, which requires the CENs at the ENNI-N to agree on the values but may allow these values to be different.";
                 }
-                uses cg-eth-frame-aggr-spec-g;
-                description "none";
+                uses carrier-eth-interface-resource;
+                description "This class represents ENNI-N management function. It augments the ONF TAPI LayerProtocol class (at the Ethernet frame layer) of ServiceInterfacePoint class. ";
             }
-            grouping cg-eth-inni-spec-g {
-                uses cg-eth-frame-aggr-spec-g;
-                description "none";
+            grouping carrier-eth-inni-n-resource {
+                uses carrier-eth-interface-resource;
+                description "This class represents INNI-N management function. It augments the ONF TAPI LayerProtocol class (at the Ethernet frame layer) of ServiceInterfacePoint class. ";
             }
-            grouping cg-eth-uni-spec-g {
-                leaf elmi-enabled {
+            grouping carrier-eth-uni-n-resource {
+                leaf elmi-pe-mode-enabled {
                     type boolean;
-                    description "MEF 7.3: This attribute denotes whether the ELMI is enabled or not. When the value is TRUE, the CEN MUST meet the mandatory requirements in MEF 16 that apply to the UNI-N.
+                    description "This attribute denotes whether the ELMI is enabled or not. When the value is TRUE, the CEN MUST meet the mandatory requirements in MEF 16 that apply to the UNI-N.
                         Note: Ethernel Local Management Interface protocol contents are defined which clearly identify MEF Service/Resource constructs like UNI and EVC, hence the attribute cannot be placed in an ethernet generic class.";
                 }
-                leaf l2cp-address-set {
-                    type mef-common-types:l2cp-address-set;
-                    description "MEF 45: The L2CP Address Set Service Attribute specifies the subset of the Bridge Reserved Addresses that are filtered (i.e. L2CP Frames with this destination address are Peered or Discarded but not Passed) at a L2CP Decision Point.
-                        The basic construct of the L2CP behavioral model is a Decision Point that determines how an L2CP Frame is processed at an External Interface. L2CP Frames that enter
-                        the Decision Point from the External Interface will either be Passed to the EVC (or OVC), or Peered by redirecting the frame to a Protocol Entity, or Discarded. L2CP Frames that enter the Decision Point
-                        from the EVC (or OVC) will either be Passed to the External Interface, or Peered by redirecting the frame to a Protocol Entity, or Discarded.";
-                }
-                container l2cp-peering-list {
-                    uses mef-common-types:l2cp-peering-g;
-                    description "MEF 45: The L2CP Peering Service Attribute is a list of Layer 2 Control Protocols that will be Peered by a protocol entity at a UNI, VUNI, or ENNI. Each entry in the list specifies the Protocol Identifier and the Destination Address in use by the protocol entity.";
-                }
-                container ingress-cg-eth-bwpflow {
-                    uses cg-eth-bwp-flow-g;
+                container ingress-bwp-flow {
+                    uses mef-common:bwp-flow;
                     description "none";
                 }
-                container egress-cg-eth-bwpflow {
-                    uses cg-eth-bwp-flow-g;
+                container egress-bwp-flow {
+                    uses mef-common:bwp-flow;
                     description "none";
                 }
-                uses cg-eth-frame-aggr-spec-g;
-                description "none";
+                uses carrier-eth-interface-resource;
+                description "This class represents UNI-N management function. It augments the ONF TAPI LayerProtocol class (at the Ethernet frame layer) of ServiceInterfacePoint class. ";
             }
-            grouping cg-ety-spec-g {
-                leaf-list physical-layer-list {
-                    type mef-common-types:physical-layer;
-                    description "MEF 7.3: This attribute is a list of physical layers, one for each physical link implementing the UNI or ENNI. Different physical links can use different physical layers. The Physical Layer for each physical link implementing the UNI or ENNI MUST is one of the PHYs listed in IEEE Std 802.3 – 2012 but excluding 1000BASE-PX-D and 1000BASE-PX-U.
-                        G.8052: This attribute identifies the PHY type of the ETY trail termination. See clause 30.3.2.1.2 of [IEEE 802.3].
-                        IEEE 802.3: A read-only value that identifies the PHY type. The enumeration of the type is such that the value matches the clause number of this International Standard that specifies the particular PHY. The value of this attribute maps to the value of aMAUType. The enumeration “none” can only occur in a standard implementation where an MII exists and there is nothing connected. However, the attribute aMIIDetect should be used to determine whether an MII exists or not.";
-                }
-                list sync-mode-list {
+            grouping carrier-eth-physical-links-resource {
+                list physical-layer-per-link-list {
+                    config false;
                     min-elements 1;
-                    uses mef-common-types:sync-mode-per-link-g;
-                    description "MEF 7.3: This attribute is a list with one item for each of the physical links. When the value of an item is 'Enabled,' the bits transmitted from the CEN to the CE on the physical link corresponding to the item can be used by the CE as a bit clock reference.
-                        G.8052: no equivalent definition
-                        IEEE 802.3: oTimeSync class (?), 1:1 with oMAU.";
+                    uses mef-common-types:physical-layer-per-link;
+                    description "This attribute is a list of physical layers, one for each physical link implementing the UNI or ENNI or INNI. Different physical links can use different physical layers. The Physical Layer for each physical link implementing the UNI or ENNI or INNI MUST is one of the PHYs listed in IEEE Std 802.3 – 2012 but excluding 1000BASE-PX-D and 1000BASE-PX-U.";
+                }
+                list sync-mode-per-link-list {
+                    min-elements 1;
+                    uses mef-common-types:sync-mode-per-link;
+                    description "This attribute is a list with one item for each of the physical links. When the value of an item is 'Enabled,' the bits transmitted from the CEN to the CE on the physical link corresponding to the item can be used by the CE as a bit clock reference.";
                 }
                 leaf number-of-links {
                     type mef-common-types:positive-integer;
-                    description "none";
-                }
-                container port-convs-id-to-agg-link-map-list {
-                    uses mef-common-types:conversation-id-to-aggregation-link-map-g;
-                    description "MEF 7.3: This attribute is applicable only when the UNI or ENNI resiliency attribute has the value of All Active. Its value is a Port Conversation ID to Aggregation Link Map as defined in IEEE Std 802.1AX – 2014.
-                        G.8052: no equivalent definition - likely because refers to IEEE Std 802.1AX – 2008, where Conversation-sensitive LACP was not yet defined.";
-                }
-                leaf link-oam-enabled {
-                    type boolean;
-                    description "MEF 7.3: This attribute denotes the Link OAM is enabled or not at the UNI or the ENNI. When the value of the Link OAM attribute is TRUE, Link OAM must be run on all physical links in the UNI/ENNI.";
-                }
-                leaf lag-link-meg-enabled {
-                    type boolean;
-                    description "MEF 7.3: This attribute denotes the Link Aggregation Link MEG enabled or not at the UNI or at the ENNI. When the value  is TRUE, the Service Provider or the Operator must operate the LAG Link MEG on each link in the EI.
-                        To be updated accordingly to the development of OAM model. E.g. can be replaced by explicit provisioning of MEP on LAG links.";
+                    config false;
+                    description "This attribute specifies the number of links at the Carrier Ethernet External Interface (UNI or ENNI or INNI).";
                 }
                 leaf link-aggregation {
                     type mef-common-types:interface-resiliency;
-                    description "MEF 7.3: This attribute represents the Link Aggregation for a UNI or an ENNI. Its value is one of None, 2-Link Active/Standby, All Active, or Other. In MEF 10.3 it is called UNI Resiliency. the value of All Active is added in MEF 10.3.2.
-                        G.8052: no equivalent definition found.";
+                    description "This attribute represents the Link Aggregation for a UNI or an ENNI or an INNI. ";
                 }
+                list port-convs-id-to-agg-link-map-list {
+                    uses mef-common-types:conversation-id-to-aggregation-link-map;
+                    description "This attribute is applicable only when the UNI or ENNI or INNI resiliency attribute has the value of ALL_ACTIVE. Its value is a Port Conversation ID to Aggregation Link Map as defined in IEEE Std 802.1AX – 2014.";
+                }
+                description "This class represents the set of one or more physical links supporting the Ethernet interface. This allows a proper extension of TAPI Service Interface Point at Ethernet physical layer, while maintaining 7.3 features.
+                    ";
+            }
+            grouping carrier-eth-interface-resource {
+                leaf max-frame-size {
+                    type mef-common-types:natural-number;
+                    description "This value limits the length of frames carried by the ConnectivityServices associated to this Interface.";
+                }
+                list l2cp-peering-list {
+                    key 'destination-address';
+                    uses mef-common-types:l2cp-peering;
+                    description "This attribute represents the L2CP Peering Service defined in MEF 45 section 8.2 when applied to the UNI/ENNI/INNI.";
+                }
+                description "This class contains common attributes for Carrier Ethernet External and Internal interfaces.";
+            }
+            grouping carrier-eth-connectivity-end-point-resource {
+                leaf cos-mapping-type {
+                    type mef-common-types:cos-or-eec-mapping-type;
+                    description "The Class of Service (CoS) is used to specify ingress Bandwidth Profiles. The CoS Mapping Type is one of SEP (Service End Point) based, PCP based or DSCP based.";
+                }
+                container source-mac-address-limit {
+                    uses mef-common-types:source-mac-address-limit;
+                    description "This attribute limits the number of source MAC Addresses that can be used in ingress EI Frames mapped to the Connectivity Service End Point of all types over a time interval. When not present, the number of source MAC addresses is unlimited.
+                        Two independent parameters control the behavior of this attribute: N : A positive integer and t : A time interval.
+                        This attribute operates by maintaining a list of maximum length N of source MAC addresses which are aged-out of the list if not seen in a time interval t. If an ingress Service Frame arrives with a new source MAC address when the list is full, the Service Frame is discarded.";
+                }
+                leaf eec-mapping-type {
+                    type mef-common-types:cos-or-eec-mapping-type;
+                    description "The Egress Equivalence Class (EEC) is used to specify Egress Bandwidth Profiles. The EEC Mapping Type is one of SEP (Service End Point) based, PCP based or DSCP based.
+                        When the list of EEC Identifier is empty,  this attribute shall be unset. Otherwise it shall be set.";
+                }
+                container color-identifier {
+                    uses mef-common:color-identifier;
+                    description "MEF 7.3 (UML): This attribute represents the relationship between the EVC/OVC End Point and a Color Identifier.";
+                }
+                container s-vlan-id-list {
+                    uses mef-common-types:vlan-id-listing;
+                    description "List of one or more S-VLAN ID values. An S-Tagged Frame, whose S-VLAN ID value matches an entry in this attribute, maps to the Connectivity Service End Point.
+                        Type=LIST: all listed VLAN IDs. Type=EXCEPT: all VLAN IDs except the listed ones. Type=ALL, all VLAN IDs, hence vlanId list is not applicable.
+                        ";
+                }
+                container ce-vlan-id-list-and-untag {
+                    uses vlan-id-list-and-untag;
+                    description "List of one or more C-VLAN ID values. A C-Tagged Frame, whose C-VLAN ID value matches an entry in this attribute, maps to the Connectivity Service End Point.
+                        It is possible to specify whether untagged and priority tagged frames are included in the mapping.
+                        Type=LIST: all listed VLAN IDs. Type=EXCEPT: all VLAN IDs except the listed ones. Type=ALL, all VLAN IDs, hence vlanId list is not applicable.";
+                }
+                container root-s-vlan-id {
+                    uses mef-common-types:vlan-id;
+                    description "This attribute applies only to End Points with Trunk End Point Role. It identifies the S-VLAN ID of frames mapped to either a Root End Point or a Trunk End Point (via the Root S-VLAN ID value) of the Connectivity Service.";
+                }
+                container leaf-s-vlan-id {
+                    uses mef-common-types:vlan-id;
+                    description "This attribute applies only to End Points with Trunk End Point Role. It identifies the S-VLAN ID of frames mapped to either a Leaf End Point or a Trunk End Point (via the Leaf S-VLAN ID value) of the Connectivity Service.";
+                }
+                list cos-identifier-list {
+                    key 'cos-name';
+                    uses mef-common:cos-identifier;
+                    description "This attribute represents the relationship between the EVC/OVC End Point and the Class of Service Identifier(s).";
+                }
+                list eec-identifier-list {
+                    key 'eec-name';
+                    uses mef-common:eec-identifier;
+                    description "This attribute represents the relationship between the EVC/OVC End Point and the Egress Equivalence Class Identifier(s).";
+                }
+                list egress-map-list {
+                    key 'egress-map-type egress-map-id';
+                    uses mef-common:egress-map;
+                    description "This attribute represents the relationship between the End Point and the Egress Map(s).  This attribute is a set of mappings that determine the content of the S-Tag or C-Tag of an egress EI Frame.
+                        ";
+                }
+                leaf l2cp-address-set {
+                    type mef-common-types:l2cp-address-set;
+                    description "This attribute specifies the subset of the Bridge Reserved Addresses that are filtered (i.e. L2CP Frames with this destination address are Peered or Discarded but not Passed) at a L2CP Decision Point.";
+                }
+                container egress-bwp-flow {
+                    uses mef-common:bwp-flow;
+                    description "none";
+                }
+                container ingress-bwp-flow {
+                    uses mef-common:bwp-flow;
+                    description "none";
+                }
+                description "This class models the Connectivity Service End Point. It augments the ONF TAPI ConnectivityServiceEndPoint.";
+            }
+            grouping carrier-eth-connectivity-resource {
+                leaf multipoint-capable {
+                    type boolean;
+                    description " A value of “true” indicates that the End Points can be added/removed during Connectivity Service lifecycle.";
+                }
+                leaf ce-vlan-pcp-preservation {
+                    type boolean;
+                    description "This attribute can be used to preserve the value of the CE-VLAN PCP field in VLAN Tagged Service Frames across a Connectivity Service.";
+                }
+                leaf ce-vlan-dei-preservation {
+                    type boolean;
+                    description "This attribute can be used to preserve the value of the CE-VLAN DEI field in VLAN Tagged Service Frames across a Connectivity Service.";
+                }
+                leaf max-frame-size {
+                    type mef-common-types:positive-integer;
+                    description "This attribute denotes the maximum frame size in bytes.";
+                }
+                leaf-list cos-name-list {
+                    type string;
+                    description "This attribute presents the list of Class of Service Names. Each ingress EI Frame or ingress Service Frame is assigned a Class of Service Name via the frame’s Class of Service Identifier.
+                        The Class of Service Name that is assigned to a frame indicates the performance objectives that apply to frame under appropriate conditions.
+                        ";
+                }
+                leaf ce-vlan-id-preservation {
+                    type mef-common-types:vlan-id-preservation;
+                    description "This attribute describes a relationship between the format of the VLAN ID and related fields values of the frame at one External Interface and the format and VLAN ID  and related fields values of the corresponding frame at another External Interface.
+                        Used the MEF 7.3 OVC type (PRESERVE/STRIP/RETAIN) as it depends on EVC/OVC decomposition performed by SOFs.
+                        ";
+                }
+                leaf s-vlan-pcp-preservation {
+                    type boolean;
+                    description "This attribute describes a relationship between the S-VLAN PCP value of a frame at one ENNI and the S-VLAN PCP of the corresponding frame at another ENNI supported by the Operator CEN where each ENNI has a Connectivity Service End Point that is associated by the Connectivity Service.";
+                }
+                leaf s-vlan-dei-preservation {
+                    type boolean;
+                    description "This attribute describes a relationship between the S-VLAN DEI value of a frame at one ENNI and the S-VLAN DEI of the corresponding frame at another ENNI supported by the Operator CEN where each ENNI has a Connectivity Service End Point that is associated by the Connectivity Service.";
+                }
+                container unicast-frame-delivery {
+                    uses frame-delivery-condition;
+                    description "When the value is conditionally, the conditions that determine whether a Data Service Frame is delivered or discarded MUST be specified. Conditions can be described in the name-value pair list.";
+                }
+                container multicast-frame-delivery {
+                    uses frame-delivery-condition;
+                    description "When the value is conditionally, the conditions that determine whether a Data Service Frame is delivered or discarded MUST be specified. Conditions can be described in the name-value pair list.";
+                }
+                container broadcast-frame-delivery {
+                    uses frame-delivery-condition;
+                    description "When the value is conditionally, the conditions that determine whether a Data Service Frame is delivered or discarded MUST be specified. Conditions can be described in the name-value pair list.";
+                }
+                description "This class represents the Ethernet end to end connectivity at resource level. It may map an original EVC, OVC, or Service Component (see MEF 55). It augments the ONF TAPI ConnectivityService class, which represents an “intent-like” request for connectivity between two or more ConnectivityServiceEndPoint.";
+            }
+
+        /***********************
+        * package diagrams
+        **********************/
+
+        /***********************
+        * package type-definitions
+        **********************/
+            identity delivery-action-type {
                 description "none";
             }
-            grouping cg-eth-frame-aggr-spec-g {
-                leaf max-frame-size {
+            identity discard {
+                base delivery-action-type;
+                description "none";
+            }
+            identity conditionally {
+                base delivery-action-type;
+                description "none";
+            }
+            identity unconditionally {
+                base delivery-action-type;
+                description "none";
+            }
+            grouping l2cp-peering {
+                container protocol-id {
+                    uses mef-common-types:l2cp-protocol;
+                    description "none";
+                }
+                leaf destination-address {
                     type mef-common-types:natural-number;
                     description "none";
                 }
                 description "none";
             }
-            grouping cg-eth-frame-flow-spec-g {
-                leaf cos-mapping-type {
-                    type mef-common-types:cos-or-eec-mapping-type;
-                    description "MEF 7.3 (UML): The Class of Service (CoS) is used to specify ingress Bandwidth Profiles. The values of CoS is a triple of the form mapping type, SEP (Service End Point) based, PCP based or DSCP based.";
+            typedef delivery-action-type {
+                type identityref {
+                    base delivery-action-type;
                 }
-                container source-mac-address-limit {
-                    uses mef-common-types:source-mac-address-limit-g;
-                    description "MEF 10.3: Source MAC Address Limit can be either Enabled or Disabled.
-                        This attribute limits the number of source MAC Addresses that can be used in ingress Service Frames of all types over a time interval. Two independent parameters control the behavior of this attribute: N : A positive integer and t : A time interval.
-                        This attribute operates by maintaining a list of maximum length N of source MAC addresses which are aged-out of the list if not seen in a time interval t. If an ingress Service Frame arrives with a new source MAC address when the list is full, the Service Frame is discarded.
-                        MEF 7.3: This attribute limits the number of source MAC Addresses that can be used in ingress EI Frames mapped to the EVC End Point or the OVC End Point of all types over a time interval. When not present, the number of source MAC addresses is unlimited.";
-                }
-                leaf eec-mapping-type {
-                    type mef-common-types:cos-or-eec-mapping-type;
-                    description "MEF 7.3 (UML): The Egress Equivalence Class (EEC) is used to specify Egress Bandwidth Profiles. The values of EEC is a triple of the form mapping type, SEP (Service End Point) based, PCP based or DSCP based. When _eecIdentifier is null this attrubute shall be null. Otherwise both shall be set.";
-                }
-                container cg-eth-color-identifier {
-                    uses cg-eth-color-identifier-g;
+                description "none";
+            }
+            grouping frame-delivery-condition {
+                leaf action {
+                    type delivery-action-type;
                     description "none";
                 }
-                leaf end-point-role {
-                    type mef-common-types:ovc-end-point-role;
-                    description "End Point Role can be Root, Leaf for EVC End Points, Root, Leaf and Trunk for OVC End Poins.";
-                }
-                container s-vlan-id-list {
-                    uses mef-common-types:vlan-id-listing-g;
-                    description "none";
-                }
-                container ce-vlan-id-list-or-untag {
-                    uses mef-common-types:vlan-id-listing-g;
-                    description "ceVlanIdList maps 7.3 evcEndPointMap.
-                        MEF 7.3: This attribute provides the list of CE-VLAN IDs those map to the EVC. MEF 10.3 lists this attribute (CE-VLAN ID/EVC map) as UNI service attribute while MEF 26.2 decided to move this on as endpoint service attribute. Decided to move this one to endpoint to be consistent. MEF 45 allows this attribute to be elastic.";
-                }
-                container root-svlan-id-list {
-                    uses mef-common-types:vlan-id-listing-g;
-                    description "none";
-                }
-                container leaf-svlan-id-list {
-                    uses mef-common-types:vlan-id-listing-g;
-                    description "none";
-                }
-                container egress-cg-eth-bwp-flow-per-sep {
-                    uses cg-eth-bwp-flow-g;
-                    description "none";
-                }
-                container ingress-cg-eth-bwp-flow-per-sep {
-                    uses cg-eth-bwp-flow-g;
-                    description "none";
-                }
-                list cg-eth-cos-identifier {
-                    key 'cos-name';
-                    uses cg-eth-cos-identifier-g;
-                    description "none";
-                }
-                list cg-eth-eec-identifier {
-                    key 'eec-name';
-                    uses cg-eth-eec-identifier-g;
-                    description "none";
-                }
-                list cg-eth-egress-map {
-                    key 'egress-map-type';
-                    uses cg-eth-egress-map-g;
+                list delivery-condition {
+                    key 'value-name';
+                    uses tapi-common:name-and-value;
                     description "none";
                 }
                 description "none";
             }
-            grouping cg-eth-conn-serv-spec-g {
-                leaf connection-type {
-                    type mef-common-types:connection-type;
-                    description "7.3 'connectionType' replaced by G.8052 'connectionType' attribute.";
+            grouping vlan-id-list-and-untag {
+                leaf vlan-id-mapping-type {
+                    type mef-common-types:vlan-id-mapping-type;
+                    description "none";
                 }
-                leaf is-connection-type-modifiable {
+                leaf untagged-and-prio-tagged-included {
                     type boolean;
+                    description "If true, then untagged and priority tagged frames are included in the mappig, otherwise not.";
+                }
+                list vlan-id {
+                    key 'vlan-id';
+                    uses mef-common-types:vlan-id;
                     description "none";
-                }
-                leaf ce-vlan-pcp-preservation {
-                    type boolean;
-                    description "MEF 7.3 (UML): The CE-VLAN PCP preservation represents the PCP value relationship between the ingress Service Frame and its corresponding egress Service Frame(s). In MEF 10.3, it is called CE VLAN ID COS Preservation. ";
-                }
-                leaf ce-vlan-dei-preservation {
-                    type boolean;
-                    description "MEF 7.3 (UML): The CE-VLAN DEI Preservation Service Attribute for EVC/OVC can be used to preserve the value of the DEI field in VLAN Tagged Service Frames across a service. This is not inlcuded in MEF 10.3 but added in MEV 26.2. Future consideration will be included in MEF 10.x.";
-                }
-                leaf max-frame-size {
-                    type mef-common-types:positive-integer;
-                    description "none";
-                }
-                leaf-list cos-name-list {
-                    type string;
-                    description "none";
-                }
-                leaf ce-vlan-id-preservation {
-                    type mef-common-types:vlan-id-preservation;
-                    description "MEF 7.3 EVC/OVC ceVlanIdPreservation added to CgEthConnServSpec class, with the OVC type (PRESERVE/STRIP/RETAIN) as it depends on EVC/OVC decomposition performed by SOFs.
-                        MEF 7.3 defines this attribute separately in EVC and OVC. When defined in OVC, the type is more complex:
-                        This attribute describes a relationship between the format of the VLAN ID and related fields values of the frame at one External Interface and the format and VLAN ID  and related fields values of the corresponding frame at another External Interface. The value of OVC CE-VLAN ID Preservation Service Attribute can be one of PRESERVE, STRIP, or RETAIN.";
-                }
-                leaf s-vlan-pcp-preservation {
-                    type boolean;
-                    description "MEF 7.3 (UML): This attribute describes a relationship between the S-VLAN PCP value of a frame at one ENNI and the S-VLAN PCP of the corresponding frame at another ENNI supported by the Operator CEN where each ENNI has an OVC End Point that is associated by the OVC.";
-                }
-                leaf s-vlan-dei-preservation {
-                    type boolean;
-                    description "MEF 7.3 (UML): This attribute describes a relationship between the S-VLAN DEI value of a frame at one ENNI and the S-VLAN DEI of the corresponding frame at another ENNI supported by the Operator CEN where each ENNI has an OVC End Point that is associated by the OVC.";
-                }
-                leaf l2cp-address-set {
-                    type mef-common-types:l2cp-address-set;
-                    description "l2cpAddressSet maps 7.3 ovcL2cpAddressSet.
-                        MEF 7.3 (UML): This attribute is the L2CP Address Set Service Attribute that is defined in MEF 45 when it is applied to the OVC.";
                 }
                 description "none";
             }
-            grouping cg-eth-cos-identifier-g {
-                leaf uuid {
-                    type tapi-common:universal-id;
-                    description "none";
-                }
-                uses mef-common:cos-identifier-g;
-                description "none";
-            }
-            grouping cg-eth-egress-map-g {
-                leaf uuid {
-                    type tapi-common:universal-id;
-                    description "none";
-                }
-                uses mef-common:egress-map-g;
-                description "none";
-            }
-            grouping cg-eth-color-identifier-g {
-                leaf uuid {
-                    type tapi-common:universal-id;
-                    description "none";
-                }
-                uses mef-common:color-identifier-g;
-                description "none";
-            }
-            grouping cg-eth-eec-identifier-g {
-                leaf uuid {
-                    type tapi-common:universal-id;
-                    description "none";
-                }
-                uses mef-common:eec-identifier-g;
-                description "none";
-            }
-            grouping cg-eth-bwp-flow-g {
-                leaf uuid {
-                    type tapi-common:universal-id;
-                    description "none";
-                }
-                uses mef-common:bwp-flow-g;
-                description "none";
-            }
-            grouping cg-eth-envelope-g {
-                uses mef-common:envelope-g;
-                description "none";
-            }
-
-        /***********************
-        * package diagrams
-        **********************/ 
 
 
 }

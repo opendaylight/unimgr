@@ -28,10 +28,10 @@ import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
 import org.opendaylight.unimgr.mef.nrp.api.Subrequrest;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.OperationalState;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.Topology;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.Node;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.OperationalState;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.context.Topology;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ public class DecompositionAction {
     private static final Logger log = LoggerFactory.getLogger(DecompositionAction.class);
     private final List<EndPoint> endpoints;
     private final DataBroker broker;
-    private HashMap<UniversalId, Vertex> sipToNep = new HashMap<>();
+    private HashMap<Uuid, Vertex> sipToNep = new HashMap<>();
 
     public DecompositionAction(List<EndPoint> endpoints, DataBroker broker) {
         Objects.requireNonNull(endpoints);
@@ -124,9 +124,9 @@ public class DecompositionAction {
     }
 
     protected Stream<Vertex> nodeToGraph(Node n) {
-        UniversalId nodeUuid = n.getUuid();
+        Uuid nodeUuid = n.getUuid();
         return n.getOwnedNodeEdgePoint().stream().map(nep -> {
-            List<UniversalId> sips = nep.getMappedServiceInterfacePoint();
+            List<Uuid> sips = nep.getMappedServiceInterfacePoint();
             if(sips == null || sips.isEmpty()) {
                 return  new Vertex(nodeUuid, nep.getUuid(), null);
             }
@@ -138,11 +138,11 @@ public class DecompositionAction {
 
     public class Vertex implements Comparable<Vertex> {
 
-        private final UniversalId nodeUuid;
-        private final UniversalId uuid;
-        private final UniversalId sip;
+        private final Uuid nodeUuid;
+        private final Uuid uuid;
+        private final Uuid sip;
 
-        public Vertex(UniversalId nodeUuid, UniversalId uuid, UniversalId sip) {
+        public Vertex(Uuid nodeUuid, Uuid uuid, Uuid sip) {
             this.sip = sip;
             Objects.requireNonNull(nodeUuid);
             Objects.requireNonNull(uuid);
@@ -150,15 +150,15 @@ public class DecompositionAction {
             this.uuid = uuid;
         }
 
-        public UniversalId getNodeUuid() {
+        public Uuid getNodeUuid() {
             return nodeUuid;
         }
 
-        public UniversalId getUuid() {
+        public Uuid getUuid() {
             return uuid;
         }
 
-        public UniversalId getSip() {
+        public Uuid getSip() {
             return sip;
         }
 

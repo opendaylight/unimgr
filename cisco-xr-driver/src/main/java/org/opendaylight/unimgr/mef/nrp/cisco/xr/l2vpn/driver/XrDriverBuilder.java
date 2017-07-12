@@ -26,8 +26,8 @@ import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnLocalConnec
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnP2pConnectActivator;
 import org.opendaylight.unimgr.utils.DriverConstants;
 import org.opendaylight.unimgr.utils.SipHandler;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.NrpConnectivityServiceAttrsG;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.NrpConnectivityServiceAttrs;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +63,7 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
             }
 
             @Override
-            public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrsG context) {
+            public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context) {
                 this.endPoints = endPoints;
                 this.serviceId = serviceId;
 
@@ -151,7 +151,7 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
     }
 
     @Override
-    public UniversalId getNodeUuid() {
-        return new UniversalId(DriverConstants.XR_NODE);
+    public Uuid getNodeUuid() {
+        return new Uuid(DriverConstants.XR_NODE);
     }
 }

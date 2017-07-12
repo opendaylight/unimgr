@@ -23,8 +23,9 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
 import org.opendaylight.unimgr.mef.nrp.ovs.FlowTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.OvsdbTopologyTestUtils;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.Node;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.context.attrs.ServiceInterfacePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
 
 /**
@@ -126,7 +127,7 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
 
     private BiFunction<Node, String, Boolean> checkNep = (node,nepName) ->
             node.getOwnedNodeEdgePoint().stream()
-                    .anyMatch(ownedNep -> ownedNep.getMappedServiceInterfacePoint().contains(new UniversalId(sip_prefix + ovs_nep_prefix + nepName))
+                    .anyMatch(ownedNep -> ownedNep.getMappedServiceInterfacePoint().contains(new Uuid(sip_prefix + ovs_nep_prefix + nepName))
                                 && ownedNep.getUuid().getValue().equals(ovs_nep_prefix + nepName)
                     );
 
@@ -135,11 +136,11 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
                 .forEach(nep -> assertTrue(checkNep.apply(node,nep)));
     }
 
-    private BiFunction<List<org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePoint>, String, Boolean> checkSip =
+    private BiFunction<List<ServiceInterfacePoint>, String, Boolean> checkSip =
             (sips, nep) -> sips.stream()
                 .anyMatch(sip -> sip.getUuid().getValue().equals(sip_prefix + ovs_nep_prefix + nep));
 
-    private void checkSips(List<org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.context.g.ServiceInterfacePoint> sips, String ... neps){
+    private void checkSips(List<ServiceInterfacePoint> sips, String ... neps){
         Arrays.stream(neps)
                 .forEach(nep -> assertTrue(checkSip.apply(sips,nep)));
     }

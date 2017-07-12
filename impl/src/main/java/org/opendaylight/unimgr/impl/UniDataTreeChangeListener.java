@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 public class UniDataTreeChangeListener extends UnimgrDataTreeChangeListener<Node> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UniDataTreeChangeListener.class);
+    private static final Logger LO = LoggerFactory.getLogger(UniDataTreeChangeListener.class);
     private final ListenerRegistration<UniDataTreeChangeListener> listener;
 
 
@@ -37,13 +37,13 @@ public class UniDataTreeChangeListener extends UnimgrDataTreeChangeListener<Node
         final DataTreeIdentifier<Node> dataTreeIid =
                 new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, uniPath);
         listener = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
-        LOG.info("UniDataTreeChangeListener created and registered");
+        LO.info("UniDataTreeChangeListener created and registered");
     }
 
     @Override
     public void add(final DataTreeModification<Node> newDataObject) {
         if (newDataObject.getRootPath() != null && newDataObject.getRootNode() != null) {
-            LOG.info("uni node {} created", newDataObject.getRootNode().getIdentifier());
+            LO.info("uni node {} created", newDataObject.getRootNode().getIdentifier());
             final UniAddCommand uniAddCmd = new UniAddCommand(dataBroker, newDataObject);
             uniAddCmd.execute();
         }
@@ -66,7 +66,7 @@ public class UniDataTreeChangeListener extends UnimgrDataTreeChangeListener<Node
     @Override
     public void remove(final DataTreeModification<Node> removedDataObject) {
         if (removedDataObject.getRootPath() != null && removedDataObject.getRootNode() != null) {
-            LOG.info("uni node {} deleted", removedDataObject.getRootNode().getIdentifier());
+            LO.info("uni node {} deleted", removedDataObject.getRootNode().getIdentifier());
             final UniRemoveCommand uniRemoveCmd = new UniRemoveCommand(dataBroker, removedDataObject);
             uniRemoveCmd.execute();
         }
@@ -75,7 +75,7 @@ public class UniDataTreeChangeListener extends UnimgrDataTreeChangeListener<Node
     @Override
     public void update(final DataTreeModification<Node> modifiedDataObject) {
         if (modifiedDataObject.getRootPath() != null && modifiedDataObject.getRootNode() != null) {
-            LOG.info("uni node {} updated", modifiedDataObject.getRootNode().getIdentifier());
+            LO.info("uni node {} updated", modifiedDataObject.getRootNode().getIdentifier());
             final UniUpdateCommand uniUpdateCmd = new UniUpdateCommand(dataBroker, modifiedDataObject);
             uniUpdateCmd.execute();
         }

@@ -32,7 +32,7 @@ import com.google.common.base.Optional;
 
 public class UniRemoveCommand extends AbstractCommand<Node> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UniRemoveCommand.class);
+    private static final Logger LO = LoggerFactory.getLogger(UniRemoveCommand.class);
 
     public UniRemoveCommand(final DataBroker dataBroker, final DataTreeModification<Node> removedUniNode) {
         super(dataBroker, removedUniNode);
@@ -53,7 +53,7 @@ public class UniRemoveCommand extends AbstractCommand<Node> {
                         ovsdbNodeIid);
                 if (optionalNode.isPresent()) {
                     final Node ovsdbNode = optionalNode.get();
-                    LOG.info("Delete QoS and Queues entries");
+                    LO.info("Delete QoS and Queues entries");
                     List<QosEntries> qosList = ovsdbNode
                             .getAugmentation(OvsdbNodeAugmentation.class)
                             .getQosEntries();
@@ -73,7 +73,7 @@ public class UniRemoveCommand extends AbstractCommand<Node> {
                         InstanceIdentifier<Queues> queuesIid = UnimgrMapper.getOvsdbQueuesIid(ovsdbNode, queuesKey);
                         MdsalUtils.deleteNode(dataBroker, queuesIid, LogicalDatastoreType.CONFIGURATION);
                     }
-                    LOG.info("Delete bride node");
+                    LO.info("Delete bride node");
                     final InstanceIdentifier<Node> bridgeIid = UnimgrMapper.getOvsdbBridgeNodeIid(ovsdbNode);
                     MdsalUtils.deleteNode(dataBroker, bridgeIid, LogicalDatastoreType.CONFIGURATION);
                 }
@@ -84,10 +84,10 @@ public class UniRemoveCommand extends AbstractCommand<Node> {
                     MdsalUtils.deleteNode(dataBroker, iidUni, LogicalDatastoreType.OPERATIONAL);
                 }
             } else {
-                LOG.info("Received Uni Augmentation has null ovsdb node ref: {}", removedUniIid);
+                LO.info("Received Uni Augmentation has null ovsdb node ref: {}", removedUniIid);
             }
         } else {
-            LOG.info("Received Uni Augmentation is null: {}", removedUniIid);
+            LO.info("Received Uni Augmentation is null: {}", removedUniIid);
         }
     }
 }

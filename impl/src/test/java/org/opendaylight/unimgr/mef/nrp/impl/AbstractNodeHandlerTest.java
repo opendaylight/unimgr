@@ -28,17 +28,17 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.Context;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.TerminationDirection;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.Context1;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.node.g.OwnedNodeEdgePointKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.Topology;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.context.g.TopologyKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.Node;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapitopology.rev170531.topology.g.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Context;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.TerminationDirection;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.Context1;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePointKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.context.Topology;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.context.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import com.google.common.base.Optional;
@@ -51,8 +51,8 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     private static final InstanceIdentifier NRP_ABSTRACT_NODE_IID = InstanceIdentifier
             .create(Context.class)
             .augmentation(Context1.class)
-            .child(Topology.class, new TopologyKey(new UniversalId(TapiConstants.PRESTO_EXT_TOPO)))
-            .child(Node.class,new NodeKey(new UniversalId(TapiConstants.PRESTO_ABSTRACT_NODE)));
+            .child(Topology.class, new TopologyKey(new Uuid(TapiConstants.PRESTO_EXT_TOPO)))
+            .child(Node.class,new NodeKey(new Uuid(TapiConstants.PRESTO_ABSTRACT_NODE)));
     private AbstractNodeHandler abstractNodeHandler;
     private NrpDao nrpDao;
     private static final String testSystemNodeName = "testSystemNode";
@@ -131,7 +131,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
         //when
         tx = dataBroker.newReadWriteTransaction();
         OwnedNodeEdgePoint n11 = new OwnedNodeEdgePointBuilder(n1.getOwnedNodeEdgePoint().get(0))
-                .setMappedServiceInterfacePoint(Collections.singletonList(new UniversalId("sip:n1:1")))
+                .setMappedServiceInterfacePoint(Collections.singletonList(new Uuid("sip:n1:1")))
                 .build();
         new NrpDao(tx).updateNep("n1", n11);
         tx.submit().checkedGet();
@@ -221,13 +221,13 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     }
 
     private OwnedNodeEdgePoint createNep(String nepName, boolean associateSip, TerminationDirection td){
-        UniversalId uuid = new UniversalId(nepName);
+        Uuid uuid = new Uuid(nepName);
         OwnedNodeEdgePointBuilder builder = new OwnedNodeEdgePointBuilder()
                 .setKey(new OwnedNodeEdgePointKey(uuid))
-                .setUuid(uuid)
-                .setTerminationDirection(td);
+                .setUuid(uuid);
+                // TODO donaldh .setTerminationDirection(td);
 
-        if(associateSip) builder.setMappedServiceInterfacePoint(Arrays.asList(new UniversalId(sipPrefix + nepName)));
+        if(associateSip) builder.setMappedServiceInterfacePoint(Arrays.asList(new Uuid(sipPrefix + nepName)));
 
         return builder.build();
     }

@@ -34,13 +34,14 @@ import org.opendaylight.unimgr.mef.nrp.ovs.OpenFlowTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.OvsdbTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.util.OpenFlowUtils;
 import org.opendaylight.unimgr.utils.MdsalUtils;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.mef_types.rev170531.PositiveInteger;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.mef_types.rev170531.vlan.id.listing.g.VlanIdList;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm_connectivity.rev170531.cg.eth.frame.flow.spec.g.CeVlanIdListOrUntag;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.NrpConnectivityServiceEndPointAttrsG;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.nrp.connectivity.service.end.point.attrs.g.NrpCgEthFrameFlowSpec;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.ConnectivityServiceEndPointG;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.types.rev170712.PositiveInteger;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev170712.VlanIdListAndUntag;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev170712.carrier.eth.connectivity.end.point.resource.CeVlanIdListAndUntag;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev170712.vlan.id.list.and.untag.VlanId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.NrpConnectivityServiceEndPointAttrs;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.nrp.connectivity.service.end.point.attrs.NrpCarrierEthConnectivityEndPointResource;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.ConnectivityServiceEndPoint;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
@@ -173,29 +174,30 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
     }
 
     private EndPoint mockEndPoint(String portName){
-        ConnectivityServiceEndPointG connectivityServiceEndPoint = mock(ConnectivityServiceEndPointG.class);
-        NrpConnectivityServiceEndPointAttrsG attrs = mock(NrpConnectivityServiceEndPointAttrsG.class);
+        ConnectivityServiceEndPoint connectivityServiceEndPoint = mock(ConnectivityServiceEndPoint.class);
+        NrpConnectivityServiceEndPointAttrs attrs = mock(NrpConnectivityServiceEndPointAttrs.class);
         //UNI port mock
         when(connectivityServiceEndPoint.getServiceInterfacePoint())
-                .thenReturn(new UniversalId(portName));
+                .thenReturn(new Uuid(portName));
 
         //Vlan Id mock
-        VlanIdList vlanIdList = mock(VlanIdList.class);
+        VlanId vlanIdList = mock(VlanId.class);
         when(vlanIdList.getVlanId())
                 .thenReturn(PositiveInteger.getDefaultInstance(expectedVlanId.toString()));
 
-        List<VlanIdList> vlanIds = new ArrayList<>();
+        List<VlanId> vlanIds = new ArrayList<>();
         vlanIds.add(vlanIdList);
 
-        CeVlanIdListOrUntag ceVlanIdList = mock(CeVlanIdListOrUntag.class);
-        when(ceVlanIdList.getVlanIdList())
+        CeVlanIdListAndUntag ceVlanIdList = mock(CeVlanIdListAndUntag.class);
+        when(ceVlanIdList.getVlanId())
                 .thenReturn(vlanIds);
 
-        NrpCgEthFrameFlowSpec nrpCgEthFrameFlowCpaAspec = mock(NrpCgEthFrameFlowSpec.class);
-        when(nrpCgEthFrameFlowCpaAspec.getCeVlanIdListOrUntag())
+        NrpCarrierEthConnectivityEndPointResource nrpCgEthFrameFlowCpaAspec =
+                mock(NrpCarrierEthConnectivityEndPointResource.class);
+        when(nrpCgEthFrameFlowCpaAspec.getCeVlanIdListAndUntag())
                 .thenReturn(ceVlanIdList);
 
-        when(attrs.getNrpCgEthFrameFlowSpec())
+        when(attrs.getNrpCarrierEthConnectivityEndPointResource())
                 .thenReturn(nrpCgEthFrameFlowCpaAspec);
 
         return new EndPoint(connectivityServiceEndPoint,attrs);

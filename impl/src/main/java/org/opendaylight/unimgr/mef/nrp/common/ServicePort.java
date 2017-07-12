@@ -12,8 +12,8 @@ import java.util.regex.Pattern;
 
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.utils.SipHandler;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp_interface.rev170531.nrp.connectivity.service.end.point.attrs.g.NrpCgEthFrameFlowSpec;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.nrp.connectivity.service.end.point.attrs.NrpCarrierEthConnectivityEndPointResource;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
@@ -76,7 +76,7 @@ public class ServicePort {
     }
 
     public static ServicePort toServicePort(EndPoint endPoint, String topologyName){
-        UniversalId sip = endPoint.getEndpoint().getServiceInterfacePoint();
+        Uuid sip = endPoint.getEndpoint().getServiceInterfacePoint();
         TopologyId topologyId = new TopologyId(topologyName);
         NodeId nodeId = new NodeId(SipHandler.getDeviceName(sip));
         TpId tpId = new TpId(SipHandler.getPortName(sip));
@@ -88,9 +88,12 @@ public class ServicePort {
     }
 
     public static boolean hasVlan(EndPoint endPoint){
-        if( (endPoint.getAttrs() != null) && (endPoint.getAttrs().getNrpCgEthFrameFlowSpec()!=null) ){
-            NrpCgEthFrameFlowSpec attr = endPoint.getAttrs().getNrpCgEthFrameFlowSpec();
-            if( (attr.getCeVlanIdListOrUntag()!=null) && !(attr.getCeVlanIdListOrUntag().getVlanIdList().isEmpty()) ){
+        if( (endPoint.getAttrs() != null)
+                && (endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource() != null) ) {
+            NrpCarrierEthConnectivityEndPointResource attr =
+                    endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource();
+            if ( (attr.getCeVlanIdListAndUntag() != null)
+                    && !(attr.getCeVlanIdListAndUntag().getVlanId().isEmpty()) ){
                 return true;
             } else {
                 return false;
@@ -101,7 +104,8 @@ public class ServicePort {
     }
 
     private static int getVlan(EndPoint endPoint){
-        return endPoint.getAttrs().getNrpCgEthFrameFlowSpec().getCeVlanIdListOrUntag().getVlanIdList().get(0).getVlanId().getValue().intValue();
+        return endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource()
+                .getCeVlanIdListAndUntag().getVlanId().get(0).getVlanId().getValue().intValue();
     }
 
     public String getInterfaceName(){

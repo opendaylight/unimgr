@@ -25,18 +25,18 @@ import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.impl.ActivationTransaction;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.Context1;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.DeleteConnectivityServiceInput;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.DeleteConnectivityServiceOutput;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.DeleteConnectivityServiceOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connection.g.Route;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.Connection;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectionKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectivityService;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectivityServiceKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.delete.connectivity.service.output.Service;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.delete.connectivity.service.output.ServiceBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.Context1;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.DeleteConnectivityServiceInput;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.DeleteConnectivityServiceOutput;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.DeleteConnectivityServiceOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connection.Route;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.Connection;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.ConnectionKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.ConnectivityService;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.ConnectivityServiceKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.delete.connectivity.service.output.Service;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.delete.connectivity.service.output.ServiceBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -52,8 +52,8 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
 
     private final DeleteConnectivityServiceInput input;
     private final TapiConnectivityServiceImpl service;
-    private UniversalId serviceId;
-    private List<UniversalId> connectionIds = new LinkedList<>();
+    private Uuid serviceId;
+    private List<Uuid> connectionIds = new LinkedList<>();
 
     DeleteConnectivityAction(TapiConnectivityServiceImpl tapiConnectivityService, DeleteConnectivityServiceInput input) {
         Objects.requireNonNull(tapiConnectivityService);
@@ -64,7 +64,7 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
 
     @Override
     public RpcResult<DeleteConnectivityServiceOutput> call() throws Exception {
-        serviceId = new UniversalId(input.getServiceIdOrName());
+        serviceId = new Uuid(input.getServiceIdOrName());
         NrpDao nrpDao = new NrpDao(service.getBroker().newReadOnlyTransaction());
 
         ConnectivityService cs =
@@ -75,7 +75,7 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
                     .withError(RpcError.ErrorType.APPLICATION, MessageFormat.format("Service {0} does not exist", input.getServiceIdOrName()))
                     .build();
         }
-        Map<UniversalId, LinkedList<EndPoint>> data = null;
+        Map<Uuid, LinkedList<EndPoint>> data = null;
         try {
             data = prepareData(cs, nrpDao);
         } catch(Exception e) {
@@ -128,7 +128,7 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
         tx.submit().checkedGet();
     }
 
-    private ActivationTransaction prepareTransaction(Map<UniversalId, LinkedList<EndPoint>> data) {
+    private ActivationTransaction prepareTransaction(Map<Uuid, LinkedList<EndPoint>> data) {
         assert data != null;
         ActivationTransaction tx = new ActivationTransaction();
         data.entrySet().stream().map(e -> {
@@ -143,32 +143,32 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
         return tx;
     }
 
-    private Map<UniversalId, LinkedList<EndPoint>> prepareData(ConnectivityService cs, NrpDao nrpDao) {
+    private Map<Uuid, LinkedList<EndPoint>> prepareData(ConnectivityService cs, NrpDao nrpDao) {
 
         assert cs.getConnection() != null && cs.getConnection().size() == 1;
 
-        UniversalId expConnectionId = cs.getConnection().get(0);
+        Uuid expConnectionId = cs.getConnection().get(0);
         connectionIds.add(expConnectionId);
 
         Connection connection = nrpDao.getConnection(expConnectionId);
         List<Route> route = connection.getRoute();
         assert route != null && route.size() == 1;
 
-        List<UniversalId> systemConnectionIds = route.get(0).getLowerConnection();
+        List<Uuid> systemConnectionIds = route.get(0).getConnectionEndPoint();
 
         connectionIds.addAll(systemConnectionIds);
 
         return systemConnectionIds.stream().map(nrpDao::getConnection)
                 .flatMap(c -> {
-                    UniversalId nodeId = c.getNode();
+                    Uuid nodeId = c.getContainerNode();
                     return c.getConnectionEndPoint().stream().map(cep -> {
-                        Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.service.g.EndPoint> optEndPoint = Optional.empty();
+                        Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.service.EndPoint> optEndPoint = Optional.empty();
                         if(cs.getEndPoint() != null){
                             optEndPoint = cs.getEndPoint().stream()
                                     .filter(endPoint1 -> endPoint1.getServiceInterfacePoint().getValue().contains(cep.getServerNodeEdgePoint().getValue()))
                                     .findFirst();
                         }
-                        org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.service.g.EndPoint endPoint =
+                        org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.service.EndPoint endPoint =
                                 optEndPoint.isPresent() ? optEndPoint.get() : null;
                         EndPoint ep = new EndPoint(endPoint, null).setSystemNepUuid(cep.getServerNodeEdgePoint());
                         return new Pair(nodeId, ep);
@@ -180,15 +180,15 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
     }
 
     private static  class Pair {
-        private final UniversalId nodeId;
+        private final Uuid nodeId;
         private final EndPoint endPoint;
 
-        private Pair(UniversalId nodeId, EndPoint endPoint) {
+        private Pair(Uuid nodeId, EndPoint endPoint) {
             this.nodeId = nodeId;
             this.endPoint = endPoint;
         }
 
-        public UniversalId getNodeId() {
+        public Uuid getNodeId() {
             return nodeId;
         }
 

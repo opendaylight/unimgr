@@ -22,7 +22,7 @@ import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
 import org.opendaylight.unimgr.mef.nrp.impl.ActivationDriverRepoServiceImpl;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -44,11 +44,11 @@ public class ActivationDriverMocks {
     public static Builder builder() { return new Builder();}
 
     public static class Builder {
-        HashMap<UniversalId, ActivationDriver> drivers = new HashMap<>();
+        HashMap<Uuid, ActivationDriver> drivers = new HashMap<>();
 
         private Builder() {}
 
-        public Builder add(UniversalId uuid, ActivationDriver driver) {
+        public Builder add(Uuid uuid, ActivationDriver driver) {
             drivers.put(uuid, driver);
             return this;
         }

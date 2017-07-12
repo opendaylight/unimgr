@@ -11,7 +11,7 @@ package org.opendaylight.unimgr.mef.nrp.api;
 import java.util.List;
 
 /**
- * Request decomposer is responsible for decomposition of {@link org.opendaylight.yang.gen.v1.urn.mef.yang.tapiconnectivity.rev170531.connectivity.context.g.ConnectivityService}
+ * Request decomposer is responsible for decomposition of {@link org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.ConnectivityService}
  * requests into one or many driver requests.
  * @author bartosz.michalik@amartus.com
  */

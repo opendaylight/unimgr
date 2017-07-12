@@ -1,16 +1,16 @@
 module mef-common-types {
-    namespace "urn:mef:yang:MEF_Types";
-    prefix mef-common-types;
+    namespace "urn:mef:yang:mef-types";
+    prefix mef-commmon-types;
     organization "Metro Ethernet Forum (MEF)";
     contact "MEF";
     description "none";
-    revision 2017-05-31 {
-        description "MEF NRP 1.0.alpha";
+    revision 2017-07-12 {
+        description "MEF NRP 1.0.cfc4";
         reference "ONF-TR-527, ONF-TR-512, ONF-TR-531, RFC 6020 and RFC 6087";
     }
     /***********************
     * package type-definitions
-    **********************/ 
+    **********************/
         typedef admin-state {
             type enumeration {
                 enum unlocked {
@@ -22,9 +22,9 @@ module mef-common-types {
             }
             description "This enumeration is for Administrative states. Refer to ITU-T X.731.";
         }
-        grouping agg-link-depth-g {
+        grouping agg-link-depth {
             container vlan-id {
-                uses vlan-id-g;
+                uses vlan-id;
                 description "The ingress frame Vlan ID. ";
             }
             leaf link-depth {
@@ -107,7 +107,7 @@ module mef-common-types {
             }
             description "This is for EVC or OVC connection types, including point to point, multi-point and rooted multi-point.";
         }
-        grouping conversation-id-to-aggregation-link-map-g {
+        grouping conversation-id-to-aggregation-link-map {
             leaf conversation-id {
                 type natural-number;
                 description "The conversation ID is a Vlan ID or 0 for untagged or priority tagged frame.. ";
@@ -267,9 +267,9 @@ module mef-common-types {
             }
             description "This lists the L2CP Address Set. Refer to MEF 45.";
         }
-        grouping l2cp-peering-g {
+        grouping l2cp-peering {
             container protocol-id {
-                uses l2cp-protocol-g;
+                uses l2cp-protocol;
                 description "This is a L2CP Protocol Identifier.";
             }
             leaf destination-address {
@@ -283,7 +283,7 @@ module mef-common-types {
             }
             description "This is a list specifies the L2CP Protocol Identifier and the Destination Address in use by the protocol entity.";
         }
-        grouping l2cp-protocol-g {
+        grouping l2cp-protocol {
             leaf l2cp-protocol-type {
                 type l2cp-protocol-type;
                 description "This attribute specifies the type of L2CP protocol, i.e., LLC or EtherType.";
@@ -320,7 +320,7 @@ module mef-common-types {
             }
             description "This is for MEP direction, either Down MEP or Up MEP.";
         }
-        grouping mep-level-and-direction-g {
+        grouping mep-level-and-direction {
             leaf level {
                 type natural-number;
                 description "This is the MEG level, value between 0..7.";
@@ -415,199 +415,199 @@ module mef-common-types {
         }
         typedef physical-layer {
             type enumeration {
-                enum 10base2 {
+                enum 10-base2 {
                     description "none";
                 }
-                enum 10base5 {
+                enum 10-base5 {
                     description "none";
                 }
-                enum 10base-f {
+                enum 10-base-f {
                     description "none";
                 }
-                enum 10base-fb {
+                enum 10-base-fb {
                     description "none";
                 }
-                enum 10base-fl {
+                enum 10-base-fl {
                     description "none";
                 }
-                enum 10base-fp {
+                enum 10-base-fp {
                     description "none";
                 }
-                enum 10base-t {
+                enum 10-base-t {
                     description "none";
                 }
-                enum 10base-te {
+                enum 10-base-te {
                     description "none";
                 }
-                enum 10broad36 {
+                enum 10-broad36 {
                     description "none";
                 }
-                enum 10pass-ts {
+                enum 10-pass-ts {
                     description "none";
                 }
-                enum 100base-bx10 {
+                enum 100-base-bx10 {
                     description "none";
                 }
-                enum 100base-fx {
+                enum 100-base-fx {
                     description "none";
                 }
-                enum 100base-lx10 {
+                enum 100-base-lx10 {
                     description "none";
                 }
-                enum 100base-t {
+                enum 100-base-t {
                     description "none";
                 }
-                enum 100base-t2 {
+                enum 100-base-t2 {
                     description "none";
                 }
-                enum 100base-t4 {
+                enum 100-base-t4 {
                     description "none";
                 }
-                enum 100base-tx {
+                enum 100-base-tx {
                     description "none";
                 }
-                enum 100base-x {
+                enum 100-base-x {
                     description "none";
                 }
-                enum 1000base-bx10 {
+                enum 1000-base-bx10 {
                     description "none";
                 }
-                enum 1000base-cx {
+                enum 1000-base-cx {
                     description "none";
                 }
-                enum 1000base-kx {
+                enum 1000-base-kx {
                     description "none";
                 }
-                enum 1000base-lx {
+                enum 1000-base-lx {
                     description "none";
                 }
-                enum 1000base-lx10 {
+                enum 1000-base-lx10 {
                     description "none";
                 }
-                enum 1000base-px10 {
+                enum 1000-base-px10 {
                     description "none";
                 }
-                enum 1000base-px20 {
+                enum 1000-base-px20 {
                     description "none";
                 }
-                enum 1000base-sx {
+                enum 1000-base-sx {
                     description "none";
                 }
-                enum 1000base-t {
+                enum 1000-base-t {
                     description "none";
                 }
-                enum 1000base-x {
+                enum 1000-base-x {
                     description "none";
                 }
-                enum 10gbase-cx4 {
+                enum 10-gbase-cx4 {
                     description "none";
                 }
-                enum 10gbase-e {
+                enum 10-gbase-e {
                     description "none";
                 }
-                enum 10gbase-er {
+                enum 10-gbase-er {
                     description "none";
                 }
-                enum 10gbase-ew {
+                enum 10-gbase-ew {
                     description "none";
                 }
-                enum 10gbase-kr {
+                enum 10-gbase-kr {
                     description "none";
                 }
-                enum 10gbase-kx4 {
+                enum 10-gbase-kx4 {
                     description "none";
                 }
-                enum 10gbase-l {
+                enum 10-gbase-l {
                     description "none";
                 }
-                enum 10gbase-lr {
+                enum 10-gbase-lr {
                     description "none";
                 }
-                enum 10gbase-lrm {
+                enum 10-gbase-lrm {
                     description "none";
                 }
-                enum 10gbase-lw {
+                enum 10-gbase-lw {
                     description "none";
                 }
-                enum 10gbase-lx4 {
+                enum 10-gbase-lx4 {
                     description "none";
                 }
-                enum 10gbase-pr {
+                enum 10-gbase-pr {
                     description "none";
                 }
-                enum 10gbase-prx {
+                enum 10-gbase-prx {
                     description "none";
                 }
-                enum 10gbase-r {
+                enum 10-gbase-r {
                     description "none";
                 }
-                enum 10gbase-s {
+                enum 10-gbase-s {
                     description "none";
                 }
-                enum 10gbase-sr {
+                enum 10-gbase-sr {
                     description "none";
                 }
-                enum 10gbase-sw {
+                enum 10-gbase-sw {
                     description "none";
                 }
-                enum 10gbase-t {
+                enum 10-gbase-t {
                     description "none";
                 }
-                enum 10gbase-w {
+                enum 10-gbase-w {
                     description "none";
                 }
-                enum 10gbase-x {
+                enum 10-gbase-x {
                     description "none";
                 }
-                enum 100gbase-r {
+                enum 100-gbase-r {
                     description "none";
                 }
-                enum 100gbase-cr10 {
+                enum 100-gbase-cr10 {
                     description "none";
                 }
-                enum 100gbase-er4 {
+                enum 100-gbase-er4 {
                     description "none";
                 }
-                enum 100gbase-lr4 {
+                enum 100-gbase-lr4 {
                     description "none";
                 }
-                enum 100gbase-sr10 {
+                enum 100-gbase-sr10 {
                     description "none";
                 }
-                enum 40gbase-r {
+                enum 40-gbase-r {
                     description "none";
                 }
-                enum 40gbase-cr4 {
+                enum 40-gbase-cr4 {
                     description "none";
                 }
-                enum 40gbase--fr {
+                enum 40-gbase-fr {
                     description "none";
                 }
-                enum 40gbase-kr4 {
+                enum 40-gbase-kr4 {
                     description "none";
                 }
-                enum 40gbase-lr4 {
+                enum 40-gbase-lr4 {
                     description "none";
                 }
-                enum 40gbase-sr4 {
+                enum 40-gbase-sr4 {
                     description "none";
                 }
-                enum 1base5 {
+                enum 1-base5 {
                     description "none";
                 }
-                enum 2base-tl {
+                enum 2-base-tl {
                     description "none";
                 }
-                enum 1g-epon {
+                enum 1-g-epon {
                     description "none";
                 }
-                enum 10g-epon {
+                enum 10-g-epon {
                     description "none";
                 }
-                enum 10-1g-epon {
+                enum 10-1-g-epon {
                     description "none";
                 }
-                enum 10-10g-epon {
+                enum 10-10-g-epon {
                     description "none";
                 }
                 enum other {
@@ -619,7 +619,7 @@ module mef-common-types {
             }
             description "IEEE802.3 (2012) defined list excluding 1000BASE-PX-D and 1000BASE-PX-U. NONE is added with further MEF 10.3 discussion, for supporting logical interfaces.";
         }
-        grouping physical-layer-per-link-g {
+        grouping physical-layer-per-link {
             leaf link-id {
                 type natural-number;
                 description "This is the link ID.";
@@ -679,7 +679,7 @@ module mef-common-types {
             }
             description "PM Unit, used for pairing with Value in data type PmUnitAndValue. Can be second, millisecond, micro second, etc. ";
         }
-        grouping pm-unit-and-value-g {
+        grouping pm-unit-and-value {
             leaf pm-unit {
                 type pm-unit;
                 description "This attribute denotes the 'unit',  e.g., MILLISECOND, COUNT or PERCENT.";
@@ -716,7 +716,7 @@ module mef-common-types {
             }
             description "This enumeration is for Service State.";
         }
-        grouping source-mac-address-limit-g {
+        grouping source-mac-address-limit {
             leaf limit {
                 type natural-number;
                 description "This attribute denotes the maximum acceptable source MAC addresses.";
@@ -738,7 +738,7 @@ module mef-common-types {
             }
             description "This lists the S Vlan ID Control, either FULL or PARTIAL.";
         }
-        grouping sync-mode-per-link-g {
+        grouping sync-mode-per-link {
             leaf link-id {
                 type natural-number;
                 description "This is the link ID of the link in the Aggregation Link.";
@@ -751,16 +751,16 @@ module mef-common-types {
         }
         typedef tagged-l2cp-processing {
             type enumeration {
-                enum 802-1-compliant {
+                enum 802.1-compliant {
                     description "none";
                 }
-                enum 802-1-non-compliant {
+                enum 802.1-non-compliant {
                     description "none";
                 }
             }
             description "Either 802.1 compliant or not. Refer to MEF 45.";
         }
-        grouping time-and-date-g {
+        grouping time-and-date {
             leaf year {
                 type positive-integer;
                 description "This denotes the year.";
@@ -787,7 +787,7 @@ module mef-common-types {
             }
             description "This data type is for Time and Date in UTC.";
         }
-        grouping time-interval-t-g {
+        grouping time-interval-t {
             leaf unit {
                 type time-interval-unit;
                 description "Month, week, day, hour, etc.";
@@ -824,21 +824,21 @@ module mef-common-types {
             }
             description "Time interval unit, e.g., month, day, week, hour, etc.";
         }
-        grouping vlan-id-g {
+        grouping vlan-id {
             leaf vlan-id {
                 type positive-integer;
                 description "This is the Vlan ID value.";
             }
             description "This is for VLAN ID from 1 to 4094";
         }
-        grouping vlan-id-listing-g {
+        grouping vlan-id-listing {
             leaf type {
                 type vlan-id-mapping-type;
                 description "Can be LIST, or ALL, or EXCEPT.";
             }
             list vlan-id-list {
                 key 'vlan-id';
-                uses vlan-id-g;
+                uses vlan-id;
                 description "This is a list of Vlan IDs.";
             }
             description "The list VLAN IDs, either when type=LIST, or when type==EXCEPT (which means the VLAN IDs except the listed). When type=ALL, the vlanId list is not applicable.";
@@ -882,14 +882,14 @@ module mef-common-types {
             }
             description "This is for Vlan Tag type, i.e., S-tag or C-tag.";
         }
-        grouping vlan-id-list-or-untag-g {
+        grouping vlan-id-list-or-untag {
             leaf type {
                 type vlan-id-mapping-type-or-untag;
                 description "none";
             }
             list vlan-id-list {
                 key 'vlan-id';
-                uses vlan-id-g;
+                uses vlan-id;
                 description "none";
             }
             description "none";
@@ -910,6 +910,17 @@ module mef-common-types {
                 }
             }
             description "Vlan ID types, ALL for all Vlan IDs, LIST for a list of Vlan IDs, EXCEPT for all Vlan IDs except the listed, UNTAGGED to indicate that untagged and priority-tagged frames are mapped to this end point.";
+        }
+        typedef resource-state {
+            type enumeration {
+                enum inactive {
+                    description "none";
+                }
+                enum active {
+                    description "none";
+                }
+            }
+            description "none";
         }
 
 }

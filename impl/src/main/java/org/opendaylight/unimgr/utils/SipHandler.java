@@ -7,24 +7,24 @@
  */
 package org.opendaylight.unimgr.utils;
 
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapicommon.rev170531.UniversalId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
 
 /**
  * @author marek.ryznar@amartus.com
  */
 public class SipHandler {
 
-    public static String getDeviceName(UniversalId sip){
+    public static String getDeviceName(Uuid sip){
         String[] sipTab = sip.getValue().split(":");
         return sipTab[sipTab.length-2];
     }
 
-    public static String getPortName(UniversalId sip){
+    public static String getPortName(Uuid sip){
         String[] sipTab = sip.getValue().split(":");
         return sipTab[sipTab.length-1];
     }
 
-    public static boolean isTheSameDevice(UniversalId sip1, UniversalId sip2){
+    public static boolean isTheSameDevice(Uuid sip1, Uuid sip2){
         return getDeviceName(sip1).equals(getDeviceName(sip2));
     }
 }

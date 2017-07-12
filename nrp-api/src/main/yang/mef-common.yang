@@ -1,5 +1,5 @@
 module mef-common {
-    namespace "urn:mef:yang:MEF_Common";
+    namespace "urn:mef:yang:mef-common";
     prefix mef-common;
     import mef-common-types {
         prefix mef-common-types;
@@ -7,8 +7,8 @@ module mef-common {
     organization "Metro Ethernet Forum (MEF)";
     contact "MEF";
     description "none";
-    revision 2017-05-31 {
-        description "MEF NRP 1.0.alpha";
+    revision 2017-07-12 {
+        description "MEF NRP 1.0.cfc4";
         reference "ONF-TR-527, ONF-TR-512, ONF-TR-531, RFC 6020 and RFC 6087";
     }
 
@@ -20,15 +20,15 @@ module mef-common {
 
     /***********************
     * package diagrams
-    **********************/ 
+    **********************/
 
     /***********************
     * package object-classes
-    **********************/ 
+    **********************/
         /***********************
         * package bwp
-        **********************/ 
-            grouping bwp-flow-g {
+        **********************/
+            grouping bwp-flow {
                 leaf rank {
                     type mef-common-types:positive-integer;
                     description "This attribute denotes the rank of the bandwidth profile flow in the envelope.";
@@ -69,9 +69,13 @@ module mef-common {
                     type mef-common-types:natural-number;
                     description "This attribute adjusts the number of tokens requested for each external interface frame.";
                 }
+                container envelope {
+                    uses envelope;
+                    description "This attribute represents the relationship between the BwpFlow and the Envelope, indicating which Envelope the BwpFlow belongs.";
+                }
                 description "The BwpFlow object class represents the Bandwidth Profile Flow which includes the bandwidth profile parameters such as CIR, CIR Max, EIR, EIR Max, CBS, EBS, Coupling Flag, Color Mode, etc.  The BwpFlow object class is associated with OperatorUni, ServiceProviderUni, VUNI, CosIdentifier, EecIdentifier, and Envelope, etc. ";
             }
-            grouping envelope-g {
+            grouping envelope {
                 leaf envelope-id {
                     type mef-common-types:identifier45;
                     description "This attribute is a string that identifies the Envelope.";
@@ -84,37 +88,413 @@ module mef-common {
             }
 
         /***********************
+        * package sls
+        **********************/
+            grouping set-of-ordered-pairs {
+                list ordered-pair-list {
+                    key 'uuid';
+                    min-elements 1;
+                    uses ordered-pair;
+                    description "This attribute denotes a set of ordered pairs.";
+                }
+                description "The SetOfOrderedPairs object class is a set of ordered pair sets of (EVC/OVC End Points for a Group Availability PM, for one way direction.";
+            }
+            grouping sls-cos-name-entry {
+                leaf cos-name {
+                    type string;
+                    description "This attribute denotes the Class of Service Name.";
+                }
+                leaf delta-t {
+                    type mef-common-types:positive-integer;
+                    description "This attribute denotes the ∆t, a time interval in seconds, much smaller than T (SLS time period). E.g., 10 seconds.";
+                }
+                leaf threshold-c {
+                    type real;
+                    default "0.5";
+                    description "This attribute denotes the threshold for PM, used  to determine whether a given time interval delta t has high loss.";
+                }
+                leaf consecutive-interval-n {
+                    type mef-common-types:positive-integer;
+                    description "This attribute denotes n, used to identify how many consecutive ∆t intervals must have high loss to trigger a change in Availability.";
+                }
+                description "The SlsCosNameEntry object class represents the CoS Name entry consisting a list of 4-tuples of the form <CoS Name, ∆t, C, n>, where CoS Name as Class of Service Name, ∆t as a small time interval, C as a threshold, and n to identify consecutive ∆t for high loss interval. The SlsCosNameEntry object class is associated with EVC or OVC, and SlsObjectiveAndParameters.";
+            }
+            grouping sls-objective-and-parameters {
+                leaf pm-metric-type {
+                    type mef-common-types:pm-metric-type;
+                    description "This attribute lists the type of PM Metric for selecting the PM Metric conditional package.";
+                }
+                container one-way-fdr-pm-pac {
+                    uses one-way-fdr-pm-pac;
+                    description "This attribute represents the relationship between the SlsObjectiveAndParameters and the conditional package OneWayFdrPmPac (for One Way FDR Pm Metric).";
+                }
+                container one-way-ifdv-pm-pac {
+                    uses one-way-ifdv-pm-pac;
+                    description "This attribute represents the relationship between the SlsObjectiveAndParameters and the conditional package OneWayIfdvPmPac (for One Way IFDV Pm Metric).";
+                }
+                container one-way-flr-pm-pac {
+                    uses one-way-flr-pm-pac;
+                    description "This attribute represents the relationship between the SlsObjectiveAndParameters and the conditional package OneWayFlrPmPac (for One Way FLR Pm Metric).";
+                }
+                container one-way-av-pm-pac {
+                    uses one-way-av-pm-pac;
+                    description "This attribute represents the relationship between the SlsObjectiveAndParameters and the conditional package OneWayAvPmPac (for One Way Availability Pm Metric).";
+                }
+                container one-way-hli-pm-pac {
+                    uses one-way-hli-pm-pac;
+                    description "This attribute represents the relationship between the SlsObjectiveAndParameters and the conditional package OneWayHliPmPac (for One Way HLI Pm Metric).";
+                }
+                container one-way-chli-pm-pac {
+                    uses one-way-chli-pm-pac;
+                    description "This attribute represents the relationship between the SlsObjectiveAndParameters and the conditional package OneWayChliPmPac (for One Way CHLI Pm Metric).";
+                }
+                container one-way-group-av-pm-pac {
+                    uses one-way-group-av-pm-pac;
+                    description "This attribute represents the relationship between the SlsObjectiveAndParameters and the conditional package OneWayGroupAvPmPac (for One Way Group Availability Pm Metric).";
+                }
+                container one-way-cpm-pm-pac {
+                    uses one-way-composite-pm-pac;
+                    description "This attribute represents the relationship between the SlsObjectiveAndParameters and the conditional package OneWayCompositePmPac (for One Way CPM Pm Metric).";
+                }
+                container one-way-mfd-pm-pac {
+                    uses one-way-mfd-pm-pac;
+                    description "This attribute represents the relationship between the SlsObjectiveAndParameters and the conditional package OneWayMfdPmPac (for One Way MFD Pm Metric).";
+                }
+                container one-way-fd-pm-pac {
+                    uses one-way-fd-pm-pac;
+                    description "This attribute represents the relationship between the SlsObjectiveAndParameters and the conditional package OneWayFdPmPac (for One Way FD Pm Metric).";
+                }
+                description "The SlsObjectiveAndParameters object class leads to one of the Performance Metrics based on the pmMetricType (FD, FDR, MFD, IFDV, FLR, AV, HLI, CHLI, Group AV, or Composite). It is associated with SlsCosNameEntry, SlsReport(s), and conditional package classes OneWayFdPmPac, OneWayFdrPmPac, OneWayMfdPmPac, OneWayIfdvPmPac, OneWayFlrPmPac, OneWayAvPmPac, OneWayHliPmPac, OneWayChliPmPac, OneWayGroupAvPmPac, and OneWayCompositePmPac.";
+            }
+            grouping sls-report {
+                container start-time {
+                    config false;
+                    uses mef-common-types:time-and-date;
+                    description "this attribute denotes the start time of the time interval T.";
+                }
+                container stop-time {
+                    config false;
+                    uses mef-common-types:time-and-date;
+                    description "this attributes denotes the stop time of the Time Interval T.";
+                }
+                leaf met-objective {
+                    type boolean;
+                    config false;
+                    description "This attribute denotes whether the PM Objective is met for this Time Interval T.";
+                }
+                container measured-value {
+                    config false;
+                    uses mef-common-types:pm-unit-and-value;
+                    description "This attribute is a pair of <Unit, Value> , e.g., the <Unit=PERCENT, value= 99.9> for 99.9%, or <Unit=MILLISECOND, Value=2> for 2 ms.";
+                }
+                description "The experimental SlsReport object class represents the collected and processed Performance result (or report) for a time period T. Some performance metrics may have percentage result and some may have value result.";
+            }
+            grouping one-way-av-pm-pac {
+                leaf oneway-av-objective {
+                    type mef-common-types:percentage;
+                    description "This attribute sets the one way availability objective.";
+                }
+                list ordered-pair-list {
+                    key 'uuid';
+                    min-elements 1;
+                    uses ordered-pair;
+                    description "This attributes associates this class with OrderedPair(s).";
+                }
+                description "The OneWayAvPmPac object class represents the One Way Availability PM. It is associated with OrderedPair and SlsObjectiveAndParameters.";
+            }
+            grouping one-way-chli-pm-pac {
+                leaf consecutive-number-p {
+                    type mef-common-types:positive-integer;
+                    description "This attribute is the minimum integer number of ∆t ’s in the (sliding) window (with 0 < p < n) to qualify as a CHLI.";
+                }
+                leaf oneway-chli-objective {
+                    type mef-common-types:positive-integer;
+                    description "This attribute sets the one way consecutive high loss interval objective.";
+                }
+                list ordered-pair-list {
+                    key 'uuid';
+                    min-elements 1;
+                    uses ordered-pair;
+                    description "This attributes associates this class with OrderedPair(s).";
+                }
+                description "The OneWayChliPmPac object class represents the One Way Consecutive High Loss Interval PM. It is associated with OrderedPair and SlsObjectiveAndParameters.";
+            }
+            grouping one-way-composite-pm-pac {
+                leaf cpi-threshold-u {
+                    type real;
+                    description "This attribute is the cpi threshold of the composite performance metric.";
+                }
+                leaf frame-loss-indicator {
+                    type mef-common-types:natural-number;
+                    description "This attribute is the frame loss indicator of the composite performance metric.";
+                }
+                leaf frame-delay-indicator {
+                    type mef-common-types:natural-number;
+                    description "This attribute is the frame delay indicator of the composite performance metric.";
+                }
+                leaf ifdv-indicator {
+                    type mef-common-types:natural-number;
+                    description "This attribute is the ifdv indicator of the composite performance metric.";
+                }
+                leaf oneway-fd-threshold {
+                    type mef-common-types:natural-number;
+                    description "This attribute is the one way frame delay threshold (in milliseconds) of the composite performance metric.";
+                }
+                leaf oneway-ifdv-threshold {
+                    type mef-common-types:natural-number;
+                    description "This attribute is the one way IFDV threshold (in milliseconds) of the composite performance metric.";
+                }
+                leaf cpm-objective {
+                    type mef-common-types:percentage;
+                    description "This attribute sets the one way composite performance objective. Refer to MEF 10.3.1. MEF 26.2 doesn't include this.";
+                }
+                list ordered-pair-list {
+                    key 'uuid';
+                    min-elements 1;
+                    uses ordered-pair;
+                    description "This attributes associates this class with OrderedPair(s).";
+                }
+                description "The OneWayCompositePmPac object class represents the One Way Composite PM. It is associated with OrderedPair and SlsObjectiveAndParameters.";
+            }
+            grouping one-way-fd-pm-pac {
+                leaf oneway-fd-percentile {
+                    type mef-common-types:percentage;
+                    description "This attribute sets the one way frame delay percentile.";
+                }
+                leaf oneway-fd-objective {
+                    type mef-common-types:natural-number;
+                    description "This attribute sets the one way frame delay (in milliseconds) objective.";
+                }
+                list ordered-pair-list {
+                    key 'uuid';
+                    min-elements 1;
+                    uses ordered-pair;
+                    description "This attributes associates this class with OrderedPair(s).";
+                }
+                description "The OneWayFdPmPac object class represents the One Way Frame Delay PM. It is associated with OrderedPair and SlsObjectiveAndParameters.";
+            }
+            grouping one-way-fdr-pm-pac {
+                leaf oneway-fdr-percentile {
+                    type mef-common-types:percentage;
+                    description "This attribute sets the one way frame delay range percentile.";
+                }
+                leaf oneway-fdr-objective {
+                    type mef-common-types:natural-number;
+                    description "This attribute sets the one way frame delay range objective.";
+                }
+                list ordered-pair-list {
+                    key 'uuid';
+                    min-elements 1;
+                    uses ordered-pair;
+                    description "This attributes associates this class with OrderedPair(s).";
+                }
+                description "The OneWayFdrPmPac object class represents the One Way Frame Delay Variation PM (in milliseconds). It is associated with OrderedPair and SlsObjectiveAndParameters.";
+            }
+            grouping one-way-flr-pm-pac {
+                leaf oneway-flr-objective {
+                    type mef-common-types:percentage;
+                    description "This attribute sets the one way frame loss ratio objective.";
+                }
+                list ordered-pair-list {
+                    key 'uuid';
+                    min-elements 1;
+                    uses ordered-pair;
+                    description "This attributes associates this class with OrderedPair(s).";
+                }
+                description "The OneWayFlrPmPac object class represents the One Way Frame Loss Ratio PM. It is associated with OrderedPair and SlsObjectiveAndParameters.";
+            }
+            grouping one-way-group-av-pm-pac {
+                leaf min-number-of-sets-available-k {
+                    type mef-common-types:positive-integer;
+                    description "This attribute is the minimum number of sets of ordered pairs (K) that have to be available for Group Availability PM.";
+                }
+                leaf oneway-group-av-objective {
+                    type mef-common-types:percentage;
+                    description "This attribute sets the one way group availability objective for a single EVC/OVC.";
+                }
+                list set-of-ordered-pair-list {
+                    min-elements 1;
+                    uses set-of-ordered-pairs;
+                    description "This attributes associates this class with SetOfOrderedPairs(s).";
+                }
+                description "The OneWayGroupAvPmPac object class represents the One Way Group Availability PM for a single EVC/OVC. It is associated with SetOfOrderedPairs and SlsObjectiveAndParameters.";
+            }
+            grouping one-way-hli-pm-pac {
+                leaf oneway-hli-objective {
+                    type mef-common-types:positive-integer;
+                    description "This attribute sets the one way high loss interval objective.";
+                }
+                list ordered-pair-list {
+                    key 'uuid';
+                    min-elements 1;
+                    uses ordered-pair;
+                    description "This attributes associates this class with OrderedPair(s).";
+                }
+                description "The OneWayHliPmPac object class represents the One Way High Loss Interval PM. It is associated with OrderedPair and SlsObjectiveAndParameters.";
+            }
+            grouping one-way-ifdv-pm-pac {
+                leaf frame-pair-separation {
+                    type mef-common-types:positive-integer;
+                    description "This attribute is the frame pair separation of the IFDV performance metric.";
+                }
+                leaf oneway-ifdv-percentile {
+                    type mef-common-types:percentage;
+                    description "This attribute sets the one way IFDV percentile";
+                }
+                leaf oneway-ifdv-objective {
+                    type mef-common-types:natural-number;
+                    description "This attribute sets the one way IFDV objective.";
+                }
+                list ordered-pair-list {
+                    key 'uuid';
+                    min-elements 1;
+                    uses ordered-pair;
+                    description "This attributes associates this class with OrderedPair(s).";
+                }
+                description "The OneWayIfdvPmPac object class represents the One Way Frame Inter Frame Delay Variation PM (in milliseconds). It is associated with OrderedPair and SlsObjectiveAndParameters.";
+            }
+            grouping one-way-mfd-pm-pac {
+                leaf oneway-mfd-objective {
+                    type mef-common-types:natural-number;
+                    description "This attribute sets the one way mean frame delay objective.";
+                }
+                list ordered-pair-list {
+                    key 'uuid';
+                    min-elements 1;
+                    uses ordered-pair;
+                    description "This attributes associates this class with OrderedPair(s).";
+                }
+                description "The OneWayMfdPmPac object class represents the One Way Mean Frame Delay PM (in milliseconds). It is associated with OrderedPair and SlsObjectiveAndParameters.";
+            }
+            grouping ordered-pair {
+                leaf from-carrier-ethernet-service-end-point {
+                    type leafref {
+                        path '/mef-common:carrier-ethernet-service-end-point/mef-common:uuid';
+                    }
+                    description "This attribute represents the relationship between OrderedPair and a 'from' CarrierEthernetServiceEndPoint (EVC End Point or OVC End Point).";
+                }
+                leaf to-carrier-ethernet-service-endpoint {
+                    type leafref {
+                        path '/mef-common:carrier-ethernet-service-end-point/mef-common:uuid';
+                    }
+                    description "This attribute represents the relationship between OrderedPair and a 'to' CarrierEthernetServiceEndPoint (EVC End Point or OVC End Point). ";
+                }
+                leaf uuid {
+                    type string;
+                    description "none";
+                }
+                description "The OrderedPair object class is an ordered pair of (EVC/OVC) end points for a specific PM, for one way direction. It is associated with a One Way PM conditional package (all PM conditional packages except Group Availability) and a pair of CarrierEthernetServiceEndPoint pairs (EVC End Points or OVC End Points, one as 'from' and one as 'to' for indication of 'order' or direction).";
+            }
+            grouping carrier-ethernet-sls {
+                container time-interval-t {
+                    uses mef-common-types:time-interval-t;
+                    description "This attribute sets the time interval to evaluate the performance for the SLS. All performances of this SLS use the same time interval T, which itself may not be constrained, e.g., 1 month.";
+                }
+                container start-time {
+                    uses mef-common-types:time-and-date;
+                    description "This attribute represents the date and time for the start of the SLS. It is the beginning of the first Time Interval T. ";
+                }
+                description "The CarrierEthernetSls object class represents Carrier Ethernet Service Level Specification that provides a list of Performance Metrics where each item in the list includes the parameters and performance objective for the given Performance Metric. It is associated with EVC or OVC, and a list of SlsCosNameEntry(s).";
+            }
+            grouping carrier-ethernet-service-end-point {
+                leaf admin-state {
+                    type mef-common-types:admin-state;
+                    default "UNLOCKED";
+                    description "This attribute denotes the administrative state of EVC End Point or OVC End Point. The values supported are LOCKED and UNLOCKED. When set to UNLOCKED, the Carrier Ethernet Service End Point (EVC End Point or OVC End Point) is enabled and ready to forward traffic. When set to LOCKED, the Carrier Ethernet Service End Point (EVC End Point or OVC End Point) is disabled and will block (i.e., not forward) traffic.";
+                }
+                leaf operational-state {
+                    type mef-common-types:operational-state;
+                    config false;
+                    description "This attribute denotes the operational state of the EVC End Point or the OVC End Point, as working ENABLED or not working
+                        DISABLED.";
+                }
+                leaf user-label {
+                    type string;
+                    description "This attribute allows the user to define a user friendly description of the entity.";
+                }
+                leaf cos-mapping-type {
+                    type mef-common-types:cos-or-eec-mapping-type;
+                    description "The Class of Service (CoS) is used to specify ingress Bandwidth Profiles. The CoS Mapping Type is one of SEP (Service End Point) based, PCP based or DSCP based.";
+                }
+                leaf eec-mapping-type {
+                    type mef-common-types:cos-or-eec-mapping-type;
+                    description "The Egress Equivalence Class (EEC) is used to specify Egress Bandwidth Profiles. The EEC Mapping Type is one of SEP (Service End Point) based, PCP based or DSCP based. When _eecIdentifierList attribute is empty,  this attribute shall be unset. Otherwise it shall be set.";
+                }
+                container source-mac-address-limit {
+                    uses mef-common-types:source-mac-address-limit;
+                    description "This attribute limits the number of source MAC Addresses that can be used in ingress EI Frames mapped to the EVC End Point or the OVC End Point of all types over a time interval. When not present, the number of source MAC addresses is unlimited.";
+                }
+                list egress-map-list {
+                    key 'egress-map-type egress-map-id';
+                    uses egress-map;
+                    description "This attribute represents the relationship between the EVC/OVC End Point and the Egress Map(s). This attribute is a set of mappings that determine the content of the S-Tag or C-Tag of an egress EI Frame. This is not defined in MEF 10.3 but future MEF 10.x may adapt this attribute.";
+                }
+                list eec-identifier-list {
+                    key 'eec-name';
+                    uses eec-identifier;
+                    description "This attribute represents the relationship between the EVC/OVC End Point and the Egress Equivalence Class Identifier(s).";
+                }
+                container color-identifier {
+                    uses color-identifier;
+                    description "This attribute represents the relationship between the EVC/OVC End Point and a Color Identifier.";
+                }
+                list cos-identifier-list {
+                    key 'cos-name';
+                    min-elements 1;
+                    uses cos-identifier;
+                    description "This attribute represents the relationship between the EVC/OVC End Point and the Class of Service Identifier(s).";
+                }
+                container ingress-bwp-flow-per-sep {
+                    uses bwp-flow;
+                    description "This attribute denotes the relationship between an EVC/OVC End Point and the bandwidth profile flow. It describes ingress policing on all ingress EI Frames mapped to a given EVC/OVC End Point";
+                }
+                container egress-bwp-flow-per-sep {
+                    uses bwp-flow;
+                    description "This attribute denotes the relationship between an EVC/OVC End Point and the bandwidth profile flow. It describes the length and arrival time characteristics of all egress EI Frames mapped to a given EVC/OVC End Point.";
+                }
+                leaf uuid {
+                    type string;
+                    description "none";
+                }
+                description "The CarrierEthernetServiceEndPoint represents the EVC End Point or the OVC End Point. This is an abstract class and the super class of EvcEndPoint and OvcEndPoint. It contains the common attributes of EvcEndPoint and OvcEndPoint, as well as all common associations with the other object classes, such as CosIdentifier(s), EecIdentifier(s), a ColorIdentifier, EgressMap(s), a CarrierEthernetService (i.e., EVC or OVC), etc. ";
+            }
+
+        /***********************
         * package color-identifier
-        **********************/ 
-            grouping color-identifier-g {
+        **********************/
+            grouping color-identifier {
                 leaf color-field-type {
                     type mef-common-types:color-field-type;
                     description "This attribute determines which conditional package (among EVC/OVC End Point, PCP, DEI or DSCP) to be used as the Color Identifier.";
                 }
                 container sep-color-pac {
-                    uses sep-color-id-pac-g;
+                    uses sep-color-id-pac;
                     description "This attribute represents the relationship between the ColorIdentifier and the SepColorIdPac (representing the choice that maps EVC End Point or OVC End Point to Color).";
                 }
                 container dei-color-pac {
-                    uses dei-color-id-pac-g;
+                    uses dei-color-id-pac;
                     description "This attribute represents the relationship between the ColorIdentifier and the DeiColorIdPac (representing the choice that maps Vlan tag DEI to Color).";
                 }
                 container pcp-color-pac {
-                    uses pcp-color-id-pac-g;
+                    uses pcp-color-id-pac;
                     description "This attribute represents the relationship between the ColorIdentifier and the PcpColorIdPac (representing the choice that maps Vlan tag PCPs to Color).";
                 }
                 list dcsp-color-pac {
                     key 'ip-version';
                     max-elements 2;
-                    uses dscp-color-id-pac-g;
+                    uses dscp-color-id-pac;
                     description "This attribute represents the relationship between the ColorIdentifier and the DscpColorIdPac (representing the choice that maps DSCP values to Color).";
+                }
+                leaf color-identifier-id {
+                    type string;
+                    description "none";
                 }
                 description "The ColorIdentifier object class represents the Color Identifier. The Color Identifier is a pair of the form <F, M> where F is a field in the ingress EI Frame and M is a mapping between each possible value of the field F and a Color. The ColorIdentifier object class is associated with CarrierEthernetServiceEndPoint (EvcEndPoint or OvcEndPoint), in addition to the different field F, such as SepColorIdPac, PcpColorIdPac, DeiColorIdPac, and DscpColorIdPac, etc.";
             }
-            grouping dei-color-id-pac-g {
+            grouping dei-color-id-pac {
                 description "The DeiColorIdPac object class represents the Color Identifier that maps the vlan tag (S tag or C tag) DEI value to Color, DEI=0 for green color and DEI=1 for yellow color. For an EVC End Point or an OVC End Point at UNI or in a VUNI, the DEI value is from C-Tag ingress EI frames. For an OVC End Point at an ENNI and not in a VUNI, the DEI value is from S-Tag of the ingress EI frames. ";
             }
-            grouping dscp-color-id-pac-g {
+            grouping dscp-color-id-pac {
                 leaf ip-version {
                     type mef-common-types:ip-version;
                     description "This attribute denotes which IP version is used. It can be IPV4, IPV6 or IPV4_AND_IPV6.";
@@ -131,7 +511,7 @@ module mef-common {
                 }
                 description "The DscpColorIdPac object class represents the Color Identifier that maps DSCP (IPv4 or IPv6) values to Color.";
             }
-            grouping pcp-color-id-pac-g {
+            grouping pcp-color-id-pac {
                 leaf-list pcp-value-for-green-list {
                     type mef-common-types:natural-number;
                     max-elements 8;
@@ -144,7 +524,7 @@ module mef-common {
                 }
                 description "The PcpColorIdPac object class represents the Color Identifier that maps vlan tag (S tag or C tag) PCP values to Color. For an EVC End Point or an OVC End Point at UNI or in a VUNI, the PCP values are from C-Tag ingress EI frames. For an OVC End Point at an ENNI and not in a VUNI, the PCP values are from S-Tag of the ingress EI frames. ";
             }
-            grouping sep-color-id-pac-g {
+            grouping sep-color-id-pac {
                 leaf color {
                     type mef-common-types:frame-color;
                     description "This attribute denotes the color of the EI frame, green or yellow.";
@@ -154,38 +534,38 @@ module mef-common {
 
         /***********************
         * package cos-identifier
-        **********************/ 
-            grouping cos-identifier-g {
+        **********************/
+            grouping cos-identifier {
                 leaf cos-name {
                     type string;
                     description "This attribute denotes the Class of Service name that the CosIdentifier map to.";
                 }
                 list l2cp-protocol-list {
                     key 'l2cp-protocol-type';
-                    uses mef-common-types:l2cp-protocol-g;
+                    uses mef-common-types:l2cp-protocol;
                     description "This attribute lists the L2CP Protocols that map to the Class of Service Name.";
                 }
                 container sep-cos-id-pac {
-                    uses sep-cos-id-pac-g;
+                    uses sep-cos-id-pac;
                     description "This attribute represents the relationship between the CosIdentifier and the SepCosIdPac when the cosMappingType of EvcEndPoint or OvcEndPoint is END_POINT and the cosName is not only for L2CP.";
                 }
                 container pcp-cos-id-pac {
-                    uses pcp-cos-id-pac-g;
+                    uses pcp-cos-id-pac;
                     description "This attribute represents the relationship between the CosIdentifier and the PcpCosIdPac  when the cosMappingType of EvcEndPoint or OvcEndPoint is PCP and the cosName is not only for L2CP.";
                 }
                 list dscp-cos-id-pac {
                     key 'ip-version';
                     max-elements 2;
-                    uses dscp-cos-id-pac-g;
+                    uses dscp-cos-id-pac;
                     description "This attribute represents the relationship between the CosIdentifier and the DespCosIdPac when the cosMappingType of EvcEndPoint or OvcEndPoint is DSCP and the cosName is not only for L2CP.";
                 }
                 container ingress-bwp-per-cos {
-                    uses bwp-flow-g;
+                    uses bwp-flow;
                     description "This attribute represents the relationship between the CosIdentifier and the BwpFlow, for ingress bandwidth profile per CoS Name.";
                 }
                 description "The CosIdentifier object class represents the Class of Service Identifier. Each ingress EI Frame mapped to the given EVC/OVC End Point has a single Class of Service. The Class of Service can be determined from inspection of the content of the ingress EI Frame. It is associated with the SepCosIdPac, or the PcpCosIdPac, or the DscpCosIdPac (when the Class of Service Identifier mapping type is Service End Point, or PCP values, or DSCP values respectively). EI Frames of L2CP protocols may be identified by a Class of Service Identifier, mapping to specific CoS Name.";
             }
-            grouping dscp-cos-id-pac-g {
+            grouping dscp-cos-id-pac {
                 leaf-list dscp-value-list {
                     type mef-common-types:natural-number;
                     min-elements 1;
@@ -198,7 +578,7 @@ module mef-common {
                 }
                 description "The DscpCosIdPac object class represents CoS Identifier that maps the IP DSCP values to the Class of Service Name(s). It can map a list of DSCP values to two different Class of Service Names, one for ingress EI Frames carrying an IPv4 packet and a different one for ingress EI Frames carrying an IPv6 packet. It also can map a list of DSCP values (both IPv4 and IPv6) to one Class of Service Name.";
             }
-            grouping pcp-cos-id-pac-g {
+            grouping pcp-cos-id-pac {
                 leaf-list pcp-value-list {
                     type mef-common-types:natural-number;
                     min-elements 1;
@@ -207,14 +587,14 @@ module mef-common {
                 }
                 description "The PcpCosIdPac object class represents CoS Identifier that maps a list of PCP values to a Class of Service Name. For an EVC End Point or an OVC End Point at UNI or in a VUNI, the PCP values are from C-Tag ingress EI frames. For an OVC End Point at an ENNI and not in a VUNI, the PCP values are from S-Tag of the ingress EI frames. ";
             }
-            grouping sep-cos-id-pac-g {
+            grouping sep-cos-id-pac {
                 description "The SepCosIdPac represents the CoS Identifier that maps the EVC End Point or the OVC End Point to a Class of Service Name. ";
             }
 
         /***********************
         * package eec-identifier
-        **********************/ 
-            grouping dscp-eec-id-pac-g {
+        **********************/
+            grouping dscp-eec-id-pac {
                 leaf ip-version {
                     type mef-common-types:ip-version;
                     description "This attribute specifies the IP version for the DSCP. It can be IPV4, IPV6 or IPV4_AND_IPV6.";
@@ -227,38 +607,38 @@ module mef-common {
                 }
                 description "The DscpEecIdPac object class represents Egress Equivalence Class Identifier that maps the IP DSCP values to the Egress Equivalence Class Name(s). It can map a list of DSCP values to two different Egress Equivalence Class Names, one for ingress EI Frames carrying an IPv4 packet and a different one for ingress EI Frames carrying an IPv6 packet. It also can map a list of DSCP values (both IPv4 and IPv6 packets) to an Egress Equivalence Class Name.";
             }
-            grouping eec-identifier-g {
+            grouping eec-identifier {
                 leaf eec-name {
                     type string;
                     description "This attribute denotes the Egress Equivalence Class Name that the EecIdentifier maps to.";
                 }
                 list l2cp-protocol-list {
                     key 'l2cp-protocol-type';
-                    uses mef-common-types:l2cp-protocol-g;
+                    uses mef-common-types:l2cp-protocol;
                     description "This attribute lists the L2CP Protocols that map to the Egress Equivalence Class Name.";
                 }
                 container sep-eec-id-pac {
-                    uses sep-eec-id-pac-g;
+                    uses sep-eec-id-pac;
                     description "This attribute represents the relationship between the EecIdentifier and a SepEecIdPac when the eecMappingType of EvcEndPoint or OvcEndPoint is END_POINT and the eecName is not only for L2CP. This not addressed in MEF 10.3 but can be future consideration.";
                 }
                 container pcp-eec-id-pac {
-                    uses pcp-eec-id-pac-g;
+                    uses pcp-eec-id-pac;
                     description "This attribute represents the relationship between the EecIdentifier and a PcpEecIdPac when the eecMappingType of EvcEndPoint or OvcEndPoint is PCP and the eecName is not only for L2CP.";
                 }
                 list dscp-eec-id-pac {
                     key 'ip-version';
                     max-elements 2;
-                    uses dscp-eec-id-pac-g;
+                    uses dscp-eec-id-pac;
                     description "This attribute represents the relationship between the EecIdentifier and a DscpEecIdPac when the eecMappingType of EvcEndPoint or OvcEndPoint is DSCP and the eecName is not only for L2CP.";
                 }
                 container egress-bwp-per-eec {
-                    uses bwp-flow-g;
+                    uses bwp-flow;
                     description "This attribute represents the relationship between the EecIdentifier and the BwpFlow, for egress bandwidth profile per EEC Name.";
                 }
                 description "The EecIdentifier object class represents the Egress Equivalence Class Identifier. Each egress EI Frame mapped to the given EVC/OVC End Point has a single Egress Equivalence Class. 
 The Egress Equivalence Class can be determined from inspection of the content of the egress EI Frame. It is associated with the SepCosIdPac, or the PcpCosIdPac, or the DscpCosIdPac (representing mapping to EVC/OVC End Point, or PCP, or DSCP respectively). EI Frames of L2CP protocols may be identified by an Egress Equivalence Class Identifier, mapping to specific Egress Equivalence Class Name.";
             }
-            grouping pcp-eec-id-pac-g {
+            grouping pcp-eec-id-pac {
                 leaf-list pcp-value-list {
                     type mef-common-types:natural-number;
                     min-elements 1;
@@ -267,14 +647,14 @@ The Egress Equivalence Class can be determined from inspection of the content of
                 }
                 description "The PcpEecIdPac object class represents Egress Equivalence Class Identifier that maps a list of PCP values to Egress Equivalence Class Name. For an EVC End Point or an OVC End Point at UNI or in a VUNI, the PCP values are from C-Tag egress EI frames. For an OVC End Point at an ENNI and not in a VUNI, the PCP values are from S-Tag of the egress EI frames";
             }
-            grouping sep-eec-id-pac-g {
+            grouping sep-eec-id-pac {
                 description "The SepEecIdPac represents the Egress Equivalence Class Identifier that maps the EVC End Point or the OVC End Point to an Egress Equivalence Class Name.";
             }
 
         /***********************
         * package egress-map
-        **********************/ 
-            grouping cos-name-and-color-to-dei-pac-g {
+        **********************/
+            grouping cos-name-and-color-to-dei-pac {
                 leaf ingress-cos-name {
                     type string;
                     description "This attribute denotes the ingress CoS name.";
@@ -289,7 +669,7 @@ The Egress Equivalence Class can be determined from inspection of the content of
                 }
                 description "The CosNameAndColorToDeiPac object class represents the Egress Map that maps from CoS Name and Ingress Color to DEI.";
             }
-            grouping cos-name-and-color-to-pcp-pac-g {
+            grouping cos-name-and-color-to-pcp-pac {
                 leaf ingress-cos-name {
                     type string;
                     description "This attribute denotes the ingress CoS name.";
@@ -304,7 +684,7 @@ The Egress Equivalence Class can be determined from inspection of the content of
                 }
                 description "The CosNameAndColorToPcpPac object class represents the Egress Map that maps from CoS Name and Ingress Color to PCP.";
             }
-            grouping cos-name-to-pcp-pac-g {
+            grouping cos-name-to-pcp-pac {
                 leaf ingress-cos-name {
                     type string;
                     description "This attribute denotes the ingress CoS name.";
@@ -315,25 +695,29 @@ The Egress Equivalence Class can be determined from inspection of the content of
                 }
                 description "The CosNameToPcpPac object class represents the Egress Map that maps from CoS Name to PCP.";
             }
-            grouping egress-map-g {
+            grouping egress-map {
                 leaf egress-map-type {
                     type mef-common-types:egress-map-type;
                     description "This attribute determines which form to take to apply for egress frame color indication, among CoS name and Ingress Color to C-Tag PCP, or CoS name and Ingress Color to S-Tag PCP, or CoS Name and Ingress Color to C-Tag DEI, or CoS Name and Ingress Color to S-Tag DEI, or CoS Name to C-Tag PCP, or CoS Name to S-Tag PCP.";
                 }
                 list cos-name-and-color-to-dei-pac-list {
                     key 'ingress-cos-name ingress-color';
-                    uses cos-name-and-color-to-dei-pac-g;
+                    uses cos-name-and-color-to-dei-pac;
                     description "This attribute represents the relationship between the EgressMap and the CosNameAndColorToDeiPac (representing the attribute set for using CoS Name and ingress color to egress DEI mapping).";
                 }
                 list cos-name-to-pcp-pac-list {
                     key 'ingress-cos-name';
-                    uses cos-name-to-pcp-pac-g;
+                    uses cos-name-to-pcp-pac;
                     description "This attribute represents the relationship between the EgressMap and the CosNameToPcpPac (representing the attribute set for using CoS Name to egress PCP mapping).";
                 }
                 list cos-name-and-color-to-pcp-pac-list {
                     key 'ingress-color';
-                    uses cos-name-and-color-to-pcp-pac-g;
+                    uses cos-name-and-color-to-pcp-pac;
                     description "This attribute represents the relationship between the EgressMap and the CosNameAndColorToPcpPac (representing the attribute set for using CoS Name and ingress color to egress PCP mapping).";
+                }
+                leaf egress-map-id {
+                    type string;
+                    description "none";
                 }
                 description "The EgressMap object class represents the Egress Map that is a set of mappings that determine the content of the S-Tag or C-Tag of an egress EI Frame. It is associated with EvcEndPoint or OvcEndPoint.";
             }
@@ -341,6 +725,6 @@ The Egress Equivalence Class can be determined from inspection of the content of
 
     /***********************
     * package associations
-    **********************/ 
+    **********************/
 
 }
