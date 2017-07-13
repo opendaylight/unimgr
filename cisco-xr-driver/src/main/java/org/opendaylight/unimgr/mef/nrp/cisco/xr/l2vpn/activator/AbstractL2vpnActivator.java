@@ -67,8 +67,8 @@ public abstract class AbstractL2vpnActivator implements ResourceActivator {
         String outerName = getOuterName(serviceId);
         ServicePort port = null;
         ServicePort neighbor = null;
-        for(EndPoint endPoint: endPoints){
-            if(port==null){
+        for (EndPoint endPoint: endPoints) {
+            if (port==null) {
                 port = ServicePort.toServicePort(endPoint, NETCONF_TOPOLODY_NAME);
             } else {
                 neighbor = ServicePort.toServicePort(endPoint, NETCONF_TOPOLODY_NAME);

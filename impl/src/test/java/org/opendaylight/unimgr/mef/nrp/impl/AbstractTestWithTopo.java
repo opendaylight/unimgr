@@ -83,7 +83,7 @@ public abstract class AbstractTestWithTopo extends AbstractDataBrokerTest {
 
     protected Node n(ReadWriteTransaction tx, boolean addSips, String node, String ... endpoints) {
         NrpDao nrpDao = new NrpDao(tx);
-        if(addSips) Arrays.stream(endpoints).map(e -> new ServiceInterfacePointBuilder()
+        if (addSips) Arrays.stream(endpoints).map(e -> new ServiceInterfacePointBuilder()
                 .setUuid(new Uuid("sip:" + e))
                 .build())
                 .forEach(nrpDao::addSip);
@@ -92,7 +92,7 @@ public abstract class AbstractTestWithTopo extends AbstractDataBrokerTest {
         return nrpDao.createSystemNode(node, Arrays.stream(endpoints)
                 .map(e-> {
                     OwnedNodeEdgePointBuilder builder = new OwnedNodeEdgePointBuilder().setUuid(new Uuid(e));
-                    if(addSips) {
+                    if (addSips) {
                         builder.setMappedServiceInterfacePoint(Collections.singletonList(new Uuid("sip:"+e)));
                     }
                     return builder.build();

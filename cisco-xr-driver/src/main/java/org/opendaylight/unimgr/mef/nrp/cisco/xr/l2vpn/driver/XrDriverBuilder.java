@@ -41,7 +41,7 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
     private L2vpnLocalConnectActivator localActivator;
     private L2vpnP2pConnectActivator p2pActivator;
 
-    public XrDriverBuilder(DataBroker dataBroker, MountPointService mountPointService){
+    public XrDriverBuilder(DataBroker dataBroker, MountPointService mountPointService) {
         this.dataBroker = dataBroker;
         this.mountPointService = mountPointService;
     }
@@ -86,11 +86,11 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
                 return 0;
             }
 
-            private void handleEndpoints(BiConsumer<List<EndPoint>,AbstractL2vpnActivator> action){
+            private void handleEndpoints(BiConsumer<List<EndPoint>,AbstractL2vpnActivator> action) {
                 endPoints.forEach(endPoint -> connectWithAllNeighbors(action,endPoint,endPoints));
             }
 
-            private void connectWithAllNeighbors(BiConsumer<List<EndPoint>,AbstractL2vpnActivator> action, EndPoint endPoint, List<EndPoint> neighbors){
+            private void connectWithAllNeighbors(BiConsumer<List<EndPoint>,AbstractL2vpnActivator> action, EndPoint endPoint, List<EndPoint> neighbors) {
                 neighbors.stream()
                         .filter(neighbor -> !neighbor.equals(endPoint))
                         .forEach(neighbor -> activateNeighbors(action,endPoint,neighbor));
@@ -99,11 +99,11 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
             private void activateNeighbors(BiConsumer<List<EndPoint>,AbstractL2vpnActivator> action, EndPoint portA, EndPoint portZ) {
                 List<EndPoint> endPointsToActivate = Arrays.asList(portA,portZ);
 
-                if(SipHandler.isTheSameDevice(portA.getEndpoint().getServiceInterfacePoint(),portZ.getEndpoint().getServiceInterfacePoint())){
-                    if(bridgeActivatedPairs==null){
+                if (SipHandler.isTheSameDevice(portA.getEndpoint().getServiceInterfacePoint(),portZ.getEndpoint().getServiceInterfacePoint())) {
+                    if (bridgeActivatedPairs==null) {
                         bridgeActivatedPairs = new ArrayList<>();
                     }
-                    if(isPairActivated(portA,portZ)){
+                    if (isPairActivated(portA,portZ)) {
                         return;
                     }
                     action.accept(endPointsToActivate, localActivator);
@@ -113,11 +113,11 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
                 }
             }
 
-            private boolean isPairActivated(EndPoint a, EndPoint z){
+            private boolean isPairActivated(EndPoint a, EndPoint z) {
                 return bridgeActivatedPairs.stream()
                         .anyMatch( entry -> {
-                            if( (entry.getKey().equals(a) && entry.getValue().equals(z))
-                                    || (entry.getKey().equals(z) && entry.getValue().equals(a))){
+                            if ( (entry.getKey().equals(a) && entry.getValue().equals(z))
+                                    || (entry.getKey().equals(z) && entry.getValue().equals(a))) {
                                 return true;
                             }
                             return false;

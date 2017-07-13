@@ -61,7 +61,7 @@ public class EvcUpdateCommandTest {
     private DataBroker dataBroker;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         PowerMockito.mockStatic(UniUtils.class);
         PowerMockito.mockStatic(MdsalUtils.class);
         PowerMockito.mockStatic(EvcUtils.class);
@@ -170,7 +170,7 @@ public class EvcUpdateCommandTest {
     }
 
     @SuppressWarnings("unchecked")
-    private void verifyExecute(int getUniTimes, int deleteTimes, int readNodeTimes, int updateEvcTime){
+    private void verifyExecute(int getUniTimes, int deleteTimes, int readNodeTimes, int updateEvcTime) {
         evcUpdateCommand.execute();
         PowerMockito.verifyStatic(times(getUniTimes));
         UnimgrMapper.getUniIid(any(DataBroker.class), any(IpAddress.class),

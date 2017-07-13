@@ -46,7 +46,7 @@ public class EvcRemoveCommandTest {
     private DataBroker dataBroker;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         PowerMockito.mockStatic(MdsalUtils.class);
         PowerMockito.mockStatic(EvcUtils.class);
         PowerMockito.mockStatic(OvsdbUtils.class);

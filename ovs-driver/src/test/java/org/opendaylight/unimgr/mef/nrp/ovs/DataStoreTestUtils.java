@@ -29,15 +29,15 @@ import static org.junit.Assert.fail;
 public class DataStoreTestUtils {
     private static final Logger LOG = LoggerFactory.getLogger(DataStoreTestUtils.class);
 
-    public static <T extends DataObject> T read(InstanceIdentifier instanceIdentifier, DataBroker dataBroker){
+    public static <T extends DataObject> T read(InstanceIdentifier instanceIdentifier, DataBroker dataBroker) {
         return read(instanceIdentifier,dataBroker,LogicalDatastoreType.OPERATIONAL);
     }
 
-    public static <T extends DataObject> T readConfig(InstanceIdentifier instanceIdentifier, DataBroker dataBroker){
+    public static <T extends DataObject> T readConfig(InstanceIdentifier instanceIdentifier, DataBroker dataBroker) {
         return read(instanceIdentifier,dataBroker,LogicalDatastoreType.CONFIGURATION);
     }
 
-    public static <T extends DataObject> void write(T object, InstanceIdentifier<T> instanceIdentifier, DataBroker dataBroker){
+    public static <T extends DataObject> void write(T object, InstanceIdentifier<T> instanceIdentifier, DataBroker dataBroker) {
         ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
         transaction.put(LogicalDatastoreType.OPERATIONAL,instanceIdentifier,object,true);
 
@@ -55,7 +55,7 @@ public class DataStoreTestUtils {
         });
     }
 
-    public static void delete(InstanceIdentifier instanceIdentifier, DataBroker dataBroker){
+    public static void delete(InstanceIdentifier instanceIdentifier, DataBroker dataBroker) {
         ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
         transaction.delete(LogicalDatastoreType.OPERATIONAL, instanceIdentifier);
 
@@ -73,11 +73,11 @@ public class DataStoreTestUtils {
         });
     }
 
-    private static <T extends DataObject> T read(InstanceIdentifier instanceIdentifier, DataBroker dataBroker, LogicalDatastoreType type){
+    private static <T extends DataObject> T read(InstanceIdentifier instanceIdentifier, DataBroker dataBroker, LogicalDatastoreType type) {
         ReadOnlyTransaction transaction = dataBroker.newReadOnlyTransaction();
         try {
             Optional<T> opt = (Optional<T>) transaction.read(type,instanceIdentifier).checkedGet();
-            if (opt.isPresent()){
+            if (opt.isPresent()) {
                 return opt.get();
             } else {
                 fail("Could not find object");

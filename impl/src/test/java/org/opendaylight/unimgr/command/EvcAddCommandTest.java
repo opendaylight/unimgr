@@ -61,7 +61,7 @@ public class EvcAddCommandTest {
 
     @SuppressWarnings("unchecked")
     @Before
-    public void setUp(){
+    public void setUp() {
         PowerMockito.mockStatic(MdsalUtils.class);
         PowerMockito.mockStatic(EvcUtils.class);
         PowerMockito.mockStatic(OvsdbUtils.class);

@@ -80,7 +80,7 @@ public class BandwidthProfileHelper {
                 .map(nadg -> nadg.collect(x -> x::getLpSpec))
                 .collect(Collectors.toList());
 
-        for(NullAwareDatastoreGetter<LpSpec> lpSpecNadg : lpSpecNadgs) {
+        for (NullAwareDatastoreGetter<LpSpec> lpSpecNadg : lpSpecNadgs) {
             NullAwareDatastoreGetter<AdapterSpec1> adapterSpecNadg = lpSpecNadg
                     .collect(x -> x::getAdapterSpec)
                     .collect(x -> x::getAugmentation, AdapterSpec1.class);
@@ -118,8 +118,8 @@ public class BandwidthProfileHelper {
     }
 
     public boolean isQosEnabled() {
-        for(BandwidthProfileComposition bandwidthProfileComposition : bandwidthProfiles) {
-            if(bandwidthProfileComposition.hasAnyProfileDefined()) {
+        for (BandwidthProfileComposition bandwidthProfileComposition : bandwidthProfiles) {
+            if (bandwidthProfileComposition.hasAnyProfileDefined()) {
                 return true;
             }
         }
@@ -159,7 +159,7 @@ public class BandwidthProfileHelper {
     }
 
     public BandwidthProfileHelper addPolicyMap(String fcName, BandwidthProfileComposition.BwpDirection direction, BandwidthProfileComposition.BwpApplicability applicability) {
-        if(bandwidthProfiles.size() > 0) {
+        if (bandwidthProfiles.size() > 0) {
             Optional<GNRPBwpFlow> bwProfileOptional = bandwidthProfiles.stream().findFirst().get().get(direction, applicability);
 
             if (bwProfileOptional.isPresent()) {

@@ -36,7 +36,7 @@ public class InterfaceHelper {
     public static InterfaceName getInterfaceName(ServicePort port) {
         String interfaceName = port.getTp().getValue();
 
-        if(interfaceName.contains(":")) {
+        if (interfaceName.contains(":")) {
             interfaceName = interfaceName.split(":")[1];
         }
 
@@ -63,11 +63,11 @@ public class InterfaceHelper {
             .setActive(new InterfaceActive("act"))
             .setShutdown(Boolean.FALSE);
 
-        if(mtus.isPresent()) {
+        if (mtus.isPresent()) {
             configurationBuilder.setMtus(mtus.get());
         }
 
-        if(setL2Transport) {
+        if (setL2Transport) {
             setL2Configuration(configurationBuilder);
         }
 

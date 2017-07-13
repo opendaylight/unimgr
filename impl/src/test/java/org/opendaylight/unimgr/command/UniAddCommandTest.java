@@ -59,7 +59,7 @@ public class UniAddCommandTest {
 
     @SuppressWarnings("unchecked")
     @Before
-    public void setUp(){
+    public void setUp() {
         PowerMockito.mockStatic(UniUtils.class);
         PowerMockito.mockStatic(OvsdbUtils.class);
         PowerMockito.mockStatic(MdsalUtils.class);
@@ -151,7 +151,7 @@ public class UniAddCommandTest {
     }
 
     @SuppressWarnings("unchecked")
-    private void verifyExecute(int qosTimes, int bridgeTimes, int updateNodeTime, int updateIIDTimes){
+    private void verifyExecute(int qosTimes, int bridgeTimes, int updateNodeTime, int updateIIDTimes) {
         uniAddCommand.execute();
         PowerMockito.verifyStatic(times(qosTimes));
         OvsdbUtils.createQoSForOvsdbNode(any(DataBroker.class), any(UniAugmentation.class));

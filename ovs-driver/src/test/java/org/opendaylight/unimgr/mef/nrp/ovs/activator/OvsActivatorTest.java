@@ -74,7 +74,7 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
     List<String> of2InterwitchPorts = Arrays.asList("openflow:5:3", "openflow:5:4");
 
     @Before
-    public void setUp(){
+    public void setUp() {
         //given
         dataBroker = getDataBroker();
         ovsActivator = new OvsActivator(dataBroker);
@@ -84,7 +84,7 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
     }
 
     @Test
-    public void testActivate(){
+    public void testActivate() {
         //given
         List<EndPoint> endPoints = prepareEndpoints();
 
@@ -143,21 +143,21 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
         assertFalse(hasVlanFlows);
     };
 
-    private boolean hasVlanMatch(Flow flow){
-        if(flow.getMatch().getVlanMatch().getVlanId().getVlanId().getValue().equals(expectedVlanId)){
+    private boolean hasVlanMatch(Flow flow) {
+        if (flow.getMatch().getVlanMatch().getVlanId().getVlanId().getValue().equals(expectedVlanId)) {
             return true;
         }
         return false;
     }
 
-    private void checkTable(Nodes nodes, BiConsumer<Table,List<String>> checkTable){
+    private void checkTable(Nodes nodes, BiConsumer<Table,List<String>> checkTable) {
         nodes.getNode()
                 .forEach(node -> {
                     try {
                         Table t = OpenFlowUtils.getTable(node);
-                        if(node.getKey().getId().getValue().equals(ofPort1Name)){
+                        if (node.getKey().getId().getValue().equals(ofPort1Name)) {
                             checkTable.accept(t,of1InterwitchPorts);
-                        } else if(node.getKey().getId().getValue().equals(ofPort2Name)){
+                        } else if (node.getKey().getId().getValue().equals(ofPort2Name)) {
                             checkTable.accept(t,of2InterwitchPorts);
                         }
                     } catch (ResourceNotAvailableException e) {
@@ -166,14 +166,14 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
                 });
     }
 
-    private List<EndPoint> prepareEndpoints(){
+    private List<EndPoint> prepareEndpoints() {
         List<EndPoint> endPoints = new ArrayList<>();
         endPoints.add(mockEndPoint(port1Name));
         endPoints.add(mockEndPoint(port2Name));
         return endPoints;
     }
 
-    private EndPoint mockEndPoint(String portName){
+    private EndPoint mockEndPoint(String portName) {
         ConnectivityServiceEndPoint connectivityServiceEndPoint = mock(ConnectivityServiceEndPoint.class);
         NrpConnectivityServiceEndPointAttrs attrs = mock(NrpConnectivityServiceEndPointAttrs.class);
         //UNI port mock
@@ -206,7 +206,7 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
     /**
      * Add 5 ovsdb bridges and suitable openflow nodes
      */
-    private void initTopologies(){
+    private void initTopologies() {
         List<Node> bridges = new ArrayList<>();
         List<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node> ofNodes = new ArrayList<>();
         bridges.add(createBridge("s1",5));
@@ -223,14 +223,14 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
         OpenFlowTopologyTestUtils.createOpenFlowNodes(ofNodes,dataBroker);
     }
 
-    private Node createBridge(String name, int portCount){
+    private Node createBridge(String name, int portCount) {
         List<TerminationPoint> tps = new ArrayList<>();
         IntStream.range(1,portCount+1)
                 .forEach(i -> tps.add(OvsdbTopologyTestUtils.createTerminationPoint(name+"-eth"+i,Long.valueOf(i))));
         return OvsdbTopologyTestUtils.createBridge(name, tps);
     }
 
-    private org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node createOpenFlowNode(Node node){
+    private org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node createOpenFlowNode(Node node) {
         String ovsdbName = node.getKey().getNodeId().getValue();
         String ofBridgeName = getOfName(ovsdbName);
 
@@ -241,12 +241,12 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
         return OpenFlowTopologyTestUtils.createOpenFlowNode(ofBridgeName,nodeConnectors);
     }
 
-    private String getOfName(String ovsdbName){
+    private String getOfName(String ovsdbName) {
         String bridgeNumber = ovsdbName.substring(1,ovsdbName.length());
         return "openflow:"+bridgeNumber;
     }
 
-    public static Nodes readOpenFLowTopology(DataBroker dataBroker){
+    public static Nodes readOpenFLowTopology(DataBroker dataBroker) {
         InstanceIdentifier instanceIdentifier = InstanceIdentifier.builder(Nodes.class).build();
         return (Nodes) MdsalUtils.read(dataBroker,LogicalDatastoreType.CONFIGURATION,instanceIdentifier);
     }
@@ -254,7 +254,7 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
     /**
      * @return List of links between ovswitches
      */
-    private static List<Link> getLinkList(){
+    private static List<Link> getLinkList() {
         List<Link> linkList = new ArrayList<>();
 
         //openflow nodes

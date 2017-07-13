@@ -96,7 +96,7 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
         boolean hasSip = nep.getMappedServiceInterfacePoint().get(0).getValue().equals("sip:" + nepId);
         ServiceInterfacePoint sip = nrpDao.getSip("sip:" + nepId);
         assertTrue(hasSip && sip != null);
-        if(verifySip != null) verifySip.accept(sip);
+        if (verifySip != null) verifySip.accept(sip);
 
     }
 
@@ -117,7 +117,7 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
                 .setNepId(new Uuid(nepId))
                 .setNodeId(new Uuid(nodeId));
 
-        if(type == null) return sipBuilder.build();
+        if (type == null) return sipBuilder.build();
 
         switch (type) {
             case uni: sipBuilder.setSipType(

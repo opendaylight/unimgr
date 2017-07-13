@@ -47,7 +47,7 @@ public class DecompositionAction {
     public DecompositionAction(List<EndPoint> endpoints, DataBroker broker) {
         Objects.requireNonNull(endpoints);
         Objects.requireNonNull(broker);
-        if(endpoints.size() < 2) throw new IllegalArgumentException("there should be at least two endpoints defined");
+        if (endpoints.size() < 2) throw new IllegalArgumentException("there should be at least two endpoints defined");
         this.endpoints = endpoints;
         this.broker = broker;
     }
@@ -59,11 +59,11 @@ public class DecompositionAction {
 
         assert vertexes.size() > 1;
 
-        if(vertexes.size() > 2) throw new IllegalStateException("currently only point to point is supported");
+        if (vertexes.size() > 2) throw new IllegalStateException("currently only point to point is supported");
 
         GraphPath<Vertex, DefaultEdge> path = DijkstraShortestPath.findPathBetween(graph, vertexes.get(0), vertexes.get(1));
 
-        if(path == null) return null;
+        if (path == null) return null;
 
         return path.getVertexList().stream().collect(Collectors.groupingBy(v -> v.getNodeUuid()))
                 .entrySet().stream().map(e -> {
@@ -79,11 +79,11 @@ public class DecompositionAction {
     }
 
     private void connected(Graph<Vertex, DefaultEdge> graph, List<Vertex> vertices) {
-        for(int i = 0; i < vertices.size(); ++i) {
+        for (int i = 0; i < vertices.size(); ++i) {
             Vertex f = vertices.get(i);
             //its OK if the vertex is added in internal loop nothing will happen
             graph.addVertex(f);
-            for(int j = i + 1; j < vertices.size(); ++j) {
+            for (int j = i + 1; j < vertices.size(); ++j) {
                 Vertex t = vertices.get(j);
                 graph.addVertex(t);
                 graph.addEdge(f,t);
@@ -106,7 +106,7 @@ public class DecompositionAction {
                 connected(graph, vertices);
             });
 
-            if(topo.getLink() != null) {
+            if (topo.getLink() != null) {
                 topo.getLink().stream()
                         .filter(l -> l.getState() != null && OperationalState.Enabled == l.getState().getOperationalState())
                         .forEach(l -> {
@@ -127,10 +127,10 @@ public class DecompositionAction {
         Uuid nodeUuid = n.getUuid();
         return n.getOwnedNodeEdgePoint().stream().map(nep -> {
             List<Uuid> sips = nep.getMappedServiceInterfacePoint();
-            if(sips == null || sips.isEmpty()) {
+            if (sips == null || sips.isEmpty()) {
                 return  new Vertex(nodeUuid, nep.getUuid(), null);
             }
-            if(sips.size() > 1) LOG.warn("NodeEdgePoint {} have multiple ServiceInterfacePoint mapped, selecting first one", nep.getUuid());
+            if (sips.size() > 1) LOG.warn("NodeEdgePoint {} have multiple ServiceInterfacePoint mapped, selecting first one", nep.getUuid());
             return new Vertex(nodeUuid, nep.getUuid(), sips.get(0));
 
         });
@@ -177,7 +177,7 @@ public class DecompositionAction {
 
         @Override
         public int compareTo(Vertex o) {
-            if(o == null) return -1;
+            if (o == null) return -1;
             return uuid.getValue().compareTo(o.uuid.getValue());
         }
 

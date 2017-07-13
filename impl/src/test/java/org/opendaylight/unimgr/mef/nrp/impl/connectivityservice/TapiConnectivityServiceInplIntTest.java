@@ -352,7 +352,7 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
                 .setContainerNode(new Uuid(nodeUuid))
                 .setConnectionEndPoint(ceps(neps));
 
-        if(!route.isEmpty()) {
+        if (!route.isEmpty()) {
             builder.setRoute(Collections.singletonList(new RouteBuilder()
                     .setConnectionEndPoint(route)
                     .setLocalId("route")

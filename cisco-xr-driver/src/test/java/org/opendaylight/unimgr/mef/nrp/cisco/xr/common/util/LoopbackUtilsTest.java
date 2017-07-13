@@ -47,17 +47,17 @@ public class LoopbackUtilsTest extends AbstractDataBrokerTest {
     private static String portNumber = "8080";
 
     @Before
-    public void setUp(){
+    public void setUp() {
         broker = getDataBroker();
     }
 
     @After
-    public void clean(){
+    public void clean() {
         deleteNode(LoopbackUtils.getNodeIid(new NodeId(nodeName),new TopologyId(topoName)));
     }
 
     @Test
-    public void testLoopbackAddress(){
+    public void testLoopbackAddress() {
         //given
         ServicePort port = L2vpnTestUtils.port(topoName, nodeName, portNumber);
         createAndPersistNode(true);
@@ -70,7 +70,7 @@ public class LoopbackUtilsTest extends AbstractDataBrokerTest {
     }
 
     @Test
-    public void testAbsenceOfLoopbackAddress(){
+    public void testAbsenceOfLoopbackAddress() {
         //given
         ServicePort port = L2vpnTestUtils.port(topoName, nodeName, portNumber);
         createAndPersistNode(false);
@@ -82,13 +82,13 @@ public class LoopbackUtilsTest extends AbstractDataBrokerTest {
         assertEquals(LoopbackUtils.getDefaultLoopback(),ipv4AddressNoZone.getValue());
     }
 
-    private void createAndPersistNode(boolean ifLoopbackAddress){
+    private void createAndPersistNode(boolean ifLoopbackAddress) {
         NodeId nodeId = new NodeId(nodeName);
         Node node = createNode(nodeId,ifLoopbackAddress);
         InstanceIdentifier<Node> nodeIid = writeNode(node);
     }
 
-    private Node createNode(NodeId nodeId,boolean ifLoopbackAddress){
+    private Node createNode(NodeId nodeId,boolean ifLoopbackAddress) {
         NodeBuilder nodeBuilder = new NodeBuilder();
 
         NodeId nodeIdTopo = new NodeId(topoName);
@@ -96,7 +96,7 @@ public class LoopbackUtilsTest extends AbstractDataBrokerTest {
 
         nodeBuilder.setNodeId(nodeId);
 
-        if(ifLoopbackAddress){
+        if (ifLoopbackAddress) {
             Ipv4Address ipv4Address = new Ipv4Address(loopbackAddress);
             IpAddress ipAddress = new IpAddress(ipv4Address);
             LoopbackAugmentationBuilder loopbackAugmentationBuilder = new LoopbackAugmentationBuilder();
@@ -107,7 +107,7 @@ public class LoopbackUtilsTest extends AbstractDataBrokerTest {
         return nodeBuilder.build();
     }
 
-    private InstanceIdentifier<Node> writeNode(Node node){
+    private InstanceIdentifier<Node> writeNode(Node node) {
         InstanceIdentifier<Node> nodeInstanceId = LoopbackUtils.getNodeIid(node.getNodeId(),new TopologyId(topoName));
         WriteTransaction transaction = broker.newWriteOnlyTransaction();
 
@@ -123,7 +123,7 @@ public class LoopbackUtilsTest extends AbstractDataBrokerTest {
         return null;
     }
 
-    private void deleteNode(InstanceIdentifier<Node> nodeIid){
+    private void deleteNode(InstanceIdentifier<Node> nodeIid) {
         WriteTransaction transaction = broker.newWriteOnlyTransaction();
         transaction.delete(LogicalDatastoreType.CONFIGURATION, nodeIid);
         try {

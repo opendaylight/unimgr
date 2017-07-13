@@ -11,11 +11,11 @@ package org.opendaylight.unimgr.mef.nrp.common;
  * Created by marek.ryznar@amartus.com.
  */
 public class ResourceNotAvailableException extends ResourceActivatorException {
-    public ResourceNotAvailableException(){
+    public ResourceNotAvailableException() {
         super();
     }
 
-    public ResourceNotAvailableException(String message){
+    public ResourceNotAvailableException(String message) {
         super(message);
     }
 }

@@ -103,7 +103,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         registerOvsdbTreeListener();
     }
 
-    private void registerOvsdbTreeListener(){
+    private void registerOvsdbTreeListener() {
         InstanceIdentifier<Node> nodeId = OVSDB_TOPO_IID.child(Node.class);
         registration = dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, nodeId), this);
     }
@@ -126,7 +126,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
             }
         });
 
-        if(registration != null) {
+        if (registration != null) {
             LOG.info("closing netconf tree listener");
             registration.close();
         }
@@ -154,7 +154,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
                 .forEach(entry -> {
                     String nepId = OVS_NODE + DELIMETER + getFullPortName(entry.getValue(), entry.getKey().getTpId().getValue());
                     OwnedNodeEdgePoint nep;
-                    if(dao.hasSip(nepId)){
+                    if (dao.hasSip(nepId)) {
                         nep = createNep(nepId);
                         dao.updateNep(OVS_NODE,nep);
                     } else {
@@ -176,8 +176,8 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         newNeps.forEach(nep -> addEndpoint(dao,nep.getKey().getUuid().getValue()));
     };
 
-    private void executeDbAction(BiConsumer<Map<TerminationPoint,String>,NrpDao> action,Map<TerminationPoint,String> map){
-        if(map.isEmpty())
+    private void executeDbAction(BiConsumer<Map<TerminationPoint,String>,NrpDao> action,Map<TerminationPoint,String> map) {
+        if (map.isEmpty())
             return ;
         final ReadWriteTransaction topoTx = dataBroker.newReadWriteTransaction();
         NrpDao dao = new NrpDao(topoTx);
@@ -198,7 +198,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         });
     }
 
-    private String getFullPortName(String switchName, String portName){
+    private String getFullPortName(String switchName, String portName) {
         return switchName + DELIMETER + portName;
     }
 
@@ -228,7 +228,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
                 .build();
     }
 
-    private OwnedNodeEdgePoint createNep(String nepId){
+    private OwnedNodeEdgePoint createNep(String nepId) {
         OwnedNodeEdgePointBuilder tpBuilder = new OwnedNodeEdgePointBuilder();
         Uuid tpId = new Uuid(OVS_NODE + DELIMETER + nepId);
         return tpBuilder
@@ -237,20 +237,20 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
                 .build();
     }
 
-    private List<OwnedNodeEdgePoint> getNewNeps(Map<TerminationPoint,String> toAddMap){
+    private List<OwnedNodeEdgePoint> getNewNeps(Map<TerminationPoint,String> toAddMap) {
         return toAddMap.entrySet().stream()
                 .map(entry -> createNep(getFullPortName(entry.getValue(),entry.getKey().getTpId().getValue())) )
                 .collect(Collectors.toList());
     }
 
     //TODO: write better implementation
-    private boolean isNep(TerminationPoint terminationPoint){
+    private boolean isNep(TerminationPoint terminationPoint) {
         OvsdbTerminationPointAugmentation ovsdbTerminationPoint = terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
-        if( ovsdbTerminationPoint==null || (ovsdbTerminationPoint.getInterfaceType()!=null && ovsdbTerminationPoint.getInterfaceType().equals(InterfaceTypeInternal.class))) {
+        if ( ovsdbTerminationPoint==null || (ovsdbTerminationPoint.getInterfaceType()!=null && ovsdbTerminationPoint.getInterfaceType().equals(InterfaceTypeInternal.class))) {
             return false;
         }
 
-        if( ovsdbTerminationPoint.getOfport() == null )
+        if ( ovsdbTerminationPoint.getOfport() == null )
             return false;
 
         String ofPortNumber = ovsdbTerminationPoint.getOfport().toString();

@@ -27,20 +27,20 @@ public class DataObjectModificationQualifier {
     private static final Logger LOG = LoggerFactory.getLogger(DataObjectModificationQualifier.class);
     private CapabilitiesService capabilitiesService;
 
-    public DataObjectModificationQualifier(DataBroker dataBroker){
+    public DataObjectModificationQualifier(DataBroker dataBroker) {
         capabilitiesService = new CapabilitiesService(dataBroker);
     }
 
     private Function<Node,Boolean> isOvs = node -> capabilitiesService.node(node).isSupporting(AND, OVSDB);
 
-    protected void checkNodes(List<DataObjectModification> nodes, Map<TerminationPoint,String> toAddMap, Map<TerminationPoint,String> toUpdateMap, Map<TerminationPoint,String> toDeleteMap){
+    protected void checkNodes(List<DataObjectModification> nodes, Map<TerminationPoint,String> toAddMap, Map<TerminationPoint,String> toUpdateMap, Map<TerminationPoint,String> toDeleteMap) {
         Node n;
-        for(DataObjectModification node: nodes){
-            switch(node.getModificationType()){
+        for (DataObjectModification node: nodes) {
+            switch(node.getModificationType()) {
                 //new ovs node
                 case WRITE :{
                     n = (Node) node.getDataAfter();
-                    if(!isOvs.apply(n) || n.getTerminationPoint()==null)
+                    if (!isOvs.apply(n) || n.getTerminationPoint()==null)
                         break;
                     String bridgeName = n.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue();
                     n.getTerminationPoint().forEach(tp -> toAddMap.put(tp,bridgeName));
@@ -51,7 +51,7 @@ public class DataObjectModificationQualifier {
                 //whole ovs-node eg. s1 deleted
                 case DELETE:{
                     n = (Node) node.getDataBefore();
-                    if(!isOvs.apply(n) || n.getTerminationPoint()==null)
+                    if (!isOvs.apply(n) || n.getTerminationPoint()==null)
                         break;
                     String bridgeName = n.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue();
                     n.getTerminationPoint().forEach(tp -> toDeleteMap.put(tp,bridgeName));
@@ -63,16 +63,16 @@ public class DataObjectModificationQualifier {
         }
     }
 
-    private void checkTerminationPoints(DataObjectModification node, Map<TerminationPoint,String> toAddMap, Map<TerminationPoint,String> toUpdateMap, Map<TerminationPoint,String> toDeleteMap){
+    private void checkTerminationPoints(DataObjectModification node, Map<TerminationPoint,String> toAddMap, Map<TerminationPoint,String> toUpdateMap, Map<TerminationPoint,String> toDeleteMap) {
         Node n = (Node) node.getDataAfter();
-        if(!isOvs.apply(n))
+        if (!isOvs.apply(n))
             return ;
         String bridgeName = n.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue();
         Collection<DataObjectModification<? extends DataObject>> modifiedChildren = node.getModifiedChildren();
 
         TerminationPoint terminationPoint;
-        for(DataObjectModification tp: modifiedChildren) {
-            if(!tp.getDataType().equals(TerminationPoint.class))
+        for (DataObjectModification tp: modifiedChildren) {
+            if (!tp.getDataType().equals(TerminationPoint.class))
                 continue;
             switch (tp.getModificationType()) {
                 //new port added eg. s1-eth7

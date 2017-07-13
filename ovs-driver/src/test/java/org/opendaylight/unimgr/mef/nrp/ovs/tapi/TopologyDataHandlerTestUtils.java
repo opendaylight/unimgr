@@ -57,7 +57,7 @@ public class TopologyDataHandlerTestUtils {
 
     private final DataBroker dataBroker;
 
-    protected TopologyDataHandlerTestUtils(DataBroker dataBroker){
+    protected TopologyDataHandlerTestUtils(DataBroker dataBroker) {
         this.dataBroker = dataBroker;
     }
 
@@ -67,7 +67,7 @@ public class TopologyDataHandlerTestUtils {
      *  2. tp2 - nep
      *  3. tp3 - not nep, becouse it is connected to other switch
      */
-    public void createTestBridge(){
+    public void createTestBridge() {
         List<TerminationPoint> tps = new LinkedList<>();
 
         tps.add(OvsdbTopologyTestUtils.createTerminationPoint(tp1Name,tp1OFport));
@@ -79,17 +79,17 @@ public class TopologyDataHandlerTestUtils {
         DataStoreTestUtils.write(node,instanceIdentifier,dataBroker);
     }
 
-    protected void deleteTestBridge(){
+    protected void deleteTestBridge() {
         InstanceIdentifier instanceIdentifier = OvsdbTopologyTestUtils.getNodeInstanceIdentifier(new NodeId(bridgeName));
         DataStoreTestUtils.delete(instanceIdentifier,dataBroker);
     }
 
-    protected void deletePort(String port){
+    protected void deletePort(String port) {
         InstanceIdentifier<TerminationPoint> tpIid = OvsdbTopologyTestUtils.getPortInstanceIdentifier(bridgeName,port);
         DataStoreTestUtils.delete(tpIid,dataBroker);
     }
 
-    protected void addPort(String bridgeName, String portName, Long ofNumber){
+    protected void addPort(String bridgeName, String portName, Long ofNumber) {
         String bridgeId = bridgeName;
         //openflow init
         NodeConnector nodeConnector = OpenFlowTopologyTestUtils.createNodeConnector(ofBridgeName,ofNumber,portName);
@@ -108,7 +108,7 @@ public class TopologyDataHandlerTestUtils {
      *  2. id:"openflow:1:2", name: "br1-eth2", portNumber: "2"
      *  3. id:"openflow:1:3", name: "br1-eth3", portNumber: "3"
      */
-    protected void createOpenFlowNodes(){
+    protected void createOpenFlowNodes() {
         NodesBuilder nodesBuilder = new NodesBuilder();
         List<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node> nodeList = new ArrayList<>();
         nodeList.add(createOpenFlowNode(ofBridgeName));
@@ -121,7 +121,7 @@ public class TopologyDataHandlerTestUtils {
         transaction.submit();
     }
 
-    private org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node createOpenFlowNode(String oFName){
+    private org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node createOpenFlowNode(String oFName) {
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder =
                 new org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder();
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId nodeId =
@@ -136,7 +136,7 @@ public class TopologyDataHandlerTestUtils {
         return nodeBuilder.build();
     }
 
-    private NodeConnector createNodeConnector(String ofBridgeName, Long portNumber, String ovsdbPortName){
+    private NodeConnector createNodeConnector(String ofBridgeName, Long portNumber, String ovsdbPortName) {
         NodeConnectorBuilder nodeConnectorBuilder = new NodeConnectorBuilder();
         String ofPortName = ofBridgeName + ":" + portNumber.toString();
         NodeConnectorId nodeConnectorId = new NodeConnectorId(ofPortName);
@@ -146,14 +146,14 @@ public class TopologyDataHandlerTestUtils {
         return nodeConnectorBuilder.build();
     }
 
-    private FlowCapableNodeConnector createFlowCapableNodeConnector(String ovsdbName, Long portNumber){
+    private FlowCapableNodeConnector createFlowCapableNodeConnector(String ovsdbName, Long portNumber) {
         FlowCapableNodeConnectorBuilder flowCapableNodeConnectorBuilder = new FlowCapableNodeConnectorBuilder();
         flowCapableNodeConnectorBuilder.setName(ovsdbName);
         flowCapableNodeConnectorBuilder.setPortNumber(new PortNumberUni(portNumber));
         return flowCapableNodeConnectorBuilder.build();
     }
 
-    protected void createPrestoSystemTopology(){
+    protected void createPrestoSystemTopology() {
         NrpInitializer nrpInitializer = new NrpInitializer(dataBroker);
         try {
             nrpInitializer.init();
@@ -162,15 +162,15 @@ public class TopologyDataHandlerTestUtils {
         }
     }
 
-    protected org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.Node readOvsNode(){
+    protected org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.Node readOvsNode() {
         return DataStoreTestUtils.read(getNodeIid(),dataBroker);
     }
 
-    protected List<org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.context.attrs.ServiceInterfacePoint> readSips(){
+    protected List<org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.context.attrs.ServiceInterfacePoint> readSips() {
         ReadWriteTransaction readWriteTransaction = dataBroker.newReadWriteTransaction();
         try {
             Optional<Context> opt = readWriteTransaction.read(LogicalDatastoreType.OPERATIONAL, InstanceIdentifier.create(Context.class)).checkedGet();
-            if(opt.isPresent()){
+            if (opt.isPresent()) {
                 return opt.get().getServiceInterfacePoint();
             } else {
                 fail("There are no sips.");
@@ -181,13 +181,13 @@ public class TopologyDataHandlerTestUtils {
         return null;
     }
 
-    private static InstanceIdentifier getNodeIid(){
+    private static InstanceIdentifier getNodeIid() {
         return getTopoIid()
                 .child(org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.Node.class,
                         new org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.NodeKey(new Uuid(ovsNodeId)));
     }
 
-    private static InstanceIdentifier getTopoIid(){
+    private static InstanceIdentifier getTopoIid() {
         return InstanceIdentifier.create(Context.class)
                 .augmentation(Context1.class)
                 .child(org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.context.Topology.class,

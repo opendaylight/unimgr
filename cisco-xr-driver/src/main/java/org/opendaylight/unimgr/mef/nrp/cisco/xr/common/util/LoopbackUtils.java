@@ -43,10 +43,10 @@ public class LoopbackUtils {
         TopologyId topologyId = port.getTopology();
         Optional<Node> nodeOpt = MdsalUtils.readOptional(dataBroker, LogicalDatastoreType.CONFIGURATION, getNodeIid(nodeId,topologyId));
 
-        if(nodeOpt.isPresent()) {
+        if (nodeOpt.isPresent()) {
             LoopbackAugmentation la = nodeOpt.get().getAugmentation(LoopbackAugmentation.class);
 
-            if (la != null){
+            if (la != null) {
                 loopback = la.getLoopbackAddress().getIpv4Address().getValue();
             }
         }
@@ -63,7 +63,7 @@ public class LoopbackUtils {
         return DEFAULT_LOOPBACK;
     }
 
-    public static InstanceIdentifier<Node> getNodeIid(NodeId nodeId, TopologyId topologyId){
+    public static InstanceIdentifier<Node> getNodeIid(NodeId nodeId, TopologyId topologyId) {
         InstanceIdentifier<Node> nodeInstanceId = InstanceIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(topologyId))
                 .child(Node.class, new NodeKey(nodeId))

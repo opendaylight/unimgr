@@ -55,9 +55,9 @@ class OvsActivatorHelper {
      */
     int getCeVlanId() throws ResourceNotAvailableException {
 
-        if( (endPoint.getAttrs() != null) && (endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource() != null) ) {
+        if ( (endPoint.getAttrs() != null) && (endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource() != null) ) {
             NrpCarrierEthConnectivityEndPointResource attr = endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource();
-            if( (attr.getCeVlanIdListAndUntag()!=null) && !(attr.getCeVlanIdListAndUntag().getVlanId().isEmpty()) ){
+            if ( (attr.getCeVlanIdListAndUntag()!=null) && !(attr.getCeVlanIdListAndUntag().getVlanId().isEmpty()) ) {
                 //for now we support only one CE VLAN
                 return attr.getCeVlanIdListAndUntag().getVlanId().get(0).getVlanId().getValue().intValue();
             } else {
@@ -101,7 +101,7 @@ class OvsActivatorHelper {
     private Map<String, String> createPortMap(List<NullAwareDatastoreGetter<Node>> nodes) {
         Map<String, String> portMap = new HashMap<>();
         for (NullAwareDatastoreGetter<Node> node : nodes) {
-            if (node.get().isPresent()){
+            if (node.get().isPresent()) {
                 for (NodeConnector nodeConnector : node.get().get().getNodeConnector()) {
                     String ofName = nodeConnector.getId().getValue();
                     FlowCapableNodeConnector flowCapableNodeConnector = nodeConnector.getAugmentation(FlowCapableNodeConnector.class);
@@ -113,7 +113,7 @@ class OvsActivatorHelper {
         return portMap;
     }
 
-    protected static String getPortName(String sip){
+    protected static String getPortName(String sip) {
         String[] tab = sip.split(":");
         return tab[tab.length-1];
     }

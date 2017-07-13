@@ -37,7 +37,7 @@ public class ServicePort {
     //defines cTag VLAN ID
     private Long vlanId=null;
 
-    public ServicePort(TopologyId topoId, NodeId nodeId, TpId tpId){
+    public ServicePort(TopologyId topoId, NodeId nodeId, TpId tpId) {
         this.topoId = topoId;
         this.nodeId = nodeId;
         this.tpId = tpId;
@@ -75,25 +75,25 @@ public class ServicePort {
         this.vlanId = vlanId;
     }
 
-    public static ServicePort toServicePort(EndPoint endPoint, String topologyName){
+    public static ServicePort toServicePort(EndPoint endPoint, String topologyName) {
         Uuid sip = endPoint.getEndpoint().getServiceInterfacePoint();
         TopologyId topologyId = new TopologyId(topologyName);
         NodeId nodeId = new NodeId(SipHandler.getDeviceName(sip));
         TpId tpId = new TpId(SipHandler.getPortName(sip));
         ServicePort servicePort = new ServicePort(topologyId,nodeId,tpId);
-        if(hasVlan(endPoint)){
+        if (hasVlan(endPoint)) {
             servicePort.setVlanId(Long.valueOf(getVlan(endPoint)));
         }
         return servicePort;
     }
 
-    public static boolean hasVlan(EndPoint endPoint){
-        if( (endPoint.getAttrs() != null)
+    public static boolean hasVlan(EndPoint endPoint) {
+        if ( (endPoint.getAttrs() != null)
                 && (endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource() != null) ) {
             NrpCarrierEthConnectivityEndPointResource attr =
                     endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource();
             if ( (attr.getCeVlanIdListAndUntag() != null)
-                    && !(attr.getCeVlanIdListAndUntag().getVlanId().isEmpty()) ){
+                    && !(attr.getCeVlanIdListAndUntag().getVlanId().isEmpty()) ) {
                 return true;
             } else {
                 return false;
@@ -103,12 +103,12 @@ public class ServicePort {
         }
     }
 
-    private static int getVlan(EndPoint endPoint){
+    private static int getVlan(EndPoint endPoint) {
         return endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource()
                 .getCeVlanIdListAndUntag().getVlanId().get(0).getVlanId().getValue().intValue();
     }
 
-    public String getInterfaceName(){
+    public String getInterfaceName() {
         TpId tpId = this.getTp();
         Matcher matcher = interface_name_pattern.matcher(tpId.getValue());
         return matcher.find() ? matcher.group() : default_interface_name;

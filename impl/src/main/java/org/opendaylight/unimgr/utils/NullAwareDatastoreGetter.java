@@ -62,7 +62,7 @@ public class NullAwareDatastoreGetter<T> {
 
         Optional<C> dataCollectionOptional = dataOptional.isPresent() ? Optional.ofNullable(function.apply(dataOptional.get()).get()) : Optional.empty();
 
-        if(dataCollectionOptional.isPresent()) {
+        if (dataCollectionOptional.isPresent()) {
             dataCollectionOptional.get().forEach(dataObject -> result.add(new NullAwareDatastoreGetter<R>(dataObject)));
         }
 
@@ -74,7 +74,7 @@ public class NullAwareDatastoreGetter<T> {
     }
 
     private void logDataOptionalStatus(Function <?, ?> function) {
-        if(dataOptional.isPresent()) {
+        if (dataOptional.isPresent()) {
             LOG.trace("Before collection of: " + function.toString() + ", currently collected data is non-null: " + dataOptional.get().toString());
         } else {
             LOG.debug("Null value encountered during collection of: " + function.toString());

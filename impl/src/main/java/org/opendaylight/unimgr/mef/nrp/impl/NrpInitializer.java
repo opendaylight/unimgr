@@ -58,7 +58,7 @@ public class NrpInitializer {
 
         Optional<? extends DataObject> context = result.checkedGet();
 
-        if(! context.isPresent()) {
+        if (! context.isPresent()) {
             LOG.info("initialize Presto NRP context");
             Context ctx = new ContextBuilder()
                     .setUuid(new Uuid(PRESTO_CTX))

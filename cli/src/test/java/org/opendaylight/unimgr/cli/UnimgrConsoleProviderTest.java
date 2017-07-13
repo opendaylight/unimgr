@@ -48,7 +48,7 @@ public class UnimgrConsoleProviderTest implements IUnimgrConsoleProvider {
     }
 
     public void setListUnis(int amount, String ipAddress) {
-        for(int i=0; i<amount; i++){
+        for (int i=0; i<amount; i++) {
             final UniAugmentation uniAug = mock(UniAugmentation.class);
             final IpAddress ipAddr = mock(IpAddress.class);
             final Ipv4Address ip4 = mock(Ipv4Address.class);

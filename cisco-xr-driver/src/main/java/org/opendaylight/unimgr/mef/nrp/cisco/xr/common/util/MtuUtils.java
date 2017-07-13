@@ -27,7 +27,7 @@ public class MtuUtils {
     public static Mtus generateMtus(List<Long> mtuValues, CiscoIosXrString owner) {
         List<Mtu> mtus = new LinkedList<>();
 
-        for(Long mtuValue : mtuValues) {
+        for (Long mtuValue : mtuValues) {
             mtus.add(generateMtu(mtuValue, owner));
         }
 

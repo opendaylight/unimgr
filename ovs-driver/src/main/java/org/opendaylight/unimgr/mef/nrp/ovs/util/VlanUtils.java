@@ -101,7 +101,7 @@ public class VlanUtils {
         if (flow.getInstructions() != null &&
             !flow.getInstructions().getInstruction().isEmpty())
         {
-            for(Instruction instruction : flow.getInstructions().getInstruction()) {
+            for (Instruction instruction : flow.getInstructions().getInstruction()) {
                 ApplyActionsCase applyActionsCase = (ApplyActionsCase) instruction.getInstruction();
                 ApplyActions applyActions = applyActionsCase.getApplyActions();
                 List<Action> actions = applyActions.getAction();
@@ -111,13 +111,13 @@ public class VlanUtils {
     }
 
     private void checkActions(List<Action> actions) {
-        for( Action action:actions ) {
+        for ( Action action:actions ) {
             org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action concreteAction = action.getAction();
-            if( concreteAction instanceof SetField ) {
+            if ( concreteAction instanceof SetField ) {
                 SetField setField = (SetField) concreteAction;
-                if( setField.getVlanMatch() != null ) {
+                if ( setField.getVlanMatch() != null ) {
                     Integer vid = getVlanFromMatch(setField.getVlanMatch());
-                    if( vid != null && !usedVlans.contains(vid)) {
+                    if ( vid != null && !usedVlans.contains(vid)) {
                         usedVlans.add(vid);
                     }
                 }

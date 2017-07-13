@@ -79,12 +79,12 @@ public class UnimgrExtServiceImpl implements UnimgrExtService {
                     .child(Node.class, new NodeKey(nodeId))
                     .child(OwnedNodeEdgePoint.class, new OwnedNodeEdgePointKey(nepId))
             ).checkedGet();
-            if(!nep.isPresent()) return withError("NEP with id {0} for node {1} not found", nepId, nodeId);
+            if (!nep.isPresent()) return withError("NEP with id {0} for node {1} not found", nepId, nodeId);
 
             Uuid sipId = new Uuid("sip:" + nepId.getValue());
 
             List<Uuid> sips = nep.get().getMappedServiceInterfacePoint();
-            if(sips != null && !sips.isEmpty()) return withError("sip for NEP with id {0} for node {1} already defined", nepId, nodeId);
+            if (sips != null && !sips.isEmpty()) return withError("sip for NEP with id {0} for node {1} already defined", nepId, nodeId);
 
             NrpDao nrpDao = new NrpDao(tx);
 
@@ -118,19 +118,19 @@ public class UnimgrExtServiceImpl implements UnimgrExtService {
 
         LayerProtocol1 lp = null;
 
-        if(sipType instanceof InniSpec) {
+        if (sipType instanceof InniSpec) {
             org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.inni.spec.InniSpec spec = ((InniSpec) sipType).getInniSpec();
-            if(spec != null) lp = new LayerProtocol1Builder()
+            if (spec != null) lp = new LayerProtocol1Builder()
                     .setNrpCarrierEthInniNResource(new NrpCarrierEthInniNResourceBuilder(spec).build()).build();
 
         } else if (sipType instanceof EnniSpec) {
             org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.enni.spec.EnniSpec spec = ((EnniSpec) sipType).getEnniSpec();
-            if(spec != null) lp = new LayerProtocol1Builder()
+            if (spec != null) lp = new LayerProtocol1Builder()
                     .setNrpCarrierEthEnniNResource(new NrpCarrierEthEnniNResourceBuilder(spec).build()).build();
 
-        } else if(sipType instanceof UniSpec) {
+        } else if (sipType instanceof UniSpec) {
             org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.uni.spec.UniSpec spec = ((UniSpec) sipType).getUniSpec();
-            if(spec != null) lp = new LayerProtocol1Builder()
+            if (spec != null) lp = new LayerProtocol1Builder()
                     .setNrpCarrierEthUniNResource(new NrpCarrierEthUniNResourceBuilder(spec).build()).build();
         }
 
@@ -144,8 +144,8 @@ public class UnimgrExtServiceImpl implements UnimgrExtService {
 
     private static RpcResult<Void> withError(String error, Object ... params) {
         RpcResultBuilder<Void> failed = RpcResultBuilder.<Void>failed();
-        if(error != null) {
-            if(params.length > 0) {
+        if (error != null) {
+            if (params.length > 0) {
                error = MessageFormat.format(error, params);
             }
             failed.withError(RpcError.ErrorType.APPLICATION, error);

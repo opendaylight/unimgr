@@ -61,7 +61,7 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractDataBrokerTest{
     private String serviceId = "serviceId";
 
     @Before
-    public void setUp(){
+    public void setUp() {
         //given
         DataBroker broker = getDataBroker();
         optBroker = Optional.of(broker);
@@ -76,7 +76,7 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractDataBrokerTest{
     }
 
     @Test
-    public void testActivateAndDeactivate(){
+    public void testActivateAndDeactivate() {
         //when
         activate();
 
@@ -103,7 +103,7 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractDataBrokerTest{
         L2vpnTestUtils.checkDeactivated(optBroker,portNo1);
     }
 
-    private void deactivate(){
+    private void deactivate() {
         try {
             l2VpnLocalConnectActivator.deactivate(endPoints,serviceId);
         } catch (TransactionCommitFailedException e) {
@@ -111,7 +111,7 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractDataBrokerTest{
         }
     }
 
-    private void activate(){
+    private void activate() {
         LOG.debug("activate L2VPN");
         try {
             l2VpnLocalConnectActivator.activate(endPoints,serviceId);
@@ -121,7 +121,7 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractDataBrokerTest{
     }
 
     private void checkL2vpnTree(CheckedFuture<Optional<L2vpn>, ReadFailedException> driverL2vpn) throws InterruptedException, ExecutionException {
-        if (driverL2vpn.get().isPresent()){
+        if (driverL2vpn.get().isPresent()) {
             L2vpn l2vpn = driverL2vpn.get().get();
             L2vpnTestUtils.checkL2vpn(l2vpn);
 
@@ -147,7 +147,7 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractDataBrokerTest{
     }
 
     private void checkInterfaceConfigurationTree(CheckedFuture<Optional<InterfaceConfigurations>, ReadFailedException> driverInterfaceConfigurations) throws InterruptedException, ExecutionException{
-        if (driverInterfaceConfigurations.get().isPresent()){
+        if (driverInterfaceConfigurations.get().isPresent()) {
             InterfaceConfigurations interfaceConfigurations = driverInterfaceConfigurations.get().get();
             L2vpnTestUtils.checkInterfaceConfigurations(interfaceConfigurations);
 

@@ -59,7 +59,7 @@ public class NodeTestUtils {
         FcPort mockedFcPort = mock(FcPort.class);
         StringBuilder nodeIdBuilder = new StringBuilder(DEVICE_ID);
 
-        if(nodeNo > 0) {
+        if (nodeNo > 0) {
             nodeIdBuilder.append("_").append(Integer.toString(nodeNo));
         }
 
@@ -84,7 +84,7 @@ public class NodeTestUtils {
         Optional<Node> mockedNodeOptional = mockNode();
 
         List<AvailableCapability> netconfCapabilityList = new ArrayList<>();
-        if(withNetconfCapabilities) {
+        if (withNetconfCapabilities) {
             netconfCapabilityList = Arrays.asList(createAvailableCapability(NetconfConstants.CAPABILITY_IOX_L2VPN),
                     createAvailableCapability(NetconfConstants.CAPABILITY_IOX_IFMGR),
                             createAvailableCapability(NetconfConstants.CAPABILITY_IOX_ASR9K_POLICYMGR));
@@ -102,7 +102,7 @@ public class NodeTestUtils {
         return mockedNodeOptional;
     }
 
-    private static AvailableCapability createAvailableCapability(String name){
+    private static AvailableCapability createAvailableCapability(String name) {
         AvailableCapabilityBuilder availableCapabilityBuilder = new AvailableCapabilityBuilder();
         availableCapabilityBuilder.setCapability(name);
         return availableCapabilityBuilder.build();

@@ -75,7 +75,7 @@ public class NrpDao  {
     }
 
     private void verifyTx() {
-        if(tx == null) throw new IllegalStateException("Top perform write operation read write transaction is needed");
+        if (tx == null) throw new IllegalStateException("Top perform write operation read write transaction is needed");
     }
 
     /**
@@ -97,9 +97,9 @@ public class NrpDao  {
         InstanceIdentifier<OwnedNodeEdgePoint> nepIdent = node(nodeId).child(OwnedNodeEdgePoint.class, new OwnedNodeEdgePointKey(new Uuid(nepId)));
         try {
             Optional<OwnedNodeEdgePoint> opt = tx.read(LogicalDatastoreType.OPERATIONAL, nepIdent).checkedGet();
-            if(opt.isPresent()) {
+            if (opt.isPresent()) {
                 tx.delete(LogicalDatastoreType.OPERATIONAL,nepIdent);
-                if(removeSips){
+                if (removeSips) {
                     List<Uuid> sips = opt.get().getMappedServiceInterfacePoint();
                     removeSips(sips == null ? null : sips.stream());
                 }
@@ -165,7 +165,7 @@ public class NrpDao  {
 
     public void removeSips(Stream<Uuid>  uuids) {
         verifyTx();
-        if(uuids == null) return ;
+        if (uuids == null) return ;
         uuids.forEach(sip -> {
             LOG.debug("removing ServiceInterfacePoint with id {}", sip);
             tx.delete(LogicalDatastoreType.OPERATIONAL, ctx().child(ServiceInterfacePoint.class, new ServiceInterfacePointKey(sip)));
@@ -174,10 +174,10 @@ public class NrpDao  {
 
     public void removeNode(String nodeId, boolean removeSips) {
         verifyTx();
-        if(removeSips) {
+        if (removeSips) {
             try {
                 Optional<Node> opt = tx.read(LogicalDatastoreType.OPERATIONAL, node(nodeId)).checkedGet();
-                if(opt.isPresent()) {
+                if (opt.isPresent()) {
                     removeSips(opt.get().getOwnedNodeEdgePoint().stream().flatMap(nep -> nep.getMappedServiceInterfacePoint() == null ?
                             Stream.empty() : nep.getMappedServiceInterfacePoint().stream()
                     ));
@@ -190,13 +190,13 @@ public class NrpDao  {
         tx.delete(LogicalDatastoreType.OPERATIONAL, node(nodeId));
     }
 
-    public void updateAbstractNep(OwnedNodeEdgePoint nep){
+    public void updateAbstractNep(OwnedNodeEdgePoint nep) {
         verifyTx();
         InstanceIdentifier<OwnedNodeEdgePoint> nodeIdent = abstractNode().child(OwnedNodeEdgePoint.class, new OwnedNodeEdgePointKey(nep.getUuid()));
         tx.merge(LogicalDatastoreType.OPERATIONAL, nodeIdent, nep);
     }
 
-    public void deleteAbstractNep(OwnedNodeEdgePoint nep){
+    public void deleteAbstractNep(OwnedNodeEdgePoint nep) {
         verifyTx();
         InstanceIdentifier<OwnedNodeEdgePoint> nodeIdent = abstractNode().child(OwnedNodeEdgePoint.class, new OwnedNodeEdgePointKey(nep.getUuid()));
         tx.delete(LogicalDatastoreType.OPERATIONAL, nodeIdent);

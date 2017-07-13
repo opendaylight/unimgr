@@ -28,7 +28,7 @@ public class OvsDriver implements ActivationDriverBuilder {
 
     private OvsActivator activator;
 
-    public OvsDriver(DataBroker dataBroker){
+    public OvsDriver(DataBroker dataBroker) {
         activator = new OvsActivator(dataBroker);
     }
 

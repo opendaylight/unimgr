@@ -59,7 +59,7 @@ public class UniUpdateCommandTest {
     private Node uniNode;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         PowerMockito.mockStatic(UniUtils.class);
         PowerMockito.mockStatic(MdsalUtils.class);
         PowerMockito.mockStatic(OvsdbUtils.class);
@@ -129,7 +129,7 @@ public class UniUpdateCommandTest {
         verifyExecute(2, 2);
     }
 
-    private void verifyExecute(int qosTimes, int updateNodeTime){
+    private void verifyExecute(int qosTimes, int updateNodeTime) {
         uniUpdateCommand.execute();
         PowerMockito.verifyStatic(times(qosTimes));
         OvsdbUtils.createQoSForOvsdbNode(any(DataBroker.class), any(UniAugmentation.class));

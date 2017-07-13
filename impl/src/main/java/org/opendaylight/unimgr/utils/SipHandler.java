@@ -14,17 +14,17 @@ import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
  */
 public class SipHandler {
 
-    public static String getDeviceName(Uuid sip){
+    public static String getDeviceName(Uuid sip) {
         String[] sipTab = sip.getValue().split(":");
         return sipTab[sipTab.length-2];
     }
 
-    public static String getPortName(Uuid sip){
+    public static String getPortName(Uuid sip) {
         String[] sipTab = sip.getValue().split(":");
         return sipTab[sipTab.length-1];
     }
 
-    public static boolean isTheSameDevice(Uuid sip1, Uuid sip2){
+    public static boolean isTheSameDevice(Uuid sip1, Uuid sip2) {
         return getDeviceName(sip1).equals(getDeviceName(sip2));
     }
 }

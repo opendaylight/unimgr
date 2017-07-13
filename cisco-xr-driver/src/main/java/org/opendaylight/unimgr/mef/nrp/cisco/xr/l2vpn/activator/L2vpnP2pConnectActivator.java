@@ -110,7 +110,7 @@ public class L2vpnP2pConnectActivator extends AbstractL2vpnActivator {
      * @param serviceId old service id
      * @return new service id
      */
-    private String replaceForbidenCharacters(String serviceId){
+    private String replaceForbidenCharacters(String serviceId) {
         return serviceId.replace(":","_");
     }
 }

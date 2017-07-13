@@ -168,19 +168,19 @@ public class BandwidthProfileHelperTest {
         when(adapterSpec1.getNrpConnAdaptSpecAttrs()).thenReturn(connAdaptSpecAttrs);
         when(adapterSpec1.getNrpEvcEndpointConnAdaptSpecAttrs()).thenReturn(evcAttrs);
 
-        if(ingressDefaultBwp.isPresent()) {
+        if (ingressDefaultBwp.isPresent()) {
             when(connAdaptSpecAttrs.getIngressBwpFlow()).thenReturn(ingressDefaultBwp.get());
         }
 
-        if(egressDefaultBwp.isPresent()) {
+        if (egressDefaultBwp.isPresent()) {
             when(connAdaptSpecAttrs.getEgressBwpFlow()).thenReturn(egressDefaultBwp.get());
         }
 
-        if(ingressEvcBwp.isPresent()) {
+        if (ingressEvcBwp.isPresent()) {
             when(evcAttrs.getIngressBwpFlow()).thenReturn(ingressEvcBwp.get());
         }
 
-        if(egressEvcBwp.isPresent()) {
+        if (egressEvcBwp.isPresent()) {
             when(evcAttrs.getEgressBwpFlow()).thenReturn(egressEvcBwp.get());
         }
 
@@ -192,11 +192,11 @@ public class BandwidthProfileHelperTest {
         when(terminationSpec.getAugmentation(TerminationSpec1.class)).thenReturn(terminationSpec1);
         when(terminationSpec1.getNrpUniTerminationAttrs()).thenReturn(nrpUniTerminationAttrs);
 
-        if(ingressUniBwp.isPresent()) {
+        if (ingressUniBwp.isPresent()) {
             when(nrpUniTerminationAttrs.getIngressBwpUni()).thenReturn(ingressUniBwp.get());
         }
 
-        if(egressUniBwp.isPresent()) {
+        if (egressUniBwp.isPresent()) {
             when(nrpUniTerminationAttrs.getEgressBwpUni()).thenReturn(egressUniBwp.get());
         }
 

@@ -37,7 +37,7 @@ public class ActivationTransaction {
      * @return result
      */
     public Result activate() {
-        if(drivers.isEmpty()) throw new IllegalStateException("at least one driver required");
+        if (drivers.isEmpty()) throw new IllegalStateException("at least one driver required");
         sortDrivers();
         try {
             for (ActivationDriver d: drivers) {
@@ -61,7 +61,7 @@ public class ActivationTransaction {
      * @return result
      */
     public Result deactivate() {
-        if(drivers.isEmpty()) throw new IllegalStateException("at least one driver required");
+        if (drivers.isEmpty()) throw new IllegalStateException("at least one driver required");
         sortDrivers();
         try {
             for (ActivationDriver d: drivers) {
@@ -117,11 +117,11 @@ public class ActivationTransaction {
             return message;
         }
 
-        public static Result success(){
+        public static Result success() {
             return new Result(true, Optional.empty(), Optional.empty());
         }
 
-        public static Result fail(String message, Throwable cause){
+        public static Result fail(String message, Throwable cause) {
             return new Result(false, Optional.of(message), Optional.of(cause));
         }
     }

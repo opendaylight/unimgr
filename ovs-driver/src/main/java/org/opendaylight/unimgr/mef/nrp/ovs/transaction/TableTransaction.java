@@ -104,7 +104,7 @@ public class TableTransaction {
         deleteTransaction.submit().checkedGet();
     }
 
-    private InstanceIdentifier<Table> getTableIid(NodeKey nodeKey, TableKey tableKey){
+    private InstanceIdentifier<Table> getTableIid(NodeKey nodeKey, TableKey tableKey) {
         return InstanceIdentifier.builder(Nodes.class)
                                  .child(Node.class, nodeKey)
                                  .augmentation(FlowCapableNode.class)
@@ -112,7 +112,7 @@ public class TableTransaction {
                                  .build();
     }
 
-    private InstanceIdentifier<Flow> getFlowIid(Flow flow){
+    private InstanceIdentifier<Flow> getFlowIid(Flow flow) {
         return tableInstanceId.child(Flow.class, flow.getKey());
     }
 }

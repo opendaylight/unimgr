@@ -33,7 +33,7 @@ public class BandwidthProfileComposition {
     }
 
     private static Optional<GNRPBwpFlow> convert(Optional<? extends GNRPBwpFlow> input) {
-        if(input.isPresent()) {
+        if (input.isPresent()) {
             return Optional.of(input.get());
         }
 

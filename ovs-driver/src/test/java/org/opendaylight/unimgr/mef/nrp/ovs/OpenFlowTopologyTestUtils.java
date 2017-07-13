@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class OpenFlowTopologyTestUtils {
 
-    public static void createOpenFlowNodes(List<Node> nodeList, DataBroker dataBroker){
+    public static void createOpenFlowNodes(List<Node> nodeList, DataBroker dataBroker) {
         NodesBuilder nodesBuilder = new NodesBuilder();
         nodesBuilder.setNode(nodeList);
         Nodes nodes = nodesBuilder.build();
@@ -43,7 +43,7 @@ public class OpenFlowTopologyTestUtils {
         DataStoreTestUtils.write(nodes,nodesIId,dataBroker);
     }
 
-    public static org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node createOpenFlowNode(String oFName, List<NodeConnector> nodeConnectorList){
+    public static org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node createOpenFlowNode(String oFName, List<NodeConnector> nodeConnectorList) {
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder =
                 new org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder();
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId nodeId =
@@ -55,7 +55,7 @@ public class OpenFlowTopologyTestUtils {
         return nodeBuilder.build();
     }
 
-    public static NodeConnector createNodeConnector(String ofBridgeName, Long portNumber, String ovsdbPortName){
+    public static NodeConnector createNodeConnector(String ofBridgeName, Long portNumber, String ovsdbPortName) {
         NodeConnectorBuilder nodeConnectorBuilder = new NodeConnectorBuilder();
         String ofPortName = ofBridgeName + ":" + portNumber.toString();
         NodeConnectorId nodeConnectorId = new NodeConnectorId(ofPortName);
@@ -65,21 +65,21 @@ public class OpenFlowTopologyTestUtils {
         return nodeConnectorBuilder.build();
     }
 
-    private static FlowCapableNodeConnector createFlowCapableNodeConnector(String ovsdbName, Long portNumber){
+    private static FlowCapableNodeConnector createFlowCapableNodeConnector(String ovsdbName, Long portNumber) {
         FlowCapableNodeConnectorBuilder flowCapableNodeConnectorBuilder = new FlowCapableNodeConnectorBuilder();
         flowCapableNodeConnectorBuilder.setName(ovsdbName);
         flowCapableNodeConnectorBuilder.setPortNumber(new PortNumberUni(portNumber));
         return flowCapableNodeConnectorBuilder.build();
     }
 
-    public static FlowCapableNode createFlowCapableNode(){
+    public static FlowCapableNode createFlowCapableNode() {
         FlowCapableNodeBuilder flowCapableNodeBuilder = new FlowCapableNodeBuilder();
 
         flowCapableNodeBuilder.setTable(createOfTable());
         return flowCapableNodeBuilder.build();
     }
 
-    private static List<Table> createOfTable(){
+    private static List<Table> createOfTable() {
         List<Table> tables = new ArrayList<>();
         TableBuilder tableBuilder = new TableBuilder();
         tableBuilder.setId(Short.valueOf("0"));
@@ -89,7 +89,7 @@ public class OpenFlowTopologyTestUtils {
         return tables;
     }
 
-    public static InstanceIdentifier<NodeConnector> getNodeConnectorInstanceIdentifier(String ofBridgeName, String nodeConnectorId){
+    public static InstanceIdentifier<NodeConnector> getNodeConnectorInstanceIdentifier(String ofBridgeName, String nodeConnectorId) {
         return InstanceIdentifier.builder(Nodes.class)
                 .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
                         new org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey(

@@ -61,7 +61,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     private static final int init_neps_count = 4;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         //given
         dataBroker = getDataBroker();
 
@@ -77,7 +77,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void testNodeAddition(){
+    public void testNodeAddition() {
         //when
         performNrpDaoAction(addNode,null);
 
@@ -87,7 +87,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void testNepAddition(){
+    public void testNepAddition() {
         //given
         String newNepName = "newNep";
         performNrpDaoAction(addNode,null);
@@ -102,7 +102,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void testNepUpdate(){
+    public void testNepUpdate() {
         //given
         performNrpDaoAction(addNode,null);
 
@@ -170,7 +170,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void testNodeRemoval(){
+    public void testNodeRemoval() {
         //given
         performNrpDaoAction(addNode,null);
 
@@ -183,7 +183,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void testNepRemoval(){
+    public void testNepRemoval() {
         //given
         performNrpDaoAction(addNode,null);
         String nepNameToRemove = testNepName+"0";
@@ -203,41 +203,41 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     BiConsumer<NrpDao,String> addNode = (dao,nepId) -> dao.createSystemNode(testSystemNodeName,createTestOwnedNodeEdgePointList());
     BiConsumer<NrpDao,OwnedNodeEdgePoint> update = (dao,nep) -> dao.updateNep(testSystemNodeName,nep);
 
-    private <T extends Object> void performNrpDaoAction(BiConsumer<NrpDao,T> action, T attr){
+    private <T extends Object> void performNrpDaoAction(BiConsumer<NrpDao,T> action, T attr) {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         nrpDao = new NrpDao(tx);
         action.accept(nrpDao,attr);
         tx.submit();
     }
 
-    private List<OwnedNodeEdgePoint> createTestOwnedNodeEdgePointList(){
+    private List<OwnedNodeEdgePoint> createTestOwnedNodeEdgePointList() {
         return IntStream.range(0,init_neps_count).
                 mapToObj(i -> createNep(testNepName + i, TerminationDirection.Bidirectional))
                 .collect(Collectors.toList());
     }
 
-    private OwnedNodeEdgePoint createNep(String nepName, TerminationDirection td){
+    private OwnedNodeEdgePoint createNep(String nepName, TerminationDirection td) {
         return createNep(nepName, true, td);
     }
 
-    private OwnedNodeEdgePoint createNep(String nepName, boolean associateSip, TerminationDirection td){
+    private OwnedNodeEdgePoint createNep(String nepName, boolean associateSip, TerminationDirection td) {
         Uuid uuid = new Uuid(nepName);
         OwnedNodeEdgePointBuilder builder = new OwnedNodeEdgePointBuilder()
                 .setKey(new OwnedNodeEdgePointKey(uuid))
                 .setUuid(uuid);
                 // TODO donaldh .setTerminationDirection(td);
 
-        if(associateSip) builder.setMappedServiceInterfacePoint(Arrays.asList(new Uuid(sipPrefix + nepName)));
+        if (associateSip) builder.setMappedServiceInterfacePoint(Arrays.asList(new Uuid(sipPrefix + nepName)));
 
         return builder.build();
     }
 
-    private Node getAbstractNode(){
+    private Node getAbstractNode() {
         ReadOnlyTransaction tx = dataBroker.newReadOnlyTransaction();
         try {
             Optional<Node> opt =
                     (Optional<Node>) tx.read(LogicalDatastoreType.OPERATIONAL,NRP_ABSTRACT_NODE_IID).checkedGet();
-            if(opt.isPresent()){
+            if (opt.isPresent()) {
                 return opt.get();
             } else {
                 return null;

@@ -45,7 +45,7 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
     private static int initialBridgePortCount = 3;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         //given
         dataBroker = getDataBroker();
         helper = new TopologyDataHandlerTestUtils(dataBroker);
@@ -61,7 +61,7 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
     }
 
     @Test
-    public void testBridgeAddition(){
+    public void testBridgeAddition() {
         //when
         helper.createTestBridge();
 
@@ -73,7 +73,7 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
     }
 
     @Test
-    public void testPortAddition(){
+    public void testPortAddition() {
         //given
         String newPortName = "br1-eth4";
         Long ofPortNumber = 4L;
@@ -92,7 +92,7 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
     }
 
     @Test
-    public void testBridgeRemoval(){
+    public void testBridgeRemoval() {
         //given
         helper.createTestBridge();
         Node ovsNode = helper.readOvsNode();
@@ -107,7 +107,7 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
     }
 
     @Test
-    public void testPortRemoval(){
+    public void testPortRemoval() {
         //given
         String fullPortNameToRemove = bridgeName+tp1Name;
         //helper.createTestBridge();
@@ -131,7 +131,7 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
                                 && ownedNep.getUuid().getValue().equals(ovs_nep_prefix + nepName)
                     );
 
-    private void checkNeps(Node node,String ... neps){
+    private void checkNeps(Node node,String ... neps) {
         Arrays.stream(neps)
                 .forEach(nep -> assertTrue(checkNep.apply(node,nep)));
     }
@@ -140,12 +140,12 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
             (sips, nep) -> sips.stream()
                 .anyMatch(sip -> sip.getUuid().getValue().equals(sip_prefix + ovs_nep_prefix + nep));
 
-    private void checkSips(List<ServiceInterfacePoint> sips, String ... neps){
+    private void checkSips(List<ServiceInterfacePoint> sips, String ... neps) {
         Arrays.stream(neps)
                 .forEach(nep -> assertTrue(checkSip.apply(sips,nep)));
     }
 
-    private List<Link> getLinkList(){
+    private List<Link> getLinkList() {
         List<Link> linkList = new ArrayList<>();
 
         //For testing purposes only - can't be find anywhere else in DataStore

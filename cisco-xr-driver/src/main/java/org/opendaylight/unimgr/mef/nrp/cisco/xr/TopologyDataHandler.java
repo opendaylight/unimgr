@@ -145,7 +145,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
     }
 
     public void close() {
-        if(registration != null) {
+        if (registration != null) {
             LOG.info("closing netconf tree listener");
             registration.close();
         }
@@ -183,7 +183,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
     }
 
     private void onAddedNodes(@Nonnull Collection<Node> added) throws ReadFailedException {
-        if(added.isEmpty()) return;
+        if (added.isEmpty()) return;
         LOG.debug("found {} added XR nodes", added.size());
 
         final ReadWriteTransaction topoTx = dataBroker.newReadWriteTransaction();
@@ -234,7 +234,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
             try {
                 KeyedInstanceIdentifier<Node, NodeKey> id = mountIds.get(key);
                 Optional<MountPoint> mountPoint = mountService.getMountPoint(id);
-                if(mountPoint.isPresent()) {
+                if (mountPoint.isPresent()) {
                     DataBroker deviceBroker = mountPoint.get().getService(DataBroker.class).get();
                     LOG.debug(deviceBroker.toString());
                     List<OwnedNodeEdgePoint> tps;
@@ -273,7 +273,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
 
     private Stream<InterfaceConfiguration> ports(ReadOnlyTransaction tx) throws ReadFailedException {
         Optional<InterfaceConfigurations> interfaces = tx.read(LogicalDatastoreType.OPERATIONAL, InterfaceHelper.getInterfaceConfigurationsId()).checkedGet();
-        if(interfaces.isPresent()) {
+        if (interfaces.isPresent()) {
             return interfaces.get().getInterfaceConfiguration().stream();
         }
 

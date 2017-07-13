@@ -53,17 +53,17 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
 
     private final DataBroker dataBroker;
 
-    public AbstractNodeHandler(DataBroker dataBroker){
+    public AbstractNodeHandler(DataBroker dataBroker) {
         Objects.requireNonNull(dataBroker);
         this.dataBroker = dataBroker;
     }
 
-    public void init(){
+    public void init() {
         registration = dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, NRP_TOPOLOGY_SYSTEM_IID), this);
     }
 
-    public void close(){
-        if (registration!=null){
+    public void close() {
+        if (registration!=null) {
             registration.close();
         }
     }
@@ -116,9 +116,9 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
         OwnedNodeEdgePoint b = (OwnedNodeEdgePoint) dataObjectModificationNep.getDataBefore();
         OwnedNodeEdgePoint a = (OwnedNodeEdgePoint) dataObjectModificationNep.getDataAfter();
 
-        if(b != null) {
-            if(a == null) return true;
-            if(hasSip(b)) {
+        if (b != null) {
+            if (a == null) return true;
+            if (hasSip(b)) {
               return ! hasSip(a);
             }
         }
@@ -126,12 +126,12 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
         return false;
     }
 
-    private boolean checkIfUpdated(DataObjectModification dataObjectModificationNep){
+    private boolean checkIfUpdated(DataObjectModification dataObjectModificationNep) {
         OwnedNodeEdgePoint before = (OwnedNodeEdgePoint) dataObjectModificationNep.getDataBefore();
         OwnedNodeEdgePoint after = (OwnedNodeEdgePoint) dataObjectModificationNep.getDataAfter();
-        if(after == null) return false;
+        if (after == null) return false;
         //added
-        if(before == null) {
+        if (before == null) {
             return hasSip(after);
         }
         //updated

@@ -15,7 +15,7 @@ import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
  * @author jakub.niezgoda@amartus.com
  */
 public class VlanNotSetException extends ResourceNotAvailableException {
-    public VlanNotSetException(String message){
+    public VlanNotSetException(String message) {
         super(message);
     }
 }

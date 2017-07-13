@@ -59,7 +59,7 @@ public class UniRemoveCommandTest {
     private Node uniNode;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         PowerMockito.mockStatic(UniUtils.class);
         PowerMockito.mockStatic(OvsdbUtils.class);
         PowerMockito.mockStatic(MdsalUtils.class);

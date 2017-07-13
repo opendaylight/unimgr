@@ -15,7 +15,7 @@ import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
  * @author marek.ryznar@amartus.com
  */
 public class VlanPoolExhaustedException extends ResourceNotAvailableException {
-    public VlanPoolExhaustedException(String message){
+    public VlanPoolExhaustedException(String message) {
         super(message);
     }
 }

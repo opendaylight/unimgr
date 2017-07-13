@@ -70,9 +70,9 @@ public class TopologyTransaction {
      * @throws ResourceNotAvailableException if node for the specified port name was not found
      */
     public Node readNode(String portName) throws ResourceNotAvailableException {
-        for(NullAwareDatastoreGetter<Node> node : readNodes()) {
-            if(node.get().isPresent()){
-                for(NodeConnector nodeConnector:node.get().get().getNodeConnector()) {
+        for (NullAwareDatastoreGetter<Node> node : readNodes()) {
+            if (node.get().isPresent()) {
+                for (NodeConnector nodeConnector:node.get().get().getNodeConnector()) {
                     FlowCapableNodeConnector flowCapableNodeConnector
                             = nodeConnector.getAugmentation(FlowCapableNodeConnector.class);
                     if (portName.equals(flowCapableNodeConnector.getName())) {
@@ -89,9 +89,9 @@ public class TopologyTransaction {
     public Node readNodeOF(String ofportName) throws ResourceNotAvailableException {
         String ofNodeName = ofportName.split(":")[0]+":"+ofportName.split(":")[1];
         Nodes nodes = readOpenFLowTopology(dataBroker);
-        if(nodes != null){
-            for(Node node: nodes.getNode()){
-                if(node.getId().getValue().equals(ofNodeName)){
+        if (nodes != null) {
+            for (Node node: nodes.getNode()) {
+                if (node.getId().getValue().equals(ofNodeName)) {
                     return node;
                 }
             }
@@ -151,7 +151,7 @@ public class TopologyTransaction {
         return InstanceIdentifier.builder(Nodes.class).build();
     }
 
-    public static Nodes readOpenFLowTopology(DataBroker dataBroker){
+    public static Nodes readOpenFLowTopology(DataBroker dataBroker) {
         InstanceIdentifier instanceIdentifier = InstanceIdentifier.builder(Nodes.class).build();
         return (Nodes) MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION,instanceIdentifier);
     }

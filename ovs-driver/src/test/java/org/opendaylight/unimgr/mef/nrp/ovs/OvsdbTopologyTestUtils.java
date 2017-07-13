@@ -40,19 +40,19 @@ public class OvsdbTopologyTestUtils {
     /**
      * Ovsdb topology initializator.
      */
-    public static void createOvsdbTopology(DataBroker dataBroker){
+    public static void createOvsdbTopology(DataBroker dataBroker) {
         TopologyBuilder topologyBuilder = new TopologyBuilder();
         topologyBuilder.setTopologyId(ovsdbTopologyId);
         Topology topology = topologyBuilder.build();
         DataStoreTestUtils.write(topology,ovsdbTopology, dataBroker);
     }
 
-    public static void writeBridge(Node node, DataBroker dataBroker){
+    public static void writeBridge(Node node, DataBroker dataBroker) {
         InstanceIdentifier bridgeIid = getNodeInstanceIdentifier(node.getNodeId());
         DataStoreTestUtils.write(node,bridgeIid,dataBroker);
     }
 
-    public static Node createBridge(String nodeId, List<TerminationPoint> tps){
+    public static Node createBridge(String nodeId, List<TerminationPoint> tps) {
         NodeBuilder nodeBuilder = new NodeBuilder();
         nodeBuilder.setNodeId(new NodeId(nodeId));
         nodeBuilder.setTerminationPoint(tps);
@@ -60,7 +60,7 @@ public class OvsdbTopologyTestUtils {
         return nodeBuilder.build();
     }
 
-    public static InstanceIdentifier getNodeInstanceIdentifier(NodeId nodeId){
+    public static InstanceIdentifier getNodeInstanceIdentifier(NodeId nodeId) {
         return InstanceIdentifier
                 .builder(NetworkTopology.class)
                 .child(Topology.class,
@@ -70,13 +70,13 @@ public class OvsdbTopologyTestUtils {
                 .build();
     }
 
-    public static InstanceIdentifier getPortInstanceIdentifier(String nodeName, String portName){
+    public static InstanceIdentifier getPortInstanceIdentifier(String nodeName, String portName) {
         return getNodeInstanceIdentifier(new NodeId(nodeName))
                 .child(TerminationPoint.class,
                         new TerminationPointKey(new TpId(portName)));
     }
 
-    private static OvsdbBridgeAugmentation createOvsdbBridgeAugmentation(String ovsdbBridgeName){
+    private static OvsdbBridgeAugmentation createOvsdbBridgeAugmentation(String ovsdbBridgeName) {
         OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
         ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(ovsdbBridgeName));
         return ovsdbBridgeAugmentationBuilder.build();

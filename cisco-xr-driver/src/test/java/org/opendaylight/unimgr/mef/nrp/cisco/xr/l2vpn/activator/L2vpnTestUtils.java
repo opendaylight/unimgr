@@ -57,26 +57,26 @@ import com.google.common.util.concurrent.CheckedFuture;
  */
 public class L2vpnTestUtils {
 
-    public static MountPointService getMockedMountPointService(Optional<DataBroker> optBroker){
+    public static MountPointService getMockedMountPointService(Optional<DataBroker> optBroker) {
         PowerMockito.mockStatic(MountPointHelper.class);
         PowerMockito.when(MountPointHelper.getDataBroker(Mockito.anyObject(),Mockito.anyString())).thenReturn(optBroker);
         return Mockito.mock(MountPointService.class);
     }
 
-    public static void checkL2vpn(L2vpn l2vpn){
+    public static void checkL2vpn(L2vpn l2vpn) {
         assertNotNull(l2vpn);
         assertNotNull(l2vpn.getDatabase());
         assertNotNull(l2vpn.getDatabase().getXconnectGroups());
     }
 
-    public static void checkXConnectGroup(XconnectGroup xconnectGroup, String outerName){
+    public static void checkXConnectGroup(XconnectGroup xconnectGroup, String outerName) {
         assertNotNull(xconnectGroup);
         assertEquals(outerName,xconnectGroup.getName().getValue());
         assertNotNull(xconnectGroup.getP2pXconnects());
         assertNotNull(xconnectGroup.getP2pXconnects().getP2pXconnect());
     }
 
-    public static void checkP2pXconnect(P2pXconnect p2pXconnect, String innerName){
+    public static void checkP2pXconnect(P2pXconnect p2pXconnect, String innerName) {
         assertNotNull(p2pXconnect);
         assertEquals(innerName,p2pXconnect.getName().getValue());
         assertNotNull(p2pXconnect.getAttachmentCircuits());
@@ -85,49 +85,49 @@ public class L2vpnTestUtils {
         assertNotNull(p2pXconnect.getPseudowires().getPseudowire());
     }
 
-    public static void checkAttachmentCircuit(AttachmentCircuit attachmentCircuit, String port){
+    public static void checkAttachmentCircuit(AttachmentCircuit attachmentCircuit, String port) {
         assertTrue(attachmentCircuit.isEnable());
         assertEquals(port,attachmentCircuit.getName().getValue());
     }
 
-    public static void checkPseudowire(Pseudowire pseudowire){
+    public static void checkPseudowire(Pseudowire pseudowire) {
         assertNotNull(pseudowire);
         assertNotNull(pseudowire.getPseudowireId());
         assertNotNull(pseudowire.getNeighbor());
         assertNotNull(pseudowire.getNeighbor().get(0));
     }
 
-    public static void checkNeighbor(Neighbor neighbor){
+    public static void checkNeighbor(Neighbor neighbor) {
         assertNotNull(neighbor);
         assertNotNull(neighbor.getXmlClass());
         assertNotNull(neighbor.getNeighbor());
         assertNotNull(neighbor.getMplsStaticLabels());
     }
 
-    public static void checkMplsStaticLabels(MplsStaticLabels mplsStaticLabels){
+    public static void checkMplsStaticLabels(MplsStaticLabels mplsStaticLabels) {
         assertNotNull(mplsStaticLabels);
         assertNotNull(mplsStaticLabels.getLocalStaticLabel());
         assertNotNull(mplsStaticLabels.getRemoteStaticLabel());
     }
 
-    public static void checkInterfaceConfigurations(InterfaceConfigurations interfaceConfigurations){
+    public static void checkInterfaceConfigurations(InterfaceConfigurations interfaceConfigurations) {
         assertNotNull(interfaceConfigurations);
         assertNotNull(interfaceConfigurations.getInterfaceConfiguration());
     }
 
-    public static void checkInterfaceConfiguration(InterfaceConfiguration interfaceConfiguration, String portNo, boolean mtu){
+    public static void checkInterfaceConfiguration(InterfaceConfiguration interfaceConfiguration, String portNo, boolean mtu) {
         assertNotNull(interfaceConfiguration);
         assertNotNull(interfaceConfiguration.getActive());
         assertNotNull(interfaceConfiguration.getInterfaceModeNonPhysical());
         assertEquals(portNo,interfaceConfiguration.getInterfaceName().getValue());
         assertTrue(interfaceConfiguration.isShutdown());
-        if(mtu){
+        if (mtu) {
             assertNotNull(interfaceConfiguration.getMtus());
             assertNotNull(interfaceConfiguration.getMtus().getMtu());
         }
     }
 
-    public static void checkMtu(Mtu mtu, Long mtuValue){
+    public static void checkMtu(Mtu mtu, Long mtuValue) {
         assertEquals(mtuValue,mtu.getMtu());
         assertNotNull(mtu.getOwner());
     }
@@ -155,7 +155,7 @@ public class L2vpnTestUtils {
     }
 
     private static void checkL2vpnDeactivation(CheckedFuture<Optional<L2vpn>, ReadFailedException>driverL2vpn) throws ExecutionException, InterruptedException {
-        if (driverL2vpn.get().isPresent()){
+        if (driverL2vpn.get().isPresent()) {
             L2vpn l2vpn = driverL2vpn.get().get();
             L2vpnTestUtils.checkL2vpn(l2vpn);
 
@@ -167,7 +167,7 @@ public class L2vpnTestUtils {
     }
 
     private static void checkInterfaceConfigurationDeactivation(CheckedFuture<Optional<InterfaceConfigurations>, ReadFailedException> driverInterfaceConfigurations, String deactivatedPort) throws InterruptedException, ExecutionException{
-        if (driverInterfaceConfigurations.get().isPresent()){
+        if (driverInterfaceConfigurations.get().isPresent()) {
             InterfaceConfigurations interfaceConfigurations = driverInterfaceConfigurations.get().get();
             L2vpnTestUtils.checkInterfaceConfigurations(interfaceConfigurations);
 
@@ -178,14 +178,14 @@ public class L2vpnTestUtils {
         }
     }
 
-    public static List<EndPoint> mockEndpoints(String device1Name, String device2Name, String portNo1, String portNo2){
+    public static List<EndPoint> mockEndpoints(String device1Name, String device2Name, String portNo1, String portNo2) {
         List<EndPoint> endPoints = new ArrayList<>();
         endPoints.add(mockEndPoint("sip:"+device1Name+":"+portNo1));
         endPoints.add(mockEndPoint("sip:"+device2Name+":"+portNo2));
         return endPoints;
     }
 
-    private static EndPoint mockEndPoint(String portName){
+    private static EndPoint mockEndPoint(String portName) {
         ConnectivityServiceEndPoint connectivityServiceEndPoint = mock(ConnectivityServiceEndPoint.class);
         NrpConnectivityServiceEndPointAttrs attrs = mock(NrpConnectivityServiceEndPointAttrs.class);
         //UNI port mock

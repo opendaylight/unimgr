@@ -66,11 +66,11 @@ public class CapabilitiesService {
                 return condition;
             }
 
-            private static boolean checkForNetconfCapability(Node node, String netconf_capability){
+            private static boolean checkForNetconfCapability(Node node, String netconf_capability) {
                 NetconfNode netconf = node.getAugmentation(NetconfNode.class);
-                if(netconf == null) return false;
-                if(netconf.getAvailableCapabilities() == null) return false;
-                if(netconf.getAvailableCapabilities().getAvailableCapability() == null) return false;
+                if (netconf == null) return false;
+                if (netconf.getAvailableCapabilities() == null) return false;
+                if (netconf.getAvailableCapabilities().getAvailableCapability() == null) return false;
 
                 return netconf
                         .getAvailableCapabilities()
@@ -108,7 +108,7 @@ public class CapabilitiesService {
                 boolean isSupporting = isSupporting(capability);
                 result = (mode == Capability.Mode.AND ? result && isSupporting: result || isSupporting);
 
-                if(result ^ (mode == Capability.Mode.AND)) {
+                if (result ^ (mode == Capability.Mode.AND)) {
                     break;
                 }
             }

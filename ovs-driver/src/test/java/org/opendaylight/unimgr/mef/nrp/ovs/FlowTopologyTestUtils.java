@@ -34,7 +34,7 @@ public class FlowTopologyTestUtils {
     /**
      * Creates flow topology with link nodes (Links between ovs).
      */
-    public static void createFlowTopology(DataBroker dataBroker, List<Link> links){
+    public static void createFlowTopology(DataBroker dataBroker, List<Link> links) {
         TopologyBuilder topologyBuilder = new TopologyBuilder();
         topologyBuilder.setTopologyId(flowTopologyId);
         topologyBuilder.setLink(links);
@@ -42,7 +42,7 @@ public class FlowTopologyTestUtils {
         DataStoreTestUtils.write(topology,FLOW_TOPO_IID,dataBroker);
     }
 
-    public static Link createLink(String sourceNode, Long sourcePort, String destNode, Long destPort){
+    public static Link createLink(String sourceNode, Long sourcePort, String destNode, Long destPort) {
         LinkBuilder linkBuilder = new LinkBuilder();
         String sourcePortName = prefix + sourceNode + ":" + sourcePort.toString();
         String destPortName =  prefix + destNode + ":" + destPort;

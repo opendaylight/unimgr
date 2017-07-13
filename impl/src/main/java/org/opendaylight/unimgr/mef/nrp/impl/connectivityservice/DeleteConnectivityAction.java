@@ -69,7 +69,7 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
 
         ConnectivityService cs =
                 nrpDao.getConnectivityService(serviceId);
-        if(cs == null) {
+        if (cs == null) {
             return RpcResultBuilder
                     .<DeleteConnectivityServiceOutput>failed()
                     .withError(RpcError.ErrorType.APPLICATION, MessageFormat.format("Service {0} does not exist", input.getServiceIdOrName()))
@@ -163,7 +163,7 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
                     Uuid nodeId = c.getContainerNode();
                     return c.getConnectionEndPoint().stream().map(cep -> {
                         Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.service.EndPoint> optEndPoint = Optional.empty();
-                        if(cs.getEndPoint() != null){
+                        if (cs.getEndPoint() != null) {
                             optEndPoint = cs.getEndPoint().stream()
                                     .filter(endPoint1 -> endPoint1.getServiceInterfacePoint().getValue().contains(cep.getServerNodeEdgePoint().getValue()))
                                     .findFirst();
