@@ -30,7 +30,7 @@ import com.google.common.base.Optional;
 
 public class OvsNodeAddCommand extends AbstractCommand<Node> {
 
-    private static final Logger LO = LoggerFactory.getLogger(OvsNodeAddCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OvsNodeAddCommand.class);
 
     public OvsNodeAddCommand(final DataBroker dataBroker, final DataTreeModification<Node> newOvsNode) {
         super(dataBroker, newOvsNode);
@@ -42,7 +42,7 @@ public class OvsNodeAddCommand extends AbstractCommand<Node> {
         final OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsNode.getAugmentation(OvsdbNodeAugmentation.class);
         final InstanceIdentifier<Node> ovsdbIid = dataObject.getRootPath().getRootIdentifier();
         if (ovsdbNodeAugmentation != null) {
-            LO.info("Received an OVSDB node create {}",
+            LOG.info("Received an OVSDB node create {}",
                     ovsdbNodeAugmentation.getConnectionInfo()
                                          .getRemoteIp()
                                          .getIpv4Address()
@@ -100,7 +100,7 @@ public class OvsNodeAddCommand extends AbstractCommand<Node> {
                     }
                 }
             } else {
-                LO.info("Received a new OVSDB node connection from {}"
+                LOG.info("Received a new OVSDB node connection from {}"
                         + ovsdbNodeAugmentation.getConnectionInfo()
                                 .getRemoteIp().getIpv4Address());
             }

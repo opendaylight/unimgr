@@ -36,7 +36,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 
 public class EvcUpdateCommand extends AbstractCommand<Link> {
 
-    private static final Logger LO = LoggerFactory.getLogger(EvcUpdateCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EvcUpdateCommand.class);
 
     public EvcUpdateCommand(final DataBroker dataBroker, final DataTreeModification<Link> updatedEvcLink) {
         super(dataBroker, updatedEvcLink);
@@ -51,17 +51,17 @@ public class EvcUpdateCommand extends AbstractCommand<Link> {
             // FIXME: For now, we assume that there is 1 uni per
             // source/destination
             if ((evc.getUniDest() == null) || evc.getUniDest().isEmpty()) {
-                LO.error("Destination UNI cannot be null.");
+                LOG.error("Destination UNI cannot be null.");
                 return;
             }
             if ((evc.getUniSource() == null) || evc.getUniSource().isEmpty()) {
-                LO.error("Source UNI cannot be null.");
+                LOG.error("Source UNI cannot be null.");
                 return;
             }
 
             final Ipv4Address laterUni1Ip = evc.getUniSource().iterator().next().getIpAddress().getIpv4Address();
             final Ipv4Address laterUni2Ip = evc.getUniDest().iterator().next().getIpAddress().getIpv4Address();
-            LO.trace("New EVC created, source IP: {} destination IP {}.", laterUni1Ip, laterUni2Ip);
+            LOG.trace("New EVC created, source IP: {} destination IP {}.", laterUni1Ip, laterUni2Ip);
 
             final ReadTransaction readTransac = dataBroker.newReadOnlyTransaction();
             final CheckedFuture<Optional<Link>, ReadFailedException> retFormerEvc =
@@ -81,7 +81,7 @@ public class EvcUpdateCommand extends AbstractCommand<Link> {
                     } else if (formerUni1ip.equals(laterUni2Ip)) {
                         // do nothing
                     } else {
-                        LO.info("{} is not part of the EVC, removing configuration", formerUni1ip);
+                        LOG.info("{} is not part of the EVC, removing configuration", formerUni1ip);
                         final InstanceIdentifier<?> formerUniIID =
                                 UnimgrMapper.getUniIid(dataBroker, new IpAddress(formerUni1ip),
                                         LogicalDatastoreType.OPERATIONAL);
@@ -94,7 +94,7 @@ public class EvcUpdateCommand extends AbstractCommand<Link> {
                     } else if (formerUni2ip.equals(laterUni2Ip)) {
                         // do nothing
                     } else {
-                        LO.info("{} is not part of the EVC, removing configuration", formerUni2ip);
+                        LOG.info("{} is not part of the EVC, removing configuration", formerUni2ip);
                         final InstanceIdentifier<?> formerUniIID =
                                 UnimgrMapper.getUniIid(dataBroker, new IpAddress(formerUni2ip),
                                         LogicalDatastoreType.OPERATIONAL);
@@ -104,7 +104,7 @@ public class EvcUpdateCommand extends AbstractCommand<Link> {
                     }
                 }
             } catch (final InterruptedException | ExecutionException e) {
-                LO.error("Failed to retrieve former EVC {}", evcKey, e);
+                LOG.error("Failed to retrieve former EVC {}", evcKey, e);
             }
 
             InstanceIdentifier<Node> sourceUniIid;
@@ -223,13 +223,13 @@ public class EvcUpdateCommand extends AbstractCommand<Link> {
                                 destinationUniIid,
                                 dataBroker);
                     } else {
-                        LO.info("Unable to retrieve the source and/or destination bridge.");
+                        LOG.info("Unable to retrieve the source and/or destination bridge.");
                     }
                 } else {
-                    LO.info("Unable to retrieve the source and/or destination ovsdbNode.");
+                    LOG.info("Unable to retrieve the source and/or destination ovsdbNode.");
                 }
             } else {
-                LO.info("Unable to retrieve the source and/or destination Uni.");
+                LOG.info("Unable to retrieve the source and/or destination Uni.");
             }
         }
     }

@@ -29,7 +29,7 @@ import com.google.common.base.Optional;
 
 public class EvcRemoveCommand extends AbstractCommand<Link> {
 
-    private static final Logger LO = LoggerFactory.getLogger(EvcRemoveCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EvcRemoveCommand.class);
 
     public EvcRemoveCommand(final DataBroker dataBroker, final DataTreeModification<Link> removedEvcLink) {
         super(dataBroker, removedEvcLink);
@@ -66,7 +66,7 @@ public class EvcRemoveCommand extends AbstractCommand<Link> {
                 }
             }
         } else {
-            LO.info("EvcAugmentation is null");
+            LOG.info("EvcAugmentation is null");
         }
         MdsalUtils.deleteNode(dataBroker, removedEvcIid, LogicalDatastoreType.OPERATIONAL);
     }

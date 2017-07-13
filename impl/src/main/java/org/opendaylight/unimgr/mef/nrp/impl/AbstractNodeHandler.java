@@ -44,7 +44,7 @@ import com.google.common.util.concurrent.Futures;
  * @author marek.ryznar@amartus.com
  */
 public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
-    private static final Logger LO = LoggerFactory.getLogger(AbstractNodeHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractNodeHandler.class);
     private static final InstanceIdentifier NRP_TOPOLOGY_SYSTEM_IID = InstanceIdentifier
             .create(Context.class)
             .augmentation(Context1.class)
@@ -102,12 +102,12 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
 
             @Override
             public void onSuccess(@Nullable Void result) {
-                LO.info("Abstract TAPI node upadate successful");
+                LOG.info("Abstract TAPI node upadate successful");
             }
 
             @Override
             public void onFailure(Throwable t) {
-                LO.warn("Abstract TAPI node upadate failed due to an error", t);
+                LOG.warn("Abstract TAPI node upadate failed due to an error", t);
             }
         });
     }

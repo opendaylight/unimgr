@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * @author bartosz.michalik@amartus.com [modifications]
  */
 public class ActivationDriverRepoServiceImpl implements ActivationDriverRepoService {
-    private static final Logger LO = LoggerFactory.getLogger(ActivationDriverRepoServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ActivationDriverRepoServiceImpl.class);
 
     private final Collection<ActivationDriverBuilder> builders;
 
@@ -41,7 +41,7 @@ public class ActivationDriverRepoServiceImpl implements ActivationDriverRepoServ
     }
 
     public ActivationDriverRepoServiceImpl(List<ActivationDriverBuilder> builders) {
-        LO.debug("Activation drivers initialized");
+        LOG.debug("Activation drivers initialized");
         this.builders = builders;
     }
 
@@ -61,11 +61,11 @@ public class ActivationDriverRepoServiceImpl implements ActivationDriverRepoServ
     }
 
     public void bind(ActivationDriverBuilder builder) {
-        LO.debug("builder {} bound", builder);
+        LOG.debug("builder {} bound", builder);
     }
 
     public void unbind(ActivationDriverBuilder builder) {
-        LO.debug("builder {} unbound", builder);
+        LOG.debug("builder {} unbound", builder);
     }
 
     @Override

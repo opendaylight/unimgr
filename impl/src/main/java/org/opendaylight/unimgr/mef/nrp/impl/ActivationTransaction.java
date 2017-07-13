@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * @author krzysztof.bijakowski@amartus.com [modifications]
  */
 public class ActivationTransaction {
-    private static final Logger LO = LoggerFactory.getLogger(ActivationTransaction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ActivationTransaction.class);
 
     private List<ActivationDriver> drivers = new ArrayList<>();
 
@@ -44,12 +44,12 @@ public class ActivationTransaction {
                 d.activate();
             }
             commit();
-            LO.info("Activate transaction successful");
+            LOG.info("Activate transaction successful");
 
             return Result.success();
         } catch (Exception e) {
             //XXX add transaction identification ???
-            LO.warn("Rolling back activate transaction ", e);
+            LOG.warn("Rolling back activate transaction ", e);
             rollback();
 
             return Result.fail(e.getMessage(), e);
@@ -67,13 +67,13 @@ public class ActivationTransaction {
             for (ActivationDriver d: drivers) {
                 d.deactivate();
             }
-            LO.info("Deactivate transaction successful");
+            LOG.info("Deactivate transaction successful");
             commit();
 
             return Result.success();
         } catch (Exception e) {
             //XXX add transaction identification ???
-            LO.warn("Rolling back deactivate transaction ", e);
+            LOG.warn("Rolling back deactivate transaction ", e);
             rollback();
 
             return Result.fail(e.getMessage(), e);

@@ -44,7 +44,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 
 public class UniUtils {
 
-    private static final Logger LO = LoggerFactory.getLogger(UniUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UniUtils.class);
 
     private UniUtils() {
         throw new AssertionError("Instantiating utility class.");
@@ -72,9 +72,9 @@ public class UniUtils {
             final CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
             future.checkedGet();
             result = true;
-            LO.info("Created and submitted a new Uni node {}", nodeData.getNodeId());
+            LOG.info("Created and submitted a new Uni node {}", nodeData.getNodeId());
         } catch (final Exception e) {
-            LO.error("Exception while creating Uni Node, Uni Node Id: {}", uniNodeId, e);
+            LOG.error("Exception while creating Uni Node, Uni Node Id: {}", uniNodeId, e);
         }
         return result;
     }
@@ -101,7 +101,7 @@ public class UniUtils {
             for (final Node uniNode : uniNodes) {
                 final UniAugmentation uniAugmentation = uniNode.getAugmentation(UniAugmentation.class);
                 if (uniAugmentation.getIpAddress().equals(ipAddress)) {
-                    LO.info("Found Uni node");
+                    LOG.info("Found Uni node");
                     return Optional.of(uniNode);
                 }
             }

@@ -29,7 +29,7 @@ import com.google.common.base.Optional;
 
 public class EvcAddCommand extends AbstractCommand<Link> {
 
-    private static final Logger LO = LoggerFactory.getLogger(EvcAddCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EvcAddCommand.class);
 
     public EvcAddCommand(final DataBroker dataBroker, final DataTreeModification<Link> newEvcLink) {
         super(dataBroker, newEvcLink);
@@ -45,14 +45,14 @@ public class EvcAddCommand extends AbstractCommand<Link> {
             if (evc != null) {
                 // For now, we assume that there is 1 uni per source/destination
                 if ((evc.getUniDest() == null) || evc.getUniDest().isEmpty()) {
-                    LO.error("Destination UNI cannot be null.");
+                    LOG.error("Destination UNI cannot be null.");
                     return;
                 }
                 if ((evc.getUniSource() == null) || evc.getUniSource().isEmpty()) {
-                    LO.error("Source UNI cannot be null.");
+                    LOG.error("Source UNI cannot be null.");
                     return;
                 }
-                LO.info("New EVC created, source IP: {} destination IP {}.",
+                LOG.info("New EVC created, source IP: {} destination IP {}.",
                         evc.getUniSource().iterator().next().getIpAddress().getIpv4Address(),
                         evc.getUniDest().iterator().next().getIpAddress().getIpv4Address());
                 InstanceIdentifier<Node> sourceUniIid;
@@ -156,13 +156,13 @@ public class EvcAddCommand extends AbstractCommand<Link> {
                                     destinationUniIid,
                                     dataBroker);
                         } else {
-                            LO.info("Unable to retrieve the source and/or destination bridge.");
+                            LOG.info("Unable to retrieve the source and/or destination bridge.");
                         }
                     } else {
-                        LO.info("Uname to retrieve the source and/or destination ovsdbNode.");
+                        LOG.info("Uname to retrieve the source and/or destination ovsdbNode.");
                     }
                 } else {
-                    LO.info("Unable to retrieve the source and/or destination Uni.");
+                    LOG.info("Unable to retrieve the source and/or destination Uni.");
                 }
             }
         }

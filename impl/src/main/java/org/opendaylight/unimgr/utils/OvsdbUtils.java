@@ -92,7 +92,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 
 public class OvsdbUtils {
 
-    private static final Logger LO = LoggerFactory.getLogger(OvsdbUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbUtils.class);
 
     private OvsdbUtils() {
         throw new AssertionError("Instantiating utility class.");
@@ -109,7 +109,7 @@ public class OvsdbUtils {
             Node ovsdbNode,
             UniAugmentation uni,
             String bridgeName) {
-        LO.info("Creating a bridge on node {}", ovsdbNode.getNodeId().getValue());
+        LOG.info("Creating a bridge on node {}", ovsdbNode.getNodeId().getValue());
         final InstanceIdentifier<Node> ovsdbNodeIid = uni.getOvsdbNodeRef().getValue().firstIdentifierOf(Node.class);
         if (ovsdbNodeIid != null) {
             final NodeBuilder bridgeNodeBuilder = new NodeBuilder();
@@ -129,7 +129,7 @@ public class OvsdbUtils {
             transaction.put(LogicalDatastoreType.CONFIGURATION, bridgeIid, bridgeNodeBuilder.build());
             transaction.submit();
         } else {
-            LO.info("OvsdbNodeRef is null");
+            LOG.info("OvsdbNodeRef is null");
         }
     }
 
@@ -144,7 +144,7 @@ public class OvsdbUtils {
             InstanceIdentifier<Node> ovsdbNodeIid,
             UniAugmentation uni,
             String bridgeName) {
-        LO.info("Creating a bridge on node {}", ovsdbNodeIid);
+        LOG.info("Creating a bridge on node {}", ovsdbNodeIid);
         if (ovsdbNodeIid != null) {
             final NodeBuilder bridgeNodeBuilder = new NodeBuilder();
             final Optional<Node> optionalOvsdbNode = MdsalUtils.readNode(dataBroker,
@@ -173,7 +173,7 @@ public class OvsdbUtils {
                 transaction.submit();
             }
         } else {
-            LO.info("OvsdbNodeRef is null");
+            LOG.info("OvsdbNodeRef is null");
         }
     }
 
@@ -224,7 +224,7 @@ public class OvsdbUtils {
         if (source.getSpeed() != null) {
             final Uuid qosUuid = getQosUuid(dataBroker, source);
             //tpAugmentationBuilder.setQos(getQosUuid(dataBroker, source));
-            LO.info("Updating Qos {} to termination point {}", qosUuid , bridgeName);
+            LOG.info("Updating Qos {} to termination point {}", qosUuid , bridgeName);
         }
         final TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
@@ -294,9 +294,9 @@ public class OvsdbUtils {
             final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
             transaction.put(LogicalDatastoreType.CONFIGURATION, ovsdbNodeIid, nodeData);
             transaction.submit();
-            LO.info("Created and submitted a new OVSDB node {}", nodeData.getNodeId());
+            LOG.info("Created and submitted a new OVSDB node {}", nodeData.getNodeId());
         } catch (final Exception e) {
-            LO.error("Exception while creating OvsdbNodeAugmentation, Uni is null. Node Id: {}", ovsdbNodeId, e);
+            LOG.error("Exception while creating OvsdbNodeAugmentation, Uni is null. Node Id: {}", ovsdbNodeId, e);
         }
     }
 
@@ -322,10 +322,10 @@ public class OvsdbUtils {
             final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
             transaction.put(LogicalDatastoreType.CONFIGURATION, ovsdbNodeIid, nodeData);
             transaction.submit();
-            LO.info("Created and submitted a new OVSDB node {}", nodeData.getNodeId());
+            LOG.info("Created and submitted a new OVSDB node {}", nodeData.getNodeId());
             return nodeData;
         } catch (final Exception e) {
-            LO.error("Exception while creating OvsdbNodeAugmentation, Uni is null. Node Id: {}", ovsdbNodeId, e);
+            LOG.error("Exception while creating OvsdbNodeAugmentation, Uni is null. Node Id: {}", ovsdbNodeId, e);
         }
         return null;
     }
@@ -387,13 +387,13 @@ public class OvsdbUtils {
             try {
                 Thread.sleep(UnimgrConstants.OVSDB_UPDATE_TIMEOUT);
             } catch (final InterruptedException e) {
-                LO.warn("Interrupted while waiting after OVSDB node augmentation {}", ovsdbNodeId, e);
+                LOG.warn("Interrupted while waiting after OVSDB node augmentation {}", ovsdbNodeId, e);
             }
             try {
                 future.checkedGet();
-                LO.trace("Update qos and queues to ovsdb for node {} {}", ovsdbNodeId, ovsdbNodeAugmentationIid);
+                LOG.trace("Update qos and queues to ovsdb for node {} {}", ovsdbNodeId, ovsdbNodeAugmentationIid);
             } catch (final TransactionCommitFailedException e) {
-                LO.warn("Failed to put {} ", ovsdbNodeAugmentationIid, e);
+                LOG.warn("Failed to put {} ", ovsdbNodeAugmentationIid, e);
             }
             updateQosEntries(dataBroker, uni);
         }
@@ -480,7 +480,7 @@ public class OvsdbUtils {
             final List<QosEntries> qosList = optionalNode.get()
                     .getAugmentation(OvsdbNodeAugmentation.class)
                     .getQosEntries();
-            LO.trace("QOS entries list {} for node {}", qosList, ovsdbNodeId);
+            LOG.trace("QOS entries list {} for node {}", qosList, ovsdbNodeId);
             QosEntriesKey qosEntryKey = null;
             for (final QosEntries qosEntry : qosList) {
                 qosEntryKey = qosEntry.getKey();
@@ -506,9 +506,9 @@ public class OvsdbUtils {
             final CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
             try {
                 future.checkedGet();
-                LO.info("Update qos-entries to ovsdb for node {} {}", ovsdbNodeId, queueIid);
+                LOG.info("Update qos-entries to ovsdb for node {} {}", ovsdbNodeId, queueIid);
             } catch (final TransactionCommitFailedException e) {
-                LO.warn("Failed to put {} ", queueIid, e);
+                LOG.warn("Failed to put {} ", queueIid, e);
             }
         }
     }
@@ -527,7 +527,7 @@ public class OvsdbUtils {
         Optional<Node> optionalNode;
         if (UniUtils.getSpeed(sourceUniAugmentation.getSpeed().getSpeed())
                 .equals(UniUtils.getSpeed(evc.getIngressBw().getSpeed()))) {
-            LO.info("Source UNI speed matches EVC ingress BW");
+            LOG.info("Source UNI speed matches EVC ingress BW");
         } else {
             // update Uni's ovsdbNodeRef qos-entries and queues for max-rate to match EVC ingress BW
             optionalNode = findOvsdbNode(dataBroker, sourceUniAugmentation);
@@ -539,7 +539,7 @@ public class OvsdbUtils {
 
         if (UniUtils.getSpeed(destinationUniAugmentation.getSpeed().getSpeed())
                 .equals(UniUtils.getSpeed(evc.getIngressBw().getSpeed()))) {
-            LO.info("Destination UNI speed matches EVC ingress BW");
+            LOG.info("Destination UNI speed matches EVC ingress BW");
         } else {
             // update Uni's ovsdbNodeRef qos-entries and queues for max-rate to match EVC ingress BW
             optionalNode = findOvsdbNode(dataBroker, destinationUniAugmentation);
@@ -557,7 +557,7 @@ public class OvsdbUtils {
         final List<QosEntries> qosList = optionalOvsdbNode.get()
                 .getAugmentation(OvsdbNodeAugmentation.class)
                 .getQosEntries();
-        LO.trace("QOS entries list {} for node {}", qosList, ovsdbNodeId);
+        LOG.trace("QOS entries list {} for node {}", qosList, ovsdbNodeId);
         QosEntriesKey qosEntryKey = null;
         for (final QosEntries qosEntry : qosList) {
             qosEntryKey = qosEntry.getKey();
@@ -574,9 +574,9 @@ public class OvsdbUtils {
         final CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
         try {
             future.checkedGet();
-            LO.info("Update qos-entries max-rate to ovsdb for node {} {}", ovsdbNodeId, qosOtherConfigIid);
+            LOG.info("Update qos-entries max-rate to ovsdb for node {} {}", ovsdbNodeId, qosOtherConfigIid);
         } catch (final TransactionCommitFailedException e) {
-            LO.warn("Failed to put {}", qosOtherConfigIid, e);
+            LOG.warn("Failed to put {}", qosOtherConfigIid, e);
         }
     }
 
@@ -603,9 +603,9 @@ public class OvsdbUtils {
         final CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
         try {
             future.checkedGet();
-            LO.info("Update queues max-rate to ovsdb for node {} {}", ovsdbNodeId, queuesOtherConfigIid);
+            LOG.info("Update queues max-rate to ovsdb for node {} {}", ovsdbNodeId, queuesOtherConfigIid);
         } catch (final TransactionCommitFailedException e) {
-            LO.warn("Failed to put {} ", queuesOtherConfigIid, e);
+            LOG.warn("Failed to put {} ", queuesOtherConfigIid, e);
         }
     }
 
@@ -697,7 +697,7 @@ public class OvsdbUtils {
         if (uni.getSpeed() != null) {
             final Uuid qosUuid = getQosUuid(dataBroker, uni);
             //tpAugmentationBuilder.setQos(getQosUuid(dataBroker, uni));
-            LO.info("Updating Qos {} to termination point {}", qosUuid , bridgeName);
+            LOG.info("Updating Qos {} to termination point {}", qosUuid , bridgeName);
         }
         final TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
@@ -749,7 +749,7 @@ public class OvsdbUtils {
             future.checkedGet();
             result = true;
         } catch (final TransactionCommitFailedException e) {
-            LO.warn("Failed to delete {} ", path, e);
+            LOG.warn("Failed to delete {} ", path, e);
         }
         return result;
     }
@@ -856,7 +856,7 @@ public class OvsdbUtils {
                         .getRemoteIp()
                         .getIpv4Address()
                         .equals(uni.getIpAddress().getIpv4Address())) {
-                    LO.info("Found ovsdb node");
+                    LOG.info("Found ovsdb node");
                     optionalOvsdb = Optional.of(ovsdbNode);
                     return optionalOvsdb;
                 }
@@ -899,7 +899,7 @@ public class OvsdbUtils {
             final Ipv4Address ipv4 = new Ipv4Address(ip);
             return new IpAddress(ipv4);
         } catch (final UnknownHostException e) {
-            LO.info("Unable to retrieve controller's ip address, using loopback. {}", e);
+            LOG.info("Unable to retrieve controller's ip address, using loopback. {}", e);
         }
         return new IpAddress(UnimgrConstants.LOCAL_IP);
     }

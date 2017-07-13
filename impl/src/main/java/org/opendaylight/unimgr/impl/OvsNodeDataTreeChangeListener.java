@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 public class OvsNodeDataTreeChangeListener extends UnimgrDataTreeChangeListener<Node> {
 
-    private static final Logger LO = LoggerFactory.getLogger(OvsNodeDataTreeChangeListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OvsNodeDataTreeChangeListener.class);
     private final ListenerRegistration<OvsNodeDataTreeChangeListener> listener;
 
     public OvsNodeDataTreeChangeListener(final DataBroker dataBroker) {
@@ -34,13 +34,13 @@ public class OvsNodeDataTreeChangeListener extends UnimgrDataTreeChangeListener<
         final DataTreeIdentifier<Node> dataTreeIid =
                 new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, nodePath);
         listener = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
-        LO.info("ovsNodeDataTreeChangeListener created and registered");
+        LOG.info("ovsNodeDataTreeChangeListener created and registered");
     }
 
     @Override
     public void add(final DataTreeModification<Node> newDataObject) {
         if (newDataObject.getRootPath() != null && newDataObject.getRootNode() != null) {
-            LO.info("ovs node {} created", newDataObject.getRootNode().getIdentifier());
+            LOG.info("ovs node {} created", newDataObject.getRootNode().getIdentifier());
             final OvsNodeAddCommand ovsNodeAddCmd = new OvsNodeAddCommand(dataBroker, newDataObject);
             ovsNodeAddCmd.execute();
         }
