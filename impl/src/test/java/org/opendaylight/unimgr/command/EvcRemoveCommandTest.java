@@ -56,8 +56,9 @@ public class EvcRemoveCommandTest {
         evcLink = DataTreeModificationHelper.getEvcLink(link);
         evcRemoveCommand = new EvcRemoveCommand(dataBroker, evcLink);
     }
+
     /**
-     * Test method for {@link org.opendaylight.unimgr.command.EvcRemoveCommand#execute().
+     * Test method for {@link org.opendaylight.unimgr.command.EvcRemoveCommand#execute()}.
      * @throws Exception
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })

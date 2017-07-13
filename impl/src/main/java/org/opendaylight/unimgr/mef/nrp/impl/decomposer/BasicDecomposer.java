@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Basic graph based request decomposer
+ * Basic graph based request decomposer.
  * @author bartosz.michalik@amartus.com
  *
  */
@@ -35,7 +35,7 @@ public class BasicDecomposer implements RequestDecomposer {
     }
 
     /**
-     * We currently support only one-to-one mapping between nep and sip
+     * We currently support only one-to-one mapping between nep and sip.
      * @param endpoints
      * @param constraint
      * @return

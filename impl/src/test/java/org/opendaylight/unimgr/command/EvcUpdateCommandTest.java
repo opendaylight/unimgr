@@ -72,6 +72,7 @@ public class EvcUpdateCommandTest {
         evcLink = DataTreeModificationHelper.getEvcLink(link);
         evcUpdateCommand = new EvcUpdateCommand(dataBroker, evcLink);
     }
+
     /**
      * Test method for {@link org.opendaylight.unimgr.command.EvcUpdateCommand#execute()}.
      * @throws Exception
@@ -155,7 +156,7 @@ public class EvcUpdateCommandTest {
         PowerMockito.doNothing().when(OvsdbUtils.class, "createGreTunnel", dataBroker, uniAugmentation,
                 uniAugmentation, node, UnimgrConstants.DEFAULT_BRIDGE_NAME, UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
         when(OvsdbUtils.createOvsdbNode(any(DataBroker.class), any(UniAugmentation.class)))
-        .thenReturn(node);
+            .thenReturn(node);
         when(UnimgrMapper.getOvsdbBridgeNodeIid(any(Node.class))).thenReturn(evcKey);
         when(UnimgrMapper.getUniIid(any(DataBroker.class), any(IpAddress.class),
                 any(LogicalDatastoreType.class))).thenReturn(evcKey);

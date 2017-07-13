@@ -18,8 +18,9 @@ import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.Con
  */
 public class EndPoint {
     private final ConnectivityServiceEndPoint endpoint;
+
     /**
-     * Optional attributes
+     * Optional attributes.
      * (likely to change to different implementation)
      */
     private final NrpConnectivityServiceEndPointAttrs attrs;
@@ -27,7 +28,7 @@ public class EndPoint {
     private Uuid systemNepUuid;
 
     /**
-     * Initialize endpoint
+     * Initialize endpoint.
      * @param endpoint endpoint data
      * @param attrs associated NRP attributes
      */
@@ -36,18 +37,10 @@ public class EndPoint {
         this.attrs = attrs;
     }
 
-    /**
-     *
-     * @return endpoints
-     */
     public ConnectivityServiceEndPoint getEndpoint() {
         return endpoint;
     }
 
-    /**
-     *
-     * @return attributes
-     */
     public NrpConnectivityServiceEndPointAttrs getAttrs() {
         return attrs;
     }

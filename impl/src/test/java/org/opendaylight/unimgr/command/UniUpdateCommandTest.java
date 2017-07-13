@@ -113,7 +113,7 @@ public class UniUpdateCommandTest {
         when(MdsalUtils.readNode(any(DataBroker.class), any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class))).thenReturn(optionalOvsdbNode);
         when(OvsdbUtils.createQoSForOvsdbNode(any(DataBroker.class), any(UniAugmentation.class)))
-        .thenReturn(null);
+            .thenReturn(null);
         when(UniUtils.updateUniNode(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                 any(UniAugmentation.class), any(Node.class), any(DataBroker.class))).thenReturn(true);
         when(OvsdbUtils.findOvsdbNode(any(DataBroker.class), any(UniAugmentation.class)))

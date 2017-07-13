@@ -27,6 +27,7 @@ public interface ActivationDriverBuilder {
      * @return {@link Optional#empty()} in case it cannot be instantiated for a port, driver otherwise
      */
     Optional<ActivationDriver> driverFor(BuilderContext context);
+
     Uuid getNodeUuid();
 
     /**

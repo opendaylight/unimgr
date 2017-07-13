@@ -12,7 +12,7 @@ import java.text.MessageFormat;
 import java.util.Random;
 
 /**
- * Dummy resource pool
+ * Dummy resource pool.
  * @author bartosz.michalik@amartus.com
  */
 public class ConnectivityServiceIdResourcePool {

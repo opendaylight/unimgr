@@ -73,7 +73,7 @@ public class NullAwareDatastoreGetter<T> {
         return dataOptional;
     }
 
-    private void logDataOptionalStatus(Function <?, ?> function) {
+    private void logDataOptionalStatus(Function<?, ?> function) {
         if (dataOptional.isPresent()) {
             LOG.trace("Before collection of: " + function.toString() + ", currently collected data is non-null: " + dataOptional.get().toString());
         } else {

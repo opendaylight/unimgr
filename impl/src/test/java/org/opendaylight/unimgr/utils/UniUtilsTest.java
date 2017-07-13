@@ -111,7 +111,7 @@ public class UniUtilsTest {
         verify(mockAppender).doAppend(argThat(new ArgumentMatcher() {
             @Override
             public boolean matches(final Object argument) {
-              return ((LoggingEvent)argument).getFormattedMessage().contains("Exception while creating Uni Node");
+                return ((LoggingEvent)argument).getFormattedMessage().contains("Exception while creating Uni Node");
             }
           }));
         MemberModifier.suppress(MemberMatcher.method(UnimgrMapper.class, "getUniNodeIid", NodeId.class));
@@ -126,7 +126,7 @@ public class UniUtilsTest {
         verify(mockAppender).doAppend(argThat(new ArgumentMatcher() {
             @Override
             public boolean matches(final Object argument) {
-              return ((LoggingEvent)argument).getFormattedMessage().contains("Created and submitted a new Uni");
+                return ((LoggingEvent)argument).getFormattedMessage().contains("Created and submitted a new Uni");
             }
           }));
     }
@@ -163,7 +163,7 @@ public class UniUtilsTest {
         Node node = mock(Node.class);
         List<Node> ndList = new ArrayList<Node>();
         ndList.add(node);
-        Topology topology = mock (Topology.class);
+        Topology topology = mock(Topology.class);
         DataBroker dataBroker = mock(DataBroker.class);
         UniAugmentation uniAugmentation = mock(UniAugmentation.class);
         InstanceIdentifier<Topology> topologyInstanceIdentifier = mock(InstanceIdentifier.class);
@@ -184,7 +184,7 @@ public class UniUtilsTest {
         Node node = mock(Node.class);
         List<Node> ndList = new ArrayList<Node>();
         ndList.add(node);
-        Topology topology = mock (Topology.class);
+        Topology topology = mock(Topology.class);
         DataBroker dataBroker = mock(DataBroker.class);
         UniAugmentation uniAugmentation = mock(UniAugmentation.class);
         InstanceIdentifier<Topology> topologyInstanceIdentifier = mock(InstanceIdentifier.class);
@@ -205,7 +205,7 @@ public class UniUtilsTest {
         Node node = mock(Node.class);
         List<Node> ndList = new ArrayList<Node>();
         ndList.add(node);
-        Topology topology = mock (Topology.class);
+        Topology topology = mock(Topology.class);
         DataBroker dataBroker = mock(DataBroker.class);
         UniAugmentation uniAugmentation = mock(UniAugmentation.class);
         InstanceIdentifier<Topology> topologyInstanceIdentifier = mock(InstanceIdentifier.class);
@@ -226,7 +226,7 @@ public class UniUtilsTest {
         Node node = mock(Node.class);
         List<Node> ndList = new ArrayList<Node>();
         ndList.add(node);
-        Topology topology = mock (Topology.class);
+        Topology topology = mock(Topology.class);
         DataBroker dataBroker = mock(DataBroker.class);
         UniAugmentation uniAugmentation = mock(UniAugmentation.class);
         IpAddress ipAddreDest = new IpAddress("10.10.0.2".toCharArray());

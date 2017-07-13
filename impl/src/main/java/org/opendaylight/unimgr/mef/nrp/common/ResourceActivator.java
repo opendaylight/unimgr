@@ -20,12 +20,14 @@ import java.util.List;
 public interface ResourceActivator {
 
     /**
+     * Activate connectivity betwee the provided endpoints.
      * @param endPoints list of endpoint to connect
      * @param serviceName generated service id
      */
     void activate(List<EndPoint> endPoints, String serviceName) throws  ResourceActivatorException, TransactionCommitFailedException;
 
     /**
+     * Deactivate connectivity between the provided endpoints.
      * @param endPoints list of endpoint between which connection have to be deactivated
      * @param serviceName generated service id
      */

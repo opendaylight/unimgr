@@ -145,7 +145,7 @@ public class UnimgrMapper {
 
     /**
      * Generates an Instance Identifier for a specific OVSDB node by
-     * using the node Id
+     * using the node Id.
      * @param nodeId The node ID of a specific OVSDB node.
      * @return An Instance Identifier for a specific OVSDB node.
      */
@@ -295,7 +295,7 @@ public class UnimgrMapper {
 
     /**
      * Generates an Instance Identifier for a specific UNI node by
-     * using the node Id
+     * using the node Id.
      * @param nodeId The node ID of a specific UNI node.
      * @return An Instance Identifier for a specific UNI node.
      */

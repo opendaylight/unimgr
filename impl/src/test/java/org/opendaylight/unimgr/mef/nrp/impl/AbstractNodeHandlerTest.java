@@ -107,7 +107,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
         performNrpDaoAction(addNode,null);
 
         //when changing not sip related attribute
-        OwnedNodeEdgePoint toUpdateNep = createNep(testNepName+"1",TerminationDirection.UndefinedOrUnknown);
+        OwnedNodeEdgePoint toUpdateNep = createNep(testNepName + "1", TerminationDirection.UndefinedOrUnknown);
         performNrpDaoAction(update, toUpdateNep);
 
 
@@ -186,14 +186,14 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     public void testNepRemoval() {
         //given
         performNrpDaoAction(addNode,null);
-        String nepNameToRemove = testNepName+"0";
+        String nepNameToRemove = testNepName + "0";
 
         //when
         performNrpDaoAction(removeNep,nepNameToRemove);
 
         //then
         Node node = getAbstractNode();
-        assertEquals(init_neps_count-1,node.getOwnedNodeEdgePoint().size());
+        assertEquals(init_neps_count - 1, node.getOwnedNodeEdgePoint().size());
         assertFalse(node.getOwnedNodeEdgePoint().stream()
             .anyMatch(nep -> nep.getUuid().getValue().equals(nepNameToRemove)));
     }
@@ -211,9 +211,9 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     }
 
     private List<OwnedNodeEdgePoint> createTestOwnedNodeEdgePointList() {
-        return IntStream.range(0,init_neps_count).
-                mapToObj(i -> createNep(testNepName + i, TerminationDirection.Bidirectional))
-                .collect(Collectors.toList());
+        return IntStream.range(0,init_neps_count)
+            .mapToObj(i -> createNep(testNepName + i, TerminationDirection.Bidirectional))
+            .collect(Collectors.toList());
     }
 
     private OwnedNodeEdgePoint createNep(String nepName, TerminationDirection td) {
@@ -227,7 +227,9 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
                 .setUuid(uuid);
                 // TODO donaldh .setTerminationDirection(td);
 
-        if (associateSip) builder.setMappedServiceInterfacePoint(Arrays.asList(new Uuid(sipPrefix + nepName)));
+        if (associateSip) {
+            builder.setMappedServiceInterfacePoint(Arrays.asList(new Uuid(sipPrefix + nepName)));
+        }
 
         return builder.build();
     }

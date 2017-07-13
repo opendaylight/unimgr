@@ -78,7 +78,7 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
         Map<Uuid, LinkedList<EndPoint>> data = null;
         try {
             data = prepareData(cs, nrpDao);
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOG.info("Service {} does not exists", input.getServiceIdOrName());
             return RpcResultBuilder
                     .<DeleteConnectivityServiceOutput>failed()
@@ -107,7 +107,7 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
                 }
             }
             throw new IllegalStateException("no transaction created for delete connectivity request");
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOG.warn("Exception in create connectivity service", e);
             return RpcResultBuilder
                     .<DeleteConnectivityServiceOutput>failed()

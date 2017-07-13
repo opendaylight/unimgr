@@ -19,7 +19,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 
 /**
- * Class representing port (replacement for FcPort)
+ * Class representing port (replacement for FcPort).
  *
  * @author marek.ryznar@amartus.com
  */
@@ -35,7 +35,7 @@ public class ServicePort {
     //defines port
     private TpId tpId;
     //defines cTag VLAN ID
-    private Long vlanId=null;
+    private Long vlanId = null;
 
     public ServicePort(TopologyId topoId, NodeId nodeId, TpId tpId) {
         this.topoId = topoId;
@@ -88,12 +88,12 @@ public class ServicePort {
     }
 
     public static boolean hasVlan(EndPoint endPoint) {
-        if ( (endPoint.getAttrs() != null)
-                && (endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource() != null) ) {
+        if ((endPoint.getAttrs() != null)
+                && (endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource() != null)) {
             NrpCarrierEthConnectivityEndPointResource attr =
                     endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource();
-            if ( (attr.getCeVlanIdListAndUntag() != null)
-                    && !(attr.getCeVlanIdListAndUntag().getVlanId().isEmpty()) ) {
+            if ((attr.getCeVlanIdListAndUntag() != null)
+                    && !(attr.getCeVlanIdListAndUntag().getVlanId().isEmpty())) {
                 return true;
             } else {
                 return false;

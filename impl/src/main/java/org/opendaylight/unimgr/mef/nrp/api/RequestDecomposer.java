@@ -11,13 +11,14 @@ package org.opendaylight.unimgr.mef.nrp.api;
 import java.util.List;
 
 /**
- * Request decomposer is responsible for decomposition of {@link org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.ConnectivityService}
+ * Request decomposer is responsible for decomposition of ConnectivityService
  * requests into one or many driver requests.
+ * @see org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.ConnectivityService
  * @author bartosz.michalik@amartus.com
  */
 public interface RequestDecomposer {
     /**
-     *
+     * Decompose the provided endpoint connectivity request into a list of sub-requests.
      * @param endpoints list of connectiviy request endpoints
      * @param constraint on decoposition
      * @return list of subrequests - one per driver

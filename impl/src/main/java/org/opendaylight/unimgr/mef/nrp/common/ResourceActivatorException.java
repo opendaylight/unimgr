@@ -7,21 +7,19 @@
  */
 package org.opendaylight.unimgr.mef.nrp.common;
 
-public class ResourceActivatorException extends Exception{
+public class ResourceActivatorException extends Exception {
 
-	private static final long serialVersionUID = 4242336212297338778L;
+    private static final long serialVersionUID = 4242336212297338778L;
 
-	public ResourceActivatorException() {
-		super();
-	}
+    public ResourceActivatorException() {
+        super();
+    }
 
-	public ResourceActivatorException(String message) {
-		super(message);
-	}
+    public ResourceActivatorException(String message) {
+        super(message);
+    }
 
-	public ResourceActivatorException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
-
+    public ResourceActivatorException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

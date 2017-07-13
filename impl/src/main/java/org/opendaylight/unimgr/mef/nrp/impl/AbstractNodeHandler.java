@@ -63,7 +63,7 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
     }
 
     public void close() {
-        if (registration!=null) {
+        if (registration != null) {
             registration.close();
         }
     }
@@ -117,9 +117,11 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
         OwnedNodeEdgePoint a = (OwnedNodeEdgePoint) dataObjectModificationNep.getDataAfter();
 
         if (b != null) {
-            if (a == null) return true;
+            if (a == null) {
+                return true;
+            }
             if (hasSip(b)) {
-              return ! hasSip(a);
+                return ! hasSip(a);
             }
         }
 
@@ -129,7 +131,9 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
     private boolean checkIfUpdated(DataObjectModification dataObjectModificationNep) {
         OwnedNodeEdgePoint before = (OwnedNodeEdgePoint) dataObjectModificationNep.getDataBefore();
         OwnedNodeEdgePoint after = (OwnedNodeEdgePoint) dataObjectModificationNep.getDataAfter();
-        if (after == null) return false;
+        if (after == null) {
+            return false;
+        }
         //added
         if (before == null) {
             return hasSip(after);

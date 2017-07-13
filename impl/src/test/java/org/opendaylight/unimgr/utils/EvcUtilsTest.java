@@ -166,7 +166,7 @@ public class EvcUtilsTest {
                 .setUniSource(uniSourceList)
                 .build();
         Optional<Link> optionalEvcLink = mock(Optional.class);
-        Link lnk = mock (Link.class);
+        Link lnk = mock(Link.class);
         when(optionalEvcLink.isPresent()).thenReturn(true);
         when(optionalEvcLink.get()).thenReturn(lnk);
         MemberModifier.suppress(MemberMatcher.method(MdsalUtils.class, "readLink", DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class));

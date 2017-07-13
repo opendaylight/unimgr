@@ -193,7 +193,7 @@ public class OvsdbUtilsTest {
         verify(mockAppender, times(2)).doAppend(argThat(new ArgumentMatcher() {
             @Override
             public boolean matches(final Object argument) {
-              return ((LoggingEvent)argument).getFormattedMessage().contains("Creating a bridge on node");
+                return ((LoggingEvent)argument).getFormattedMessage().contains("Creating a bridge on node");
             }
           }));
     }
@@ -295,7 +295,7 @@ public class OvsdbUtilsTest {
         verify(mockAppender).doAppend(argThat(new ArgumentMatcher() {
             @Override
             public boolean matches(final Object argument) {
-              return ((LoggingEvent)argument).getFormattedMessage().contains("Created and submitted a new OVSDB node");
+                return ((LoggingEvent)argument).getFormattedMessage().contains("Created and submitted a new OVSDB node");
             }
           }));
         doNothing().when(transaction).put(any(LogicalDatastoreType.class),
@@ -313,7 +313,7 @@ public class OvsdbUtilsTest {
         verify(mockAppender).doAppend(argThat(new ArgumentMatcher() {
             @Override
             public boolean matches(final Object argument) {
-              return ((LoggingEvent)argument).getFormattedMessage().contains("Created and submitted a new OVSDB node");
+                return ((LoggingEvent)argument).getFormattedMessage().contains("Created and submitted a new OVSDB node");
             }
           }));
         // createOvsdbNode with Uni

@@ -103,9 +103,9 @@ public class MdsalUtilsTest {
         verify(mockAppender).doAppend(argThat(new ArgumentMatcher() {
             @Override
             public boolean matches(final Object argument) {
-              return ((LoggingEvent)argument).getFormattedMessage().contains("Received a request to delete node");
+                return ((LoggingEvent)argument).getFormattedMessage().contains("Received a request to delete node");
             }
-          }));
+            }));
     }
 
     @SuppressWarnings("unchecked")

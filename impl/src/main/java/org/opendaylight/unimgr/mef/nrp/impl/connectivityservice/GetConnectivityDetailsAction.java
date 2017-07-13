@@ -22,7 +22,7 @@ import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
-public class GetConnectivityDetailsAction implements Callable<RpcResult<GetConnectivityServiceDetailsOutput>>{
+public class GetConnectivityDetailsAction implements Callable<RpcResult<GetConnectivityServiceDetailsOutput>> {
 
     private final TapiConnectivityServiceImpl service;
     private final GetConnectivityServiceDetailsInput input;

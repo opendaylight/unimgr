@@ -132,7 +132,7 @@ public class UniUtils {
     }
 
     /**
-     * Retrieve a list of Uni Nodes on a specific DataStore
+     * Retrieve a list of Uni Nodes on a specific DataStore.
      * @param dataBroker The dataBroker instance to create transactions
      * @param store The store to which to send the read request
      * @return A List of UNI Nodes.
@@ -156,7 +156,7 @@ public class UniUtils {
     }
 
     /**
-     * Retrieve a list of Unis on a specific DataStore
+     * Retrieve a list of Unis on a specific DataStore.
      * @param dataBroker instance to create transactions
      * @param store to which send the read request
      * @return A List of Unis.
@@ -180,7 +180,7 @@ public class UniUtils {
     }
 
     /**
-     * Retrieve a list of Unis on a specific DataStore
+     * Retrieve a list of Unis on a specific DataStore.
      * @param dataBroker instance to create transactions
      * @param store to which send the read request
      * @param ipAddress of the required Uni

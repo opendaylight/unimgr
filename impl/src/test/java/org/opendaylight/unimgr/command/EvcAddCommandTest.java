@@ -126,7 +126,7 @@ public class EvcAddCommandTest {
         PowerMockito.doNothing().when(OvsdbUtils.class, "createGreTunnel", dataBroker, uniAugmentation,
                 uniAugmentation, node, UnimgrConstants.DEFAULT_BRIDGE_NAME, UnimgrConstants.DEFAULT_GRE_TUNNEL_NAME);
         when(OvsdbUtils.createOvsdbNode(any(DataBroker.class), any(UniAugmentation.class)))
-        .thenReturn(node);
+            .thenReturn(node);
         when(UnimgrMapper.getOvsdbNodeIid(any(NodeId.class))).thenReturn(evcKey);
         when(UnimgrMapper.getUniIid(any(DataBroker.class), any(IpAddress.class),
                 any(LogicalDatastoreType.class))).thenReturn(evcKey);

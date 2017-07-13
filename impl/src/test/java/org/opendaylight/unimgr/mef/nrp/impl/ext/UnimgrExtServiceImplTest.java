@@ -96,8 +96,9 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
         boolean hasSip = nep.getMappedServiceInterfacePoint().get(0).getValue().equals("sip:" + nepId);
         ServiceInterfacePoint sip = nrpDao.getSip("sip:" + nepId);
         assertTrue(hasSip && sip != null);
-        if (verifySip != null) verifySip.accept(sip);
-
+        if (verifySip != null) {
+            verifySip.accept(sip);
+        }
     }
 
 
@@ -109,7 +110,7 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
         return input(nepId, null);
     }
 
-    enum SipType {enni, inni, uni}
+    enum SipType { enni, inni, uni }
 
     private AddSipInput input(String nepId, SipType type) {
 
@@ -117,15 +118,19 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
                 .setNepId(new Uuid(nepId))
                 .setNodeId(new Uuid(nodeId));
 
-        if (type == null) return sipBuilder.build();
+        if (type == null) {
+            return sipBuilder.build();
+        }
 
         switch (type) {
-            case uni: sipBuilder.setSipType(
+            case uni:
+                sipBuilder.setSipType(
                     new UniSpecBuilder()
-                        .setUniSpec(new org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.uni.spec.UniSpecBuilder().build())
+                    .setUniSpec(new org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.uni.spec.UniSpecBuilder().build())
                     .build());
             break;
-            case enni: sipBuilder.setSipType(
+            case enni:
+                sipBuilder.setSipType(
                     new EnniSpecBuilder()
                         .setEnniSpec(
                                 new org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.enni.spec.EnniSpecBuilder()
@@ -134,7 +139,8 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
                     .build());
             break;
             case inni:
-            default: sipBuilder.setSipType(
+            default:
+                sipBuilder.setSipType(
                     new InniSpecBuilder()
                     .setInniSpec(new org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.inni.spec.InniSpecBuilder().build())
                     .build());

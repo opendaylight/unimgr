@@ -75,11 +75,13 @@ public class NrpDao  {
     }
 
     private void verifyTx() {
-        if (tx == null) throw new IllegalStateException("Top perform write operation read write transaction is needed");
+        if (tx == null) {
+            throw new IllegalStateException("Top perform write operation read write transaction is needed");
+        }
     }
 
     /**
-     * Update nep or add if it does not exist
+     * Update nep or add if it does not exist.
      * @param nodeId node id
      * @param nep nep to update
      */
@@ -112,7 +114,7 @@ public class NrpDao  {
     public void addSip(ServiceInterfacePoint sip) {
         verifyTx();
         tx.put(LogicalDatastoreType.OPERATIONAL,
-        ctx().child(ServiceInterfacePoint.class, new ServiceInterfacePointKey(sip.getUuid())),
+            ctx().child(ServiceInterfacePoint.class, new ServiceInterfacePointKey(sip.getUuid())),
                 sip);
     }
 
@@ -165,7 +167,9 @@ public class NrpDao  {
 
     public void removeSips(Stream<Uuid>  uuids) {
         verifyTx();
-        if (uuids == null) return ;
+        if (uuids == null) {
+            return;
+        }
         uuids.forEach(sip -> {
             LOG.debug("removing ServiceInterfacePoint with id {}", sip);
             tx.delete(LogicalDatastoreType.OPERATIONAL, ctx().child(ServiceInterfacePoint.class, new ServiceInterfacePointKey(sip)));
@@ -178,8 +182,9 @@ public class NrpDao  {
             try {
                 Optional<Node> opt = tx.read(LogicalDatastoreType.OPERATIONAL, node(nodeId)).checkedGet();
                 if (opt.isPresent()) {
-                    removeSips(opt.get().getOwnedNodeEdgePoint().stream().flatMap(nep -> nep.getMappedServiceInterfacePoint() == null ?
-                            Stream.empty() : nep.getMappedServiceInterfacePoint().stream()
+                    removeSips(opt.get().getOwnedNodeEdgePoint().stream().flatMap(nep -> nep.getMappedServiceInterfacePoint() == null
+                                                                                  ? Stream.empty()
+                                                                                  : nep.getMappedServiceInterfacePoint().stream()
                     ));
                 }
             } catch (ReadFailedException e) {

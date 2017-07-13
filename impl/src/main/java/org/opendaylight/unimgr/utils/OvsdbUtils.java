@@ -250,7 +250,7 @@ public class OvsdbUtils {
     }
 
     /**
-     * Creates a Bridge Augmentation by using a UNI
+     * Creates a Bridge Augmentation by using a UNI.
      * @param uni Contains data used to create the augmentation
      * @return A Built OvsdbBridgeAugmentation with data.
      * @throws Exception if the Ovsdb Node Reference cannot be found.

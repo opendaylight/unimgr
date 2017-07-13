@@ -47,7 +47,9 @@ public class DecompositionAction {
     public DecompositionAction(List<EndPoint> endpoints, DataBroker broker) {
         Objects.requireNonNull(endpoints);
         Objects.requireNonNull(broker);
-        if (endpoints.size() < 2) throw new IllegalArgumentException("there should be at least two endpoints defined");
+        if (endpoints.size() < 2) {
+            throw new IllegalArgumentException("there should be at least two endpoints defined");
+        }
         this.endpoints = endpoints;
         this.broker = broker;
     }
@@ -59,16 +61,20 @@ public class DecompositionAction {
 
         assert vertexes.size() > 1;
 
-        if (vertexes.size() > 2) throw new IllegalStateException("currently only point to point is supported");
+        if (vertexes.size() > 2) {
+            throw new IllegalStateException("currently only point to point is supported");
+        }
 
         GraphPath<Vertex, DefaultEdge> path = DijkstraShortestPath.findPathBetween(graph, vertexes.get(0), vertexes.get(1));
 
-        if (path == null) return null;
+        if (path == null) {
+            return null;
+        }
 
         return path.getVertexList().stream().collect(Collectors.groupingBy(v -> v.getNodeUuid()))
                 .entrySet().stream().map(e -> {
                     return new Subrequrest(e.getKey(), e.getValue().stream().map(v -> toEndPoint(v)).collect(Collectors.toList()));
-        }).collect(Collectors.toList());
+                }).collect(Collectors.toList());
     }
 
     private EndPoint toEndPoint(Vertex v) {
@@ -130,7 +136,9 @@ public class DecompositionAction {
             if (sips == null || sips.isEmpty()) {
                 return  new Vertex(nodeUuid, nep.getUuid(), null);
             }
-            if (sips.size() > 1) LOG.warn("NodeEdgePoint {} have multiple ServiceInterfacePoint mapped, selecting first one", nep.getUuid());
+            if (sips.size() > 1) {
+                LOG.warn("NodeEdgePoint {} have multiple ServiceInterfacePoint mapped, selecting first one", nep.getUuid());
+            }
             return new Vertex(nodeUuid, nep.getUuid(), sips.get(0));
 
         });
@@ -164,8 +172,12 @@ public class DecompositionAction {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             Vertex vertex = (Vertex) o;
             return Objects.equals(uuid, vertex.uuid);
         }
@@ -177,7 +189,9 @@ public class DecompositionAction {
 
         @Override
         public int compareTo(Vertex o) {
-            if (o == null) return -1;
+            if (o == null) {
+                return -1;
+            }
             return uuid.getValue().compareTo(o.uuid.getValue());
         }
 

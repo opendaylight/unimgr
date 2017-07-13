@@ -55,7 +55,7 @@ public class TapiConnectivityServiceImpl implements TapiConnectivityService, Aut
             30, TimeUnit.MINUTES,
             new LinkedBlockingQueue<>());
 
-    final static  InstanceIdentifier<Context1> connectivityCtx = NrpDao.ctx().augmentation(Context1.class);
+    final static InstanceIdentifier<Context1> connectivityCtx = NrpDao.ctx().augmentation(Context1.class);
 
 
     public void init() {

@@ -140,7 +140,7 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
 
         assertEquals(1, connCtx.getConnectivityService().size());
         assertFalse(connCtx.getConnectivityService().get(0).getEndPoint().isEmpty());
-        assertEquals("cs:"+servId, connCtx.getConnectivityService().get(0).getUuid().getValue());
+        assertEquals("cs:" + servId, connCtx.getConnectivityService().get(0).getUuid().getValue());
 
     }
 

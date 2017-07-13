@@ -41,7 +41,9 @@ public class ActivationDriverMocks {
     }
 
 
-    public static Builder builder() { return new Builder();}
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public static class Builder {
         HashMap<Uuid, ActivationDriver> drivers = new HashMap<>();

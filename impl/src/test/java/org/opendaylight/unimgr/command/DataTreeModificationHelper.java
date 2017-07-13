@@ -33,12 +33,12 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
 
 /**
- * DataTreeModificationHelper help to get a dummy value of DataTreeModification object as DataTreeModification 
+ * DataTreeModificationHelper help to get a dummy value of DataTreeModification object as DataTreeModification
  * class is a final class.
  */
 public final class DataTreeModificationHelper {
 
-    public static final DataTreeModification<Node> getUniNode(final Node node) {
+    public static DataTreeModification<Node> getUniNode(final Node node) {
         final DataTreeIdentifier<Node> uniDataTreeIid = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getUniIid("10.10.1.3"));
         final DataObjectModification<Node> uniDataTreeObj = new DataObjectModification<Node>() {
             @Override
@@ -46,52 +46,62 @@ public final class DataTreeModificationHelper {
                 // TODO Auto-generated method stub
                 return null;
             }
+
             @Override
             public <C extends Identifiable<K> & ChildOf<? super Node>, K extends Identifier<C>> DataObjectModification<C> getModifiedChildListItem(
                     Class<C> arg0, K arg1) {
                 // TODO Auto-generated method stub
                 return null;
             }
+
             @Override
             public <C extends ChildOf<? super Node>> DataObjectModification<C> getModifiedChildContainer(Class<C> arg0) {
                 // TODO Auto-generated method stub
                 return null;
             }
+
             @Override
             public DataObjectModification<? extends DataObject> getModifiedChild(PathArgument arg0) {
                 // TODO Auto-generated method stub
                 return null;
             }
+
             @Override
             public <C extends Augmentation<Node> & DataObject> DataObjectModification<C> getModifiedAugmentation(
                     Class<C> arg0) {
                 // TODO Auto-generated method stub
                 return null;
             }
+
             @Override
             public ModificationType getModificationType() {
                 // TODO Auto-generated method stub
                 return null;
             }
+
             @Override
             public PathArgument getIdentifier() {
                 // TODO Auto-generated method stub
                 return null;
             }
+
             @Override
             public Class<Node> getDataType() {
                 // TODO Auto-generated method stub
                 return null;
             }
+
             @Override
             public Node getDataBefore() {
                 return node;
             }
+
             @Override
             public Node getDataAfter() {
                 return node;
             }
         };
+
         DataTreeModification<Node> uniNode = new DataTreeModification<Node>() {
             @Override
             public DataTreeIdentifier<Node> getRootPath() {
@@ -105,7 +115,7 @@ public final class DataTreeModificationHelper {
         return uniNode;
     }
 
-    private static final InstanceIdentifier<Node> getUniIid(String nodeId) {
+    private static InstanceIdentifier<Node> getUniIid(String nodeId) {
         NodeId uniNodeId = new NodeId(new NodeId(nodeId));
         InstanceIdentifier<Node> uniNodeIid = InstanceIdentifier
                 .create(NetworkTopology.class)
@@ -114,60 +124,71 @@ public final class DataTreeModificationHelper {
         return uniNodeIid;
     }
 
-    public static final DataTreeModification<Link> getEvcLink(final Link link) {
+    public static DataTreeModification<Link> getEvcLink(final Link link) {
         final DataTreeIdentifier<Link> evcDataTreeIid = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getEvcLinkIid("1"));
         final DataObjectModification<Link> evcDataTreeObj = new DataObjectModification<Link>() {
+
             @Override
             public Collection<DataObjectModification<? extends DataObject>> getModifiedChildren() {
                 // TODO Auto-generated method stub
                 return null;
             }
+
             @Override
             public <C extends Identifiable<K> & ChildOf<? super Link>, K extends Identifier<C>> DataObjectModification<C> getModifiedChildListItem(
                     Class<C> arg0, K arg1) {
                 // TODO Auto-generated method stub
                 return null;
             }
+
             @Override
             public <C extends ChildOf<? super Link>> DataObjectModification<C> getModifiedChildContainer(Class<C> arg0) {
                 // TODO Auto-generated method stub
                 return null;
             }
+
             @Override
             public DataObjectModification<? extends DataObject> getModifiedChild(PathArgument arg0) {
                 // TODO Auto-generated method stub
                 return null;
             }
+
             @Override
             public <C extends Augmentation<Link> & DataObject> DataObjectModification<C> getModifiedAugmentation(
                     Class<C> arg0) {
                 // TODO Auto-generated method stub
                 return null;
             }
+
             @Override
             public ModificationType getModificationType() {
                 // TODO Auto-generated method stub
                 return null;
             }
+
             @Override
             public PathArgument getIdentifier() {
                 // TODO Auto-generated method stub
                 return null;
             }
+
             @Override
             public Class<Link> getDataType() {
                 // TODO Auto-generated method stub
                 return null;
             }
+
             @Override
             public Link getDataBefore() {
                 return link;
             }
+
             @Override
             public Link getDataAfter() {
                 return link;
             }
         };
+
         DataTreeModification<Link> evcLink = new DataTreeModification<Link>() {
             @Override
             public DataTreeIdentifier<Link> getRootPath() {

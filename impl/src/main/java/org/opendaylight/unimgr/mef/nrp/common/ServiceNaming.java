@@ -19,7 +19,7 @@ public interface ServiceNaming {
      * @param id unique allocated id
      * @return String name
      */
-    public String getOuterName(String id);
+    String getOuterName(String id);
 
     /**
      * Return a resource name composed to include the provided id.
@@ -27,5 +27,5 @@ public interface ServiceNaming {
      * @param id unique allocated id
      * @return String name
      */
-    public String getInnerName(String id);
+    String getInnerName(String id);
 }

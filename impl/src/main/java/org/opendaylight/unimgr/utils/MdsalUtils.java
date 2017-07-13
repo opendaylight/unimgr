@@ -74,7 +74,7 @@ public class MdsalUtils {
     }
 
     /**
-     * Read a specific datastore type and return a optional of DataObject
+     * Read a specific datastore type and return a optional of DataObject.
      * @param dataBroker The dataBroker instance to create transactions
      * @param store The store type to query
      * @param path The generic path to query
@@ -142,7 +142,7 @@ public class MdsalUtils {
     }
 
     /**
-     * Generic function to delete a node on a specific dataStore
+     * Generic function to delete a node on a specific dataStore.
      * @param dataBroker The instance of the data broker to create transactions.
      * @param genericNode The instance identifier of a generic node
      * @param store The dataStore where to send and submit the delete call.
@@ -164,7 +164,7 @@ public class MdsalUtils {
     }
 
     /**
-     * Read a specific Link from a specific datastore
+     * Read a specific Link from a specific datastore.
      * @param dataBroker The dataBroker instance to create transactions
      * @param store The datastore type.
      * @param genericNode The Instance Identifier of the Link
@@ -185,7 +185,7 @@ public class MdsalUtils {
     }
 
     /**
-     * Read a specific Link from a specific datastore
+     * Read a specific Link from a specific datastore.
      * @param dataBroker The dataBroker instance to create transactions
      * @param store The datastore type.
      * @param topologyName The topology name.
@@ -211,7 +211,7 @@ public class MdsalUtils {
     }
 
     /**
-     * Read a TerminationPoint from datastore used in given FcPort
+     * Read a TerminationPoint from datastore used in given FcPort.
      * @param dataBroker The dataBroker instance to create transactions
      * @param store The datastore type.
      * @param port FcPort data
