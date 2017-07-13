@@ -40,7 +40,7 @@ import com.google.common.base.Optional;
 
 public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements IUniPortManager {
 
-    private static final Logger log = LoggerFactory.getLogger(UniPortManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UniPortManager.class);
     private ListenerRegistration<UniPortManager> uniListenerRegistration;
     private static int maxWaitRetries = 3;
     private static long noVlan = 0l;
@@ -56,9 +56,9 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
             final DataTreeIdentifier<Uni> dataTreeIid = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION,
                     getInstanceIdentifier());
             uniListenerRegistration = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
-            log.info("UniPortListener created and registered");
+            LOG.info("UniPortListener created and registered");
         } catch (final Exception e) {
-            log.error("UniPortListener registration failed !", e);
+            LOG.error("UniPortListener registration failed !", e);
             throw new IllegalStateException("UniPortListener registration failed.", e);
         }
     }
@@ -75,7 +75,7 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
     @Override
     public void add(DataTreeModification<Uni> newDataObject) {
         if (newDataObject.getRootPath() != null && newDataObject.getRootNode() != null) {
-            log.info("uni node {} created", newDataObject.getRootNode().getIdentifier());
+            LOG.info("uni node {} created", newDataObject.getRootNode().getIdentifier());
         }
         Uni confUni = newDataObject.getRootNode().getDataAfter();
         String uniId = confUni.getUniId().getValue();
@@ -91,7 +91,7 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
     @Override
     public void remove(DataTreeModification<Uni> removedDataObject) {
         if (removedDataObject.getRootPath() != null && removedDataObject.getRootNode() != null) {
-            log.info("uni node {} deleted", removedDataObject.getRootNode().getIdentifier());
+            LOG.info("uni node {} deleted", removedDataObject.getRootNode().getIdentifier());
         }
         Uni confUni = removedDataObject.getRootNode().getDataBefore();
         String uniId = confUni.getUniId().getValue();
@@ -106,7 +106,7 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
     @Override
     public void update(DataTreeModification<Uni> modifiedDataObject) {
         if (modifiedDataObject.getRootPath() != null && modifiedDataObject.getRootNode() != null) {
-            log.info("node connector {} updated", modifiedDataObject.getRootNode().getIdentifier());
+            LOG.info("node connector {} updated", modifiedDataObject.getRootNode().getIdentifier());
         }
         Uni confUni = modifiedDataObject.getRootNode().getDataAfter();
         String uniId = confUni.getUniId().getValue();
@@ -123,14 +123,14 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
     public void updateOperUni(String uniId) {
         Uni confUni = MefInterfaceUtils.getUni(dataBroker, uniId, LogicalDatastoreType.CONFIGURATION);
         if (confUni == null) {
-            log.debug("No UNI {} exists, nothing to update");
+            LOG.debug("No UNI {} exists, nothing to update");
             return;
         }
         synchronized (uniId.intern()) {
             if (!checkOperUni(uniId)) {
                 return;
             }
-            log.info("UNI  {} ports updated", uniId);
+            LOG.info("UNI  {} ports updated", uniId);
 
             removeCheckUniPorts(confUni);
             addCheckUniPorts(confUni);
@@ -141,7 +141,7 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
     public void removeUniPorts(String uniId) {
         Uni confUni = MefInterfaceUtils.getUni(dataBroker, uniId, LogicalDatastoreType.CONFIGURATION);
         if (confUni == null) {
-            log.debug("No UNI {} exists, nothing to update");
+            LOG.debug("No UNI {} exists, nothing to update");
             return;
         }
         synchronized (uniId.intern()) {
@@ -155,7 +155,7 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
     private boolean checkOperUni(String uniId) {
         Uni operUni = MefInterfaceUtils.getUni(dataBroker, uniId, LogicalDatastoreType.OPERATIONAL);
         if (operUni == null) {
-            log.info("Uni {} is not operational", uniId);
+            LOG.info("Uni {} is not operational", uniId);
             return false;
         }
         return true;
@@ -229,7 +229,7 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
     }
 
     private VlanToPort addTrunkInterface(String interfaceName, String parentInterfaceName, WriteTransaction tx) {
-        log.info("Adding VLAN trunk {} ParentRef {}", interfaceName, parentInterfaceName);
+        LOG.info("Adding VLAN trunk {} ParentRef {}", interfaceName, parentInterfaceName);
         Interface trunkInterface = NetvirtUtils.createTrunkInterface(interfaceName, parentInterfaceName);
         NetvirtUtils.writeInterface(trunkInterface, tx);
         return createOperTrunkInterfaceMapping(Long.valueOf(0), trunkInterface.getName());
@@ -237,7 +237,7 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
 
     private VlanToPort addTrunkMemberInterface(String interfaceName, String parentInterfaceName, Long vlan,
             WriteTransaction tx) {
-        log.info("Adding VLAN trunk member {} ParentRef {}", interfaceName, parentInterfaceName);
+        LOG.info("Adding VLAN trunk member {} ParentRef {}", interfaceName, parentInterfaceName);
         Interface trunkInterface = NetvirtUtils.createTrunkMemberInterface(interfaceName, parentInterfaceName,
                 vlan.intValue());
         NetvirtUtils.writeInterface(trunkInterface, tx);
@@ -245,7 +245,7 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
     }
 
     private VlanToPort removeTrunkInterface(String interfaceName, Long vlan, WriteTransaction tx) {
-        log.info("Delete VLAN trunk {}", interfaceName);
+        LOG.info("Delete VLAN trunk {}", interfaceName);
         NetvirtUtils.deleteInterface(interfaceName, tx);
         return createOperTrunkInterfaceMapping(vlan, interfaceName);
     }
@@ -302,19 +302,19 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
     @Override
     public void addCeVlan(String uniId, Long vlanId) {
         if (getUniVlanInterfaceNoRetry(uniId, vlanId) != null) {
-            log.debug("UNI {} Port for vlan {} exists already, nothing to update", uniId, vlanId);
+            LOG.debug("UNI {} Port for vlan {} exists already, nothing to update", uniId, vlanId);
             return;
         }
         synchronized (uniId.intern()) {
             Uni confUni = MefInterfaceUtils.getUni(dataBroker, uniId, LogicalDatastoreType.CONFIGURATION);
             if (confUni == null) {
-                log.debug("No UNI {} exists, nothing to update");
+                LOG.debug("No UNI {} exists, nothing to update");
                 return;
             }
             if (!checkOperUni(uniId)) {
                 return;
             }
-            log.info("UNI  {} Vlan {} adding", uniId, vlanId);
+            LOG.info("UNI  {} Vlan {} adding", uniId, vlanId);
             List<CeVlan> ceVlans = confUni.getCeVlans() != null ? confUni.getCeVlans().getCeVlan() : new ArrayList<>();
             CeVlanBuilder ceVlanBuilder = new CeVlanBuilder();
             ceVlanBuilder.setVid(new VlanIdType(vlanId));
@@ -333,19 +333,19 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
     @Override
     public void removeCeVlan(String uniId, Long vlanId) {
         if (getUniVlanInterfaceNoRetry(uniId, vlanId) == null) {
-            log.debug("No UNI {} Port for vlan {} dosn't exist already, nothing to delete", uniId, vlanId);
+            LOG.debug("No UNI {} Port for vlan {} dosn't exist already, nothing to delete", uniId, vlanId);
             return;
         }
         synchronized (uniId.intern()) {
             Uni confUni = MefInterfaceUtils.getUni(dataBroker, uniId, LogicalDatastoreType.CONFIGURATION);
             if (confUni == null) {
-                log.debug("No UNI {} exists, nothing to update");
+                LOG.debug("No UNI {} exists, nothing to update");
                 return;
             }
             if (!checkOperUni(uniId)) {
                 return;
             }
-            log.info("UNI  {} Vlan {} deleting", uniId, vlanId);
+            LOG.info("UNI  {} Vlan {} deleting", uniId, vlanId);
             UniBuilder uniBuilder = new UniBuilder(confUni);
 
             if (vlanId != null && vlanId != noVlan) {
@@ -386,7 +386,7 @@ public class UniPortManager extends UnimgrDataTreeChangeListener<Uni> implements
     }
 
     private String getUniVlanInterfaceRetry(String uniId, Long vlanId, int retries) {
-        log.trace("Retry {} to wait for uniId {} vlan {} interface", retries, uniId, vlanId);
+        LOG.trace("Retry {} to wait for uniId {} vlan {} interface", retries, uniId, vlanId);
         List<VlanToPort> vlanToPorts = getOperTrunkInterfaces(uniId);
         java.util.Optional<String> toReturn = vlanToPorts.stream()
                 .filter(port -> port.getVlan().getValue().equals(vlanId)).map(port -> port.getVlanPortId()).findFirst();

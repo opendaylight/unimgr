@@ -43,7 +43,7 @@ import com.google.common.util.concurrent.CheckedFuture;
  * @author bartosz.michalik@amartus.com
  */
 public class NrpInitializer {
-    private static final Logger log = LoggerFactory.getLogger(NrpInitializer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NrpInitializer.class);
     private final DataBroker dataBroker;
 
 
@@ -59,7 +59,7 @@ public class NrpInitializer {
         Optional<? extends DataObject> context = result.checkedGet();
 
         if(! context.isPresent()) {
-            log.info("initialize Presto NRP context");
+            LOG.info("initialize Presto NRP context");
             Context ctx = new ContextBuilder()
                     .setUuid(new Uuid(PRESTO_CTX))
                     .addAugmentation(org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.Context1.class, context())
@@ -68,9 +68,9 @@ public class NrpInitializer {
             tx.put(LogicalDatastoreType.OPERATIONAL, ctxId, ctx);
             try {
                 tx.submit().checkedGet();
-                log.debug("Presto context model created");
+                LOG.debug("Presto context model created");
             } catch (TransactionCommitFailedException e) {
-                log.error("Failed to create presto context model");
+                LOG.error("Failed to create presto context model");
                 throw new IllegalStateException("cannot create presto context", e);
             }
         }
@@ -89,7 +89,7 @@ public class NrpInitializer {
 
     private Topology extTopo() {
         Uuid topoId = new Uuid(PRESTO_EXT_TOPO);
-        log.debug("Adding {}", PRESTO_EXT_TOPO);
+        LOG.debug("Adding {}", PRESTO_EXT_TOPO);
         return new TopologyBuilder()
                 .setLayerProtocolName(Collections.singletonList(Eth.class))
                 .setUuid(topoId)
@@ -111,7 +111,7 @@ public class NrpInitializer {
 
     private Topology systemTopo() {
         Uuid topoId = new Uuid(PRESTO_SYSTEM_TOPO);
-        log.debug("Adding {}", PRESTO_SYSTEM_TOPO);
+        LOG.debug("Adding {}", PRESTO_SYSTEM_TOPO);
         return new TopologyBuilder()
                 .setLayerProtocolName(Collections.singletonList(Eth.class))
                 .setUuid(topoId)

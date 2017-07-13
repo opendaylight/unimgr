@@ -47,7 +47,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(MountPointHelper.class)
 public class L2vpnLocalConnectionActivatorTest extends AbstractDataBrokerTest{
-    private static final Logger log = LoggerFactory.getLogger(L2vpnLocalConnectionActivatorTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(L2vpnLocalConnectionActivatorTest.class);
 
     private L2vpnLocalConnectActivator l2VpnLocalConnectActivator;
     private MountPointService mountService;
@@ -112,7 +112,7 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractDataBrokerTest{
     }
 
     private void activate(){
-        log.debug("activate L2VPN");
+        LOG.debug("activate L2VPN");
         try {
             l2VpnLocalConnectActivator.activate(endPoints,serviceId);
         } catch (TransactionCommitFailedException e) {

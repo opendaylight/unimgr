@@ -77,7 +77,7 @@ import com.google.common.util.concurrent.Futures;
  * @author bartosz.michalik@amartus.com
  */
 public class TopologyDataHandler implements DataTreeChangeListener<Node> {
-    private static final Logger log = LoggerFactory.getLogger(TopologyDataHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TopologyDataHandler.class);
     public static final InstanceIdentifier<Topology> NETCONF_TOPO_IID =
             InstanceIdentifier
                     .create(NetworkTopology.class)
@@ -111,7 +111,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
     }
 
     public void init() {
-        log.debug("initializing topology handler for {}", DriverConstants.XR_NODE);
+        LOG.debug("initializing topology handler for {}", DriverConstants.XR_NODE);
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
 
         NrpDao dao = new NrpDao(tx);
@@ -120,7 +120,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
             @Override
             public void onSuccess(@Nullable Void result) {
-                log.info("Node {} created", DriverConstants.XR_NODE);
+                LOG.info("Node {} created", DriverConstants.XR_NODE);
                 capabilitiesService = new CapabilitiesService(dataBroker);
                 registerNetconfTreeListener();
 
@@ -128,13 +128,13 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
 
             @Override
             public void onFailure(Throwable t) {
-                log.error("No node created due to the error", t);
+                LOG.error("No node created due to the error", t);
                 try {
                     TimeUnit.SECONDS.sleep(3);
                 } catch (InterruptedException _e) {
 
                 }
-                log.info("retrying initialization of Topology handler for {}", DriverConstants.XR_NODE);
+                LOG.info("retrying initialization of Topology handler for {}", DriverConstants.XR_NODE);
                 init();
             }
         });
@@ -146,7 +146,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
 
     public void close() {
         if(registration != null) {
-            log.info("closing netconf tree listener");
+            LOG.info("closing netconf tree listener");
             registration.close();
         }
 
@@ -157,7 +157,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         InstanceIdentifier<Node> nodeId = NETCONF_TOPO_IID.child(Node.class);
 
         registration = dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, nodeId), this);
-        log.info("netconf tree listener registered");
+        LOG.info("netconf tree listener registered");
     }
 
 
@@ -178,13 +178,13 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
             onAddedNodes(addedNodes);
         } catch(Exception e) {
             //TODO improve error handling
-            log.error("error while processing new Cisco nodes", e);
+            LOG.error("error while processing new Cisco nodes", e);
         }
     }
 
     private void onAddedNodes(@Nonnull Collection<Node> added) throws ReadFailedException {
         if(added.isEmpty()) return;
-        log.debug("found {} added XR nodes", added.size());
+        LOG.debug("found {} added XR nodes", added.size());
 
         final ReadWriteTransaction topoTx = dataBroker.newReadWriteTransaction();
         NrpDao dao = new NrpDao(topoTx);
@@ -201,7 +201,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
                     .build();
             dao.addSip(sip);
             nep = new OwnedNodeEdgePointBuilder(nep).setMappedServiceInterfacePoint(Collections.singletonList(sip.getUuid())).build();
-            log.trace("Adding nep {} to {} node", nep.getUuid(), DriverConstants.XR_NODE);
+            LOG.trace("Adding nep {} to {} node", nep.getUuid(), DriverConstants.XR_NODE);
             dao.updateNep(DriverConstants.XR_NODE, nep);
         });
 
@@ -209,12 +209,12 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
 
             @Override
             public void onSuccess(@Nullable Void result) {
-                log.debug("TAPI node upadate successful");
+                LOG.debug("TAPI node upadate successful");
             }
 
             @Override
             public void onFailure(Throwable t) {
-                log.warn("TAPI node upadate failed due to an error", t);
+                LOG.warn("TAPI node upadate failed due to an error", t);
             }
         });
     }
@@ -236,7 +236,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
                 Optional<MountPoint> mountPoint = mountService.getMountPoint(id);
                 if(mountPoint.isPresent()) {
                     DataBroker deviceBroker = mountPoint.get().getService(DataBroker.class).get();
-                    log.debug(deviceBroker.toString());
+                    LOG.debug(deviceBroker.toString());
                     List<OwnedNodeEdgePoint> tps;
                     try(ReadOnlyTransaction tx = deviceBroker.newReadOnlyTransaction()) {
                         tps = ports(tx)
@@ -247,7 +247,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
                                 .filter(isNep::test)
                                 .map(i -> {
                                     InterfaceConfigurationKey ikey = i.getKey();
-                                    log.debug("found {} interface", ikey);
+                                    LOG.debug("found {} interface", ikey);
 
                                     Uuid tpId = new Uuid(cn.getNodeId().getValue() + ":" + ikey.getInterfaceName().getValue());
                                     return tpBuilder
@@ -261,11 +261,11 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
                     return tps.stream();
 
                 } else {
-                    log.warn("no mount point for {}", key);
+                    LOG.warn("no mount point for {}", key);
                 }
 
             } catch (Exception e) {
-                log.warn("error while processing " + key, e);
+                LOG.warn("error while processing " + key, e);
             }
             return Stream.empty();
         }).collect(Collectors.toList());

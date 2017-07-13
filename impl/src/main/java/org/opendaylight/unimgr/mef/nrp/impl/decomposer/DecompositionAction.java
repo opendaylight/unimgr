@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author bartosz.michalik@amartus.com
  */
 public class DecompositionAction {
-    private static final Logger log = LoggerFactory.getLogger(DecompositionAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DecompositionAction.class);
     private final List<EndPoint> endpoints;
     private final DataBroker broker;
     private HashMap<Uuid, Vertex> sipToNep = new HashMap<>();
@@ -130,7 +130,7 @@ public class DecompositionAction {
             if(sips == null || sips.isEmpty()) {
                 return  new Vertex(nodeUuid, nep.getUuid(), null);
             }
-            if(sips.size() > 1) log.warn("NodeEdgePoint {} have multiple ServiceInterfacePoint mapped, selecting first one", nep.getUuid());
+            if(sips.size() > 1) LOG.warn("NodeEdgePoint {} have multiple ServiceInterfacePoint mapped, selecting first one", nep.getUuid());
             return new Vertex(nodeUuid, nep.getUuid(), sips.get(0));
 
         });

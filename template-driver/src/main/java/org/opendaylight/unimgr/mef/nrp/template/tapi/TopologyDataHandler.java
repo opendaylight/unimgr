@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * @author bartosz.michalik@amartus.com
  */
 public class TopologyDataHandler {
-    private static final Logger log = LoggerFactory.getLogger(TopologyDataHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TopologyDataHandler.class);
     private DataBroker dataBroker;
 
     public TopologyDataHandler(DataBroker dataBroker) {
@@ -50,7 +50,7 @@ public class TopologyDataHandler {
 
     public void init() {
         Objects.requireNonNull(dataBroker);
-        log.info("Starting topology handler");
+        LOG.info("Starting topology handler");
         // this is a static and simplistic topology push to the TAPI system topology
 
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
@@ -79,7 +79,7 @@ public class TopologyDataHandler {
 
             tx.submit().checkedGet();
         } catch (TransactionCommitFailedException e) {
-            log.error("Adding node to system topology has failed", e);
+            LOG.error("Adding node to system topology has failed", e);
         }
 
     }
@@ -124,7 +124,7 @@ public class TopologyDataHandler {
     }
 
     public void close() {
-        log.info("Closing topology handler");
+        LOG.info("Closing topology handler");
     }
 
 }

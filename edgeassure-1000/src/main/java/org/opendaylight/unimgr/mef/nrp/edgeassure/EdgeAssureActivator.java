@@ -36,7 +36,7 @@ import com.google.common.base.Optional;
 
 public class EdgeAssureActivator implements ResourceActivator {
 
-    private static final Logger log = LoggerFactory.getLogger(EdgeAssureActivator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EdgeAssureActivator.class);
     private MountPointService mountService;
     DataBroker baseDataBroker;
 
@@ -47,7 +47,7 @@ public class EdgeAssureActivator implements ResourceActivator {
 
     @Override
     public void activate(List<EndPoint> endPoints, String serviceName) throws ResourceNotAvailableException, TransactionCommitFailedException {
-        log.info("Activation called on EdgeAssureActivator");
+        LOG.info("Activation called on EdgeAssureActivator");
         Uuid sip = endPoints.get(0).getEndpoint().getServiceInterfacePoint();
         String nodeName = SipHandler.getDeviceName(sip);
         long evcId = 1;
@@ -66,12 +66,12 @@ public class EdgeAssureActivator implements ResourceActivator {
             WriteTransaction w = netconfDataBroker.newWriteOnlyTransaction();
             w.merge(LogicalDatastoreType.CONFIGURATION, evcConfigId, evcBuilder.build());
         } else {
-            log.error("");
+            LOG.error("");
         }
     }
 
     @Override
     public void deactivate(List<EndPoint> endPoints, String serviceName) throws TransactionCommitFailedException, ResourceNotAvailableException {
-        log.info("Deactivation called on EdgeAssureActivator. Not yet implemented.");
+        LOG.info("Deactivation called on EdgeAssureActivator. Not yet implemented.");
     }
 }

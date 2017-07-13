@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * @author bartosz.michalik@amartus.com
  */
 public class TemplateDriver implements ActivationDriverBuilder {
-    private static final Logger log = LoggerFactory.getLogger(TemplateDriver.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TemplateDriver.class);
     @Override
     public Optional<ActivationDriver> driverFor(BuilderContext context) {
         // build a stateful driver
@@ -41,12 +41,12 @@ public class TemplateDriver implements ActivationDriverBuilder {
 
             @Override
             public void commit() {
-                log.info("commit was triggered for {}", serviceId);
+                LOG.info("commit was triggered for {}", serviceId);
             }
 
             @Override
             public void rollback() {
-                log.info("rollback was triggered for {}", serviceId);
+                LOG.info("rollback was triggered for {}", serviceId);
             }
 
             @Override
@@ -57,13 +57,13 @@ public class TemplateDriver implements ActivationDriverBuilder {
             @Override
             public void activate() throws TransactionCommitFailedException, ResourceActivatorException {
                 // method can fail if you wish
-                log.info("activate was triggered for {}", serviceId);
+                LOG.info("activate was triggered for {}", serviceId);
             }
 
             @Override
             public void deactivate() throws TransactionCommitFailedException, ResourceActivatorException {
                 // method can fail if you wish
-                log.info("adectivate was triggered for {}", serviceId);
+                LOG.info("adectivate was triggered for {}", serviceId);
             }
 
             @Override

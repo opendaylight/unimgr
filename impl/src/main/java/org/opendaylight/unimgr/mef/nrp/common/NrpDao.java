@@ -46,7 +46,7 @@ import com.google.common.base.Optional;
  * @author bartosz.michalik@amartus.com
  */
 public class NrpDao  {
-    private static final Logger log = LoggerFactory.getLogger(NrpDao.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NrpDao.class);
     private final ReadWriteTransaction tx;
     private final ReadTransaction rtx;
 
@@ -105,7 +105,7 @@ public class NrpDao  {
                 }
             }
         } catch (ReadFailedException e) {
-            log.error("Cannot read {} with id {}",OwnedNodeEdgePoint.class, nodeId);
+            LOG.error("Cannot read {} with id {}",OwnedNodeEdgePoint.class, nodeId);
         }
     }
 
@@ -127,7 +127,7 @@ public class NrpDao  {
             return rtx.read(LogicalDatastoreType.OPERATIONAL,
                     ctx().child(ServiceInterfacePoint.class, new ServiceInterfacePointKey(universalId))).checkedGet().isPresent();
         } catch (ReadFailedException e) {
-            log.error("Cannot read sip with id {}", universalId.getValue());
+            LOG.error("Cannot read sip with id {}", universalId.getValue());
         }
         return false;
     }
@@ -167,7 +167,7 @@ public class NrpDao  {
         verifyTx();
         if(uuids == null) return ;
         uuids.forEach(sip -> {
-            log.debug("removing ServiceInterfacePoint with id {}", sip);
+            LOG.debug("removing ServiceInterfacePoint with id {}", sip);
             tx.delete(LogicalDatastoreType.OPERATIONAL, ctx().child(ServiceInterfacePoint.class, new ServiceInterfacePointKey(sip)));
         });
     }
@@ -183,7 +183,7 @@ public class NrpDao  {
                     ));
                 }
             } catch (ReadFailedException e) {
-                log.error("Cannot read node with id {}", nodeId);
+                LOG.error("Cannot read node with id {}", nodeId);
             }
         }
 
@@ -208,7 +208,7 @@ public class NrpDao  {
                     ctx().augmentation(org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.Context1.class))
                     .checkedGet().orNull().getConnectivityService();
         } catch (ReadFailedException e) {
-            log.warn("reading connectivity services failed", e);
+            LOG.warn("reading connectivity services failed", e);
             return null;
         }
     }
@@ -219,7 +219,7 @@ public class NrpDao  {
                     .checkedGet().orNull();
 
         } catch (ReadFailedException e) {
-            log.warn("reading connectivity service failed", e);
+            LOG.warn("reading connectivity service failed", e);
             return null;
         }
     }
@@ -239,7 +239,7 @@ public class NrpDao  {
                     .checkedGet().orNull();
 
         } catch (ReadFailedException e) {
-            log.warn("reading connectivity service failed", e);
+            LOG.warn("reading connectivity service failed", e);
             return null;
         }
     }

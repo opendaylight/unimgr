@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TapiConnectivityServiceImpl implements TapiConnectivityService, AutoCloseable {
 
-    private static final Logger log = LoggerFactory.getLogger(TapiConnectivityServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TapiConnectivityServiceImpl.class);
     private ActivationDriverRepoService driverRepo;
     private RequestDecomposer decomposer;
     private RequestValidator validator;
@@ -64,7 +64,7 @@ public class TapiConnectivityServiceImpl implements TapiConnectivityService, Aut
         Objects.requireNonNull(validator);
         Objects.requireNonNull(broker);
         Objects.requireNonNull(serviceIdPool);
-        log.info("TapiConnectivityService initialized");
+        LOG.info("TapiConnectivityService initialized");
     }
 
     @Override

@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * @author bartosz.michalik@amartus.com
  */
 public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnectivityServiceOutput>> {
-    private static final Logger log = LoggerFactory.getLogger(DeleteConnectivityAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DeleteConnectivityAction.class);
 
     private final DeleteConnectivityServiceInput input;
     private final TapiConnectivityServiceImpl service;
@@ -79,7 +79,7 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
         try {
             data = prepareData(cs, nrpDao);
         } catch(Exception e) {
-            log.info("Service {} does not exists", input.getServiceIdOrName());
+            LOG.info("Service {} does not exists", input.getServiceIdOrName());
             return RpcResultBuilder
                     .<DeleteConnectivityServiceOutput>failed()
                     .withError(RpcError.ErrorType.APPLICATION, MessageFormat.format("error while preparing data for service {0} ", input.getServiceIdOrName()))
@@ -96,19 +96,19 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
             if (tx != null) {
                 ActivationTransaction.Result txResult = tx.deactivate();
                 if (txResult.isSuccessful()) {
-                    log.info("ConnectivityService construct deactivated successfully, request = {} ", input);
+                    LOG.info("ConnectivityService construct deactivated successfully, request = {} ", input);
                     removeConnectivity();
 
                     DeleteConnectivityServiceOutput result = new DeleteConnectivityServiceOutputBuilder()
                             .setService(new ServiceBuilder(response).build()).build();
                     return RpcResultBuilder.success(result).build();
                 } else {
-                    log.warn("CreateConnectivityService deactivation failed, reason = {}, request = {}", txResult.getMessage(), input);
+                    LOG.warn("CreateConnectivityService deactivation failed, reason = {}, request = {}", txResult.getMessage(), input);
                 }
             }
             throw new IllegalStateException("no transaction created for delete connectivity request");
         } catch(Exception e) {
-            log.warn("Exception in create connectivity service", e);
+            LOG.warn("Exception in create connectivity service", e);
             return RpcResultBuilder
                     .<DeleteConnectivityServiceOutput>failed()
                     .build();
@@ -118,10 +118,10 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
     private void removeConnectivity() throws TransactionCommitFailedException {
         WriteTransaction tx = service.getBroker().newWriteOnlyTransaction();
         InstanceIdentifier<Context1> conCtx = NrpDao.ctx().augmentation(Context1.class);
-        log.debug("Removing connectivity service {}", serviceId.getValue());
+        LOG.debug("Removing connectivity service {}", serviceId.getValue());
         tx.delete(LogicalDatastoreType.OPERATIONAL, conCtx.child(ConnectivityService.class, new ConnectivityServiceKey(serviceId)));
         connectionIds.forEach(csId -> {
-            log.debug("Removing connection {}", csId.getValue());
+            LOG.debug("Removing connection {}", csId.getValue());
             tx.delete(LogicalDatastoreType.OPERATIONAL, conCtx.child(Connection.class, new ConnectionKey(csId)));
         });
         //TODO should be transactional with operations on deactivation
@@ -137,7 +137,7 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
                 throw new IllegalStateException(MessageFormat.format("driver {} cannot be created", e.getKey()));
             }
             driver.get().initialize(e.getValue(), serviceId.getValue(), null);
-            log.debug("driver {} added to deactivation transaction", driver.get());
+            LOG.debug("driver {} added to deactivation transaction", driver.get());
             return driver.get();
         }).forEach(tx::addDriver);
         return tx;

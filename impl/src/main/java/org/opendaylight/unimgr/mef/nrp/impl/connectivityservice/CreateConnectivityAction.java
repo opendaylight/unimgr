@@ -67,7 +67,7 @@ import com.google.common.util.concurrent.Futures;
  * @author bartosz.michalik@amartus.com
  */
 class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityServiceOutput>> {
-    private static final Logger log = LoggerFactory.getLogger(CreateConnectivityAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CreateConnectivityAction.class);
 
     private TapiConnectivityServiceImpl service;
     private final CreateConnectivityServiceInput input;
@@ -83,7 +83,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
 
     @Override
     public RpcResult<CreateConnectivityServiceOutput> call() throws Exception {
-        log.debug("running CreateConnectivityService task");
+        LOG.debug("running CreateConnectivityService task");
 
         try {
             RequestValidator.ValidationResult validationResult = validateInput();
@@ -105,21 +105,21 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
             if (tx != null) {
                 ActivationTransaction.Result txResult = tx.activate();
                 if (txResult.isSuccessful()) {
-                    log.info("ConnectivityService construct activated successfully, request = {} ", input);
+                    LOG.info("ConnectivityService construct activated successfully, request = {} ", input);
 
                     ConnectivityService service = createConnectivityModel(uniqueStamp);
                     CreateConnectivityServiceOutput result = new CreateConnectivityServiceOutputBuilder()
                             .setService(new ServiceBuilder(service).build()).build();
                     return RpcResultBuilder.success(result).build();
                 } else {
-                    log.warn("CreateConnectivityService failed, reason = {}, request = {}", txResult.getMessage(), input);
+                    LOG.warn("CreateConnectivityService failed, reason = {}, request = {}", txResult.getMessage(), input);
                 }
             }
             throw new IllegalStateException("no transaction created for create connectivity request");
 
 
         } catch (Exception e) {
-            log.warn("Exception in create connectivity service", e);
+            LOG.warn("Exception in create connectivity service", e);
             return RpcResultBuilder
                     .<CreateConnectivityServiceOutput>failed()
                     .withError(ErrorType.APPLICATION, e.getMessage())
@@ -128,7 +128,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
     }
 
     private ActivationTransaction prepareTransaction(String serviceId) throws FailureResult {
-        log.debug("decompose request");
+        LOG.debug("decompose request");
         decomposedRequest = service.getDecomposer().decompose(endpoints, null);
 
         ActivationTransaction tx = new ActivationTransaction();
@@ -139,7 +139,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 throw new IllegalStateException(MessageFormat.format("driver {} cannot be created", s.getNodeUuid()));
             }
             driver.get().initialize(s.getEndpoints(), serviceId, null);
-            log.debug("driver {} added to activation transaction", driver.get());
+            LOG.debug("driver {} added to activation transaction", driver.get());
             return driver.get();
         }).forEach(tx::addDriver);
 
@@ -158,7 +158,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         assert decomposedRequest != null : "this method can be only run after request was successfuly decomposed";
         //sort of unique ;)
 
-        log.debug("Preparing connectivity related model for {}", uniqueStamp);
+        LOG.debug("Preparing connectivity related model for {}", uniqueStamp);
 
         List<Connection> systemConnections = decomposedRequest.stream().map(s -> new ConnectionBuilder()
                 .setUuid(new Uuid("conn:" + s.getNodeUuid().getValue() + ":" + uniqueStamp))
@@ -206,16 +206,16 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
 
         tx.put(LogicalDatastoreType.OPERATIONAL, TapiConnectivityServiceImpl.connectivityCtx.child(Connection.class, new ConnectionKey(globalConnection.getUuid())), globalConnection);
 
-        log.debug("Storing connectivity related model for {} to operational data store", uniqueStamp);
+        LOG.debug("Storing connectivity related model for {} to operational data store", uniqueStamp);
         Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
             @Override
             public void onSuccess(@Nullable Void result) {
-                log.info("Success with serializing Connections and Connectivity Service for {}", uniqueStamp);
+                LOG.info("Success with serializing Connections and Connectivity Service for {}", uniqueStamp);
             }
 
             @Override
             public void onFailure(Throwable t) {
-                log.error("Error with serializing Connections and Connectivity Service for " + uniqueStamp, t);
+                LOG.error("Error with serializing Connections and Connectivity Service for " + uniqueStamp, t);
             }
         });
 

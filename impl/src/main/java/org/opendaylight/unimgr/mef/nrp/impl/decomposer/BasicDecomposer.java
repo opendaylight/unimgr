@@ -25,13 +25,13 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class BasicDecomposer implements RequestDecomposer {
-    private static final Logger log = LoggerFactory.getLogger(BasicDecomposer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BasicDecomposer.class);
 
     private final DataBroker broker;
 
     public BasicDecomposer(DataBroker broker) {
         this.broker = broker;
-        log.trace("basic decomposer initialized");
+        LOG.trace("basic decomposer initialized");
     }
 
     /**

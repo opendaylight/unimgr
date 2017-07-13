@@ -46,7 +46,7 @@ import jline.internal.Log;
 
 public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IUniAwareService {
 
-    private static final Logger log = LoggerFactory.getLogger(EvcListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EvcListener.class);
     private ListenerRegistration<EvcListener> evcListenerRegistration;
     private final IUniPortManager uniPortManager;
     private final UniQosManager uniQosManager;
@@ -67,9 +67,9 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
             final DataTreeIdentifier<Evc> dataTreeIid = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION,
                     MefServicesUtils.getEvcsInstanceIdentifier());
             evcListenerRegistration = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
-            log.info("EvcDataTreeChangeListener created and registered");
+            LOG.info("EvcDataTreeChangeListener created and registered");
         } catch (final Exception e) {
-            log.error("Evc DataChange listener registration failed !", e);
+            LOG.error("Evc DataChange listener registration failed !", e);
             throw new IllegalStateException("Evc registration Listener failed.", e);
         }
     }
@@ -82,7 +82,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
     @Override
     public void add(DataTreeModification<Evc> newDataObject) {
         if (newDataObject.getRootPath() != null && newDataObject.getRootNode() != null) {
-            log.info("evc {} created", newDataObject.getRootNode().getIdentifier());
+            LOG.info("evc {} created", newDataObject.getRootNode().getIdentifier());
             addEvc(newDataObject);
         }
     }
@@ -90,7 +90,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
     @Override
     public void remove(DataTreeModification<Evc> removedDataObject) {
         if (removedDataObject.getRootPath() != null && removedDataObject.getRootNode() != null) {
-            log.info("evc {} deleted", removedDataObject.getRootNode().getIdentifier());
+            LOG.info("evc {} deleted", removedDataObject.getRootNode().getIdentifier());
             removeEvc(removedDataObject);
         }
     }
@@ -98,7 +98,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
     @Override
     public void update(DataTreeModification<Evc> modifiedDataObject) {
         if (modifiedDataObject.getRootPath() != null && modifiedDataObject.getRootNode() != null) {
-            log.info("evc {} updated", modifiedDataObject.getRootNode().getIdentifier());
+            LOG.info("evc {} updated", modifiedDataObject.getRootNode().getIdentifier());
             updateEvc(modifiedDataObject);
         }
     }
@@ -135,7 +135,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
                 NetvirtUtils.createElanInstance(dataBroker, instanceName, isEtree, evc.getSegmentationId());
                 evcElan = getOperEvcElan(evcId);
                 if (evcElan == null) {
-                    log.error("Evc {} has not been created as required. Nothing to reconnect", evcId);
+                    LOG.error("Evc {} has not been created as required. Nothing to reconnect", evcId);
                     return;
                 }
             }
@@ -174,7 +174,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
 
             EvcElan evcElan = getOperEvcElan(evcId);
             if (evcElan == null) {
-                log.error("Evc {} has not been created as required. Nothing to disconnect", evcId);
+                LOG.error("Evc {} has not been created as required. Nothing to disconnect", evcId);
                 return;
             }
 
@@ -199,7 +199,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
 
                 // Create interfaces
                 if (data.getUnis() == null) {
-                    log.info("No UNI's in service {}, exiting", instanceName);
+                    LOG.info("No UNI's in service {}, exiting", instanceName);
                     return;
                 }
                 for (Uni uni : data.getUnis().getUni()) {
@@ -208,7 +208,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
                 updateQos(data.getUnis().getUni());
             }
         } catch (final Exception e) {
-            log.error("Add evc failed !", e);
+            LOG.error("Add evc failed !", e);
         }
     }
 
@@ -223,7 +223,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
                 updateQos(uniToRemove);
                 EvcElan evcElan = getOperEvcElan(evcId);
                 if (evcElan == null) {
-                    log.error("Evc {} has not been created as required. Nothing to remove", data.getEvcId().getValue());
+                    LOG.error("Evc {} has not been created as required. Nothing to remove", data.getEvcId().getValue());
                     return;
                 }
 
@@ -233,12 +233,12 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
                     removeUniElanInterfaces(evcId, instanceName, uni);
                 }
 
-                log.info("Removing elan instance: " + instanceName);
+                LOG.info("Removing elan instance: " + instanceName);
                 NetvirtUtils.deleteElanInstance(dataBroker, instanceName);
                 removeOperEvcElan(evcId);
             }
         } catch (final Exception e) {
-            log.error("Remove evc failed !", e);
+            LOG.error("Remove evc failed !", e);
         }
     }
 
@@ -261,7 +261,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
 
                 String instanceName = original.getEvcId().getValue();
                 boolean isEtree = update.getEvcType() == EvcType.RootedMultipoint;
-                log.info("Updating {} instance: {}", isEtree ? "etree" : "elan", instanceName);
+                LOG.info("Updating {} instance: {}", isEtree ? "etree" : "elan", instanceName);
 
                 // Changed Uni will be deleted / recreated
                 List<Uni> uniToRemove = new ArrayList<>(originalUni);
@@ -284,7 +284,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
                 updateUnis(uniToUpdate);
             }
         } catch (final Exception e) {
-            log.error("Update evc failed !", e);
+            LOG.error("Update evc failed !", e);
         }
     }
 
@@ -310,11 +310,11 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
                 throw new UnsupportedOperationException(errorMessage);
             }
             if (isOperEvcElanPort(evcId, interfaceName)) {
-                log.info("elan interface for elan {} vlan {} interface {} exists already", instanceName, 0,
+                LOG.info("elan interface for elan {} vlan {} interface {} exists already", instanceName, 0,
                         interfaceName);
                 return;
             }
-            log.info("Creting elan interface for elan {} vlan {} interface {}", instanceName, 0, interfaceName);
+            LOG.info("Creting elan interface for elan {} vlan {} interface {}", instanceName, 0, interfaceName);
             NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName, roleToInterfaceType(role),
                     isEtree);
             if (uni.isPortSecurityEnabled() && uni.getSecurityGroups() != null && !uni.getSecurityGroups().isEmpty()) {
@@ -336,11 +336,11 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
                     throw new UnsupportedOperationException(errorMessage);
                 }
                 if (isOperEvcElanPort(evcId, interfaceName)) {
-                    log.info("elan interface for elan {} vlan {} interface {} exists already", instanceName, 0,
+                    LOG.info("elan interface for elan {} vlan {} interface {} exists already", instanceName, 0,
                             interfaceName);
                     return;
                 }
-                log.info("Creting elan interface for elan {} vlan {} interface {}", instanceName, 0, interfaceName);
+                LOG.info("Creting elan interface for elan {} vlan {} interface {}", instanceName, 0, interfaceName);
                 NetvirtUtils.createElanInterface(dataBroker, instanceName, interfaceName, roleToInterfaceType(role),
                         isEtree);
                 if (uni.isPortSecurityEnabled() && uni.getSecurityGroups() != null && !uni.getSecurityGroups().isEmpty()) {
@@ -364,7 +364,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
         if (evcUniCeVlan.isEmpty()) {
             String interfaceName = uniPortManager.getUniVlanInterface(uni.getUniId().getValue(), Long.valueOf(0));
             if (interfaceName == null || !isOperEvcElanPort(evcId, interfaceName)) {
-                log.info("elan interface for elan {} vlan {} is not operational, nothing to remove", instanceName, 0,
+                LOG.info("elan interface for elan {} vlan {} is not operational, nothing to remove", instanceName, 0,
                         interfaceName);
                 interfaceName = uniPortManager.getUniVlanInterfaceName(uni.getUniId().getValue(), null);
             }
@@ -374,7 +374,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
                 Long vlan = safeCastVlan(ceVlan.getVid());
                 String interfaceName = uniPortManager.getUniVlanInterface(uni.getUniId().getValue(), vlan);
                 if (interfaceName == null || !isOperEvcElanPort(evcId, interfaceName)) {
-                    log.info("elan interface for elan {} vlan {} is not operational, nothing to remove", instanceName,
+                    LOG.info("elan interface for elan {} vlan {} is not operational, nothing to remove", instanceName,
                             vlan, interfaceName);
                     interfaceName = uniPortManager.getUniVlanInterfaceName(uni.getUniId().getValue(), vlan);
                 }
@@ -389,13 +389,13 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
     }
 
     private void removeElanInterface(InstanceIdentifier<Evc> identifier, String uniId, String interfaceName) {
-        log.info("Removing elan interface: " + interfaceName);
+        LOG.info("Removing elan interface: " + interfaceName);
         uniQosManager.unMapUniPortBandwidthLimits(uniId, interfaceName);
         NetvirtUtils.deleteElanInterface(dataBroker, interfaceName);
 
         EvcElan evcElan = getOperEvcElan(identifier);
         if (evcElan == null) {
-            log.error("Removing non-operational Elan interface {}", interfaceName);
+            LOG.error("Removing non-operational Elan interface {}", interfaceName);
         }
 
         deleteOperEvcElanPort(identifier, interfaceName);
@@ -405,7 +405,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
     private Long safeCastVlan(Object vid) {
         if (!(vid instanceof Long)) {
             String errorMessage = String.format("vlan id %s cannot be cast to Long", vid);
-            log.error(errorMessage);
+            LOG.error(errorMessage);
             throw new UnsupportedOperationException(errorMessage);
         }
         return (Long) vid;

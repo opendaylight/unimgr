@@ -47,7 +47,7 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
 
     private static final String BRIDGE_PREFIX = "br-";
     private static final String TUNNEL_PREFIX = "tun";
-    private static final Logger log = LoggerFactory.getLogger(NodeConnectorListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NodeConnectorListener.class);
     private static boolean generateMac = false;
     private final UniPortManager uniPortManager;
     private ListenerRegistration<NodeConnectorListener> nodeConnectorListenerRegistration;
@@ -65,11 +65,11 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
             final DataTreeIdentifier<FlowCapableNodeConnector> dataTreeIid = new DataTreeIdentifier<>(
                     LogicalDatastoreType.OPERATIONAL, getInstanceIdentifier());
             nodeConnectorListenerRegistration = dataBroker.registerDataTreeChangeListener(dataTreeIid, this);
-            log.info("NodeConnectorListener created and registered");
+            LOG.info("NodeConnectorListener created and registered");
 
             configIntegrationBridge();
         } catch (final Exception e) {
-            log.error("Node connector listener registration failed !", e);
+            LOG.error("Node connector listener registration failed !", e);
             throw new IllegalStateException("Node connector listener registration failed.", e);
         }
     }
@@ -88,7 +88,7 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
     @Override
     public void add(DataTreeModification<FlowCapableNodeConnector> newDataObject) {
         if (newDataObject.getRootPath() != null && newDataObject.getRootNode() != null) {
-            log.info("node connector {} created", newDataObject.getRootNode().getIdentifier());
+            LOG.info("node connector {} created", newDataObject.getRootNode().getIdentifier());
             addFlowCapableNodeConnector(newDataObject);
         }
     }
@@ -96,7 +96,7 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
     @Override
     public void remove(DataTreeModification<FlowCapableNodeConnector> removedDataObject) {
         if (removedDataObject.getRootPath() != null && removedDataObject.getRootNode() != null) {
-            log.info("node connector {} deleted", removedDataObject.getRootNode().getIdentifier());
+            LOG.info("node connector {} deleted", removedDataObject.getRootNode().getIdentifier());
             removeFlowCapableNodeConnector(removedDataObject);
         }
     }
@@ -104,7 +104,7 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
     @Override
     public void update(DataTreeModification<FlowCapableNodeConnector> modifiedDataObject) {
         if (modifiedDataObject.getRootPath() != null && modifiedDataObject.getRootNode() != null) {
-            log.info("node connector {} updated", modifiedDataObject.getRootNode().getIdentifier());
+            LOG.info("node connector {} updated", modifiedDataObject.getRootNode().getIdentifier());
             updateFlowCapableNodeConnector(modifiedDataObject);
         }
     }
@@ -117,7 +117,7 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
 
             handleNodeConnectorAdded(dataBroker, dpnFromNodeConnectorId, data);
         } catch (final Exception e) {
-            log.error("Add node connector failed !", e);
+            LOG.error("Add node connector failed !", e);
         }
     }
 
@@ -129,7 +129,7 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
 
             handleNodeConnectorRemoved(dataBroker, dpnFromNodeConnectorId, data);
         } catch (final Exception e) {
-            log.error("Remove node connector failed !", e);
+            LOG.error("Remove node connector failed !", e);
         }
     }
 
@@ -142,7 +142,7 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
 
             handleNodeConnectorUpdated(dataBroker, dpnFromNodeConnectorId, original, update);
         } catch (final Exception e) {
-            log.error("Update node connector failed !", e);
+            LOG.error("Update node connector failed !", e);
         }
     }
 
@@ -169,13 +169,13 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
         String uniName = MefInterfaceUtils.getDeviceInterfaceName(dpnId, nodeConnector.getName());
 
         if (shouldFilterOutNodeConnector(uniName)) {
-            log.info("filtered out interface {} with device {}", nodeConnector.getName(), dpnId);
+            LOG.info("filtered out interface {} with device {}", nodeConnector.getName(), dpnId);
             return;
         }
 
         WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
 
-        log.info("Adding mef uni/device interface {} with device {}", nodeConnector.getName(), dpnId);
+        LOG.info("Adding mef uni/device interface {} with device {}", nodeConnector.getName(), dpnId);
 
         InstanceIdentifier<Interface> interfacePath = MefInterfaceUtils.getDeviceInterfaceInstanceIdentifier(dpnId,
                 uniName);
@@ -206,7 +206,7 @@ public class NodeConnectorListener extends UnimgrDataTreeChangeListener<FlowCapa
         try {
             futures.get();
         } catch (InterruptedException | ExecutionException e) {
-            log.error("Error writing to datastore (path, data) : ({}, {}), ({}, {})", interfacePath, deviceInterface,
+            LOG.error("Error writing to datastore (path, data) : ({}, {}), ({}, {})", interfacePath, deviceInterface,
                     uniPath, uni);
             throw new RuntimeException(e.getMessage());
         }
