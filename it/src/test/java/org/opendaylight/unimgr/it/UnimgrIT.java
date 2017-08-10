@@ -93,16 +93,6 @@ public class UnimgrIT extends AbstractMdsalTestBase {
     }
 
     @Override
-    public String getModuleName() {
-        return "unimgr";
-    }
-
-    @Override
-    public String getInstanceName() {
-        return "unimgr-default";
-    }
-
-    @Override
     public MavenUrlReference getFeatureRepo() {
         return maven()
                 .groupId("org.opendaylight.unimgr")
