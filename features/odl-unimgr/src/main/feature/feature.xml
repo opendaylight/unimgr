@@ -8,8 +8,5 @@
  -->
 <features name="odl-unimgr-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
     <feature name="odl-unimgr" version="${project.version}">
-        <configfile finalname="${configfile.directory}/unimgr.xml">
-            mvn:org.opendaylight.unimgr/unimgr-impl/${project.version}/xml/config
-        </configfile>
     </feature>
 </features>
