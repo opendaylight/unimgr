@@ -53,6 +53,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.Vpn
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.VpnInstanceToVpnId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.add.dpn.event.AddEventDataBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.Adjacency;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.Adjacency.AdjacencyType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.AdjacencyBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.AdjacencyKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.learnt.vpn.vip.to.port.data.LearntVpnVipToPort;
@@ -190,7 +191,7 @@ public class NetvirtVpnUtils {
         if (macAddress != null) {
             aBuilder.setMacAddress(macAddress);
         }
-        aBuilder.setPrimaryAdjacency(primary);
+        aBuilder.setAdjacencyType(primary ? AdjacencyType.PrimaryAdjacency : AdjacencyType.ExtraRoute);
         if (subnetId != null) {
             aBuilder.setSubnetId(new Uuid(subnetId));
         }
@@ -236,7 +237,8 @@ public class NetvirtVpnUtils {
             if (vpnint.getAdjacency() == null) {
                 return null;
             }
-            return vpnint.getAdjacency().stream().filter(a -> !a.isPrimaryAdjacency());
+            return vpnint.getAdjacency().stream()
+                .filter(a -> !(a.getAdjacencyType() == AdjacencyType.PrimaryAdjacency));
         };
 
         @SuppressWarnings("resource") // AutoCloseable
