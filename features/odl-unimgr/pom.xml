@@ -33,7 +33,6 @@
     <netconf.version>1.4.0-SNAPSHOT</netconf.version>
     <genius.version>0.4.0-SNAPSHOT</genius.version>
     <l2switch.version>0.7.0-SNAPSHOT</l2switch.version>
-    <configfile.directory>etc/opendaylight/karaf</configfile.directory>
     <openflowplugin.version>0.6.0-SNAPSHOT</openflowplugin.version>
     <openflowjava.version>0.11.0-SNAPSHOT</openflowjava.version>
     <ovsdb.version>1.6.0-SNAPSHOT</ovsdb.version>
@@ -93,23 +92,6 @@
       <groupId>org.opendaylight.unimgr</groupId>
       <artifactId>unimgr-impl</artifactId>
       <version>${project.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>ch.qos.logback</groupId>
-          <artifactId>logback-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>ch.qos.logback</groupId>
-          <artifactId>logback-classic</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.unimgr</groupId>
-      <artifactId>unimgr-impl</artifactId>
-      <version>${project.version}</version>
-      <type>xml</type>
-      <classifier>config</classifier>
       <exclusions>
         <exclusion>
           <groupId>ch.qos.logback</groupId>
