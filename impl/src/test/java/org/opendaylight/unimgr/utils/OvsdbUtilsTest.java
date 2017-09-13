@@ -13,22 +13,24 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ch.qos.logback.classic.spi.LoggingEvent;
+import ch.qos.logback.core.Appender;
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableBiMap;
+import com.google.common.util.concurrent.CheckedFuture;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -39,7 +41,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
@@ -90,13 +91,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.util.concurrent.CheckedFuture;
-
-import ch.qos.logback.classic.spi.LoggingEvent;
-import ch.qos.logback.core.Appender;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({LogicalDatastoreType.class, UnimgrMapper.class, OvsdbUtils.class, MdsalUtils.class, UUID.class})
@@ -201,7 +195,7 @@ public class OvsdbUtilsTest {
     @Test
     public void testCreateControllerEntries() {
         String targetString = new String("controllerEntry");
-        List<ControllerEntry> controllerEntries = new ArrayList<ControllerEntry>();
+        List<ControllerEntry> controllerEntries = new ArrayList<>();
         ControllerEntryBuilder controllerEntryBuilder = new ControllerEntryBuilder();
         controllerEntryBuilder.setTarget(new Uri(targetString));
         controllerEntries.add(controllerEntryBuilder.build());
@@ -251,10 +245,10 @@ public class OvsdbUtilsTest {
 
     @Test
     public void testCreateMdsalProtocols() {
-        List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
+        List<ProtocolEntry> protocolList = new ArrayList<>();
         ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
                 SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
-        ProtocolEntry protoEntry = new ProtocolEntryBuilder().setProtocol((Class<? extends OvsdbBridgeProtocolBase>) mapper.get("OpenFlow13")).build();
+        ProtocolEntry protoEntry = new ProtocolEntryBuilder().setProtocol(mapper.get("OpenFlow13")).build();
         protocolList.add(protoEntry);
         assertEquals(protocolList, OvsdbUtils.createMdsalProtocols());
     }
@@ -435,29 +429,9 @@ public class OvsdbUtilsTest {
         assertEquals(HashMap.class, OvsdbUtils.extract(changes, klazz).getClass());
     }
 
-    @SuppressWarnings("unchecked")
-    @Test
-    public void testExtractOriginal() {
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes = mock(AsyncDataChangeEvent.class);
-        Class<DataObject> klazz = DataObject.class;
-        Map<InstanceIdentifier<?>, DataObject> map = new HashMap<>();
-        when(changes.getOriginalData()).thenReturn(map);
-        Map<InstanceIdentifier<DataObject>, DataObject> map1 = new HashMap<>();
-        when(OvsdbUtils.extract(any(Map.class),eq(DataObject.class))).thenReturn(map1);
-        assertEquals(map1, OvsdbUtils.extractOriginal(changes, klazz));
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    public void testExtractRemoved() {
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes = mock(AsyncDataChangeEvent.class);
-        Class<DataObject> klazz = DataObject.class;
-        assertEquals(HashSet.class, OvsdbUtils.extractRemoved(changes, klazz).getClass());
-    }
-
     @Test
     public void testFindOvsdbNode() {
-        List<Node> ovsdbNodes = new ArrayList<Node>();
+        List<Node> ovsdbNodes = new ArrayList<>();
         UniAugmentation uni = new UniAugmentationBuilder()
                                       .setIpAddress(IP)
                                       .build();
@@ -516,7 +490,7 @@ public class OvsdbUtilsTest {
     @Test
     public void testGetOvsdbNodes() {
         Node node = mock(Node.class);
-        List<Node> ndList = new ArrayList<Node>();
+        List<Node> ndList = new ArrayList<>();
         ndList.add(node);
         Topology topology = mock (Topology.class);
         DataBroker dataBroker = mock(DataBroker.class);

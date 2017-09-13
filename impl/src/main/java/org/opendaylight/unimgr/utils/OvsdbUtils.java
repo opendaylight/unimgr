@@ -8,20 +8,20 @@
 
 package org.opendaylight.unimgr.utils;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.CheckedFuture;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.UUID;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
@@ -84,11 +84,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.CheckedFuture;
 
 public class OvsdbUtils {
 
@@ -184,7 +179,7 @@ public class OvsdbUtils {
      * @return A List of Controller Entry to be used when adding controllers
      */
     public static List<ControllerEntry> createControllerEntries(String targetString) {
-        final List<ControllerEntry> controllerEntries = new ArrayList<ControllerEntry>();
+        final List<ControllerEntry> controllerEntries = new ArrayList<>();
         final ControllerEntryBuilder controllerEntryBuilder = new ControllerEntryBuilder();
         controllerEntryBuilder.setTarget(new Uri(targetString));
         controllerEntries.add(controllerEntryBuilder.build());
@@ -241,11 +236,11 @@ public class OvsdbUtils {
      * @return A List of protocol entry
      */
     public static List<ProtocolEntry> createMdsalProtocols() {
-        final List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
+        final List<ProtocolEntry> protocolList = new ArrayList<>();
         final ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
                 SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
         protocolList.add(new ProtocolEntryBuilder().setProtocol(
-                (Class<? extends OvsdbBridgeProtocolBase>) mapper.get("OpenFlow13")).build());
+                mapper.get("OpenFlow13")).build());
         return protocolList;
     }
 
@@ -257,7 +252,7 @@ public class OvsdbUtils {
      */
     public static OvsdbBridgeAugmentation createOvsdbBridgeAugmentation(Uni uni) throws Exception {
         final OvsdbNodeRef ovsdbNodeRef = uni.getOvsdbNodeRef();
-        if ((ovsdbNodeRef != null) && (ovsdbNodeRef.getValue() != null)) {
+        if (ovsdbNodeRef != null && ovsdbNodeRef.getValue() != null) {
             final UUID bridgeUuid = UUID.randomUUID();
             final OvsdbBridgeAugmentation ovsdbBridge = new OvsdbBridgeAugmentationBuilder()
                     .setBridgeName(
@@ -788,8 +783,8 @@ public class OvsdbUtils {
      */
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extract(
             Map<InstanceIdentifier<?>, DataObject> changes, Class<T> klazz) {
-        final Map<InstanceIdentifier<T>,T> result = new HashMap<InstanceIdentifier<T>,T>();
-        if ((changes != null) && (changes.entrySet() != null)) {
+        final Map<InstanceIdentifier<T>,T> result = new HashMap<>();
+        if (changes != null && changes.entrySet() != null) {
             for (final Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
                 if (klazz.isInstance(created.getValue())) {
                     @SuppressWarnings("unchecked")
@@ -800,38 +795,6 @@ public class OvsdbUtils {
                         final InstanceIdentifier<T> iid = (InstanceIdentifier<T>) created.getKey();
                         result.put(iid, value);
                     }
-                }
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Extract original data from the data store.
-     * @param changes The dataChange object
-     * @param klazz The class type
-     * @return The DataObject casted as a Class type
-     */
-    public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractOriginal(
-            AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
-        return extract(changes.getOriginalData(),klazz);
-    }
-
-    /**
-     * Extracts the removed nodes.
-     * @param changes he dataChange object
-     * @param klazz The class type
-     * @return A set to removed nodes as DataObject casted as the class type
-     */
-    public static <T extends DataObject> Set<InstanceIdentifier<T>> extractRemoved(
-            AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
-        final Set<InstanceIdentifier<T>> result = new HashSet<InstanceIdentifier<T>>();
-        if ((changes != null) && (changes.getRemovedPaths() != null)) {
-            for (final InstanceIdentifier<?> iid : changes.getRemovedPaths()) {
-                if (iid.getTargetType().equals(klazz)) {
-                    @SuppressWarnings("unchecked") // Actually checked above
-                    final InstanceIdentifier<T> iidn = (InstanceIdentifier<T>)iid;
-                    result.add(iidn);
                 }
             }
         }
@@ -915,7 +878,7 @@ public class OvsdbUtils {
         Topology topology = MdsalUtils.read(dataBroker,
                 LogicalDatastoreType.OPERATIONAL,
                 ovsdbTopoIdentifier);
-        if ((topology != null) && (topology.getNode() != null)) {
+        if (topology != null && topology.getNode() != null) {
             for (final Node node : topology.getNode()) {
                 final OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
                 if (ovsdbNodeAugmentation != null) {
@@ -924,7 +887,7 @@ public class OvsdbUtils {
             }
         } else {
             topology = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, ovsdbTopoIdentifier);
-            if ((topology != null) && (topology.getNode() != null)) {
+            if (topology != null && topology.getNode() != null) {
                 for (final Node node : topology.getNode()) {
                     final OvsdbNodeAugmentation ovsdbNodeAugmentation =
                             node.getAugmentation(OvsdbNodeAugmentation.class);
