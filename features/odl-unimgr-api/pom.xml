@@ -22,7 +22,7 @@
   <properties>
     <mdsal.version>1.7.0-SNAPSHOT</mdsal.version>
     <restconf.version>1.7.0-SNAPSHOT</restconf.version>
-    <yangtools.version>2.0.0-SNAPSHOT</yangtools.version>
+    <yangtools.version>1.2.0</yangtools.version>
     <dlux.version>0.7.0-SNAPSHOT</dlux.version>
     <dluxapps.version>0.7.0-SNAPSHOT</dluxapps.version>
     <ovsdb.version>1.6.0-SNAPSHOT</ovsdb.version>
