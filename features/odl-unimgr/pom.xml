@@ -69,21 +69,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.netconf</groupId>
-      <artifactId>odl-netconf-connector</artifactId>
-      <version>${netconf.version}</version>
-      <type>xml</type>
-      <classifier>features</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.netconf</groupId>
-      <artifactId>odl-netconf-connector-ssh</artifactId>
-      <version>${netconf.version}</version>
-      <type>xml</type>
-      <classifier>features</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.netconf</groupId>
-      <artifactId>odl-netconf-tcp</artifactId>
+      <artifactId>odl-netconf-topology</artifactId>
       <version>${netconf.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
