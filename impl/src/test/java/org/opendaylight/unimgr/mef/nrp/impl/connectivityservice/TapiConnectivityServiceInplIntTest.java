@@ -131,7 +131,6 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         verify(ad1).activate();
         verify(ad1).commit();
         verifyZeroInteractions(ad2);
-        verifyZeroInteractions(ad2);
 
         ReadOnlyTransaction tx2 = dataBroker.newReadOnlyTransaction();
         Context1 connCtx = tx2.read(LogicalDatastoreType.OPERATIONAL, TapiConnectivityServiceImpl.connectivityCtx).checkedGet().get();
@@ -342,7 +341,7 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
     private org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.ConnectivityService cs(String csId, Uuid connectionId) {
         return new ConnectivityServiceBuilder()
                 .setUuid(new Uuid(csId))
-                .setConnection(Arrays.asList(connectionId))
+                .setConnection(Collections.singletonList(connectionId))
                 .build();
     }
 
