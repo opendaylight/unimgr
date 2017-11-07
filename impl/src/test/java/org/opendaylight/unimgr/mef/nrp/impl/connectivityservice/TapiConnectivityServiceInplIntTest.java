@@ -131,7 +131,6 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         verify(ad1).activate();
         verify(ad1).commit();
         verifyZeroInteractions(ad2);
-        verifyZeroInteractions(ad2);
 
         ReadOnlyTransaction tx2 = dataBroker.newReadOnlyTransaction();
         Context1 connCtx = tx2.read(LogicalDatastoreType.OPERATIONAL, TapiConnectivityServiceImpl.connectivityCtx).checkedGet().get();

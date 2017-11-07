@@ -53,6 +53,16 @@ public interface ActivationDriver {
     void activate() throws TransactionCommitFailedException, ResourceActivatorException;
 
     /**
+     * Performs the update action.
+     * @throws TransactionCommitFailedException
+     * @throws ResourceActivatorException
+     */
+    default void update() throws TransactionCommitFailedException, ResourceActivatorException {
+        deactivate();
+        activate();
+    }
+
+    /**
      * Performs the deactivation action.
      * @throws TransactionCommitFailedException
      * @throws ResourceActivatorException

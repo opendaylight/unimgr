@@ -32,6 +32,12 @@ module nrp-interface {
         uses nrp-connectivity-service-end-point-attrs;
         description "none";
     }
+
+    augment "/tapi-connectivity:update-connectivity-service/tapi-connectivity:input/tapi-connectivity:end-point" {
+        uses nrp-connectivity-service-end-point-attrs;
+        description "none";
+    }
+
     augment "/tapi-common:context/tapi-connectivity:connectivity-service/tapi-connectivity:end-point" {
         uses nrp-connectivity-service-end-point-attrs;
         description "none";

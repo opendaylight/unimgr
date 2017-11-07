@@ -33,10 +33,12 @@ import org.opendaylight.unimgr.mef.nrp.ovs.FlowTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.OpenFlowTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.OvsdbTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.util.OpenFlowUtils;
+import org.opendaylight.unimgr.mef.nrp.ovs.util.OvsdbUtils;
 import org.opendaylight.unimgr.utils.MdsalUtils;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.types.rev170712.NaturalNumber;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.types.rev170712.PositiveInteger;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev170712.VlanIdListAndUntag;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev170712.carrier.eth.connectivity.end.point.resource.CeVlanIdListAndUntag;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev170712.carrier.eth.connectivity.end.point.resource.IngressBwpFlow;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev170712.vlan.id.list.and.untag.VlanId;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.NrpConnectivityServiceEndPointAttrs;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.nrp.connectivity.service.end.point.attrs.NrpCarrierEthConnectivityEndPointResource;
@@ -99,6 +101,7 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
 
         //then
         Nodes nodes = readOpenFLowTopology(dataBroker);
+        Node odlNode = OvsdbUtils.getOdlNode(dataBroker);
         checkTable(nodes,activated);
         System.out.println("Before deactivation: "+ nodes.toString());
 
@@ -128,7 +131,6 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
 
         List<Flow> vlanFlows = flows.stream()
                 .filter(flow -> flow.getId().getValue().contains(vlanName))
-                .filter(flow -> flow.getMatch().getVlanMatch().getVlanId().getVlanId().getValue().equals(expectedVlanId))
                 .collect(Collectors.toList());
         assertEquals(interswitchPortCount+1,vlanFlows.size());
 
@@ -192,10 +194,18 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
         when(ceVlanIdList.getVlanId())
                 .thenReturn(vlanIds);
 
+        IngressBwpFlow ingressBwpFlow = mock(IngressBwpFlow.class);
+        when(ingressBwpFlow.getCir()).thenReturn(new NaturalNumber(4000000L));
+        when(ingressBwpFlow.getEir()).thenReturn(new NaturalNumber(4000000L));
+
         NrpCarrierEthConnectivityEndPointResource nrpCgEthFrameFlowCpaAspec =
                 mock(NrpCarrierEthConnectivityEndPointResource.class);
+
+		when(nrpCgEthFrameFlowCpaAspec.getIngressBwpFlow())
+                .thenReturn(ingressBwpFlow);
+
         when(nrpCgEthFrameFlowCpaAspec.getCeVlanIdListAndUntag())
-                .thenReturn(ceVlanIdList);
+        .thenReturn(ceVlanIdList);
 
         when(attrs.getNrpCarrierEthConnectivityEndPointResource())
                 .thenReturn(nrpCgEthFrameFlowCpaAspec);
@@ -214,6 +224,8 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
         bridges.add(createBridge("s3",4));
         bridges.add(createBridge("s4",3));
         bridges.add(createBridge("s5",4));
+
+        bridges.add(createBridge("odl", 0));
 
         bridges.forEach(node -> {
             OvsdbTopologyTestUtils.writeBridge(node,dataBroker);
