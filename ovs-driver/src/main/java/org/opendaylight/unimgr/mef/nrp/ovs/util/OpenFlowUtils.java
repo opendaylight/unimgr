@@ -92,19 +92,19 @@ public class OpenFlowUtils {
     }
 
     /**
-     * Returns list of flows for passing traffic with given VLAN ID
+     * Returns list of flows for passing traffic using decorated S-VLAN ID via qos queue numer
      *
      * @param servicePort port on which service is activated (format: openflow:[node]:[port])
-     * @param externalVlanId VLAN ID used outside OvSwitch network
      * @param internalVlanId VLAN ID used internally in OvSwitch network
      * @param interswitchLinks list of interswitch links for the node on which service is activated
      * @param serviceName service name (used as prefix for flow IDs)
+     * @param queueNumber qos queue number
      * @return list of flows
      */
-    public static List<Flow> getVlanFlows(String servicePort, int externalVlanId, int internalVlanId, List<Link> interswitchLinks, String serviceName) {
+    public static List<Flow> getVlanFlows(String servicePort, int internalVlanId, List<Link> interswitchLinks, String serviceName, long queueNumber) {
         List<Flow> flows = new ArrayList<>();
-        flows.addAll(createVlanPassingFlows(servicePort, externalVlanId, internalVlanId, serviceName, interswitchLinks));
-        flows.add(createVlanIngressFlow(servicePort, externalVlanId, internalVlanId, serviceName, interswitchLinks));
+        flows.addAll(createVlanPassingFlows(servicePort, internalVlanId, serviceName, interswitchLinks));
+        flows.add(createVlanIngressFlow(servicePort, internalVlanId, serviceName, interswitchLinks, queueNumber));
 
         return flows;
     }
@@ -184,25 +184,20 @@ public class OpenFlowUtils {
                                 .build();
     }
 
-    private static List<Flow> createVlanPassingFlows(String outputPort, int externalVlanId, int internalVlanId, String serviceName, List<Link> interswitchLinks) {
+    private static List<Flow> createVlanPassingFlows(String outputPort, int internalVlanId, String serviceName, List<Link> interswitchLinks) {
         return interswitchLinks.stream()
-                               .map(link -> createVlanPassingFlow(outputPort, link.getLinkId().getValue(), externalVlanId, internalVlanId, serviceName))
+                               .map(link -> createVlanPassingFlow(outputPort, link.getLinkId().getValue(), internalVlanId, serviceName))
                                .collect(Collectors.toList());
     }
 
-    private static Flow createVlanPassingFlow(String outputPort, String inputPort, int externalVlanId, int internalVlanId, String serviceName) {
+    private static Flow createVlanPassingFlow(String outputPort, String inputPort, int internalVlanId, String serviceName) {
         // Create list of actions and VLAN match
         List<Action> actions = new ArrayList<>();
         Match vlanMatch;
         int actionOrder = 0;
-        if (externalVlanId == internalVlanId) {
-            vlanMatch = MatchUtils.createVlanMatch(externalVlanId, inputPort);
-        } else {
-            vlanMatch = MatchUtils.createVlanMatch(internalVlanId, inputPort);
-            actions.add(ActionUtils.createPopVlanAction(actionOrder++));
-            actions.add(ActionUtils.createPushVlanAction(actionOrder++));
-            actions.add(ActionUtils.createSetVlanIdAction(externalVlanId, actionOrder++));
-        }
+
+        vlanMatch = MatchUtils.createVlanMatch(internalVlanId, inputPort);
+        actions.add(ActionUtils.createPopVlanAction(actionOrder++));
         actions.add(ActionUtils.createOutputAction(outputPort, actionOrder));
 
         FlowId flowId = new FlowId(getVlanFlowId(serviceName, inputPort));
@@ -215,7 +210,7 @@ public class OpenFlowUtils {
                 .build();
     }
 
-    private static Flow createVlanIngressFlow(String inputPort, int externalVlanId, int internalVlanId, String serviceName, List<Link> interswitchLinks) {
+    public static Flow createVlanIngressFlow(String inputPort, int internalVlanId, String serviceName, List<Link> interswitchLinks, long queueNumber) {
         // Create list of output port IDs
         List<String> outputPortIds = interswitchLinks.stream()
                                                      .map(link -> link.getLinkId().getValue())
@@ -226,11 +221,10 @@ public class OpenFlowUtils {
         List<Action> actions = new ArrayList<>();
         int actionOrder = 0;
         // 1. Create VLAN actions performing VLAN translation when service VLAN is already used in OvSwitch network
-        if (externalVlanId != internalVlanId) {
-            actions.add(ActionUtils.createPopVlanAction(actionOrder++));
-            actions.add(ActionUtils.createPushVlanAction(actionOrder++));
-            actions.add(ActionUtils.createSetVlanIdAction(internalVlanId, actionOrder++));
-        }
+        actions.add(ActionUtils.createPushVlanAction(actionOrder++));
+        actions.add(ActionUtils.createSetVlanIdAction(internalVlanId, actionOrder++));
+        actions.add(ActionUtils.createSetQueueNumberAction(queueNumber, actionOrder++));
+
         // 2. Create output actions
         final int outputActionOrder = actionOrder;
         actions.addAll(outputPortIds.stream()
@@ -243,7 +237,8 @@ public class OpenFlowUtils {
                                 .setKey(new FlowKey(flowId))
                                 .setTableId(FLOW_TABLE_ID)
                                 .setPriority(VLAN_FLOW_PRIORITY)
-                                .setMatch(MatchUtils.createVlanMatch(externalVlanId, inputPort))
+//                                .setMatch(MatchUtils.createVlanMatch(externalVlanId, inputPort))
+                                .setMatch(MatchUtils.createInPortMatch(inputPort))
                                 .setInstructions(ActionUtils.createInstructions(actions))
                                 .build();
     }
