@@ -75,7 +75,7 @@ public class TapiConnectivityServiceImpl implements TapiConnectivityService, Aut
 
     @Override
     public Future<RpcResult<UpdateConnectivityServiceOutput>> updateConnectivityService(UpdateConnectivityServiceInput input) {
-        return null;
+    	return executor.submit(new UpdateConnectivityAction(this, input));
     }
 
     @Override

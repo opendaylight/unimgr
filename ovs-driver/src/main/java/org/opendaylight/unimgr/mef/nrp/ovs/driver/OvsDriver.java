@@ -15,6 +15,7 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
+import org.opendaylight.unimgr.mef.nrp.common.ResourceActivatorException;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
 import org.opendaylight.unimgr.mef.nrp.ovs.activator.OvsActivator;
 import org.opendaylight.unimgr.mef.nrp.ovs.tapi.TopologyDataHandler;
@@ -58,6 +59,11 @@ public class OvsDriver implements ActivationDriverBuilder {
             public void activate() throws TransactionCommitFailedException, ResourceNotAvailableException {
                 activator.activate(endPoints,serviceId);
             }
+
+			@Override
+			public void update() throws TransactionCommitFailedException, ResourceActivatorException {
+				activator.update(endPoints,serviceId);
+			}
 
             @Override
             public void deactivate() throws TransactionCommitFailedException, ResourceNotAvailableException {
