@@ -8,7 +8,6 @@
 
 package org.opendaylight.unimgr.mef.netvirt;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,7 +17,6 @@ import java.util.UUID;
 import org.apache.commons.net.util.SubnetUtils;
 import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.genius.mdsalutil.MDSALUtil;
@@ -33,6 +31,9 @@ import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev14081
 import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.interfaces.VpnInterface;
 import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.interfaces.VpnInterfaceBuilder;
 import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.interfaces.VpnInterfaceKey;
+import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.interfaces.vpn._interface.VpnInstanceNames;
+import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.interfaces.vpn._interface.VpnInstanceNamesBuilder;
+import org.opendaylight.yang.gen.v1.urn.huawei.params.xml.ns.yang.l3vpn.rev140815.vpn.interfaces.vpn._interface.VpnInstanceNamesKey;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpPrefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
@@ -42,16 +43,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.arputil.rev160406.Se
 import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.arputil.rev160406.SendArpRequestInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.arputil.rev160406.interfaces.InterfaceAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.genius.arputil.rev160406.interfaces.InterfaceAddressBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.ElanInstances;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan.instances.ElanInstance;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.rev150602.elan.instances.ElanInstanceKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.AddDpnEventBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.Adjacencies;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.AdjacenciesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.LearntVpnVipToPortData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.VpnInstanceOpData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.VpnInstanceToVpnId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.add.dpn.event.AddEventDataBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.Adjacency;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.Adjacency.AdjacencyType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l3vpn.rev130911.adjacency.list.AdjacencyBuilder;
@@ -175,7 +172,13 @@ public class NetvirtVpnUtils {
     private static VpnInterfaceBuilder createVpnInterface(String instanceName, String interfaceName,
             Adjacencies adjacencies) {
         VpnInterfaceBuilder einterfaceBuilder = new VpnInterfaceBuilder();
-        einterfaceBuilder.setVpnInstanceName(instanceName);
+        List<VpnInstanceNames> vpnInstanceNames = new ArrayList<VpnInstanceNames>();
+        vpnInstanceNames.add(
+                new VpnInstanceNamesBuilder()
+                .setVpnName(instanceName)
+                .setKey(new VpnInstanceNamesKey(instanceName))
+                .build());
+        einterfaceBuilder.setVpnInstanceNames(vpnInstanceNames);
         einterfaceBuilder.setName(interfaceName);
         einterfaceBuilder.addAugmentation(Adjacencies.class, adjacencies);
         return einterfaceBuilder;
@@ -290,10 +293,13 @@ public class NetvirtVpnUtils {
         }
 
         for (VpnInterface interf : opt.get().getVpnInterface()) {
-            if (interf.getVpnInstanceName().equals(vpnName) && interf.isScheduledForRemove()) {
-                InstanceIdentifier<VpnInterface> interfId = path.child(VpnInterface.class,
-                        new VpnInterfaceKey(interf.getKey()));
-                MdsalUtils.delete(dataBroker, LogicalDatastoreType.OPERATIONAL, interfId);
+            for (VpnInstanceNames instance : interf.getVpnInstanceNames()) {
+                if (instance.getVpnName().equals(vpnName) && interf.isScheduledForRemove()) {
+                    InstanceIdentifier<VpnInterface> interfId = path.child(VpnInterface.class,
+                            new VpnInterfaceKey(interf.getKey()));
+                    MdsalUtils.delete(dataBroker, LogicalDatastoreType.OPERATIONAL, interfId);
+                    break;
+                }
             }
         }
     }
@@ -365,7 +371,7 @@ public class NetvirtVpnUtils {
         subnetBuilder.setKey(subnetkey);
         subnetBuilder.setNetworkId(subnetName);
         MdsalUtils.syncWrite(dataBroker, LogicalDatastoreType.CONFIGURATION, subnetidentifier, subnetBuilder.build());
-        
+
         logger.info("Adding subnet {} {} to elan map", subnetName, subnetName);
         createSubnetToNetworkMapping(dataBroker, subnetName, subnetName);
 
@@ -383,7 +389,7 @@ public class NetvirtVpnUtils {
                 .child(Subnets.class).child(Subnet.class, subnetkey);
 
         MdsalUtils.syncDelete(dataBroker, LogicalDatastoreType.CONFIGURATION, subnetidentifier);
-        
+
 
         logger.info("Removing port {} from subnet {}", interfaceName, subnetName);
         updateSubnetmapNodeWithPorts(dataBroker, subnetName, null, new Uuid(interfaceName), vpnName);
@@ -426,7 +432,7 @@ public class NetvirtVpnUtils {
     }
 
     protected static void updateSubnetNode(DataBroker dataBroker, Uuid vpnId, Uuid subnetId, String subnetIp,
-            String intfMac) {       
+            String intfMac) {
         InstanceIdentifier<ElanInstance> elanIdentifierId = NetvirtUtils.getElanInstanceInstanceIdentifier(subnetId.getValue());
         @SuppressWarnings("resource") // AutoCloseable
         DataWaitListener<ElanInstance> elanTagWaiter = new DataWaitListener<>(dataBroker, elanIdentifierId, 10,
@@ -435,7 +441,7 @@ public class NetvirtVpnUtils {
             logger.error("Trying to add invalid elan {} to vpn {}", subnetId.getValue(), vpnId.getValue());
             return;
         }
-        
+
         Subnetmap subnetmap = null;
         SubnetmapBuilder builder = null;
         InstanceIdentifier<Subnetmap> id = InstanceIdentifier.builder(Subnetmaps.class)
