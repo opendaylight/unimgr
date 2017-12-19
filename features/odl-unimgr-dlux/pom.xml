@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>single-feature-parent</artifactId>
-    <version>2.0.5</version>
+    <version>3.0.2-SNAPSHOT</version>
     <relativePath />
   </parent>
   <groupId>org.opendaylight.unimgr</groupId>
@@ -23,7 +23,7 @@
     <mdsal.version>1.7.0-SNAPSHOT</mdsal.version>
     <controller.mdsal.version>1.7.0-SNAPSHOT</controller.mdsal.version>
     <restconf.version>1.7.0-SNAPSHOT</restconf.version>
-    <yangtools.version>1.2.0</yangtools.version>
+    <yangtools.version>2.0.0</yangtools.version>
     <dlux.version>0.7.0-SNAPSHOT</dlux.version>
     <dluxapps.version>0.7.0-SNAPSHOT</dluxapps.version>
     <ovsdb.version>1.6.0-SNAPSHOT</ovsdb.version>
