@@ -13,7 +13,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.function.Consumer;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -38,7 +37,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
     private UnimgrExtServiceImpl extService;
 
-    private String nodeId = "node-id";
+    private final String nodeId = "node-id";
 
     @Before
     public void setUp() {
@@ -124,14 +123,14 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
             case uni:
                 sipBuilder.setSipType(
                     new UniSpecBuilder()
-                    .setUniSpec(new org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.uni.spec.UniSpecBuilder().build())
+                    .setUniSpec(new org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.norev.add.sip.input.sip.type.uni.spec.UniSpecBuilder().build())
                     .build());
             break;
             case enni:
                 sipBuilder.setSipType(
                     new EnniSpecBuilder()
                         .setEnniSpec(
-                                new org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.enni.spec.EnniSpecBuilder()
+                                new org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.norev.add.sip.input.sip.type.enni.spec.EnniSpecBuilder()
                                         .setMaxFrameSize(new NaturalNumber(new Long(1000)))
                                         .build())
                     .build());
@@ -140,7 +139,7 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
             default:
                 sipBuilder.setSipType(
                     new InniSpecBuilder()
-                    .setInniSpec(new org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.inni.spec.InniSpecBuilder().build())
+                    .setInniSpec(new org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.norev.add.sip.input.sip.type.inni.spec.InniSpecBuilder().build())
                     .build());
         }
 
