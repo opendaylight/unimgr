@@ -13,7 +13,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.function.Consumer;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -38,7 +37,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
     private UnimgrExtServiceImpl extService;
 
-    private String nodeId = "node-id";
+    private final String nodeId = "node-id";
 
     @Before
     public void setUp() {
