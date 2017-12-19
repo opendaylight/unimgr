@@ -17,7 +17,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -55,7 +54,7 @@ import com.google.common.base.Optional;
  */
 public class UnimgrExtServiceImpl implements UnimgrExtService {
 
-    private ExecutorService executor = new ThreadPoolExecutor(1, 4,
+    private final ExecutorService executor = new ThreadPoolExecutor(1, 4,
             10, TimeUnit.MINUTES,
             new LinkedBlockingQueue<>());
 
