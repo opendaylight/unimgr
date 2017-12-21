@@ -3,9 +3,18 @@ module mef-interfaces {
   prefix mef-interfaces;
   import ietf-inet-types { prefix inet; }
   import ietf-yang-types { prefix yang; }
-  import mef-types { prefix mef-types; }
-  import mef-global { prefix mef-global; }
-  import mef-topology { prefix mef-topology; }
+  import mef-types {
+    prefix mef-types;
+    revision-date 2015-05-26;
+   }
+  import mef-global {
+    prefix mef-global;
+    revision-date 2015-05-26;
+  }
+  import mef-topology {
+    prefix mef-topology;
+    revision-date 2015-05-26;
+   }
   import yang-ext {prefix ext; revision-date "2013-07-09";}
 
   import opendaylight-l2-types { prefix ethertype; }

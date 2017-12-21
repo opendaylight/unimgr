@@ -1,7 +1,10 @@
 module mef-topology {
   namespace "http://metroethernetforum.org/ns/yang/mef-topology";
   prefix mef-topology;
-  import mef-types { prefix mef-types; }
+  import mef-types {
+    prefix mef-types;
+    revision-date 2015-05-26;
+   }
   organization "Metro Ethernet Forum";
   contact
     "Web URL: http://metroethernetforum.org/ \\ E-mail: mibs@metroethernetforum.org
