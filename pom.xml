@@ -79,7 +79,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <modules>
         <module>it</module>
       </modules>
-      <activation><activeByDefault>true</activeByDefault></activation>
+      <activation><activeByDefault>false</activeByDefault></activation>
     </profile>
   </profiles>
 
