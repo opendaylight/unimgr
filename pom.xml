@@ -50,7 +50,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <id>models</id>
       <modules>
         <module>cisco-xrmodels</module>
-        <module>edgeassure-1000</module>
       </modules>
       <activation><activeByDefault>true</activeByDefault></activation>
     </profile>
@@ -59,7 +58,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <modules>
         <module>api</module>
         <module>legato-api</module>
-        <module>presto-api</module>
         <module>nrp-api</module>
         <module>impl</module>
         <module>netvirt</module>

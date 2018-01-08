@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Request decomposer is responsible for decomposition of ConnectivityService
  * requests into one or many driver requests.
- * @see org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.ConnectivityService
+ * @see org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.connectivity.context.ConnectivityService
  * @author bartosz.michalik@amartus.com
  */
 public interface RequestDecomposer {

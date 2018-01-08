@@ -11,9 +11,7 @@ package org.opendaylight.unimgr.utils;
 import com.google.common.base.Optional;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
-import org.opendaylight.unimgr.utils.CapabilitiesService;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
+import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import static org.junit.Assert.*;
@@ -21,41 +19,7 @@ import static org.opendaylight.unimgr.utils.NodeTestUtils.*;
 import static org.opendaylight.unimgr.utils.CapabilitiesService.Capability.Mode.AND;
 import static org.opendaylight.unimgr.utils.CapabilitiesService.NodeContext.NodeCapability.*;
 
-public class CapabilitiesServiceTest extends AbstractDataBrokerTest {
-
-    @Test
-    public void testNodeByPortPositive() {
-        //given
-        Optional<Node> mockedNodeOptional = mockNode();
-        DataBroker mockedDataBrocker = mockDataBroker(mockedNodeOptional);
-        CapabilitiesService capabilitiesService = new CapabilitiesService(mockedDataBrocker);
-        FcPort mockedFcPort = mockFcPort();
-
-        //when
-        CapabilitiesService.NodeContext context = capabilitiesService.nodeByPort(mockedFcPort);
-
-        //then
-        assertNotNull(context);
-        assertTrue(context.getNode().isPresent());
-        assertEquals(mockedNodeOptional.get(), context.getNode().get());
-    }
-
-    @Test
-    public void testNodeByPortNegative() {
-        //given
-        DataBroker mockedDataBrocker = mockDataBroker(Optional.absent());
-        CapabilitiesService capabilitiesService = new CapabilitiesService(mockedDataBrocker);
-        FcPort mockedFcPort = mockFcPort();
-
-        //when
-        CapabilitiesService.NodeContext context = capabilitiesService.nodeByPort(mockedFcPort);
-
-        //then
-        assertNotNull(context);
-        assertFalse(context.getNode().isPresent());
-    }
-
-
+public class CapabilitiesServiceTest extends AbstractConcurrentDataBrokerTest {
     @Test
     public void testNode() {
         //given

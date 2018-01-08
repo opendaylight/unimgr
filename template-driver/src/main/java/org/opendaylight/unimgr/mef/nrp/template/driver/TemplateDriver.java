@@ -16,8 +16,9 @@ import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceActivatorException;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.NrpConnectivityServiceAttrs;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
+import org.opendaylight.unimgr.mef.nrp.template.TemplateConstants;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.NrpConnectivityServiceAttrs;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +64,12 @@ public class TemplateDriver implements ActivationDriverBuilder {
             @Override
             public void deactivate() throws TransactionCommitFailedException, ResourceActivatorException {
                 // method can fail if you wish
-                LOG.info("adectivate was triggered for {}", serviceId);
+                LOG.info("dectivate was triggered for {}", serviceId);
+            }
+
+            @Override
+            public void update() throws TransactionCommitFailedException, ResourceActivatorException {
+
             }
 
             @Override
@@ -77,6 +83,6 @@ public class TemplateDriver implements ActivationDriverBuilder {
 
     @Override
     public Uuid getNodeUuid() {
-        return null;
+        return new Uuid(TemplateConstants.DRIVER_ID);
     }
 }

@@ -46,7 +46,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <argument ref="dataBroker" />
     </bean>
 
-    <odl:rpc-implementation ref="tapiConnectivityService" interface="org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.TapiConnectivityService" />
+    <odl:rpc-implementation ref="tapiConnectivityService" interface="org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.TapiConnectivityService" />
 
     <reference id="dataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"/>
     <reference-list id="driverBuilders" interface="org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder" availability="optional">

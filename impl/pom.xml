@@ -84,11 +84,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
             <artifactId>unimgr-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>unimgr-presto-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <!--     OVSDB dependency -->
         <dependency>

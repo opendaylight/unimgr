@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.unimgr.mef.nrp.impl;
+package org.opendaylight.unimgr.mef.nrp.impl.decomposer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -22,9 +23,15 @@ import org.junit.rules.ExpectedException;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
 import org.opendaylight.unimgr.mef.nrp.api.Subrequrest;
+import org.opendaylight.unimgr.mef.nrp.impl.AbstractTestWithTopo;
+import org.opendaylight.unimgr.mef.nrp.impl.NrpInitializer;
 import org.opendaylight.unimgr.mef.nrp.impl.decomposer.BasicDecomposer;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.OperationalState;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.ForwardingDirection;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.OperationalState;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.PortDirection;
 import org.opendaylight.yangtools.yang.common.OperationFailedException;
+
+import javax.sound.sampled.Port;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -76,19 +83,21 @@ public class BasicDecomposerTest extends AbstractTestWithTopo {
 
     @Test
     public void twoNodesTest() throws FailureResult, OperationFailedException {
-        //having
+        //having three nodes, but only two nodes connected
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, "n1", "n1:1", "n1:2", "n1:3");
         n(tx, "n2", "n2:1", "n2:2", "n2:3");
         n(tx, "n3", "n3:1", "n3:2", "n3:3");
-        l(tx, "n1", "n1:1", "n2", "n2:1", OperationalState.Enabled);
-        l(tx, "n2", "n2:3", "n3", "n3:3", OperationalState.Enabled);
+        l(tx, "n1", "n1:1", "n2", "n2:1", OperationalState.ENABLED);
+        l(tx, "n2", "n2:3", "n3", "n3:3", OperationalState.ENABLED);
         tx.submit().checkedGet();
         //when
         List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:2"), ep("n2:2")), null);
         assertNotNull(decomposed);
         assertEquals(2, decomposed.size());
     }
+
+
 
     @Test
     public void threeNodesTest() throws FailureResult, OperationFailedException {
@@ -97,14 +106,16 @@ public class BasicDecomposerTest extends AbstractTestWithTopo {
         n(tx, "n1", "n1:1", "n1:2", "n1:3");
         n(tx, "n2", "n2:1", "n2:2", "n2:3");
         n(tx, "n3", "n3:1", "n3:2", "n3:3");
-        l(tx, "n1", "n1:1", "n2", "n2:1", OperationalState.Enabled);
-        l(tx, "n2", "n2:3", "n3", "n3:3", OperationalState.Enabled);
+        l(tx, "n1", "n1:1", "n2", "n2:1", OperationalState.ENABLED);
+        l(tx, "n2", "n2:3", "n3", "n3:3", OperationalState.ENABLED);
         tx.submit().checkedGet();
         //when
         List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:2"), ep("n3:2")), null);
         assertNotNull(decomposed);
         assertEquals(3, decomposed.size());
     }
+
+
 
     @Test
     public void threeNodesDisabledLinkTest() throws FailureResult, OperationFailedException {
@@ -113,8 +124,8 @@ public class BasicDecomposerTest extends AbstractTestWithTopo {
         n(tx, "n1", "n1:1", "n1:2", "n1:3");
         n(tx, "n2", "n2:1", "n2:2", "n2:3");
         n(tx, "n3", "n3:1", "n3:2", "n3:3");
-        l(tx, "n1", "n1:1", "n2", "n2:1", OperationalState.Disabled);
-        l(tx, "n2", "n2:3", "n3", "n3:3", OperationalState.Enabled);
+        l(tx, "n1", "n1:1", "n2", "n2:1", OperationalState.DISABLED);
+        l(tx, "n2", "n2:3", "n3", "n3:3", OperationalState.ENABLED);
         tx.submit().checkedGet();
         //when
         List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:2"), ep("n3:2")), null);

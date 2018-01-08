@@ -14,13 +14,11 @@ import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.connection.status.AvailableCapabilities;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.connection.status.available.capabilities.AvailableCapability;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.connection.status.available.capabilities.AvailableCapabilityBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -37,7 +35,6 @@ import static org.mockito.Mockito.when;
 public class NodeTestUtils {
     public static final String DEVICE_ID = "device";
 
-    public static final String TOPOLOGY_ID = "topology";
 
     public static DataBroker mockDataBroker(Optional<Node> nodeOptional) {
         DataBroker dataBroker = mock(DataBroker.class);
@@ -53,24 +50,6 @@ public class NodeTestUtils {
         when(dataBroker.newReadOnlyTransaction()).thenReturn(transaction);
 
         return dataBroker;
-    }
-
-    public static FcPort mockFcPort(int nodeNo) {
-        FcPort mockedFcPort = mock(FcPort.class);
-        StringBuilder nodeIdBuilder = new StringBuilder(DEVICE_ID);
-
-        if (nodeNo > 0) {
-            nodeIdBuilder.append("_").append(Integer.toString(nodeNo));
-        }
-
-        when(mockedFcPort.getNode()).thenReturn(new NodeId(nodeIdBuilder.toString()));
-        when(mockedFcPort.getTopology()).thenReturn(new TopologyId(TOPOLOGY_ID));
-
-        return mockedFcPort;
-    }
-
-    public static FcPort mockFcPort() {
-        return mockFcPort(0);
     }
 
     public static Optional<Node> mockNode() {

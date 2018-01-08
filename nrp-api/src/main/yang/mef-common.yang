@@ -7,27 +7,20 @@ module mef-common {
     organization "Metro Ethernet Forum (MEF)";
     contact "MEF";
     description "none";
-    revision 2017-07-12 {
-        description "MEF NRP 1.0.cfc4";
+    revision 2017-12-21 {
+        description "MEF NRP 1.0.beta";
         reference "ONF-TR-527, ONF-TR-512, ONF-TR-531, RFC 6020 and RFC 6087";
     }
-
-    typedef real {
-      type decimal64 {
-        fraction-digits 2;
-      }
-    }
-
     /***********************
     * package diagrams
-    **********************/
+    **********************/ 
 
     /***********************
     * package object-classes
-    **********************/
+    **********************/ 
         /***********************
         * package bwp
-        **********************/
+        **********************/ 
             grouping bwp-flow {
                 leaf rank {
                     type mef-common-types:positive-integer;
@@ -77,7 +70,7 @@ module mef-common {
             }
             grouping envelope {
                 leaf envelope-id {
-                    type mef-common-types:identifier45;
+                    type mef-common-types:identifier-45;
                     description "This attribute is a string that identifies the Envelope.";
                 }
                 leaf coupling-flag-for-index-zero {
@@ -89,7 +82,7 @@ module mef-common {
 
         /***********************
         * package sls
-        **********************/
+        **********************/ 
             grouping set-of-ordered-pairs {
                 list ordered-pair-list {
                     key 'uuid';
@@ -116,6 +109,11 @@ module mef-common {
                 leaf consecutive-interval-n {
                     type mef-common-types:positive-integer;
                     description "This attribute denotes n, used to identify how many consecutive ∆t intervals must have high loss to trigger a change in Availability.";
+                }
+                list sls-objective-and-parameter-list {
+                    key 'pm-metric-type';
+                    uses sls-objective-and-parameters;
+                    description "This attribute represents the relationship between SlsCosNameEntry and a list of SlsObjectiveAndParameters. ";
                 }
                 description "The SlsCosNameEntry object class represents the CoS Name entry consisting a list of 4-tuples of the form <CoS Name, ∆t, C, n>, where CoS Name as Class of Service Name, ∆t as a small time interval, C as a threshold, and n to identify consecutive ∆t for high loss interval. The SlsCosNameEntry object class is associated with EVC or OVC, and SlsObjectiveAndParameters.";
             }
@@ -394,6 +392,11 @@ module mef-common {
                     uses mef-common-types:time-and-date;
                     description "This attribute represents the date and time for the start of the SLS. It is the beginning of the first Time Interval T. ";
                 }
+                list sls-cos-name-entry-list {
+                    min-elements 1;
+                    uses sls-cos-name-entry;
+                    description "This attribute represents the relationship between the CarrierEthernetSls and SlsCosNameEntry(s) representing CN (CoS Name) entries as lists of 4-tuples of the form <CoS Name, ∆t, C, n> as defined in MEF 26.2 (MEF 10.3 covered the descriptions but not as this format). ";
+                }
                 description "The CarrierEthernetSls object class represents Carrier Ethernet Service Level Specification that provides a list of Performance Metrics where each item in the list includes the parameters and performance objective for the given Performance Metric. It is associated with EVC or OVC, and a list of SlsCosNameEntry(s).";
             }
             grouping carrier-ethernet-service-end-point {
@@ -425,7 +428,7 @@ module mef-common {
                     description "This attribute limits the number of source MAC Addresses that can be used in ingress EI Frames mapped to the EVC End Point or the OVC End Point of all types over a time interval. When not present, the number of source MAC addresses is unlimited.";
                 }
                 list egress-map-list {
-                    key 'egress-map-type egress-map-id';
+                    key 'egress-map-type';
                     uses egress-map;
                     description "This attribute represents the relationship between the EVC/OVC End Point and the Egress Map(s). This attribute is a set of mappings that determine the content of the S-Tag or C-Tag of an egress EI Frame. This is not defined in MEF 10.3 but future MEF 10.x may adapt this attribute.";
                 }
@@ -461,7 +464,7 @@ module mef-common {
 
         /***********************
         * package color-identifier
-        **********************/
+        **********************/ 
             grouping color-identifier {
                 leaf color-field-type {
                     type mef-common-types:color-field-type;
@@ -484,10 +487,6 @@ module mef-common {
                     max-elements 2;
                     uses dscp-color-id-pac;
                     description "This attribute represents the relationship between the ColorIdentifier and the DscpColorIdPac (representing the choice that maps DSCP values to Color).";
-                }
-                leaf color-identifier-id {
-                    type string;
-                    description "none";
                 }
                 description "The ColorIdentifier object class represents the Color Identifier. The Color Identifier is a pair of the form <F, M> where F is a field in the ingress EI Frame and M is a mapping between each possible value of the field F and a Color. The ColorIdentifier object class is associated with CarrierEthernetServiceEndPoint (EvcEndPoint or OvcEndPoint), in addition to the different field F, such as SepColorIdPac, PcpColorIdPac, DeiColorIdPac, and DscpColorIdPac, etc.";
             }
@@ -534,7 +533,7 @@ module mef-common {
 
         /***********************
         * package cos-identifier
-        **********************/
+        **********************/ 
             grouping cos-identifier {
                 leaf cos-name {
                     type string;
@@ -593,7 +592,7 @@ module mef-common {
 
         /***********************
         * package eec-identifier
-        **********************/
+        **********************/ 
             grouping dscp-eec-id-pac {
                 leaf ip-version {
                     type mef-common-types:ip-version;
@@ -653,7 +652,7 @@ The Egress Equivalence Class can be determined from inspection of the content of
 
         /***********************
         * package egress-map
-        **********************/
+        **********************/ 
             grouping cos-name-and-color-to-dei-pac {
                 leaf ingress-cos-name {
                     type string;
@@ -715,16 +714,13 @@ The Egress Equivalence Class can be determined from inspection of the content of
                     uses cos-name-and-color-to-pcp-pac;
                     description "This attribute represents the relationship between the EgressMap and the CosNameAndColorToPcpPac (representing the attribute set for using CoS Name and ingress color to egress PCP mapping).";
                 }
-                leaf egress-map-id {
-                    type string;
-                    description "none";
-                }
                 description "The EgressMap object class represents the Egress Map that is a set of mappings that determine the content of the S-Tag or C-Tag of an egress EI Frame. It is associated with EvcEndPoint or OvcEndPoint.";
             }
 
 
     /***********************
     * package associations
-    **********************/
+    **********************/ 
 
+    typedef real { type decimal64 { fraction-digits 2; } }
 }

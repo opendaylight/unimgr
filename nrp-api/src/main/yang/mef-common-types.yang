@@ -1,22 +1,22 @@
 module mef-common-types {
-    namespace "urn:mef:yang:mef-types";
-    prefix mef-commmon-types;
+    namespace "urn:mef:yang:mef-common-types";
+    prefix mef-common-types;
     organization "Metro Ethernet Forum (MEF)";
     contact "MEF";
     description "none";
-    revision 2017-07-12 {
-        description "MEF NRP 1.0.cfc4";
+    revision 2017-12-21 {
+        description "MEF NRP 1.0.beta";
         reference "ONF-TR-527, ONF-TR-512, ONF-TR-531, RFC 6020 and RFC 6087";
     }
     /***********************
     * package type-definitions
-    **********************/
+    **********************/ 
         typedef admin-state {
             type enumeration {
-                enum unlocked {
+                enum UNLOCKED {
                     description "The resource is administratively permitted to perform services for its users.";
                 }
-                enum locked {
+                enum LOCKED {
                     description "The resource is administratively prohibited from performing services for its users.";
                 }
             }
@@ -35,7 +35,7 @@ module mef-common-types {
         }
         typedef available-meg-level {
             type enumeration {
-                enum none {
+                enum NONE {
                     description "Indicates that SOAM EI Frames are not guaranteed to pass over this OVC at any MEG Level.";
                 }
                 enum 0 {
@@ -67,16 +67,16 @@ module mef-common-types {
         }
         typedef color-field-type {
             type enumeration {
-                enum pcp {
+                enum PCP {
                     description "Using PCP field to map to the color.";
                 }
-                enum dei {
+                enum DEI {
                     description "Using DEI field to map to the color.";
                 }
-                enum end-point {
+                enum END_POINT {
                     description "Using EVC End Point or the OVC End Point to map to the color.";
                 }
-                enum dscp {
+                enum DSCP {
                     description "Using DSCP field to map to the color.";
                 }
             }
@@ -84,10 +84,10 @@ module mef-common-types {
         }
         typedef color-mode {
             type enumeration {
-                enum color-aware {
+                enum COLOR_AWARE {
                     description "none";
                 }
-                enum color-blind {
+                enum COLOR_BLIND {
                     description "none";
                 }
             }
@@ -95,13 +95,13 @@ module mef-common-types {
         }
         typedef connection-type {
             type enumeration {
-                enum point-to-point {
+                enum POINT_TO_POINT {
                     description "none";
                 }
-                enum multipoint {
+                enum MULTIPOINT {
                     description "none";
                 }
-                enum rooted-multipoint {
+                enum ROOTED_MULTIPOINT {
                     description "none";
                 }
             }
@@ -121,13 +121,13 @@ module mef-common-types {
         }
         typedef cos-or-eec-mapping-type {
             type enumeration {
-                enum end-point {
+                enum END_POINT {
                     description "Using EVC End Point or OVC End Point to map to the CoS Name as CoS ID.";
                 }
-                enum pcp {
+                enum PCP {
                     description "Using PCP field to map to the CoS Name as CoS ID.";
                 }
-                enum dscp {
+                enum DSCP {
                     description "Using DSCP field to map to the CoS Name as CoS ID.";
                 }
             }
@@ -135,7 +135,7 @@ module mef-common-types {
         }
         typedef dei-or-discard {
             type enumeration {
-                enum discard {
+                enum DISCARD {
                     description "Discard the egress frame when the Egress Map determines based on CoS Name (and ingress Color).";
                 }
                 enum 0 {
@@ -149,22 +149,22 @@ module mef-common-types {
         }
         typedef egress-map-type {
             type enumeration {
-                enum cn-c-tag-pcp {
+                enum CN_C_TAG_PCP {
                     description "CoS Name to C-Tag PCP egress map type";
                 }
-                enum cc-c-tag-pcp {
+                enum CC_C_TAG_PCP {
                     description "CoS Name and Color to C-Tag PCP egress map type";
                 }
-                enum cc-c-tag-dei {
+                enum CC_C_TAG_DEI {
                     description "CoS Name and Color to C-Tag DEI egress map type";
                 }
-                enum cn-s-tag-pcp {
+                enum CN_S_TAG_PCP {
                     description "CoS Name to S-Tag PCP egress map type";
                 }
-                enum cc-s-tag-pcp {
+                enum CC_S_TAG_PCP {
                     description "CoS Name and Color to S-Tag PCP egress map type";
                 }
-                enum cc-s-tag-dei {
+                enum CC_S_TAG_DEI {
                     description "CoS Name and Color to S-Tag DEI egress map type";
                 }
             }
@@ -172,7 +172,7 @@ module mef-common-types {
         }
         typedef ethernet-frame-format {
             type enumeration {
-                enum ethernet {
+                enum ETHERNET {
                     description "none";
                 }
             }
@@ -180,10 +180,10 @@ module mef-common-types {
         }
         typedef evc-end-point-role {
             type enumeration {
-                enum root {
+                enum ROOT {
                     description "EVC End Point has role of root for the EVC.";
                 }
-                enum leaf {
+                enum LEAF {
                     description "EVC End Point has role of leaf for the EVC.";
                 }
             }
@@ -191,10 +191,10 @@ module mef-common-types {
         }
         typedef frame-color {
             type enumeration {
-                enum green {
+                enum GREEN {
                     description "none";
                 }
-                enum yellow {
+                enum YELLOW {
                     description "none";
                 }
             }
@@ -202,38 +202,38 @@ module mef-common-types {
         }
         typedef frame-delivery {
             type enumeration {
-                enum discard {
+                enum DISCARD {
                     description "Frame must be discarded.";
                 }
-                enum conditionally {
+                enum CONDITIONALLY {
                     description "Frame will be delivered with specified condition.";
                 }
-                enum unconditionally {
+                enum UNCONDITIONALLY {
                     description "Frame will be delivered unconditionally.";
                 }
             }
             description "Service frame delivery defined in MEF 10.3. When the value is conditionally, the specific condition has to be addresses by the users. What conditions should be supported are not in the scope.";
         }
-        typedef identifier45 {
+        typedef identifier-45 {
             type string;
             description "Unique by network administrative domain, containing no more than 45 characters and non-null RFC Display String but not contain the characters 0x00 through 0x1f.";
         }
-        typedef identifier90 {
+        typedef identifier-90 {
             type string;
             description "Unique by network administrative domain, containing no more than 90 characters and non-null RFC Display String but not contain the characters 0x00 through 0x1f.";
         }
         typedef interface-resiliency {
             type enumeration {
-                enum none {
+                enum NONE {
                     description "none";
                 }
-                enum 2-link-active-standby {
+                enum 2_LINK_ACTIVE_STANDBY {
                     description "none";
                 }
-                enum all-active {
+                enum ALL_ACTIVE {
                     description "none";
                 }
-                enum other {
+                enum OTHER {
                     description "none";
                 }
             }
@@ -241,13 +241,13 @@ module mef-common-types {
         }
         typedef ip-version {
             type enumeration {
-                enum ipv4 {
+                enum IPV4 {
                     description "none";
                 }
-                enum ipv6 {
+                enum IPV6 {
                     description "none";
                 }
-                enum ipv4-and-ipv6 {
+                enum IPV4_AND_IPV6 {
                     description "none";
                 }
             }
@@ -255,13 +255,13 @@ module mef-common-types {
         }
         typedef l2cp-address-set {
             type enumeration {
-                enum cta {
+                enum CTA {
                     description "CE-Vlan Tag Aware";
                 }
-                enum ctb {
+                enum CTB {
                     description "CE-Vlan Tag Blind";
                 }
-                enum ctb2 {
+                enum CTB2 {
                     description "CE-Vlan Tag Blind option 2";
                 }
             }
@@ -300,10 +300,10 @@ module mef-common-types {
         }
         typedef l2cp-protocol-type {
             type enumeration {
-                enum ethertype {
+                enum ETHERTYPE {
                     description "EtherType for L2CP, e.g., LLDP (0x88CC).";
                 }
-                enum llc {
+                enum LLC {
                     description "Logical Link Control sublayer address for L2CP, e.g., STP (0x42).";
                 }
             }
@@ -311,10 +311,10 @@ module mef-common-types {
         }
         typedef mep-direction {
             type enumeration {
-                enum down {
+                enum DOWN {
                     description "none";
                 }
-                enum up {
+                enum UP {
                     description "none";
                 }
             }
@@ -337,10 +337,10 @@ module mef-common-types {
         }
         typedef operational-state {
             type enumeration {
-                enum enabled {
+                enum ENABLED {
                     description "none";
                 }
-                enum disabled {
+                enum DISABLED {
                     description "none";
                 }
             }
@@ -348,16 +348,16 @@ module mef-common-types {
         }
         typedef ovc-end-point-map-form {
             type enumeration {
-                enum form-e {
+                enum FORM_E {
                     description "OVC End Point Map for ENNI.";
                 }
-                enum form-v {
+                enum FORM_V {
                     description "OVC End Point Map for VUNI.";
                 }
-                enum form-u {
+                enum FORM_U {
                     description "OVC End Point Map for UNI.";
                 }
-                enum form-t {
+                enum FORM_T {
                     description "OVC End Point Map for Trunk.";
                 }
             }
@@ -365,13 +365,13 @@ module mef-common-types {
         }
         typedef ovc-end-point-role {
             type enumeration {
-                enum root {
+                enum ROOT {
                     description "OVC End Point has role of root for the OVC.";
                 }
-                enum leaf {
+                enum LEAF {
                     description "OVC End Point has role of leaf for the OVC.";
                 }
-                enum trunk {
+                enum TRUNK {
                     description "OVC End Point has role of trunk for the OVC.";
                 }
             }
@@ -379,7 +379,7 @@ module mef-common-types {
         }
         typedef pcp-or-discard {
             type enumeration {
-                enum discard {
+                enum DISCARD {
                     description "none";
                 }
                 enum 0 {
@@ -415,205 +415,205 @@ module mef-common-types {
         }
         typedef physical-layer {
             type enumeration {
-                enum 10-base2 {
+                enum 10BASE2 {
                     description "none";
                 }
-                enum 10-base5 {
+                enum 10BASE5 {
                     description "none";
                 }
-                enum 10-base-f {
+                enum 10BASE_F {
                     description "none";
                 }
-                enum 10-base-fb {
+                enum 10BASE_FB {
                     description "none";
                 }
-                enum 10-base-fl {
+                enum 10BASE_FL {
                     description "none";
                 }
-                enum 10-base-fp {
+                enum 10BASE_FP {
                     description "none";
                 }
-                enum 10-base-t {
+                enum 10BASE_T {
                     description "none";
                 }
-                enum 10-base-te {
+                enum 10BASE_TE {
                     description "none";
                 }
-                enum 10-broad36 {
+                enum 10BROAD36 {
                     description "none";
                 }
-                enum 10-pass-ts {
+                enum 10PASS_TS {
                     description "none";
                 }
-                enum 100-base-bx10 {
+                enum 100BASE_BX10 {
                     description "none";
                 }
-                enum 100-base-fx {
+                enum 100BASE_FX {
                     description "none";
                 }
-                enum 100-base-lx10 {
+                enum 100BASE_LX10 {
                     description "none";
                 }
-                enum 100-base-t {
+                enum 100BASE_T {
                     description "none";
                 }
-                enum 100-base-t2 {
+                enum 100BASE_T2 {
                     description "none";
                 }
-                enum 100-base-t4 {
+                enum 100BASE_T4 {
                     description "none";
                 }
-                enum 100-base-tx {
+                enum 100BASE_TX {
                     description "none";
                 }
-                enum 100-base-x {
+                enum 100BASE_X {
                     description "none";
                 }
-                enum 1000-base-bx10 {
+                enum 1000BASE_BX10 {
                     description "none";
                 }
-                enum 1000-base-cx {
+                enum 1000BASE_CX {
                     description "none";
                 }
-                enum 1000-base-kx {
+                enum 1000BASE_KX {
                     description "none";
                 }
-                enum 1000-base-lx {
+                enum 1000BASE_LX {
                     description "none";
                 }
-                enum 1000-base-lx10 {
+                enum 1000BASE_LX10 {
                     description "none";
                 }
-                enum 1000-base-px10 {
+                enum 1000BASE_PX10 {
                     description "none";
                 }
-                enum 1000-base-px20 {
+                enum 1000BASE_PX20 {
                     description "none";
                 }
-                enum 1000-base-sx {
+                enum 1000BASE_SX {
                     description "none";
                 }
-                enum 1000-base-t {
+                enum 1000BASE_T {
                     description "none";
                 }
-                enum 1000-base-x {
+                enum 1000BASE_X {
                     description "none";
                 }
-                enum 10-gbase-cx4 {
+                enum 10GBASE_CX4 {
                     description "none";
                 }
-                enum 10-gbase-e {
+                enum 10GBASE_E {
                     description "none";
                 }
-                enum 10-gbase-er {
+                enum 10GBASE_ER {
                     description "none";
                 }
-                enum 10-gbase-ew {
+                enum 10GBASE_EW {
                     description "none";
                 }
-                enum 10-gbase-kr {
+                enum 10GBASE_KR {
                     description "none";
                 }
-                enum 10-gbase-kx4 {
+                enum 10GBASE_KX4 {
                     description "none";
                 }
-                enum 10-gbase-l {
+                enum 10GBASE_L {
                     description "none";
                 }
-                enum 10-gbase-lr {
+                enum 10GBASE_LR {
                     description "none";
                 }
-                enum 10-gbase-lrm {
+                enum 10GBASE_LRM {
                     description "none";
                 }
-                enum 10-gbase-lw {
+                enum 10GBASE_LW {
                     description "none";
                 }
-                enum 10-gbase-lx4 {
+                enum 10GBASE_LX4 {
                     description "none";
                 }
-                enum 10-gbase-pr {
+                enum 10GBASE_PR {
                     description "none";
                 }
-                enum 10-gbase-prx {
+                enum 10GBASE_PRX {
                     description "none";
                 }
-                enum 10-gbase-r {
+                enum 10GBASE_R {
                     description "none";
                 }
-                enum 10-gbase-s {
+                enum 10GBASE_S {
                     description "none";
                 }
-                enum 10-gbase-sr {
+                enum 10GBASE_SR {
                     description "none";
                 }
-                enum 10-gbase-sw {
+                enum 10GBASE_SW {
                     description "none";
                 }
-                enum 10-gbase-t {
+                enum 10GBASE_T {
                     description "none";
                 }
-                enum 10-gbase-w {
+                enum 10GBASE_W {
                     description "none";
                 }
-                enum 10-gbase-x {
+                enum 10GBASE_X {
                     description "none";
                 }
-                enum 100-gbase-r {
+                enum 100GBASE_R {
                     description "none";
                 }
-                enum 100-gbase-cr10 {
+                enum 100GBASE_CR10 {
                     description "none";
                 }
-                enum 100-gbase-er4 {
+                enum 100GBASE_ER4 {
                     description "none";
                 }
-                enum 100-gbase-lr4 {
+                enum 100GBASE_LR4 {
                     description "none";
                 }
-                enum 100-gbase-sr10 {
+                enum 100GBASE_SR10 {
                     description "none";
                 }
-                enum 40-gbase-r {
+                enum 40GBASE_R {
                     description "none";
                 }
-                enum 40-gbase-cr4 {
+                enum 40GBASE_CR4 {
                     description "none";
                 }
-                enum 40-gbase-fr {
+                enum 40GBASE__FR {
                     description "none";
                 }
-                enum 40-gbase-kr4 {
+                enum 40GBASE_KR4 {
                     description "none";
                 }
-                enum 40-gbase-lr4 {
+                enum 40GBASE_LR4 {
                     description "none";
                 }
-                enum 40-gbase-sr4 {
+                enum 40GBASE_SR4 {
                     description "none";
                 }
-                enum 1-base5 {
+                enum 1BASE5 {
                     description "none";
                 }
-                enum 2-base-tl {
+                enum 2BASE_TL {
                     description "none";
                 }
-                enum 1-g-epon {
+                enum 1G_EPON {
                     description "none";
                 }
-                enum 10-g-epon {
+                enum 10G_EPON {
                     description "none";
                 }
-                enum 10-1-g-epon {
+                enum 10_1G_EPON {
                     description "none";
                 }
-                enum 10-10-g-epon {
+                enum 10_10G_EPON {
                     description "none";
                 }
-                enum other {
+                enum OTHER {
                     description "none";
                 }
-                enum none {
+                enum NONE {
                     description "none";
                 }
             }
@@ -632,34 +632,34 @@ module mef-common-types {
         }
         typedef pm-metric-type {
             type enumeration {
-                enum fd {
+                enum FD {
                     description "Frame Delay Performance Metric.";
                 }
-                enum fdr {
+                enum FDR {
                     description "Frame Delay Range Performance Metric.";
                 }
-                enum mfd {
+                enum MFD {
                     description "Mean Frame Delay Performance Metric.";
                 }
-                enum ifdv {
+                enum IFDV {
                     description "Inter Frame Delay Variation Performance Metric.";
                 }
-                enum flr {
+                enum FLR {
                     description "Frame Loss Ratio Performance Metric.";
                 }
-                enum av {
+                enum AV {
                     description "Availability Performance Metric.";
                 }
-                enum hli {
+                enum HLI {
                     description "High Loss Interval Performance Metric.";
                 }
-                enum chli {
+                enum CHLI {
                     description "Consecutive High Loss Interval Performance Metric.";
                 }
-                enum group-av {
+                enum GROUP_AV {
                     description "Group Availability (for a single EVC/OVC) Performance Metric.";
                 }
-                enum cpm {
+                enum CPM {
                     description "Composite Performance Metric. Refer to MEF 10.3.1.";
                 }
             }
@@ -667,13 +667,13 @@ module mef-common-types {
         }
         typedef pm-unit {
             type enumeration {
-                enum millisecond {
+                enum MILLISECOND {
                     description "Measured Performance Metric in PM report as milliseconds, for FD, FDR, IFDV, and MFD.";
                 }
-                enum count {
+                enum COUNT {
                     description "Measured Performance Metric in PM report as count number, for HLI and CHLI.";
                 }
-                enum percent {
+                enum PERCENT {
                     description "Measured Performance Metric in PM report as percentage, for FLR, Availability, Group Availability and Composite PM.";
                 }
             }
@@ -704,13 +704,13 @@ module mef-common-types {
         }
         typedef service-state {
             type enumeration {
-                enum pending {
+                enum PENDING {
                     description "none";
                 }
-                enum active {
+                enum ACTIVE {
                     description "none";
                 }
-                enum inactive {
+                enum INACTIVE {
                     description "none";
                 }
             }
@@ -729,10 +729,10 @@ module mef-common-types {
         }
         typedef svlan-id-control {
             type enumeration {
-                enum full {
+                enum FULL {
                     description "Operator can support only a single SP/SO (Service Provider/Super Operator) at the ENNI.";
                 }
-                enum partial {
+                enum PARTIAL {
                     description "Operator can support only multiple SP/SO (Service Provider/Super Operator) at the ENNI";
                 }
             }
@@ -751,10 +751,10 @@ module mef-common-types {
         }
         typedef tagged-l2cp-processing {
             type enumeration {
-                enum 802.1-compliant {
+                enum 802.1_COMPLIANT {
                     description "none";
                 }
-                enum 802.1-non-compliant {
+                enum 802.1_NON_COMPLIANT {
                     description "none";
                 }
             }
@@ -800,25 +800,25 @@ module mef-common-types {
         }
         typedef time-interval-unit {
             type enumeration {
-                enum year {
+                enum YEAR {
                     description "none";
                 }
-                enum month {
+                enum MONTH {
                     description "none";
                 }
-                enum week {
+                enum WEEK {
                     description "none";
                 }
-                enum day {
+                enum DAY {
                     description "none";
                 }
-                enum hour {
+                enum HOUR {
                     description "none";
                 }
-                enum minute {
+                enum MINUTE {
                     description "none";
                 }
-                enum second {
+                enum SECOND {
                     description "none";
                 }
             }
@@ -845,13 +845,13 @@ module mef-common-types {
         }
         typedef vlan-id-mapping-type {
             type enumeration {
-                enum all {
+                enum ALL {
                     description "All Vlan IDs.";
                 }
-                enum except {
+                enum EXCEPT {
                     description "All Vlan IDs except the listed.";
                 }
-                enum list {
+                enum LIST {
                     description "List of Vlan IDs.";
                 }
             }
@@ -859,13 +859,13 @@ module mef-common-types {
         }
         typedef vlan-id-preservation {
             type enumeration {
-                enum preserve {
+                enum PRESERVE {
                     description "To achieve EVC CE-VLAN ID Preservation.";
                 }
-                enum retain {
+                enum RETAIN {
                     description "C-Tag, if present, is encapsulated with the C-Tag VLAN ID value retained.";
                 }
-                enum strip {
+                enum STRIP {
                     description "C-Tag is discarded.";
                 }
             }
@@ -873,10 +873,10 @@ module mef-common-types {
         }
         typedef vlan-tag {
             type enumeration {
-                enum s-tag {
+                enum S_TAG {
                     description "none";
                 }
-                enum c-tag {
+                enum C_TAG {
                     description "none";
                 }
             }
@@ -896,16 +896,16 @@ module mef-common-types {
         }
         typedef vlan-id-mapping-type-or-untag {
             type enumeration {
-                enum all {
+                enum ALL {
                     description "none";
                 }
-                enum except {
+                enum EXCEPT {
                     description "none";
                 }
-                enum list {
+                enum LIST {
                     description "none";
                 }
-                enum untagged {
+                enum UNTAGGED {
                     description "none";
                 }
             }
@@ -913,10 +913,10 @@ module mef-common-types {
         }
         typedef resource-state {
             type enumeration {
-                enum inactive {
+                enum INACTIVE {
                     description "none";
                 }
-                enum active {
+                enum ACTIVE {
                     description "none";
                 }
             }

@@ -30,8 +30,11 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.unimgr.impl.UnimgrConstants;
+import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.PortDirection;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.ConnectivityServiceEndPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.*;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
@@ -230,10 +233,17 @@ public class MdsalUtilsTest {
     public void testReadTerminationPoint() throws ReadFailedException {
         //given
         TerminationPoint expectedTp = mock(TerminationPoint.class);
-        FcPort fcPort = mock(FcPort.class);
-        when(fcPort.getNode()).thenReturn(new NodeId("r1"));
-        when(fcPort.getTopology()).thenReturn(new TopologyId("topology-netconf"));
-        when(fcPort.getTp()).thenReturn(new TpId("tp1"));
+
+
+        TopologyId topologyId = new TopologyId("topology-netconf");
+
+
+        ConnectivityServiceEndPoint cep = new org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.connectivity.service.EndPointBuilder()
+                .setServiceInterfacePoint(new Uuid("sip:r1:tp1"))
+                .setDirection(PortDirection.BIDIRECTIONAL)
+                .build();
+        EndPoint ep = new EndPoint(cep, null);
+
 
         DataBroker dataBroker = mock(DataBroker.class);
         ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
@@ -247,7 +257,7 @@ public class MdsalUtilsTest {
         when(optionalDataObject.get()).thenReturn(expectedTp);
 
         //when
-        Optional<TerminationPoint> actualTpOptional = MdsalUtils.readTerminationPoint(dataBroker, LogicalDatastoreType.CONFIGURATION, fcPort);
+        Optional<TerminationPoint> actualTpOptional = MdsalUtils.readTerminationPoint(dataBroker, LogicalDatastoreType.CONFIGURATION, topologyId, ep);
 
         //then
         assertNotNull(actualTpOptional);

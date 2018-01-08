@@ -93,7 +93,7 @@ public class OvsActivator implements ResourceActivator {
 
     }
 
-    @Override
+	@Override
     public void deactivate(List<EndPoint> endPoints, String serviceName) throws TransactionCommitFailedException, ResourceNotAvailableException {
         for (EndPoint endPoint:endPoints)
             deactivateEndpoint(endPoint, serviceName);
