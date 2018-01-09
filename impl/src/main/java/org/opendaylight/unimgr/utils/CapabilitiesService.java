@@ -9,20 +9,10 @@
 package org.opendaylight.unimgr.utils;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,29 +123,6 @@ public class CapabilitiesService {
 
     public NodeContext node(Node node) {
         return new NodeContext(this, Optional.of(node));
-    }
-
-    public NodeContext nodeByPort(FcPort port) {
-        return new NodeContext(this, readNode(port));
-    }
-
-    private Optional<Node> readNode(FcPort port) {
-        InstanceIdentifier<Node> nodeIid = InstanceIdentifier.builder(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(port.getTopology()))
-                .child(Node.class, new NodeKey(port.getNode()))
-                .build();
-
-        final ReadTransaction tx = dataBroker.newReadOnlyTransaction();
-        final CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture = tx.read(LogicalDatastoreType.OPERATIONAL, nodeIid);
-        Optional<Node> result = Optional.absent();
-
-        try {
-            result = nodeFuture.checkedGet();
-        } catch (final ReadFailedException e) {
-            LOG.error("Unable to read node with Iid {}", nodeIid, e);
-        }
-
-        return result;
     }
 
     private <T> boolean checkCondition(Capability<T> capability, T data) {

@@ -76,8 +76,11 @@ public class ServicePort {
     }
 
     public static ServicePort toServicePort(EndPoint endPoint, String topologyName) {
+        return toServicePort(endPoint, new TopologyId(topologyName));
+    }
+
+    public static ServicePort toServicePort(EndPoint endPoint, TopologyId topologyId) {
         Uuid sip = endPoint.getEndpoint().getServiceInterfacePoint();
-        TopologyId topologyId = new TopologyId(topologyName);
         NodeId nodeId = new NodeId(SipHandler.getDeviceName(sip));
         TpId tpId = new TpId(SipHandler.getPortName(sip));
         ServicePort servicePort = new ServicePort(topologyId,nodeId,tpId);

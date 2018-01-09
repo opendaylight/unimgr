@@ -25,7 +25,6 @@
   <modules>
     <module>features4-unimgr</module>
     <module>odl-unimgr-api</module>
-    <module>odl-unimgr-presto-api</module>
     <module>odl-unimgr</module>
     <module>odl-unimgr-netvirt</module>
     <module>odl-unimgr-dlux</module>

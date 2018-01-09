@@ -15,7 +15,8 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
+import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
+import org.opendaylight.unimgr.mef.nrp.common.ServicePort;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -214,17 +215,13 @@ public class MdsalUtils {
      * Read a TerminationPoint from datastore used in given FcPort.
      * @param dataBroker The dataBroker instance to create transactions
      * @param store The datastore type.
-     * @param port FcPort data
+     * @param topo TopologyId
+     * @param ep FcPort data
      * @return An Optional TerminationPoint instance
      */
-    public static Optional<TerminationPoint> readTerminationPoint(DataBroker dataBroker, LogicalDatastoreType store, FcPort port) {
-        InstanceIdentifier tpIid = InstanceIdentifier.builder(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(port.getTopology()))
-                .child(Node.class, new NodeKey(port.getNode()))
-                .child(TerminationPoint.class, new TerminationPointKey(port.getTp()))
-                .build();
-
-        return MdsalUtils.readOptional(dataBroker, store, tpIid);
+    public static Optional<TerminationPoint> readTerminationPoint(DataBroker dataBroker, LogicalDatastoreType store, TopologyId topo, EndPoint ep) {
+        ServicePort servicePort = ServicePort.toServicePort(ep, topo);
+        return readTerminationPoint(dataBroker, store, servicePort.getTopology(), servicePort.getNode(), servicePort.getTp());
     }
 
     public static Optional<TerminationPoint> readTerminationPoint(DataBroker dataBroker, LogicalDatastoreType store, TopologyId topologyId, NodeId nodeId, TpId tpId) {
