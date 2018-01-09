@@ -19,21 +19,21 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.template.TemplateConstants;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.types.rev170712.NaturalNumber;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.LayerProtocol1;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.LayerProtocol1Builder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.nrp.layer.protocol.attrs.NrpCarrierEthUniNResourceBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Eth;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.PortDirection;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.PortRole;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.TerminationDirection;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.context.attrs.ServiceInterfacePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.context.attrs.ServiceInterfacePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.service._interface.point.LayerProtocol;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.service._interface.point.LayerProtocolBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.types.rev171221.NaturalNumber;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.ServiceInterfacePoint1;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.ServiceInterfacePoint1Builder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.nrp.sip.attrs.NrpCarrierEthUniNResourceBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.ETH;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.PortDirection;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.PortRole;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.TerminationDirection;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.context.attrs.ServiceInterfacePoint;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.context.attrs.ServiceInterfacePointBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.service._interface.point.LayerProtocol;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.service._interface.point.LayerProtocolBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.node.OwnedNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.node.OwnedNodeEdgePointBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,26 +85,22 @@ public class TopologyDataHandler {
     }
 
     private ServiceInterfacePoint createSomeSid(String idx) {
-        return new ServiceInterfacePointBuilder()
-                .setUuid(new Uuid("sip" + ":" + TemplateConstants.DRIVER_ID + ":" + idx))
-                .setLayerProtocol(layerProtocolWithUniAttributes())
-                .build();
-    }
-
-    private List<LayerProtocol> layerProtocolWithUniAttributes() {
-
         LayerProtocol layerProtocol = new LayerProtocolBuilder()
                 .setLocalId("eth")
-                .setLayerProtocolName(Eth.class)
-                .addAugmentation(LayerProtocol1.class, new LayerProtocol1Builder()
-                        .setNrpCarrierEthUniNResource(
-                                new NrpCarrierEthUniNResourceBuilder()
-                                        .setMaxFrameSize(new NaturalNumber(new Long(1703)))
-                                        .build()
-                        ).build()
+                .setLayerProtocolName(ETH.class).build();
+
+        ServiceInterfacePoint1 sip = new ServiceInterfacePoint1Builder()
+                .setNrpCarrierEthUniNResource(
+                        new NrpCarrierEthUniNResourceBuilder()
+                                .setMaxFrameSize(new NaturalNumber(new Long(1703)))
+                                .build()
                 ).build();
 
-        return Collections.singletonList(layerProtocol);
+        return new ServiceInterfacePointBuilder()
+                .setUuid(new Uuid("sip" + ":" + TemplateConstants.DRIVER_ID + ":" + idx))
+                .setLayerProtocol(Collections.singletonList(layerProtocol))
+                .addAugmentation(ServiceInterfacePoint1.class, sip)
+                .build();
     }
 
     private List<OwnedNodeEdgePoint> createSomeEndpoints(int... indexes) {
@@ -112,13 +108,13 @@ public class TopologyDataHandler {
         return Arrays.stream(indexes).mapToObj(idx -> new OwnedNodeEdgePointBuilder()
                 .setUuid(new Uuid(TemplateConstants.DRIVER_ID + ":nep" + idx))
                 .setLayerProtocol(Collections.singletonList(
-                        new org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.edge.point.LayerProtocolBuilder()
+                        new org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.node.edge.point.LayerProtocolBuilder()
                             .setLocalId("eth")
-                            .setTerminationDirection(TerminationDirection.Bidirectional)
-                            .setLayerProtocolName(Eth.class)
+                            .setTerminationDirection(TerminationDirection.BIDIRECTIONAL)
+                            .setLayerProtocolName(ETH.class)
                             .build()))
-                .setLinkPortDirection(PortDirection.Bidirectional)
-                .setLinkPortRole(PortRole.Symmetric)
+                .setLinkPortDirection(PortDirection.BIDIRECTIONAL)
+                .setLinkPortRole(PortRole.SYMMETRIC)
 
                 .build()).collect(Collectors.toList());
     }

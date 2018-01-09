@@ -10,7 +10,7 @@ package org.opendaylight.unimgr.mef.nrp.api;
 
 import java.util.List;
 
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
 
 /**
  * @author bartosz.michalik@amartus.com

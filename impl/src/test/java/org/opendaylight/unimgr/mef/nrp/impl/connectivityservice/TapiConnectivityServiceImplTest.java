@@ -42,13 +42,13 @@ import org.opendaylight.unimgr.mef.nrp.api.Subrequrest;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceActivatorException;
 import org.opendaylight.unimgr.mef.nrp.impl.ConnectivityServiceIdResourcePool;
 import org.opendaylight.unimgr.utils.ActivationDriverMocks;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.PortRole;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.CreateConnectivityServiceInput;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.CreateConnectivityServiceInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.CreateConnectivityServiceOutput;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.create.connectivity.service.input.EndPoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.create.connectivity.service.input.EndPointBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.PortRole;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.CreateConnectivityServiceInput;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.CreateConnectivityServiceInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.CreateConnectivityServiceOutput;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.create.connectivity.service.input.EndPoint;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.create.connectivity.service.input.EndPointBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
@@ -209,10 +209,10 @@ public class TapiConnectivityServiceImplTest {
                 .build();
     }
 
-    private org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.create.connectivity.service.input.EndPoint ep(String id) {
+    private org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.create.connectivity.service.input.EndPoint ep(String id) {
         return new EndPointBuilder()
                 .setLocalId(id)
-                .setRole(PortRole.Symmetric)
+                .setRole(PortRole.SYMMETRIC)
 //                .setServiceInterfacePoint()
         .build();
     }

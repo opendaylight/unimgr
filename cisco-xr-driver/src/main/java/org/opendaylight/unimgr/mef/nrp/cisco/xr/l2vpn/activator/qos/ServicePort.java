@@ -1,7 +1,7 @@
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.qos;
 
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev170712.carrier.eth.connectivity.end.point.resource.IngressBwpFlow;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev170712.carrier.eth.connectivity.end.point.resource.EgressBwpFlow;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev171221.carrier.eth.connectivity.end.point.resource.IngressBwpFlow;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev171221.carrier.eth.connectivity.end.point.resource.EgressBwpFlow;
 
 /**
  * @author bartosz.michalik@amartus.com

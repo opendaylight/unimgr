@@ -13,11 +13,11 @@ import java.util.concurrent.Callable;
 
 import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.GetConnectivityServiceDetailsInput;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.GetConnectivityServiceDetailsOutput;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.GetConnectivityServiceDetailsOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.ConnectivityService;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.get.connectivity.service.details.output.ServiceBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.GetConnectivityServiceDetailsInput;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.GetConnectivityServiceDetailsOutput;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.GetConnectivityServiceDetailsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.connectivity.context.ConnectivityService;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.get.connectivity.service.details.output.ServiceBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;

@@ -1,14 +1,17 @@
 module tapi-topology {
-    namespace "urn:mef:yang:tapi-topology";
+    namespace "urn:onf:params:xml:ns:yang:tapi-topology";
     prefix tapi-topology;
     import tapi-common {
         prefix tapi-common;
     }
-    organization "Metro Ethernet Forum (MEF)";
-    contact "MEF";
+    organization "ONF (Open Networking Foundation) IMP Working Group";
+    contact "WG Web: <https://www.open{[]}networking.org/technical-communities/areas/services/> 
+ WG List: mailto: <wg list name>@opennetworking.org>, 
+.WG Chair: your-WG-chair<mailto:your-WG-chair@example.com> 
+Editor: your-name<mailto:your-email@example.com>";
     description "none";
-    revision 2017-07-12 {
-        description "MEF NRP 1.0.cfc4";
+    revision 2017-11-13 {
+        description "TAPI SDK 2.0-alpha";
         reference "ONF-TR-527, ONF-TR-512, ONF-TR-531, RFC 6020 and RFC 6087";
     }
     augment "/tapi-common:context" {
@@ -17,7 +20,7 @@ module tapi-topology {
     }
     /***********************
     * package object-classes
-    **********************/
+    **********************/ 
         grouping link {
             leaf-list node-edge-point {
                 type leafref {
@@ -441,7 +444,7 @@ module tapi-topology {
 
     /***********************
     * package type-definitions
-    **********************/
+    **********************/ 
         grouping cost-characteristic {
             leaf cost-name {
                 type string;
@@ -516,16 +519,16 @@ module tapi-topology {
         }
         typedef forwarding-rule {
             type enumeration {
-                enum may-forward-across-group {
+                enum MAY_FORWARD_ACROSS_GROUP {
                     description "none";
                 }
-                enum must-forward-across-group {
+                enum MUST_FORWARD_ACROSS_GROUP {
                     description "none";
                 }
-                enum cannot-forward-across-group {
+                enum CANNOT_FORWARD_ACROSS_GROUP {
                     description "none";
                 }
-                enum no-statement-on-forwarding {
+                enum NO_STATEMENT_ON_FORWARDING {
                     description "none";
                 }
             }
@@ -533,22 +536,22 @@ module tapi-topology {
         }
         typedef rule-type {
             type enumeration {
-                enum forwarding {
+                enum FORWARDING {
                     description "none";
                 }
-                enum capacity {
+                enum CAPACITY {
                     description "none";
                 }
-                enum cost {
+                enum COST {
                     description "none";
                 }
-                enum timing {
+                enum TIMING {
                     description "none";
                 }
-                enum risk {
+                enum RISK {
                     description "none";
                 }
-                enum grouping {
+                enum GROUPING {
                     description "none";
                 }
             }
@@ -557,7 +560,7 @@ module tapi-topology {
 
     /***********************
     * package interfaces
-    **********************/
+    **********************/ 
         rpc get-topology-details {
             description "none";
             input {

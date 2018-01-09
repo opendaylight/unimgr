@@ -11,7 +11,7 @@ import java.util.List;
 
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceActivatorException;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.NrpConnectivityServiceAttrs;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.NrpConnectivityServiceAttrs;
 
 /**
  * Interface of a driver that maps NRP concepts to the configuration of underlying infrastructure.

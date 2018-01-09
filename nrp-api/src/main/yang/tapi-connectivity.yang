@@ -1,5 +1,5 @@
 module tapi-connectivity {
-    namespace "urn:mef:yang:tapi-connectivity";
+    namespace "urn:onf:params:xml:ns:yang:tapi-connectivity";
     prefix tapi-connectivity;
     import tapi-common {
         prefix tapi-common;
@@ -10,11 +10,14 @@ module tapi-connectivity {
     import tapi-path-computation {
         prefix tapi-path-computation;
     }
-    organization "Metro Ethernet Forum (MEF)";
-    contact "MEF";
+    organization "ONF (Open Networking Foundation) IMP Working Group";
+    contact "WG Web: <https://www.open{[]}networking.org/technical-communities/areas/services/> 
+ WG List: mailto: <wg list name>@opennetworking.org>, 
+.WG Chair: your-WG-chair<mailto:your-WG-chair@example.com> 
+Editor: your-name<mailto:your-email@example.com>";
     description "none";
-    revision 2017-07-12 {
-        description "MEF NRP 1.0.cfc4";
+    revision 2017-11-13 {
+        description "TAPI SDK 2.0-alpha";
         reference "ONF-TR-527, ONF-TR-512, ONF-TR-531, RFC 6020 and RFC 6087";
     }
     augment "/tapi-common:context" {
@@ -23,7 +26,7 @@ module tapi-connectivity {
     }
     /***********************
     * package object-classes
-    **********************/
+    **********************/ 
         grouping connection {
             list connection-end-point {
                 key 'uuid';
@@ -452,19 +455,19 @@ module tapi-connectivity {
 
     /***********************
     * package type-definitions
-    **********************/
+    **********************/ 
         typedef service-type {
             type enumeration {
-                enum point-to-point-connectivity {
+                enum POINT_TO_POINT_CONNECTIVITY {
                     description "none";
                 }
-                enum point-to-multipoint-connectivty {
+                enum POINT_TO_MULTIPOINT_CONNECTIVTY {
                     description "none";
                 }
-                enum multipoint-connectivity {
+                enum MULTIPOINT_CONNECTIVITY {
                     description "none";
                 }
-                enum rooted-multipoint-connectivity {
+                enum ROOTED_MULTIPOINT_CONNECTIVITY {
                     description "none";
                 }
             }
@@ -472,10 +475,10 @@ module tapi-connectivity {
         }
         typedef reversion-mode {
             type enumeration {
-                enum revertive {
+                enum REVERTIVE {
                     description "An FC switched to a lower priority (non-preferred) resource will revert to a higher priority (preferred) resource when that recovers (potentially after some hold-off time).";
                 }
-                enum non-revertive {
+                enum NON-REVERTIVE {
                     description "An FC switched to a lower priority (non-preferred) resource will not revert to a higher priority (preferred) resource when that recovers.";
                 }
             }
@@ -483,19 +486,19 @@ module tapi-connectivity {
         }
         typedef selection-control {
             type enumeration {
-                enum lock-out {
+                enum LOCK_OUT {
                     description "The resource is configured to temporarily not be available for use in the protection scheme(s) it is part of.
                         This overrides all other protection control states including forced.
                         If the item is locked out then it cannot be used under any circumstances.
                         Note: Only relevant when part of a protection scheme.";
                 }
-                enum normal {
+                enum NORMAL {
                     description "none";
                 }
-                enum manual {
+                enum MANUAL {
                     description "none";
                 }
-                enum forced {
+                enum FORCED {
                     description "none";
                 }
             }
@@ -503,25 +506,25 @@ module tapi-connectivity {
         }
         typedef selection-reason {
             type enumeration {
-                enum lockout {
+                enum LOCKOUT {
                     description "none";
                 }
-                enum normal {
+                enum NORMAL {
                     description "none";
                 }
-                enum manual {
+                enum MANUAL {
                     description "none";
                 }
-                enum forced {
+                enum FORCED {
                     description "none";
                 }
-                enum wait-to-revert {
+                enum WAIT_TO_REVERT {
                     description "none";
                 }
-                enum signal-degrade {
+                enum SIGNAL_DEGRADE {
                     description "none";
                 }
-                enum signal-fail {
+                enum SIGNAL_FAIL {
                     description "none";
                 }
             }
@@ -529,10 +532,10 @@ module tapi-connectivity {
         }
         typedef switch-type {
             type enumeration {
-                enum linear-1-plus-1 {
+                enum LINEAR_1_PLUS_1 {
                     description "none";
                 }
-                enum linear-1-for-1 {
+                enum LINEAR_1_FOR_1 {
                     description "none";
                 }
             }
@@ -541,7 +544,7 @@ module tapi-connectivity {
 
     /***********************
     * package interfaces
-    **********************/
+    **********************/ 
         rpc get-connection-details {
             description "none";
             input {

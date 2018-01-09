@@ -20,17 +20,16 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.impl.AbstractTestWithTopo;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.types.rev170712.NaturalNumber;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.LayerProtocol1;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.ServiceInterfacePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.service._interface.point.LayerProtocol;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.types.rev171221.NaturalNumber;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.ServiceInterfacePoint1;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.AddSipInput;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.AddSipInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.EnniSpecBuilder;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.InniSpecBuilder;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.UniSpecBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.context.attrs.ServiceInterfacePoint;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.node.OwnedNodeEdgePoint;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
 /**
@@ -66,8 +65,7 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
         RpcResult<Void> result = extService.addSip(input).get();
         assertTrue(result.isSuccessful());
         verifySipExists(nodeId + ":1", sip -> {
-            LayerProtocol lp = sip.getLayerProtocol().get(0);
-            LayerProtocol1 lpAug = lp.getAugmentation(LayerProtocol1.class);
+            ServiceInterfacePoint1 lpAug = sip.getAugmentation(ServiceInterfacePoint1.class);
             assertNotNull(lpAug);
             assertNotNull(lpAug.getNrpCarrierEthEnniNResource());
         });

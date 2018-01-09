@@ -1,5 +1,5 @@
 module tapi-path-computation {
-    namespace "urn:mef:yang:tapi-path-computation";
+    namespace "urn:onf:params:xml:ns:yang:tapi-path-computation";
     prefix tapi-path-computation;
     import tapi-topology {
         prefix tapi-topology;
@@ -7,11 +7,14 @@ module tapi-path-computation {
     import tapi-common {
         prefix tapi-common;
     }
-    organization "Metro Ethernet Forum (MEF)";
-    contact "MEF";
+    organization "ONF (Open Networking Foundation) IMP Working Group";
+    contact "WG Web: <https://www.open{[]}networking.org/technical-communities/areas/services/> 
+ WG List: mailto: <wg list name>@opennetworking.org>, 
+.WG Chair: your-WG-chair<mailto:your-WG-chair@example.com> 
+Editor: your-name<mailto:your-email@example.com>";
     description "none";
-    revision 2017-07-12 {
-        description "MEF NRP 1.0.cfc4";
+    revision 2017-11-13 {
+        description "TAPI SDK 2.0-alpha";
         reference "ONF-TR-527, ONF-TR-512, ONF-TR-531, RFC 6020 and RFC 6087";
     }
     augment "/tapi-common:context" {
@@ -20,7 +23,7 @@ module tapi-path-computation {
     }
     /***********************
     * package object-classes
-    **********************/
+    **********************/ 
         grouping path {
             leaf-list link {
                 type leafref {
@@ -201,8 +204,8 @@ module tapi-path-computation {
 
     /***********************
     * package interfaces
-    **********************/
-        rpc compute-p2-p-path {
+    **********************/ 
+        rpc compute-p2p-path {
             description "none";
             input {
                 list sep {
@@ -227,7 +230,7 @@ module tapi-path-computation {
                 }
             }
         }
-        rpc optimize-p2-p-path {
+        rpc optimize-p2p-path {
             description "none";
             input {
                 leaf path-id-or-name {
@@ -254,7 +257,7 @@ module tapi-path-computation {
                 }
             }
         }
-        rpc delete-p2-p-path {
+        rpc delete-p2p-path {
             description "none";
             input {
                 leaf path-id-or-name {
