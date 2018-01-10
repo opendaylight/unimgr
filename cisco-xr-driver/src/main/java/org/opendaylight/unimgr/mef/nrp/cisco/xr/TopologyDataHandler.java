@@ -46,6 +46,8 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfigurationKey;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.ETH;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.PortDirection;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.PortRole;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.context.attrs.ServiceInterfacePoint;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.context.attrs.ServiceInterfacePointBuilder;
@@ -193,7 +195,6 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
             ServiceInterfacePoint sip = new ServiceInterfacePointBuilder()
                     .setUuid(new Uuid("sip:" + nep.getUuid().getValue()))
 //                    .setState(St)
-// TODO donaldh     .setDirection(TerminationDirection.Bidirectional)
                     .setLayerProtocol(Collections.singletonList(new LayerProtocolBuilder()
                             .setLocalId("eth")
                             .setLayerProtocolName(ETH.class)
@@ -253,6 +254,8 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
                                     return tpBuilder
                                             .setUuid(tpId)
                                             .setKey(new OwnedNodeEdgePointKey(tpId))
+                                            .setLinkPortDirection(PortDirection.BIDIRECTIONAL)
+                                            .setLinkPortRole(PortRole.SYMMETRIC)
                                             .build();
                                 }).collect(Collectors.toList());
 

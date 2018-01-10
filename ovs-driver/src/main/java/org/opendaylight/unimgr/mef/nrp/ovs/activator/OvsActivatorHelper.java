@@ -131,32 +131,36 @@ class OvsActivatorHelper {
     }
 
 	public long getQosMinRate() throws ResourceNotAvailableException {
-		if ( (endPoint.getAttrs() != null) && (endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource() != null) ) {
-			NrpCarrierEthConnectivityEndPointResource attr = endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource();
-			IngressBwpFlow ingressBwpFlow = attr.getIngressBwpFlow();
-			if(ingressBwpFlow != null) {
-				//TODO add validation
-				return ingressBwpFlow.getCir().getValue();
-			} else {
-                LOG.warn(String.format(INGRESS_BWP_FLOW_NOT_SET_ERROR_MESSAGE, tpName));
-                throw new ResourceNotAvailableException(String.format(INGRESS_BWP_FLOW_NOT_SET_ERROR_MESSAGE, tpName));
-			}
-		}
-		return 0;
+        IngressBwpFlow ingressBwpFlow = getIngressBwpFlow();
+        if(ingressBwpFlow != null) {
+            //TODO add validation
+            return ingressBwpFlow.getCir().getValue();
+        }
+
+		LOG.warn(String.format(INGRESS_BWP_FLOW_NOT_SET_ERROR_MESSAGE, tpName));
+        throw new ResourceNotAvailableException(String.format(INGRESS_BWP_FLOW_NOT_SET_ERROR_MESSAGE, tpName));
+
 	}
 
 	public long getQosMaxRate() throws ResourceNotAvailableException {
-		if ( (endPoint.getAttrs() != null) && (endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource() != null) ) {
-			NrpCarrierEthConnectivityEndPointResource attr = endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource();
-			IngressBwpFlow ingressBwpFlow = attr.getIngressBwpFlow();
-			if(ingressBwpFlow != null) {
-				//TODO add validation
-				return ingressBwpFlow.getCir().getValue() + ingressBwpFlow.getEir().getValue();
-			} else {
-                LOG.warn(String.format(INGRESS_BWP_FLOW_NOT_SET_ERROR_MESSAGE, tpName));
-                throw new ResourceNotAvailableException(String.format(INGRESS_BWP_FLOW_NOT_SET_ERROR_MESSAGE, tpName));
-			}
-		}
-		return 0;
+
+        IngressBwpFlow ingressBwpFlow = getIngressBwpFlow();
+        if(ingressBwpFlow != null) {
+            //TODO add validation
+            return ingressBwpFlow.getCir().getValue() + ingressBwpFlow.getEir().getValue();
+        }
+
+        LOG.warn(String.format(INGRESS_BWP_FLOW_NOT_SET_ERROR_MESSAGE, tpName));
+        throw new ResourceNotAvailableException(String.format(INGRESS_BWP_FLOW_NOT_SET_ERROR_MESSAGE, tpName));
 	}
+
+    private IngressBwpFlow getIngressBwpFlow() {
+        if ( (endPoint.getAttrs() == null) || (endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource() == null) )
+            return null;
+        return endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource().getIngressBwpFlow();
+    }
+
+    protected boolean isIBwpConfigured() {
+        return getIngressBwpFlow() != null;
+    }
 }

@@ -66,15 +66,22 @@ public class TopologyDataHandler {
             //add sip for one of these endpoints
 
             //create sid and add it to model
-            ServiceInterfacePoint someSid = createSomeSid("some-sid-id");
-            nrpDao.addSip(someSid);
+            ServiceInterfacePoint someSip1 = createSomeSid("some-sip-1");
+            ServiceInterfacePoint someSip2 = createSomeSid("some-sip-2");
+            nrpDao.addSip(someSip1);
+            nrpDao.addSip(someSip2);
 
-            //update an existing nep wit mapping to sip
-            OwnedNodeEdgePoint updatedNep = new OwnedNodeEdgePointBuilder(someEndpoints.get(1))
-                    .setMappedServiceInterfacePoint(Collections.singletonList(someSid.getUuid()))
+            //update an existing nep with mapping to sip
+            OwnedNodeEdgePoint updatedNep1 = new OwnedNodeEdgePointBuilder(someEndpoints.get(1))
+                    .setMappedServiceInterfacePoint(Collections.singletonList(someSip1.getUuid()))
                     .build();
 
-            nrpDao.updateNep(TemplateConstants.DRIVER_ID, updatedNep);
+            OwnedNodeEdgePoint updatedNep2 = new OwnedNodeEdgePointBuilder(someEndpoints.get(2))
+                    .setMappedServiceInterfacePoint(Collections.singletonList(someSip2.getUuid()))
+                    .build();
+
+            nrpDao.updateNep(TemplateConstants.DRIVER_ID, updatedNep1);
+            nrpDao.updateNep(TemplateConstants.DRIVER_ID, updatedNep2);
 
 
             tx.submit().checkedGet();

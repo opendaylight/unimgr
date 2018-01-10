@@ -8,22 +8,6 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
@@ -41,8 +25,8 @@ import org.opendaylight.unimgr.mef.nrp.impl.AbstractTestWithTopo;
 import org.opendaylight.unimgr.mef.nrp.impl.ConnectivityServiceIdResourcePool;
 import org.opendaylight.unimgr.mef.nrp.impl.decomposer.BasicDecomposer;
 import org.opendaylight.unimgr.utils.ActivationDriverMocks;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.PortDirection;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.PortRole;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.TerminationDirection;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.Context1;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.CreateConnectivityServiceInput;
@@ -69,6 +53,16 @@ import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.create.connectivity.service.input.EndPointBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -334,6 +328,7 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         return Arrays.stream(uuids).map(uuid -> new EndPointBuilder()
                 .setLocalId("e:" + uuid)
                 .setRole(PortRole.SYMMETRIC)
+                .setDirection(PortDirection.BIDIRECTIONAL)
                 .setServiceInterfacePoint(new Uuid("sip:" + uuid))
                 .build()).collect(Collectors.toList());
     }

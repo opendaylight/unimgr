@@ -50,8 +50,10 @@ public class OvsActivator implements ResourceActivator {
      */
     @Override
     public void activate(List<EndPoint> endPoints, String serviceName) throws ResourceNotAvailableException, TransactionCommitFailedException {
-        for (EndPoint endPoint:endPoints)
+        for (EndPoint endPoint:endPoints) {
             activateEndpoint(endPoint, serviceName);
+        }
+
     }
 
 
@@ -87,16 +89,22 @@ public class OvsActivator implements ResourceActivator {
 				.map(link -> ovsActivatorHelper.getTpNameFromOpenFlowPortName(link.getLinkId().getValue()))
 				.collect(Collectors.toList());
 
-        //Create egress qos
-		OvsdbUtils.createEgressQos(dataBroker, portName, outputPortNames, ovsActivatorHelper.getQosMinRate(),
-				ovsActivatorHelper.getQosMaxRate(), serviceName, queueNumber);
+		if(ovsActivatorHelper.isIBwpConfigured()) {
+            //Create egress qos
+            OvsdbUtils.createEgressQos(dataBroker, portName, outputPortNames, ovsActivatorHelper.getQosMinRate(),
+                    ovsActivatorHelper.getQosMaxRate(), serviceName, queueNumber);
+        }
+
+
 
     }
 
-    @Override
+	@Override
     public void deactivate(List<EndPoint> endPoints, String serviceName) throws TransactionCommitFailedException, ResourceNotAvailableException {
-        for (EndPoint endPoint:endPoints)
-            deactivateEndpoint(endPoint, serviceName);
+
+        for (EndPoint endPoint:endPoints) {
+        	deactivateEndpoint(endPoint, serviceName);
+        }
     }
 
     private void deactivateEndpoint(EndPoint endPoint, String serviceName) throws ResourceNotAvailableException, TransactionCommitFailedException {

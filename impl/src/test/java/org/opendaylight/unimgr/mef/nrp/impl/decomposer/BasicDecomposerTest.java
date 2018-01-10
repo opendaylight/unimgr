@@ -6,14 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.unimgr.mef.nrp.impl;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
-import java.util.Arrays;
-import java.util.List;
+package org.opendaylight.unimgr.mef.nrp.impl.decomposer;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -22,9 +15,15 @@ import org.junit.rules.ExpectedException;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
 import org.opendaylight.unimgr.mef.nrp.api.Subrequrest;
-import org.opendaylight.unimgr.mef.nrp.impl.decomposer.BasicDecomposer;
+import org.opendaylight.unimgr.mef.nrp.impl.AbstractTestWithTopo;
+import org.opendaylight.unimgr.mef.nrp.impl.NrpInitializer;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.OperationalState;
 import org.opendaylight.yangtools.yang.common.OperationFailedException;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -76,7 +75,7 @@ public class BasicDecomposerTest extends AbstractTestWithTopo {
 
     @Test
     public void twoNodesTest() throws FailureResult, OperationFailedException {
-        //having
+        //having three nodes, but only two nodes connected
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, "n1", "n1:1", "n1:2", "n1:3");
         n(tx, "n2", "n2:1", "n2:2", "n2:3");

@@ -26,9 +26,7 @@ import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.connectivity.context.ConnectivityService;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.connectivity.context.ConnectivityServiceKey;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.Context1;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.get.node.edge.point.details.output.NodeEdgePoint;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.node.OwnedNodeEdgePoint;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.node.OwnedNodeEdgePointBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.node.OwnedNodeEdgePointKey;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.topology.context.Topology;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.topology.context.TopologyKey;
@@ -52,6 +50,7 @@ public class NrpDao  {
 
 
     public NrpDao(ReadWriteTransaction tx) {
+        if(tx == null) throw new NullPointerException();
         this.tx = tx;
         this.rtx = tx;
     }
@@ -59,8 +58,6 @@ public class NrpDao  {
         this.rtx = tx;
         this.tx =  null;
     }
-
-    private Function<NodeEdgePoint, OwnedNodeEdgePoint> toNep = nep -> new OwnedNodeEdgePointBuilder(nep).build();
 
     public Node createSystemNode(String nodeId, List<OwnedNodeEdgePoint> neps) {
         verifyTx();
@@ -90,6 +87,7 @@ public class NrpDao  {
     }
 
     public void updateNep(Uuid nodeId, OwnedNodeEdgePoint nep) {
+        verifyTx();
         InstanceIdentifier<OwnedNodeEdgePoint> nodeIdent = node(nodeId).child(OwnedNodeEdgePoint.class, new OwnedNodeEdgePointKey(nep.getUuid()));
         tx.put(LogicalDatastoreType.OPERATIONAL, nodeIdent, nep);
     }
@@ -165,6 +163,10 @@ public class NrpDao  {
         return topo(TapiConstants.PRESTO_EXT_TOPO).child(Node.class, new NodeKey(new Uuid(TapiConstants.PRESTO_ABSTRACT_NODE)));
     }
 
+    public void removeSip(Uuid uuid) {
+        removeSips(Stream.of(uuid));
+    }
+
     public void removeSips(Stream<Uuid>  uuids) {
         verifyTx();
         if (uuids == null) {
@@ -209,9 +211,10 @@ public class NrpDao  {
 
     public List<ConnectivityService> getConnectivityServiceList() {
         try {
-            return rtx.read(LogicalDatastoreType.OPERATIONAL,
+            org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.Context1 connections = rtx.read(LogicalDatastoreType.OPERATIONAL,
                     ctx().augmentation(org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.Context1.class))
-                    .checkedGet().orNull().getConnectivityService();
+                    .checkedGet().orNull();
+            return connections == null ? null : connections.getConnectivityService();
         } catch (ReadFailedException e) {
             LOG.warn("reading connectivity services failed", e);
             return null;
