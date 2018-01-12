@@ -20,10 +20,13 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Context;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.ContextBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.ETH;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.node.TransferCostBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.node.TransferTimingBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.topology.NodeKey;
@@ -102,8 +105,8 @@ public class NrpInitializer {
         return new NodeBuilder()
                 .setLayerProtocolName(Collections.singletonList(ETH.class))
                 .setEncapTopology(new Uuid(PRESTO_SYSTEM_TOPO))
-                .setKey(new NodeKey(uid))
-//                .setState()
+                .setTransferCost(new TransferCostBuilder().setCostCharacteristic(TapiUtils.emptyCostCharacteristic()).build())
+                .setTransferTiming(new TransferTimingBuilder().setLatencyCharacteristic(TapiUtils.emptyTransferCost()).build())
                 .setUuid(uid)
                 .build();
     }
@@ -114,7 +117,6 @@ public class NrpInitializer {
         return new TopologyBuilder()
                 .setLayerProtocolName(Collections.singletonList(ETH.class))
                 .setUuid(topoId)
-                .setKey(new TopologyKey(topoId))
                 .build();
     }
 
