@@ -181,7 +181,7 @@ public class TopologyDataHandlerTestUtils {
         return null;
     }
 
-    private static InstanceIdentifier getNodeIid() {
+    private static InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.topology.Node> getNodeIid() {
         return getTopoIid()
                 .child(org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.topology.Node.class,
                         new org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.topology.NodeKey(new Uuid(ovsNodeId)));

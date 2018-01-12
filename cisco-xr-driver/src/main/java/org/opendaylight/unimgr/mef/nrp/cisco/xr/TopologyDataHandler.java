@@ -40,6 +40,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.InterfaceHelper;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
+import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
 import org.opendaylight.unimgr.utils.CapabilitiesService;
 import org.opendaylight.unimgr.utils.DriverConstants;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
@@ -256,6 +257,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
                                             .setKey(new OwnedNodeEdgePointKey(tpId))
                                             .setLinkPortDirection(PortDirection.BIDIRECTIONAL)
                                             .setLinkPortRole(PortRole.SYMMETRIC)
+                                            .setLayerProtocol(Collections.singletonList(TapiUtils.toNepPN(ETH.class)))
                                             .build();
                                 }).collect(Collectors.toList());
 

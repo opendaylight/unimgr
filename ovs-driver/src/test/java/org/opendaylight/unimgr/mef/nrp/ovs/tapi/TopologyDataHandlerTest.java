@@ -8,19 +8,19 @@
 package org.opendaylight.unimgr.mef.nrp.ovs.tapi;
 
 import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
+import java.util.function.Predicate;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
+import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.unimgr.mef.nrp.ovs.FlowTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.OvsdbTopologyTestUtils;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
@@ -31,7 +31,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 /**
  * @author marek.ryznar@amartus.com
  */
-public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
+public class TopologyDataHandlerTest extends AbstractConcurrentDataBrokerTest {
 
     private TopologyDataHandler topologyDataHandler;
     private DataBroker dataBroker;
@@ -66,7 +66,8 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
         helper.createTestBridge();
 
         //then
-        Node ovsNode = helper.readOvsNode();
+        Node ovsNode = getOvsNodeWithNeps(n -> n.getOwnedNodeEdgePoint() != null);
+
         assertNotNull(ovsNode);
         checkNeps(ovsNode,expectedNep1,expectedNep2);
         checkSips(helper.readSips(),expectedNep1,expectedNep2);
@@ -78,14 +79,14 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
         String newPortName = "br1-eth4";
         Long ofPortNumber = 4L;
         helper.createTestBridge();
-        Node ovsNode = helper.readOvsNode();
-        assertEquals(initialBridgePortCount,ovsNode.getOwnedNodeEdgePoint().size());
+        getOvsNodeWithNeps(initialBridgePortCount);
+
 
         //when
         helper.addPort(bridgeName,newPortName,ofPortNumber);
 
         //then
-        ovsNode = helper.readOvsNode();
+        Node ovsNode = getOvsNodeWithNeps(initialBridgePortCount + 1);
         assertEquals(initialBridgePortCount+1,ovsNode.getOwnedNodeEdgePoint().size());
         checkNeps(ovsNode,"br1:"+newPortName,expectedNep1,expectedNep2);
         checkSips(helper.readSips(),"br1:"+newPortName,expectedNep1,expectedNep2);
@@ -95,35 +96,56 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
     public void testBridgeRemoval() {
         //given
         helper.createTestBridge();
-        Node ovsNode = helper.readOvsNode();
-        assertEquals(initialBridgePortCount,ovsNode.getOwnedNodeEdgePoint().size());
+        getOvsNodeWithNeps(initialBridgePortCount);
 
         //when
         helper.deleteTestBridge();
 
         //then
-        ovsNode = helper.readOvsNode();
-        assertEquals(0,ovsNode.getOwnedNodeEdgePoint().size());
+        Node ovsNode = getOvsNodeWithNeps(0);
     }
 
     @Test
     public void testPortRemoval() {
         //given
         String fullPortNameToRemove = bridgeName+tp1Name;
-        //helper.createTestBridge();
+
         helper.createTestBridge();
-        Node ovsNode = helper.readOvsNode();
-        assertEquals(initialBridgePortCount,ovsNode.getOwnedNodeEdgePoint().size());
+        getOvsNodeWithNeps(initialBridgePortCount);
 
         //when
         helper.deletePort(tp1Name);
 
         //then
+        Node ovsNode = getOvsNodeWithNeps(initialBridgePortCount-1);
         ovsNode = helper.readOvsNode();
         assertEquals(initialBridgePortCount-1,ovsNode.getOwnedNodeEdgePoint().size());
         assertFalse(checkNep.apply(ovsNode,fullPortNameToRemove));
         assertFalse(checkSip.apply(helper.readSips(), fullPortNameToRemove));
     }
+
+    private Node getOvsNodeWithNeps(int expectedPorts) {
+        Node node = getOvsNodeWithNeps(n -> n.getOwnedNodeEdgePoint() != null && n.getOwnedNodeEdgePoint().size() == expectedPorts);
+        if(node == null) {
+            fail("OVS node does not contain " + expectedPorts + " ports");
+            throw new IllegalStateException("OVS node does not contain " + expectedPorts + " ports");
+        }
+        return node;
+    }
+
+    private Node getOvsNodeWithNeps(Predicate<Node> nodePredicate) {
+        for(int i = 0; i < 5; ++i) {
+            Node ovsNode = helper.readOvsNode();
+            if(nodePredicate.test(ovsNode)) {
+                return ovsNode;
+            }
+            try {
+                TimeUnit.MILLISECONDS.sleep(10);
+            } catch (InterruptedException _e) { }
+        }
+        return null;
+    }
+
 
     private BiFunction<Node, String, Boolean> checkNep = (node,nepName) ->
             node.getOwnedNodeEdgePoint().stream()

@@ -24,7 +24,7 @@ import java.util.stream.IntStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
+import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
@@ -33,7 +33,6 @@ import org.opendaylight.unimgr.mef.nrp.ovs.FlowTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.OpenFlowTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.OvsdbTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.util.OpenFlowUtils;
-import org.opendaylight.unimgr.mef.nrp.ovs.util.OvsdbUtils;
 import org.opendaylight.unimgr.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.types.rev171221.NaturalNumber;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.types.rev171221.PositiveInteger;
@@ -57,7 +56,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 /**
  * @author marek.ryznar@amartus.com
  */
-public class OvsActivatorTest extends AbstractDataBrokerTest{
+public class OvsActivatorTest extends AbstractConcurrentDataBrokerTest {
 
     private DataBroker dataBroker;
     private OvsActivator ovsActivator;
