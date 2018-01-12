@@ -23,17 +23,18 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
+import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.ServiceInterfacePoint1;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.ServiceInterfacePoint1Builder;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.nrp.sip.attrs.NrpCarrierEthEnniNResourceBuilder;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.nrp.sip.attrs.NrpCarrierEthInniNResourceBuilder;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.nrp.sip.attrs.NrpCarrierEthUniNResourceBuilder;
-import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.AddSipInput;
-import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.UnimgrExtService;
-import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.SipType;
-import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.EnniSpec;
-import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.InniSpec;
-import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.UniSpec;
+import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.AddSipInput;
+import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.UnimgrExtService;
+import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.add.sip.input.SipType;
+import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.add.sip.input.sip.type.EnniSpec;
+import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.add.sip.input.sip.type.InniSpec;
+import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.add.sip.input.sip.type.UniSpec;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.ETH;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.context.attrs.ServiceInterfacePointBuilder;
@@ -90,15 +91,12 @@ public class UnimgrExtServiceImpl implements UnimgrExtService {
             }
 
             NrpDao nrpDao = new NrpDao(tx);
-            LayerProtocolBuilder lpBuilder = new LayerProtocolBuilder()
-                    .setLocalId("eth")
-                    .setLayerProtocolName(ETH.class);
 
             ServiceInterfacePoint1 sip1 = getServiceInterfacePoint(sipType);
             ServiceInterfacePointBuilder sipBuilder = new ServiceInterfacePointBuilder()
                     .setUuid(sipId)
                     .addAugmentation(ServiceInterfacePoint1.class, sip1)
-                    .setLayerProtocol(Collections.singletonList(lpBuilder.build()));
+                    .setLayerProtocol(Collections.singletonList(TapiUtils.toSipPN(ETH.class)));
 
             nrpDao.addSip(
                 sipBuilder
@@ -120,21 +118,21 @@ public class UnimgrExtServiceImpl implements UnimgrExtService {
         ServiceInterfacePoint1 sip = null;
 
         if (sipType instanceof InniSpec) {
-            org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.inni.spec.InniSpec spec = ((InniSpec) sipType).getInniSpec();
+            org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.add.sip.input.sip.type.inni.spec.InniSpec spec = ((InniSpec) sipType).getInniSpec();
             if (spec != null) {
                 sip = new ServiceInterfacePoint1Builder()
                     .setNrpCarrierEthInniNResource(new NrpCarrierEthInniNResourceBuilder(spec).build()).build();
             }
 
         } else if (sipType instanceof EnniSpec) {
-            org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.enni.spec.EnniSpec spec = ((EnniSpec) sipType).getEnniSpec();
+            org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.add.sip.input.sip.type.enni.spec.EnniSpec spec = ((EnniSpec) sipType).getEnniSpec();
             if (spec != null) {
                 sip = new ServiceInterfacePoint1Builder()
                     .setNrpCarrierEthEnniNResource(new NrpCarrierEthEnniNResourceBuilder(spec).build()).build();
             }
 
         } else if (sipType instanceof UniSpec) {
-            org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev700101.add.sip.input.sip.type.uni.spec.UniSpec spec = ((UniSpec) sipType).getUniSpec();
+            org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.add.sip.input.sip.type.uni.spec.UniSpec spec = ((UniSpec) sipType).getUniSpec();
             if (spec != null) {
                 sip = new ServiceInterfacePoint1Builder()
                     .setNrpCarrierEthUniNResource(new NrpCarrierEthUniNResourceBuilder(spec).build()).build();
