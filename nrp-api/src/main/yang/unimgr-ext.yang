@@ -12,6 +12,10 @@ module unimgr-ext {
         prefix nrp-interface;
     }
 
+    revision 2017-05-31 {
+        description "Unimgr SIP extensions";
+    }
+
 
     rpc add-sip {
         description "Add sip to the existing nep";

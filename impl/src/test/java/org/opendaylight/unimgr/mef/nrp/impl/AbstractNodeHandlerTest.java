@@ -15,7 +15,9 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
+import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Context;
+import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.ETH;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.TerminationDirection;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.node.OwnedNodeEdgePoint;
@@ -223,6 +225,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
         Uuid uuid = new Uuid(nepName);
         OwnedNodeEdgePointBuilder builder = new OwnedNodeEdgePointBuilder()
                 .setKey(new OwnedNodeEdgePointKey(uuid))
+                .setLayerProtocol(Collections.singletonList(TapiUtils.toNepPN(ETH.class)))
                 .setUuid(uuid);
                 // TODO donaldh .setTerminationDirection(td);
 

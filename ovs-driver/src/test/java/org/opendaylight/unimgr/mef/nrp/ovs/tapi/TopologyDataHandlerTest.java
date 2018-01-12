@@ -20,6 +20,7 @@ import java.util.function.BiFunction;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
 import org.opendaylight.unimgr.mef.nrp.ovs.FlowTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.OvsdbTopologyTestUtils;
@@ -31,7 +32,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 /**
  * @author marek.ryznar@amartus.com
  */
-public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
+public class TopologyDataHandlerTest extends AbstractConcurrentDataBrokerTest {
 
     private TopologyDataHandler topologyDataHandler;
     private DataBroker dataBroker;
