@@ -18,6 +18,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
+import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
 import org.opendaylight.unimgr.mef.nrp.template.TemplateConstants;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.types.rev171221.NaturalNumber;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.ServiceInterfacePoint1;
@@ -66,8 +67,8 @@ public class TopologyDataHandler {
             //add sip for one of these endpoints
 
             //create sid and add it to model
-            ServiceInterfacePoint someSip1 = createSomeSid("some-sip-1");
-            ServiceInterfacePoint someSip2 = createSomeSid("some-sip-2");
+            ServiceInterfacePoint someSip1 = createSomeSip("some-sip-1");
+            ServiceInterfacePoint someSip2 = createSomeSip("some-sip-2");
             nrpDao.addSip(someSip1);
             nrpDao.addSip(someSip2);
 
@@ -91,11 +92,7 @@ public class TopologyDataHandler {
 
     }
 
-    private ServiceInterfacePoint createSomeSid(String idx) {
-        LayerProtocol layerProtocol = new LayerProtocolBuilder()
-                .setLocalId("eth")
-                .setLayerProtocolName(ETH.class).build();
-
+    private ServiceInterfacePoint createSomeSip(String idx) {
         ServiceInterfacePoint1 sip = new ServiceInterfacePoint1Builder()
                 .setNrpCarrierEthUniNResource(
                         new NrpCarrierEthUniNResourceBuilder()
@@ -105,7 +102,7 @@ public class TopologyDataHandler {
 
         return new ServiceInterfacePointBuilder()
                 .setUuid(new Uuid("sip" + ":" + TemplateConstants.DRIVER_ID + ":" + idx))
-                .setLayerProtocol(Collections.singletonList(layerProtocol))
+                .setLayerProtocol(Collections.singletonList(TapiUtils.toSipPN(ETH.class)))
                 .addAugmentation(ServiceInterfacePoint1.class, sip)
                 .build();
     }
@@ -114,12 +111,7 @@ public class TopologyDataHandler {
 
         return Arrays.stream(indexes).mapToObj(idx -> new OwnedNodeEdgePointBuilder()
                 .setUuid(new Uuid(TemplateConstants.DRIVER_ID + ":nep" + idx))
-                .setLayerProtocol(Collections.singletonList(
-                        new org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.node.edge.point.LayerProtocolBuilder()
-                            .setLocalId("eth")
-                            .setTerminationDirection(TerminationDirection.BIDIRECTIONAL)
-                            .setLayerProtocolName(ETH.class)
-                            .build()))
+                .setLayerProtocol(Collections.singletonList(TapiUtils.toNepPN(ETH.class)))
                 .setLinkPortDirection(PortDirection.BIDIRECTIONAL)
                 .setLinkPortRole(PortRole.SYMMETRIC)
 

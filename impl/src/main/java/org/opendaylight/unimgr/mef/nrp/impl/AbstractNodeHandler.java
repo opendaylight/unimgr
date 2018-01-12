@@ -79,6 +79,7 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
                         .map(DataTreeModification::getRootNode)
                         .flatMap(topo -> topo.getModifiedChildren().stream())
                         .flatMap(node -> node.getModifiedChildren().stream())
+                        .filter(this::isNep)
                         .filter(this::checkIfUpdated)
                         .map(nep -> (OwnedNodeEdgePoint) nep.getDataAfter())
                         .collect(Collectors.toList());
@@ -88,6 +89,7 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
                 .map(DataTreeModification::getRootNode)
                 .flatMap(topo -> topo.getModifiedChildren().stream())
                 .flatMap(node -> node.getModifiedChildren().stream())
+                .filter(this::isNep)
                 .filter(this::checkIfDeleted)
                 .map(nep -> (OwnedNodeEdgePoint) nep.getDataBefore())
                 .collect(Collectors.toList());
@@ -113,6 +115,10 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
                 LOG.warn("Abstract TAPI node upadate failed due to an error", t);
             }
         });
+    }
+
+    private boolean isNep(DataObjectModification dataObjectModificationNep) {
+        return OwnedNodeEdgePoint.class.isAssignableFrom(dataObjectModificationNep.getDataType());
     }
 
     private boolean checkIfDeleted(DataObjectModification dataObjectModificationNep) {
