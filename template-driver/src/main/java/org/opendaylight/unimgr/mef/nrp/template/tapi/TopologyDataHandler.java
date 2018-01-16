@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.unimgr.mef.nrp.api.TopologyManager;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
 import org.opendaylight.unimgr.mef.nrp.template.TemplateConstants;
@@ -27,12 +28,9 @@ import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.nrp.si
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.ETH;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.PortDirection;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.PortRole;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.TerminationDirection;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.context.attrs.ServiceInterfacePoint;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.context.attrs.ServiceInterfacePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.service._interface.point.LayerProtocol;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.service._interface.point.LayerProtocolBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.node.OwnedNodeEdgePoint;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.node.OwnedNodeEdgePointBuilder;
 import org.slf4j.Logger;
@@ -44,9 +42,11 @@ import org.slf4j.LoggerFactory;
 public class TopologyDataHandler {
     private static final Logger LOG = LoggerFactory.getLogger(TopologyDataHandler.class);
     private DataBroker dataBroker;
+    private TopologyManager topologyManager;
 
-    public TopologyDataHandler(DataBroker dataBroker) {
+    public TopologyDataHandler(DataBroker dataBroker, TopologyManager topologyManager) {
         this.dataBroker = dataBroker;
+        this.topologyManager = topologyManager;
     }
 
     public void init() {
@@ -63,7 +63,7 @@ public class TopologyDataHandler {
             NrpDao nrpDao = new NrpDao(tx);
             //we are creating a list of NodeEdgePoints for the node no sips are added to the system
             List<OwnedNodeEdgePoint> someEndpoints = createSomeEndpoints(1, 2, 5, 7);
-            nrpDao.createSystemNode(TemplateConstants.DRIVER_ID, someEndpoints);
+            nrpDao.createNode(topologyManager.getSystemTopologyId(), TemplateConstants.DRIVER_ID, ETH.class, null);
             //add sip for one of these endpoints
 
             //create sid and add it to model

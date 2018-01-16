@@ -17,12 +17,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     </bean>
 
     <service id="unimgrProviderService" interface="org.opendaylight.unimgr.api.IUnimgrConsoleProvider" ref="unimgrProvider" odl:type="default" />
+    <service interface="org.opendaylight.unimgr.mef.nrp.api.TopologyManager" ref="topologyService" odl:type="default" />
 
     <bean id="activationDriverRepo" class="org.opendaylight.unimgr.mef.nrp.impl.ActivationDriverRepoServiceImpl">
         <argument ref="driverBuilders" />
     </bean>
 
-    <bean id="topologyService" class="org.opendaylight.unimgr.mef.nrp.impl.NrpInitializer" init-method="init" destroy-method="close">
+    <bean id="topologyService" class="org.opendaylight.unimgr.mef.nrp.impl.NrpInitializer" init-method="init" destroy-method="close"
+          activation="eager">
         <argument index="0" ref="dataBroker" />
     </bean>
 
@@ -42,11 +44,16 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         </property>
     </bean>
 
+    <bean id="tapiTopologyService" class="org.opendaylight.unimgr.mef.nrp.impl.topologytervice.TapiTopologyServiceImpl" init-method="init">
+        <property name="broker" ref="dataBroker" />
+    </bean>
+
     <bean id="basicDecomposer" class="org.opendaylight.unimgr.mef.nrp.impl.decomposer.BasicDecomposer">
         <argument ref="dataBroker" />
     </bean>
 
     <odl:rpc-implementation ref="tapiConnectivityService" interface="org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.TapiConnectivityService" />
+    <odl:rpc-implementation ref="tapiTopologyService" interface="org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.TapiTopologyService" />
 
     <reference id="dataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"/>
     <reference-list id="driverBuilders" interface="org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder" availability="optional">

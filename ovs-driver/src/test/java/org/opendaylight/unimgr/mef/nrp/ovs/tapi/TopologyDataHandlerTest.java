@@ -19,8 +19,11 @@ import java.util.function.BiFunction;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
+import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
+import org.opendaylight.unimgr.mef.nrp.api.TopologyManager;
 import org.opendaylight.unimgr.mef.nrp.ovs.FlowTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.OvsdbTopologyTestUtils;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
@@ -49,6 +52,8 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
         //given
         dataBroker = getDataBroker();
         helper = new TopologyDataHandlerTestUtils(dataBroker);
+        TopologyManager topologyManager = Mockito.mock(TopologyManager.class);
+        Mockito.when(topologyManager.getSystemTopologyId()).thenReturn(TapiConstants.PRESTO_SYSTEM_TOPO);
 
         //helper.createOvsdbTopology();
         OvsdbTopologyTestUtils.createOvsdbTopology(dataBroker);
@@ -56,7 +61,7 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
         FlowTopologyTestUtils.createFlowTopology(dataBroker,getLinkList());
         helper.createPrestoSystemTopology();
 
-        topologyDataHandler = new TopologyDataHandler(dataBroker);
+        topologyDataHandler = new TopologyDataHandler(dataBroker, topologyManager);
         topologyDataHandler.init();
     }
 

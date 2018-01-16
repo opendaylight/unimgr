@@ -38,6 +38,7 @@ import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.unimgr.mef.nrp.api.TopologyManager;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.InterfaceHelper;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
@@ -88,6 +89,8 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
                             new TopologyKey(new TopologyId(TopologyNetconf.QNAME.getLocalName())));
 
 
+    private final  TopologyManager topologyManager;
+
     LoadingCache<NodeKey, KeyedInstanceIdentifier<Node, NodeKey>> mountIds = CacheBuilder.newBuilder()
             .maximumSize(20)
             .build(
@@ -106,7 +109,8 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
     private CapabilitiesService capabilitiesService;
 
 
-    public TopologyDataHandler(DataBroker dataBroker, MountPointService mountService) {
+    public TopologyDataHandler(TopologyManager topologyManager, DataBroker dataBroker, MountPointService mountService) {
+        this.topologyManager = topologyManager;
         Objects.requireNonNull(dataBroker);
         Objects.requireNonNull(mountService);
         this.dataBroker = dataBroker;
@@ -118,7 +122,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
 
         NrpDao dao = new NrpDao(tx);
-        dao.createSystemNode(DriverConstants.XR_NODE, null);
+        dao.createNode(topologyManager.getSystemTopologyId(), DriverConstants.XR_NODE, ETH.class, null);
 
         Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
             @Override
@@ -284,5 +288,4 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
 
         return Stream.empty();
     }
-
 }

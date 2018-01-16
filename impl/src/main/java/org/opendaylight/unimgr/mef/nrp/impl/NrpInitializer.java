@@ -8,18 +8,15 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl;
 
-import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_CTX;
-import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_EXT_TOPO;
-import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_SYSTEM_TOPO;
-
-import java.util.Arrays;
-import java.util.Collections;
-
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
+import org.opendaylight.unimgr.mef.nrp.api.TopologyManager;
 import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Context;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.ContextBuilder;
@@ -29,7 +26,6 @@ import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.node.TransferTimingBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.topology.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.topology.context.Topology;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.topology.context.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.topology.context.TopologyKey;
@@ -38,13 +34,15 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import java.util.Arrays;
+import java.util.Collections;
+
+import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.*;
 
 /**
  * @author bartosz.michalik@amartus.com
  */
-public class NrpInitializer {
+public class NrpInitializer implements TopologyManager {
     private static final Logger LOG = LoggerFactory.getLogger(NrpInitializer.class);
     private final DataBroker dataBroker;
 
@@ -123,5 +121,10 @@ public class NrpInitializer {
 
     public void close() {
 
+    }
+
+    @Override
+    public String getSystemTopologyId() {
+        return TapiConstants.PRESTO_SYSTEM_TOPO;
     }
 }

@@ -30,7 +30,7 @@ public class TopologyDataHandlerTest extends AbstractTestWithTopo {
 
     @Before
     public void testSetup() {
-        topologyDataHandler = new TopologyDataHandler(dataBroker);
+        topologyDataHandler = new TopologyDataHandler(dataBroker, topologyManager);
     }
 
     @Test

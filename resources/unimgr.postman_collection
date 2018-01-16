@@ -1,321 +1,306 @@
 {
-	"id": "46c77098-5939-1f56-2e3a-4a3997be95c0",
-	"name": "CableLabs - Unimgr",
-	"description": "",
-	"order": [
-		"dc89d7f7-9c7e-d6c7-3d9b-9e68d72a1ceb",
-		"abe347a4-a35a-5ba6-ec40-863431d0b64d",
-		"d96aaa33-486c-20d9-2c6f-57b876cadbb8",
-		"a91dba5c-e518-c2fa-83f7-24ac35c63f86",
-		"298c2bfa-448c-6fe0-916e-0411fff21843",
-		"eabf5f1b-d081-d13c-0bf8-c438b9726aaf",
-		"c780ad05-96af-c239-d6a6-df12b0f37ea6",
-		"5e449224-8792-762b-75fa-da41bdcee322",
-		"1d7e32ea-677e-8c88-1c41-ca2dae24396d",
-		"6e1f7bca-5c00-418c-8e54-f4bd0c4abd6f",
-		"cb3f77ff-f006-e6dd-eaef-2186e4bb69da",
-		"9af14fa4-0baf-f0d5-2975-7f442bdf1685",
-		"53b95ff4-54a2-2dd7-1045-ba855a9a909c",
-		"79f845a9-45f3-3f07-d924-d9a8b48a213b",
-		"0bfdcc50-3ee5-4bbc-1006-d9a900dac3c9"
-	],
-	"folders": [],
-	"timestamp": 0,
-	"owner": 0,
-	"remoteLink": "",
-	"public": false,
-	"requests": [
+	"variables": [],
+	"info": {
+		"name": "MEF LSO simplified",
+		"_postman_id": "b27154fd-9d18-b9c7-5b8c-1422a15e86c9",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
 		{
-			"id": "0bfdcc50-3ee5-4bbc-1006-d9a900dac3c9",
-			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\n",
-			"url": "http://localhost:8181/restconf/config/network-topology:network-topology/topology/unimgr:evc/link/evc:%2F%2F1/cl-unimgr-mef:egress-bw",
-			"preRequestScript": "",
-			"pathVariables": {},
-			"method": "GET",
-			"data": [],
-			"dataMode": "params",
-			"version": 2,
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1453244942574,
-			"name": "Get EVC egress bw-speed",
-			"description": "",
-			"collectionId": "46c77098-5939-1f56-2e3a-4a3997be95c0",
-			"responses": []
+			"name": "Step 0 Init - add OVSDB Node",
+			"request": {
+				"url": "{{host}}/restconf/config/network-topology:network-topology/topology/ovsdb:1/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4=",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"node\": [\n        {\n            \"node-id\": \"odl\",\n            \"connection-info\": {\n              \"remote-ip\": \"{{mininet_ip_address}}\",\n              \"remote-port\": 6640\n            }\n        }\n    ]\n}"
+				},
+				"description": ""
+			},
+			"response": []
 		},
 		{
-			"id": "1d7e32ea-677e-8c88-1c41-ca2dae24396d",
-			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
-			"url": "http://localhost:8181/restconf/config/network-topology:network-topology/topology/unimgr:uni/node/uni:%2F%2F192.168.2.10",
-			"preRequestScript": "",
-			"pathVariables": {},
-			"method": "DELETE",
-			"data": [],
-			"dataMode": "raw",
-			"version": 2,
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1453243682727,
-			"name": "Delete UNI 2",
-			"description": "",
-			"collectionId": "46c77098-5939-1f56-2e3a-4a3997be95c0",
-			"responses": [],
-			"rawModeData": ""
+			"name": "Step 1 change statistics manager mode - disable",
+			"request": {
+				"url": "{{host}}/restconf/operations/statistics-manager-control:change-statistics-work-mode",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4=",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"input\": {\n    \"mode\": \"FULLY_DISABLED\"\n  }\n}"
+				},
+				"description": ""
+			},
+			"response": []
 		},
 		{
-			"id": "298c2bfa-448c-6fe0-916e-0411fff21843",
-			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\n",
-			"url": "http://localhost:8181/restconf/config/network-topology:network-topology/topology/unimgr:uni/node/uni:%2F%2F192.168.1.30",
-			"preRequestScript": "",
-			"pathVariables": {},
-			"method": "GET",
-			"data": [],
-			"dataMode": "params",
-			"version": 2,
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1446585683690,
-			"name": "Get Specific Config Uni",
-			"description": "",
-			"collectionId": "46c77098-5939-1f56-2e3a-4a3997be95c0",
-			"responses": []
+			"name": "Step 1a - get Tapi Topology - mef:presto-nrp-topology",
+			"request": {
+				"url": "{{host}}/restconf/operational/tapi-common:context/tapi-topology:topology/mef:presto-nrp-topology",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4=",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": ""
+			},
+			"response": []
 		},
 		{
-			"id": "53b95ff4-54a2-2dd7-1045-ba855a9a909c",
-			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\n",
-			"url": "http://localhost:8181/restconf/config/network-topology:network-topology/topology/unimgr:uni/node/uni:%2F%2F192.168.2.11/cl-unimgr-mef:speed",
-			"preRequestScript": "",
-			"pathVariables": {},
-			"method": "GET",
-			"data": [],
-			"dataMode": "params",
-			"version": 2,
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1453244973214,
-			"name": "Get UNI Node  bw-speed",
-			"description": "",
-			"collectionId": "46c77098-5939-1f56-2e3a-4a3997be95c0",
-			"responses": []
+			"name": "Step 2 - create connnectivity service",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"postman.setEnvironmentVariable(\"service_uuid\", jsonData.output.service.uuid);"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{host}}/restconf/operations/tapi-connectivity:create-connectivity-service",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4=",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"input\": {\r\n    \"end-point\": [\r\n      {\r\n        \"service-interface-point\": \"{{sip1_uuid}}\",\r\n        \"direction\": \"BIDIRECTIONAL\",\r\n        \"layer-protocol\": [{\r\n          \"local-id\":\"eth\",\r\n          \"layer-protocol-name\" : \"tapi-common:ETH\"\r\n        }],\r\n        \"nrp-interface:nrp-carrier-eth-connectivity-end-point-resource\": {\r\n          \"ce-vlan-id-list-and-untag\": {\r\n            \"vlan-id\":[\r\n              {\r\n                \"vlan-id\": 301\r\n              }\r\n            ]\r\n          }\r\n        }\r\n      },\r\n      {\r\n        \"service-interface-point\": \"{{sip2_uuid}}\",\r\n        \"direction\": \"BIDIRECTIONAL\",\r\n        \"layer-protocol\": [{\r\n          \"local-id\":\"eth\",\r\n          \"layer-protocol-name\" : \"tapi-common:ETH\"\r\n        }],\r\n        \"nrp-interface:nrp-carrier-eth-connectivity-end-point-resource\": {\r\n          \"ce-vlan-id-list-and-untag\": {\r\n            \"vlan-id\":[\r\n              {\r\n                \"vlan-id\": 301\r\n              }\r\n            ]\r\n          }\r\n        }\r\n      }\r\n    ],\r\n    \"conn-constraint\": {\r\n      \"service-type\": \"POINT_TO_POINT_CONNECTIVITY\",\r\n      \"service-level\": \"BEST_EFFORT\"\r\n    },\r\n    \"nrp-interface:nrp-carrier-eth-connectivity-resource\": {\r\n      \"max-frame-size\": \"2000\"\r\n    }\r\n  }\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
 		},
 		{
-			"id": "5e449224-8792-762b-75fa-da41bdcee322",
-			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
-			"url": "http://localhost:8181/restconf/config/network-topology:network-topology/topology/unimgr:uni/node/uni:%2F%2F192.168.2.11",
-			"preRequestScript": "",
-			"pathVariables": {},
-			"method": "DELETE",
-			"data": [],
-			"dataMode": "raw",
-			"version": 2,
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1453243668536,
-			"name": "Delete UNI 1",
-			"description": "",
-			"collectionId": "46c77098-5939-1f56-2e3a-4a3997be95c0",
-			"responses": [],
-			"rawModeData": ""
+			"name": "Step 3 - get connnectivity service list",
+			"request": {
+				"url": "{{host}}/restconf/operations/tapi-connectivity:get-connectivity-service-list",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4=",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": ""
+			},
+			"response": []
 		},
 		{
-			"id": "6e1f7bca-5c00-418c-8e54-f4bd0c4abd6f",
-			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\n",
-			"url": "http://localhost:8181/restconf/config/network-topology:network-topology/topology/unimgr:evc/link/evc:%2F%2F1/cl-unimgr-mef:ingress-bw",
-			"preRequestScript": "",
-			"pathVariables": {},
-			"method": "PUT",
-			"data": [],
-			"dataMode": "raw",
-			"version": 2,
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1453244573378,
-			"name": "update ingress bw-speed",
-			"description": "",
-			"collectionId": "46c77098-5939-1f56-2e3a-4a3997be95c0",
-			"responses": [],
-			"rawModeData": "{\n    \"ingress-bw\": {\n        \"speed-100M\": {}\n    }\n}"
+			"name": "Step 4 - delete connectivity service",
+			"request": {
+				"url": "{{host}}/restconf/operations/tapi-connectivity:delete-connectivity-service",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4=",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"input\" : {\n    \"service-id-or-name\" : \"{{service_uuid}}\"\n  }\n}"
+				},
+				"description": ""
+			},
+			"response": []
 		},
 		{
-			"id": "79f845a9-45f3-3f07-d924-d9a8b48a213b",
-			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\n",
-			"url": "http://localhost:8181/restconf/config/network-topology:network-topology/topology/unimgr:evc/link/evc:%2F%2F1/cl-unimgr-mef:ingress-bw",
-			"preRequestScript": "",
-			"pathVariables": {},
-			"method": "GET",
-			"data": [],
-			"dataMode": "params",
-			"version": 2,
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1453244872644,
-			"name": "Get EVC ingress bw-speed",
-			"description": "",
-			"collectionId": "46c77098-5939-1f56-2e3a-4a3997be95c0",
-			"responses": []
+			"name": "del OVSDB Node copy",
+			"request": {
+				"url": "{{host}}/restconf/config/network-topology:network-topology/topology/ovsdb%3A1/node/odl",
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4=",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": ""
+			},
+			"response": []
 		},
 		{
-			"id": "9af14fa4-0baf-f0d5-2975-7f442bdf1685",
-			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\n",
-			"url": "http://localhost:8181/restconf/config/network-topology:network-topology/topology/unimgr:uni/node/uni:%2F%2F192.168.2.11/cl-unimgr-mef:speed",
-			"preRequestScript": "",
-			"pathVariables": {},
-			"method": "PUT",
-			"data": [],
-			"dataMode": "raw",
-			"version": 2,
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1453244780757,
-			"name": "update UNI Node  bw-speed",
-			"description": "",
-			"collectionId": "46c77098-5939-1f56-2e3a-4a3997be95c0",
-			"responses": [],
-			"rawModeData": "{\n    \"speed\": {\n        \"speed-10G\": {}\n    }\n}"
+			"name": "Init - get OVSDB Node copy",
+			"request": {
+				"url": "{{host}}/restconf/config/network-topology:network-topology",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4=",
+						"description": ""
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"node\": [\n        {\n            \"node-id\": \"odl\",\n            \"connection-info\": {\n              \"remote-ip\": \"127.0.0.1\",\n              \"remote-port\": 6640\n            }\n        }\n    ]\n}"
+				},
+				"description": ""
+			},
+			"response": []
 		},
 		{
-			"folder": null,
-			"id": "a91dba5c-e518-c2fa-83f7-24ac35c63f86",
-			"name": "Get Config Topology",
-			"dataMode": "params",
-			"data": [],
-			"rawModeData": null,
-			"descriptionFormat": "html",
-			"description": "",
-			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\n",
-			"method": "GET",
-			"pathVariables": {},
-			"url": "http://localhost:8181/restconf/config/network-topology:network-topology",
-			"preRequestScript": "",
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"collectionId": "46c77098-5939-1f56-2e3a-4a3997be95c0"
+			"name": "get topology list RPC",
+			"request": {
+				"url": "{{host}}/restconf/operations/tapi-topology:get-topology-list",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4=",
+						"description": ""
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
 		},
 		{
-			"id": "abe347a4-a35a-5ba6-ec40-863431d0b64d",
-			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
-			"url": "http://localhost:8181/restconf/config/network-topology:network-topology/topology/unimgr:uni/node/uni:%2F%2F192.168.2.10",
-			"preRequestScript": "",
-			"pathVariables": {},
-			"method": "PUT",
-			"data": [],
-			"dataMode": "raw",
-			"version": 2,
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1453243618910,
-			"name": "Create UNI 2",
-			"description": "",
-			"collectionId": "46c77098-5939-1f56-2e3a-4a3997be95c0",
-			"rawModeData": "{\n \"network-topology:node\": [\n       {\n           \"node-id\": \"uni://192.168.2.10\",\n           \"speed\": {\n               \"speed-1G\": 1\n           },\n           \"uni:mac-layer\": \"IEEE 802.3-2005\",\n           \"uni:physical-medium\": \"UNI TypeFull Duplex 2 Physical Interface\",\n           \"uni:mtu-size\": 0,\n           \"uni:type\": \"\",\n           \"uni:mac-address\": \"68:5b:35:bb:f8:3c\",\n           \"uni:ip-address\": \"192.168.2.10\",\n           \"uni:mode\": \"Full Duplex\"\n       }\n   ]\n}"
+			"name": "get topology details RPC",
+			"request": {
+				"url": "{{host}}/restconf/operations/tapi-topology:get-topology-details",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4=",
+						"description": ""
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"input\" : {\n\t\t\"topology-id-or-name\" : \"mef:presto-nrp-topology\"\n\t}\n}"
+				},
+				"description": ""
+			},
+			"response": []
 		},
 		{
-			"id": "c780ad05-96af-c239-d6a6-df12b0f37ea6",
-			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
-			"url": "http://localhost:8181/restconf/config/network-topology:network-topology/topology/unimgr:evc/link/evc:%2F%2F1",
-			"preRequestScript": "",
-			"pathVariables": {},
-			"method": "DELETE",
-			"data": [],
-			"dataMode": "raw",
-			"version": 2,
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1452717219049,
-			"name": "Delete EVC",
-			"description": "",
-			"collectionId": "46c77098-5939-1f56-2e3a-4a3997be95c0",
-			"responses": [],
-			"rawModeData": ""
-		},
-		{
-			"id": "cb3f77ff-f006-e6dd-eaef-2186e4bb69da",
-			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\n",
-			"url": "http://localhost:8181/restconf/config/network-topology:network-topology/topology/unimgr:evc/link/evc:%2F%2F1/cl-unimgr-mef:egress-bw",
-			"preRequestScript": "",
-			"pathVariables": {},
-			"method": "PUT",
-			"data": [],
-			"dataMode": "raw",
-			"version": 2,
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1453244557357,
-			"name": "update egress bw-speed",
-			"description": "",
-			"collectionId": "46c77098-5939-1f56-2e3a-4a3997be95c0",
-			"responses": [],
-			"rawModeData": "{\n    \"egress-bw\": {\n        \"speed-100M\": {}\n    }\n}"
-		},
-		{
-			"folder": null,
-			"id": "d96aaa33-486c-20d9-2c6f-57b876cadbb8",
-			"name": "Get Operational Topology",
-			"dataMode": "params",
-			"data": [],
-			"rawModeData": null,
-			"descriptionFormat": "html",
-			"description": "This restconf request will fetch the operational topology. Operational topology details are fetch by southbound plugin from all the connected ovsdb node.",
-			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\n",
-			"method": "GET",
-			"pathVariables": {},
-			"url": "http://localhost:8181/restconf/operational/network-topology:network-topology/",
-			"preRequestScript": "",
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"collectionId": "46c77098-5939-1f56-2e3a-4a3997be95c0"
-		},
-		{
-			"id": "dc89d7f7-9c7e-d6c7-3d9b-9e68d72a1ceb",
-			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
-			"url": "http://localhost:8181/restconf/config/network-topology:network-topology/topology/unimgr:uni/node/uni:%2F%2F192.168.2.11",
-			"preRequestScript": "",
-			"pathVariables": {},
-			"method": "PUT",
-			"data": [],
-			"dataMode": "raw",
-			"version": 2,
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1453243591567,
-			"name": "Create UNI 1",
-			"description": "",
-			"collectionId": "46c77098-5939-1f56-2e3a-4a3997be95c0",
-			"rawModeData": "{\n \"network-topology:node\": [\n       {\n           \"node-id\": \"uni://192.168.2.11\",\n           \"speed\": {\n               \"speed-1G\": 1\n           },\n           \"uni:mac-layer\": \"IEEE 802.3-2005\",\n           \"uni:physical-medium\": \"UNI TypeFull Duplex 2 Physical Interface\",\n           \"uni:mtu-size\": 0,\n           \"uni:type\": \"\",\n           \"uni:mac-address\": \"68:5b:35:bb:f8:3e\",\n           \"uni:ip-address\": \"192.168.2.11\",\n           \"uni:mode\": \"Full Duplex\"\n       }\n   ]\n}"
-		},
-		{
-			"id": "eabf5f1b-d081-d13c-0bf8-c438b9726aaf",
-			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
-			"url": "http://localhost:8181/restconf/config/network-topology:network-topology/topology/unimgr:evc/link/evc:%2F%2F1",
-			"preRequestScript": "",
-			"pathVariables": {},
-			"method": "PUT",
-			"data": [],
-			"dataMode": "raw",
-			"version": 2,
-			"tests": "",
-			"currentHelper": "normal",
-			"helperAttributes": {},
-			"time": 1453243654861,
-			"name": "Create EVC",
-			"description": "",
-			"collectionId": "46c77098-5939-1f56-2e3a-4a3997be95c0",
-			"responses": [],
-			"rawModeData": "{\n    \"link\": [\n        {\n            \"link-id\": \"evc://1\",\n            \"source\": {\n                \"source-node\": \"/network-topology/topology/node/uni://192.168.2.11\"\n            },\n            \"destination\": {\n                \"dest-node\": \"/network-topology/topology/node/uni://192.168.2.10\"\n            },\n            \"cl-unimgr-mef:uni-source\": [\n                {\n                    \"order\": \"0\",\n                    \"ip-address\": \"192.168.2.11\"\n                }\n            ],\n            \"cl-unimgr-mef:uni-dest\": [\n                {\n                    \"order\": \"0\",\n                    \"ip-address\": \"192.168.2.10\"\n                }\n            ],\n            \"cl-unimgr-mef:cos-id\": \"string\",\n            \"cl-unimgr-mef:ingress-bw\": {\n                \"speed-10G\": {}\n            },\n            \"cl-unimgr-mef:egress-bw\": {\n                \"speed-10G\": {}\n            }\n        }\n    ]\n}"
+			"name": "get node details RPC",
+			"request": {
+				"url": "{{host}}/restconf/operations/tapi-topology:get-node-details",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4=",
+						"description": ""
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"input\" : {\n\t\t\"topology-id-or-name\" : \"mef:presto-nrp-topology\",\n\t\t\"node-id-or-name\" : \"mef:presto-nrp-abstract-node\"\n\t}\n}"
+				},
+				"description": ""
+			},
+			"response": []
 		}
 	]
 }

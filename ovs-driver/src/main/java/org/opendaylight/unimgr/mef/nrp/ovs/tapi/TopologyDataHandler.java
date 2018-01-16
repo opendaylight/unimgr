@@ -26,6 +26,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.unimgr.mef.nrp.api.TopologyManager;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
 import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
@@ -34,8 +35,6 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.*;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.context.attrs.ServiceInterfacePoint;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.context.attrs.ServiceInterfacePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.context.attrs.ServiceInterfacePointKey;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.service._interface.point.LayerProtocolBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.service._interface.point.StateBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.node.OwnedNodeEdgePoint;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.node.OwnedNodeEdgePointBuilder;
@@ -73,11 +72,14 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
     private TopologyTransaction topologyTransaction;
     private DataObjectModificationQualifier dataObjectModificationQualifier;
 
+    private final TopologyManager topologyManager;
+
     private final DataBroker dataBroker;
 
-    public TopologyDataHandler(DataBroker dataBroker) {
+    public TopologyDataHandler(DataBroker dataBroker, TopologyManager topologyManager) {
         Objects.requireNonNull(dataBroker);
         this.dataBroker = dataBroker;
+        this.topologyManager = topologyManager;
         topologyTransaction = new TopologyTransaction(dataBroker);
     }
 
@@ -85,7 +87,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
 
         NrpDao dao = new NrpDao(tx);
-        dao.createSystemNode(OVS_NODE, null);
+        dao.createNode(topologyManager.getSystemTopologyId(), OVS_NODE, ETH.class, null);
 
         Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
             @Override
@@ -272,4 +274,5 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
     public static String getOvsNode() {
         return OVS_NODE;
     }
+
 }

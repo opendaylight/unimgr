@@ -25,6 +25,15 @@ import org.opendaylight.unimgr.mef.nrp.impl.AbstractTestWithTopo;
 import org.opendaylight.unimgr.mef.nrp.impl.ConnectivityServiceIdResourcePool;
 import org.opendaylight.unimgr.mef.nrp.impl.decomposer.BasicDecomposer;
 import org.opendaylight.unimgr.utils.ActivationDriverMocks;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.types.rev171221.PositiveInteger;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev171221.carrier.eth.connectivity.end.point.resource.CeVlanIdListAndUntag;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev171221.carrier.eth.connectivity.end.point.resource.CeVlanIdListAndUntagBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev171221.vlan.id.list.and.untag.VlanIdBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.EndPoint2;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.EndPoint2Builder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.NrpConnectivityServiceEndPointAttrs;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.nrp.connectivity.service.end.point.attrs.NrpCarrierEthConnectivityEndPointResource;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.nrp.connectivity.service.end.point.attrs.NrpCarrierEthConnectivityEndPointResourceBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.PortDirection;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.PortRole;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
@@ -115,6 +124,7 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         verifyZeroInteractions(ad2);
 
         ReadOnlyTransaction tx2 = dataBroker.newReadOnlyTransaction();
+
         Context1 connCtx = tx2.read(LogicalDatastoreType.OPERATIONAL, TapiConnectivityServiceImpl.connectivityCtx).checkedGet().get();
         assertEquals(2, connCtx.getConnection().size());
         connCtx.getConnection().forEach(this::verifyConnection);
@@ -313,11 +323,24 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
     }
 
     private List<EndPoint> eps(String ... uuids) {
+
+        EndPoint2Builder builder = new EndPoint2Builder();
+        EndPoint2 epAugmentation = builder.setNrpCarrierEthConnectivityEndPointResource(new NrpCarrierEthConnectivityEndPointResourceBuilder()
+                .setCeVlanIdListAndUntag(new CeVlanIdListAndUntagBuilder()
+                        .setVlanId(Collections.singletonList(
+                                new VlanIdBuilder().setVlanId(new PositiveInteger(100L)).build()))
+                        .build()
+
+                ).build()
+        ).build();
+
+
         return Arrays.stream(uuids).map(uuid -> new EndPointBuilder()
                 .setLocalId("e:" + uuid)
                 .setRole(PortRole.SYMMETRIC)
                 .setDirection(PortDirection.BIDIRECTIONAL)
                 .setServiceInterfacePoint(new Uuid("sip:" + uuid))
+                .addAugmentation(EndPoint2.class, epAugmentation)
                 .build()).collect(Collectors.toList());
     }
 

@@ -51,9 +51,7 @@ public class TapiConnectivityServiceImpl implements TapiConnectivityService, Aut
     private DataBroker broker;
     private ConnectivityServiceIdResourcePool serviceIdPool;
 
-    private ExecutorService executor = new ThreadPoolExecutor(4, 16,
-            30, TimeUnit.MINUTES,
-            new LinkedBlockingQueue<>());
+    private ExecutorService executor = null;
 
     final static InstanceIdentifier<Context1> connectivityCtx = NrpDao.ctx().augmentation(Context1.class);
 
@@ -64,7 +62,17 @@ public class TapiConnectivityServiceImpl implements TapiConnectivityService, Aut
         Objects.requireNonNull(validator);
         Objects.requireNonNull(broker);
         Objects.requireNonNull(serviceIdPool);
+        if(executor == null) {
+            executor = new ThreadPoolExecutor(4, 16,
+                    30, TimeUnit.MINUTES,
+                    new LinkedBlockingQueue<>());
+        }
         LOG.info("TapiConnectivityService initialized");
+    }
+
+    @Override
+    public void close() throws Exception {
+        executor.shutdown();
     }
 
     @Override
@@ -99,11 +107,6 @@ public class TapiConnectivityServiceImpl implements TapiConnectivityService, Aut
         return executor.submit(new ListConnectivityAction(this));
     }
 
-    @Override
-    public void close() throws Exception {
-        executor.shutdown();
-    }
-
 
     public void setValidator(RequestValidator validator) {
         this.validator = validator;
@@ -122,6 +125,7 @@ public class TapiConnectivityServiceImpl implements TapiConnectivityService, Aut
     }
 
     public void setExecutor(ExecutorService executor) {
+        if(executor != null) throw new IllegalStateException();
         this.executor = executor;
     }
 

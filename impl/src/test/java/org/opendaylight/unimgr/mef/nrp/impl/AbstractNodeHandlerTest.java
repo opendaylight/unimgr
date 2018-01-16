@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
 import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Context;
@@ -201,7 +202,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
 
     private BiConsumer<NrpDao,String> removeNep = (dao, nepId) -> dao.removeNep(testSystemNodeName,nepId,false);
     private BiConsumer<NrpDao,String> removeNode = (dao, nepId) -> dao.removeNode(testSystemNodeName,false);
-    private BiConsumer<NrpDao,String> addNode = (dao, nepId) -> dao.createSystemNode(testSystemNodeName,createTestOwnedNodeEdgePointList());
+    private BiConsumer<NrpDao,String> addNode = (dao, nepId) -> dao.createNode(TapiConstants.PRESTO_SYSTEM_TOPO, testSystemNodeName, ETH.class,createTestOwnedNodeEdgePointList());
     private BiConsumer<NrpDao,OwnedNodeEdgePoint> update = (dao, nep) -> dao.updateNep(testSystemNodeName,nep);
 
     private <T extends Object> CheckedFuture<Void, TransactionCommitFailedException> performNrpDaoAction(BiConsumer<NrpDao,T> action, T attr) {
