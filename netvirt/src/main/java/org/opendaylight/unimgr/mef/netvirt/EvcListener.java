@@ -19,20 +19,18 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.EvcElan;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.EvcElanBuilder;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.MefService;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.Evc;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.ElanPorts;
+import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.ElanPortsBuilder;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.Uni;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.UniKey;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.uni.EvcUniCeVlans;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.unis.uni.evc.uni.ce.vlans.EvcUniCeVlan;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.EvcElan;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.EvcElanBuilder;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.ElanPorts;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.services.rev150526.mef.services.mef.service.mef.service.choice.evc.choice.evc.ElanPortsBuilder;
-
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcType;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.EvcUniRoleType;
-import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.Identifier45;
 import org.opendaylight.yang.gen.v1.http.metroethernetforum.org.ns.yang.mef.types.rev150526.RetailSvcIdType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.elan.etree.rev160614.EtreeInterface.EtreeInterfaceType;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -42,7 +40,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
-import jline.internal.Log;
 
 public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IUniAwareService {
 
@@ -112,7 +109,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
             InstanceIdentifier<Evc> evcId = MefServicesUtils.getEvcInstanceIdentifier(evcSerId);
             Evc evc = MefServicesUtils.getEvc(dataBroker, evcId);
             if (evc == null) {
-                Log.error("Inconsistent data for svcId {}", evcSerId);
+                LOG.error("Inconsistent data for svcId {}", evcSerId);
                 continue;
             }
 
@@ -124,7 +121,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
             unis = unis != null ? unis : Collections.emptyList();
             for (Uni uni : unis) {
                 if (uni.getUniId().getValue().equals(uniId)) {
-                    Log.info("Connecting Uni {} to svc id {}", uniId, evcSerId);
+                    LOG.info("Connecting Uni {} to svc id {}", uniId, evcSerId);
                     toConnect.add(uni);
                     break;
                 }
@@ -156,7 +153,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
             InstanceIdentifier<Evc> evcId = MefServicesUtils.getEvcInstanceIdentifier(evcSerId);
             Evc evc = MefServicesUtils.getEvc(dataBroker, evcId);
             if (evc == null) {
-                Log.error("Inconsistent data for svcId {}", evcSerId);
+                LOG.error("Inconsistent data for svcId {}", evcSerId);
                 continue;
             }
 
@@ -166,7 +163,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
             unis = unis != null ? unis : Collections.emptyList();
             for (Uni uni : unis) {
                 if (uni.getUniId().getValue().equals(uniId)) {
-                    Log.info("Disconnecting Uni {} from svc id {}", uniId, evcSerId);
+                    LOG.info("Disconnecting Uni {} from svc id {}", uniId, evcSerId);
                     toDisconnect.add(uni);
                     break;
                 }
@@ -306,7 +303,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
             if (interfaceName == null) {
                 String errorMessage = String.format("Uni %s Interface for vlan %d is not operational ", uni.getUniId(),
                         0);
-                Log.error(errorMessage);
+                LOG.error(errorMessage);
                 throw new UnsupportedOperationException(errorMessage);
             }
             if (isOperEvcElanPort(evcId, interfaceName)) {
@@ -332,7 +329,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
                 if (interfaceName == null) {
                     String errorMessage = String.format("Uni %s Interface for vlan %d is not operational ",
                             uni.getUniId(), 0);
-                    Log.error(errorMessage);
+                    LOG.error(errorMessage);
                     throw new UnsupportedOperationException(errorMessage);
                 }
                 if (isOperEvcElanPort(evcId, interfaceName)) {
@@ -467,7 +464,7 @@ public class EvcListener extends UnimgrDataTreeChangeListener<Evc> implements IU
             evcElanBuilder = new EvcElanBuilder(evcElan);
             exPorts = evcElan.getElanPorts() != null ? evcElan.getElanPorts() : Collections.emptyList();
         } else {
-            Log.error("Deleting non-operational Elan port {}", elanPort);
+            LOG.error("Deleting non-operational Elan port {}", elanPort);
             return;
         }
         List<ElanPorts> newList = exPorts.stream().filter(p -> !p.getPortId().equals(elanPort))
