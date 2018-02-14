@@ -13,7 +13,7 @@
   </parent>
   <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>odl-unimgr-template-driver</artifactId>
-  <version>0.3.2-SNAPSHOT</version>
+  <version>0.3.2</version>
   <packaging>feature</packaging>
 
   <name>ODL :: unimgr :: ${project.artifactId}</name>
