@@ -25,7 +25,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 
   <properties>
     <ovsdb.version>1.6.0-SNAPSHOT</ovsdb.version>
-    <vpnservice.version>0.6.0-SNAPSHOT</vpnservice.version>
+    <netvirt.version>0.6.0-SNAPSHOT</netvirt.version>
   </properties>
 
   <dependencies>
