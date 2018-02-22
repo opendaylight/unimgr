@@ -14,12 +14,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
@@ -106,6 +109,8 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 if (txResult.isSuccessful()) {
                     LOG.info("ConnectivityService construct activated successfully, request = {} ", input);
 
+                    // XXX [bm] when createConnectivityModel methods throws an exception we have desync
+                    // (devices are configured but no data stored in MD-SAL. How should we address that?
                     ConnectivityService service = createConnectivityModel(uniqueStamp);
                     CreateConnectivityServiceOutput result = new CreateConnectivityServiceOutputBuilder()
                             .setService(new ServiceBuilder(service).build()).build();
@@ -153,7 +158,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         return "cs:" + uniqueStamp;
     }
 
-    private ConnectivityService createConnectivityModel(String uniqueStamp) {
+    private ConnectivityService createConnectivityModel(String uniqueStamp) throws TransactionCommitFailedException, TimeoutException {
         assert decomposedRequest != null : "this method can be only run after request was successfuly decomposed";
         //sort of unique ;)
 
@@ -206,18 +211,18 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         tx.put(LogicalDatastoreType.OPERATIONAL, TapiConnectivityServiceImpl.connectivityCtx.child(Connection.class, new ConnectionKey(globalConnection.getUuid())), globalConnection);
 
         LOG.debug("Storing connectivity related model for {} to operational data store", uniqueStamp);
-        Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
-            @Override
-            public void onSuccess(@Nullable Void result) {
-                LOG.info("Success with serializing Connections and Connectivity Service for {}", uniqueStamp);
-            }
 
-            @Override
-            public void onFailure(Throwable t) {
-                LOG.error("Error with serializing Connections and Connectivity Service for " + uniqueStamp, t);
-            }
-        });
 
+        try {
+            tx.submit().checkedGet(500, TimeUnit.MILLISECONDS);
+            LOG.info("Success with serializing Connections and Connectivity Service for {}", uniqueStamp);
+        } catch (TimeoutException e) {
+            LOG.error("Error with commiting Connections and Connectivity Service for {} within {} ms", uniqueStamp, 500);
+            throw e;
+        } catch (TransactionCommitFailedException e) {
+            LOG.error("Error with commiting Connections and Connectivity Service for " + uniqueStamp, e);
+            throw e;
+        }
 
         return new ConnectivityServiceBuilder(cs).build();
     }
