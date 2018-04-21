@@ -8,35 +8,35 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>single-feature-parent</artifactId>
-    <version>1.8.4-SNAPSHOT</version>
+    <version>1.8.4-Carbon</version>
     <relativePath />
   </parent>
   <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>odl-unimgr-cisco-xr-driver</artifactId>
-  <version>0.2.4-SNAPSHOT</version>
+  <version>0.2.4-Carbon</version>
   <packaging>feature</packaging>
 
   <name>ODL :: unimgr :: ${project.artifactId}</name>
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <mdsal.version>1.5.4-SNAPSHOT</mdsal.version>
-    <controller.mdsal.version>1.5.4-SNAPSHOT</controller.mdsal.version>
-    <restconf.version>1.5.4-SNAPSHOT</restconf.version>
-    <yangtools.version>1.1.4-SNAPSHOT</yangtools.version>
-    <dlux.version>0.5.4-SNAPSHOT</dlux.version>
-    <dluxapps.version>0.5.4-SNAPSHOT</dluxapps.version>
-    <ovsdb.version>1.4.4-SNAPSHOT</ovsdb.version>
-    <netvirt.version>1.4.4-SNAPSHOT</netvirt.version>
-    <vpnservice.version>0.4.4-SNAPSHOT</vpnservice.version>
-    <mdsal.model.version>0.10.4-SNAPSHOT</mdsal.model.version>
-    <netconf.version>1.2.4-SNAPSHOT</netconf.version>
-    <genius.version>0.2.4-SNAPSHOT</genius.version>
-    <l2switch.version>0.5.4-SNAPSHOT</l2switch.version>
+    <mdsal.version>1.5.4-Carbon</mdsal.version>
+    <controller.mdsal.version>1.5.4-Carbon</controller.mdsal.version>
+    <restconf.version>1.5.4-Carbon</restconf.version>
+    <yangtools.version>1.1.4-Carbon</yangtools.version>
+    <dlux.version>0.5.4-Carbon</dlux.version>
+    <dluxapps.version>0.5.4-Carbon</dluxapps.version>
+    <ovsdb.version>1.4.4-Carbon</ovsdb.version>
+    <netvirt.version>1.4.4-Carbon</netvirt.version>
+    <vpnservice.version>0.4.4-Carbon</vpnservice.version>
+    <mdsal.model.version>0.10.4-Carbon</mdsal.model.version>
+    <netconf.version>1.2.4-Carbon</netconf.version>
+    <genius.version>0.2.4-Carbon</genius.version>
+    <l2switch.version>0.5.4-Carbon</l2switch.version>
     <configfile.directory>etc/opendaylight/karaf</configfile.directory>
-    <openflowplugin.version>0.4.4-SNAPSHOT</openflowplugin.version>
-    <openflowjava.version>0.9.4-SNAPSHOT</openflowjava.version>
-    <ovsdb.version>1.4.4-SNAPSHOT</ovsdb.version>
+    <openflowplugin.version>0.4.4-Carbon</openflowplugin.version>
+    <openflowjava.version>0.9.4-Carbon</openflowjava.version>
+    <ovsdb.version>1.4.4-Carbon</ovsdb.version>
   </properties>
 
   <dependencies>
