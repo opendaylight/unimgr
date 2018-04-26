@@ -6,20 +6,20 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-parent</artifactId>
-        <version>0.6.4-SNAPSHOT</version>
+        <version>0.6.5-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
     <properties>
         <checkstyle.skip>true</checkstyle.skip>
         <powermock.version>1.6.4</powermock.version>
-        <openflow.version>0.4.4-SNAPSHOT</openflow.version>
+        <openflow.version>0.4.5-SNAPSHOT</openflow.version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.opendaylight.unimgr</groupId>
     <artifactId>ovs-driver</artifactId>
-    <version>0.2.4-SNAPSHOT</version>
+    <version>0.2.5-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <!-- <name> formatting is used by autorelease to parse and notify projects on
          build failure. Please do not modify this unless you have a good reason. -->
