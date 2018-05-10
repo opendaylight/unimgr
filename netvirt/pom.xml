@@ -10,19 +10,19 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-parent</artifactId>
-    <version>0.7.3-SNAPSHOT</version>
+    <version>0.7.4-SNAPSHOT</version>
     <relativePath />
   </parent>
 
   <properties>
-    <genius.version>0.3.3-SNAPSHOT</genius.version>
-    <vpnservices.version>0.5.3-SNAPSHOT</vpnservices.version>
+    <genius.version>0.3.4-SNAPSHOT</genius.version>
+    <vpnservices.version>0.5.4-SNAPSHOT</vpnservices.version>
   </properties>
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>unimgr-netvirt</artifactId>
-  <version>0.3.3-SNAPSHOT</version>
+  <version>0.3.4-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <!-- <name> formatting is used by autorelease to parse and notify projects on
        build failure. Please do not modify this unless you have a good reason. -->

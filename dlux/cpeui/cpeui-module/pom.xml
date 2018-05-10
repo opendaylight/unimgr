@@ -4,7 +4,7 @@
     <parent>
         <artifactId>cpeui</artifactId>
         <groupId>org.opendaylight.unimgr</groupId>
-        <version>0.3.3-SNAPSHOT</version>
+        <version>0.3.4-SNAPSHOT</version>
     </parent>
     <artifactId>cpeui-module</artifactId>
     <packaging>jar</packaging>
