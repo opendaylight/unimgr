@@ -19,13 +19,16 @@ import java.util.function.BiFunction;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
+import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
+import org.opendaylight.unimgr.mef.nrp.api.TopologyManager;
 import org.opendaylight.unimgr.mef.nrp.ovs.FlowTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.OvsdbTopologyTestUtils;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.context.attrs.ServiceInterfacePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.tapi.context.ServiceInterfacePoint;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
 
 /**
@@ -49,6 +52,8 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
         //given
         dataBroker = getDataBroker();
         helper = new TopologyDataHandlerTestUtils(dataBroker);
+        TopologyManager topologyManager = Mockito.mock(TopologyManager.class);
+        Mockito.when(topologyManager.getSystemTopologyId()).thenReturn(TapiConstants.PRESTO_SYSTEM_TOPO);
 
         //helper.createOvsdbTopology();
         OvsdbTopologyTestUtils.createOvsdbTopology(dataBroker);
@@ -56,7 +61,7 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
         FlowTopologyTestUtils.createFlowTopology(dataBroker,getLinkList());
         helper.createPrestoSystemTopology();
 
-        topologyDataHandler = new TopologyDataHandler(dataBroker);
+        topologyDataHandler = new TopologyDataHandler(dataBroker, topologyManager);
         topologyDataHandler.init();
     }
 
@@ -127,8 +132,10 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
 
     private BiFunction<Node, String, Boolean> checkNep = (node,nepName) ->
             node.getOwnedNodeEdgePoint().stream()
-                    .anyMatch(ownedNep -> ownedNep.getMappedServiceInterfacePoint().contains(new Uuid(sip_prefix + ovs_nep_prefix + nepName))
-                                && ownedNep.getUuid().getValue().equals(ovs_nep_prefix + nepName)
+                    .filter(ownedNep -> ownedNep.getUuid().getValue().equals(ovs_nep_prefix + nepName))
+                    .flatMap(ownedNep -> ownedNep.getMappedServiceInterfacePoint().stream())
+                    .anyMatch(sipRef ->
+                        sipRef.getServiceInterfacePointId().equals(new Uuid(sip_prefix + ovs_nep_prefix + nepName))
                     );
 
     private void checkNeps(Node node,String ... neps) {

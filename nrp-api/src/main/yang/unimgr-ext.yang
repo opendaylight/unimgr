@@ -11,6 +11,15 @@ module unimgr-ext {
     import nrp-interface {
         prefix nrp-interface;
     }
+    import mef-common-types {
+        prefix mef-common-types;
+    }
+    import yang-ext {
+        prefix "ext";
+    }
+    revision 2017-05-31 {
+        description "Unimgr SIP extensions";
+    }
 
 
     rpc add-sip {
@@ -28,18 +37,38 @@ module unimgr-ext {
             }
             choice sip-type {
                 container uni-spec {
-                    uses nrp-interface:nrp-carrier-eth-uni-n-resource-attrs;
+                    uses nrp-interface:nrp-carrier-eth-uni-n-resource;
                     description "none";
                 }
                 container inni-spec {
-                    uses nrp-interface:nrp-carrier-eth-inni-n-resource-attrs;
+                    uses nrp-interface:nrp-carrier-eth-inni-n-resource;
                     description "none";
                 }
                 container enni-spec {
-                    uses nrp-interface:nrp-carrier-eth-enni-n-resource-attrs;
+                    uses nrp-interface:nrp-carrier-eth-enni-n-resource;
                     description "none";
                 }
             }
         }
+    }
+
+    augment "/tapi-common:context/tapi-topology:topology/tapi-topology:node" {
+        leaf activation-driver-id {
+            type string;
+        }
+        ext:augment-identifier "node-adi-augmentation";
+    }
+
+    augment "/tapi-common:context/tapi-topology:topology/tapi-topology:node" {
+        list service-vlan-map {
+            key "service-id";
+            leaf service-id {
+                type string;
+            }
+            leaf vlan-id {
+                type mef-common-types:positive-integer;
+            }
+        }
+        ext:augment-identifier "node-svm-augmentation";
     }
 }

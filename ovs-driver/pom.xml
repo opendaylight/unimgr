@@ -6,20 +6,22 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-parent</artifactId>
-        <version>0.7.4-SNAPSHOT</version>
+        <version>0.7.3</version>
         <relativePath/>
     </parent>
 
     <properties>
         <checkstyle.skip>true</checkstyle.skip>
         <powermock.version>1.6.4</powermock.version>
-        <openflow.version>0.5.4-SNAPSHOT</openflow.version>
+        <openflow.version>0.5.3</openflow.version>
+        <ovsdb.version>1.5.3</ovsdb.version>
+        <controller.version>0.13.3</controller.version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.opendaylight.unimgr</groupId>
     <artifactId>ovs-driver</artifactId>
-    <version>0.3.4-SNAPSHOT</version>
+    <version>0.3.3-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <!-- <name> formatting is used by autorelease to parse and notify projects on
          build failure. Please do not modify this unless you have a good reason. -->
@@ -38,12 +40,30 @@
         </plugins>
     </build>
 
+    <dependencyManagement>
+      <dependencies>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>mdsal-artifacts</artifactId>
+          <version>1.6.0</version>
+          <type>pom</type>
+          <scope>import</scope>
+        </dependency>
+      </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>unimgr-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+	<dependency>
+		<groupId>org.opendaylight.ovsdb</groupId>
+		<artifactId>utils.mdsal-utils</artifactId>
+		<version>${ovsdb.version}</version>
+	</dependency>
 
         <!-- Testing Dependencies -->
         <dependency>
@@ -108,6 +128,11 @@
             <groupId>org.opendaylight.openflowplugin.model</groupId>
             <artifactId>model-flow-statistics</artifactId>
             <version>${openflow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>liblldp</artifactId>
+            <version>${controller.version}</version>
         </dependency>
     </dependencies>
 </project>

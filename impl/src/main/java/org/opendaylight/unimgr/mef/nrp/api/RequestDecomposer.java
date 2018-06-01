@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Request decomposer is responsible for decomposition of ConnectivityService
  * requests into one or many driver requests.
- * @see org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.ConnectivityService
+ * @see org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.ConnectivityService
  * @author bartosz.michalik@amartus.com
  */
 public interface RequestDecomposer {
@@ -22,6 +22,7 @@ public interface RequestDecomposer {
      * @param endpoints list of connectiviy request endpoints
      * @param constraint on decoposition
      * @return list of subrequests - one per driver
+     * @throws FailureResult on decomposition problem
      */
     List<Subrequrest> decompose(List<EndPoint> endpoints, Constraints constraint) throws FailureResult;
 }

@@ -3,7 +3,10 @@ module mef-global {
   prefix mef-global;
   import ietf-yang-types { prefix yang; }
   import ietf-inet-types { prefix inet; }
-  import mef-types { prefix mef-types; }
+  import mef-types {
+    prefix mef-types;
+    revision-date 2015-05-26;
+  }
   organization "Metro Ethernet Forum";
   contact
     "Web URL: http://metroethernetforum.org/ E-mail: mibs@metroethernetforum.org

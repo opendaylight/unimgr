@@ -14,11 +14,11 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.InterfaceHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.L2vpnHelper;
-import org.opendaylight.unimgr.mef.nrp.common.MountPointHelper;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.MountPointHelper;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceActivator;
-import org.opendaylight.unimgr.mef.nrp.common.ServicePort;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.asr9k.policymgr.cfg.rev150518.PolicyManager;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceActive;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
@@ -34,11 +34,15 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.P2pXconnectKey;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.Pseudowires;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.CiscoIosXrString;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.nrp.connectivity.service.end.point.attrs.NrpCarrierEthConnectivityEndPointResource;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+
+import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort.toServicePort;
+
 
 /**
  * Abstarct activator of VPLS-based L2 VPN on IOS-XR devices. It is responsible for handling activation and deactivation
@@ -69,9 +73,15 @@ public abstract class AbstractL2vpnActivator implements ResourceActivator {
         ServicePort neighbor = null;
         for (EndPoint endPoint: endPoints) {
             if (port==null) {
-                port = ServicePort.toServicePort(endPoint, NETCONF_TOPOLODY_NAME);
+                port = toServicePort(endPoint, NETCONF_TOPOLODY_NAME);
+                NrpCarrierEthConnectivityEndPointResource attrs = endPoint.getAttrs() == null ? null : endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource();
+                if(attrs != null) {
+                    port.setEgressBwpFlow(attrs.getEgressBwpFlow());
+                    port.setIngressBwpFlow(attrs.getIngressBwpFlow());
+
+                }
             } else {
-                neighbor = ServicePort.toServicePort(endPoint, NETCONF_TOPOLODY_NAME);
+                neighbor = toServicePort(endPoint, NETCONF_TOPOLODY_NAME);
             }
         }
 
@@ -88,7 +98,7 @@ public abstract class AbstractL2vpnActivator implements ResourceActivator {
     public void deactivate(List<EndPoint> endPoints, String serviceId) throws TransactionCommitFailedException {
         String innerName = getInnerName(serviceId);
         String outerName = getOuterName(serviceId);
-        ServicePort port = ServicePort.toServicePort(endPoints.stream().findFirst().get(), NETCONF_TOPOLODY_NAME);
+        ServicePort port = toServicePort(endPoints.stream().findFirst().get(), NETCONF_TOPOLODY_NAME);
 
         InstanceIdentifier<P2pXconnect> xconnectId = deactivateXConnect(outerName, innerName);
         InstanceIdentifier<InterfaceConfiguration> interfaceConfigurationId = deactivateInterface(port);

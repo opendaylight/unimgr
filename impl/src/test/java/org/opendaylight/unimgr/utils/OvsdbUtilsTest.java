@@ -139,7 +139,7 @@ public class OvsdbUtilsTest {
     }
 
     /*
-     *  This test for 2 functions with the
+     *  This testAddCeps for 2 functions with the
      *  same name that take different parameters.
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -278,7 +278,7 @@ public class OvsdbUtilsTest {
     }
 
     /*
-     *  This test for 2 functions with the
+     *  This testAddCeps for 2 functions with the
      *  same name that take different parameters.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -370,7 +370,7 @@ public class OvsdbUtilsTest {
     }
 
     /*
-     *  This test for 2 functions with the
+     *  This testAddCeps for 2 functions with the
      *  same name that take different parameters.
      */
     @SuppressWarnings("unchecked")

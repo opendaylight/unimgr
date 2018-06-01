@@ -9,6 +9,7 @@ package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.BandwidthProfileHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.InterfaceHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.LoopbackUtils;
@@ -17,8 +18,7 @@ import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.AttachmentCircuitHe
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.L2vpnHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.PseudowireHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.XConnectHelper;
-import org.opendaylight.unimgr.mef.nrp.common.FixedServiceNaming;
-import org.opendaylight.unimgr.mef.nrp.common.ServicePort;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.FixedServiceNaming;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.asr9k.policymgr.cfg.rev150518.PolicyManager;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.Mtus;
@@ -52,7 +52,7 @@ public class L2vpnP2pConnectActivator extends AbstractL2vpnActivator {
 
     @Override
     protected Optional<PolicyManager> activateQos(String name, ServicePort port) {
-        return new BandwidthProfileHelper(dataBroker, port)
+        return new BandwidthProfileHelper(port)
                 .addPolicyMap(name, INGRESS, UNI)
                 .addPolicyMap(name, EGRESS, UNI)
                 .build();

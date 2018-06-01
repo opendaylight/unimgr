@@ -18,7 +18,8 @@ import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.impl.AbstractTestWithTopo;
 import org.opendaylight.unimgr.mef.nrp.template.TemplateConstants;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.context.Topology;
+import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.NodeAdiAugmentation;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.context.Topology;
 
 /**
  * A simple integration test to look at the handler
@@ -30,7 +31,7 @@ public class TopologyDataHandlerTest extends AbstractTestWithTopo {
 
     @Before
     public void testSetup() {
-        topologyDataHandler = new TopologyDataHandler(dataBroker);
+        topologyDataHandler = new TopologyDataHandler(dataBroker, topologyManager);
     }
 
     @Test
@@ -42,7 +43,7 @@ public class TopologyDataHandlerTest extends AbstractTestWithTopo {
         ReadOnlyTransaction tx = dataBroker.newReadOnlyTransaction();
         Topology t = new NrpDao(tx).getTopology(TapiConstants.PRESTO_SYSTEM_TOPO);
         assertNotNull(t.getNode());
-        assertTrue(t.getNode().stream().anyMatch(n -> n.getUuid().getValue().equals(TemplateConstants.DRIVER_ID)));
+        assertTrue(t.getNode().stream().allMatch(n -> n.getAugmentation(NodeAdiAugmentation.class).getActivationDriverId().equals(TemplateConstants.DRIVER_ID)));
 
     }
 

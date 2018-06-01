@@ -12,13 +12,13 @@ import java.util.concurrent.Callable;
 
 import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.GetConnectionDetailsInput;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.GetConnectionDetailsOutput;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.GetConnectionDetailsOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.Connection;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.connectivity.context.ConnectivityService;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.get.connection.details.output.ConnectionBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.GetConnectionDetailsInput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.GetConnectionDetailsOutput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.GetConnectionDetailsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.Connection;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.ConnectivityService;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.get.connection.details.output.ConnectionBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -28,13 +28,13 @@ public class GetConnectionDetailsAction implements Callable<RpcResult<GetConnect
     private final TapiConnectivityServiceImpl service;
     private final GetConnectionDetailsInput input;
 
-    public GetConnectionDetailsAction(TapiConnectivityServiceImpl service, GetConnectionDetailsInput input) {
+    GetConnectionDetailsAction(TapiConnectivityServiceImpl service, GetConnectionDetailsInput input) {
         this.service = service;
         this.input = input;
     }
 
     @Override
-    public RpcResult<GetConnectionDetailsOutput> call() throws Exception {
+    public RpcResult<GetConnectionDetailsOutput> call() {
 
         try {
             NrpDao nrpDao = new NrpDao(service.getBroker().newReadOnlyTransaction());

@@ -3,9 +3,18 @@ module mef-services {
   prefix mef-services;
   import ietf-yang-types { prefix yang; }
   import ietf-inet-types { prefix inet; }
-  import mef-types { prefix mef-types; }
-  import mef-global { prefix mef-global; }
-  import mef-interfaces { prefix mef-interfaces; }
+  import mef-types {
+    prefix mef-types;
+    revision-date 2015-05-26;
+  }
+  import mef-global {
+    prefix mef-global;
+    revision-date 2015-05-26;
+   }
+  import mef-interfaces {
+    prefix mef-interfaces;
+    revision-date 2015-05-26;
+   }
   import yang-ext {prefix ext; revision-date "2013-07-09";}
 
   organization "Metro Ethernet Forum";

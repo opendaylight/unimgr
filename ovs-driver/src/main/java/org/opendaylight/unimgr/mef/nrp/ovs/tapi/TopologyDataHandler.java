@@ -7,18 +7,15 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs.tapi;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
@@ -26,20 +23,19 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.unimgr.mef.nrp.api.TopologyManager;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
+import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.transaction.TopologyTransaction;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.LifecycleState;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.TerminationDirection;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.context.attrs.ServiceInterfacePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.context.attrs.ServiceInterfacePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.context.attrs.ServiceInterfacePointKey;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.service._interface.point.StateBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePointBuilder;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePointKey;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.*;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.tapi.context.ServiceInterfacePoint;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.tapi.context.ServiceInterfacePointBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.node.OwnedNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.node.OwnedNodeEdgePointBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.node.OwnedNodeEdgePointKey;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.node.edge.point.MappedServiceInterfacePoint;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeInternal;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -65,6 +61,7 @@ import com.google.common.util.concurrent.Futures;
 public class TopologyDataHandler implements DataTreeChangeListener<Node> {
     private static final Logger LOG = LoggerFactory.getLogger(TopologyDataHandler.class);
     private static final String OVS_NODE = "ovs-node";
+    private static final String OVS_DRIVER_ID = "ovs-driver";
     private static final String DELIMETER = ":";
     private static final InstanceIdentifier<Topology> OVSDB_TOPO_IID = InstanceIdentifier
             .create(NetworkTopology.class)
@@ -73,37 +70,57 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
     private TopologyTransaction topologyTransaction;
     private DataObjectModificationQualifier dataObjectModificationQualifier;
 
-    private final DataBroker dataBroker;
+    private final TopologyManager topologyManager;
 
-    public TopologyDataHandler(DataBroker dataBroker) {
+    private final DataBroker dataBroker;
+    private final int MAX_RETRIALS = 5;
+
+    public TopologyDataHandler(DataBroker dataBroker, TopologyManager topologyManager) {
         Objects.requireNonNull(dataBroker);
         this.dataBroker = dataBroker;
+        this.topologyManager = topologyManager;
         topologyTransaction = new TopologyTransaction(dataBroker);
     }
 
     public void init() {
+        initializeWithRetrial(MAX_RETRIALS);
+    }
+
+    private void initializeWithRetrial(int retrialCouter) {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
 
         NrpDao dao = new NrpDao(tx);
-        dao.createSystemNode(OVS_NODE, null);
+
+        dao.createNode(topologyManager.getSystemTopologyId(), OVS_NODE, OVS_DRIVER_ID, LayerProtocolName.ETH, null, new ArrayList<>());
 
         Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
             @Override
             public void onSuccess(@Nullable Void result) {
                 LOG.info("Node {} created", OVS_NODE);
+                registerOvsdbTreeListener();
             }
 
             @Override
             public void onFailure(Throwable t) {
-                LOG.error("No node created due to the error", t);
-            }
-        });
+                if(retrialCouter != 0) {
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(100);
+                    } catch (InterruptedException e) { }
+                    if(retrialCouter != MAX_RETRIALS) {
+                        LOG.debug("Retrying initialization of {} for {} time", OVS_NODE, MAX_RETRIALS - retrialCouter + 1);
+                    }
+                    initializeWithRetrial(retrialCouter - 1);
+                } else {
+                    LOG.error("No node created due to the error", t);
+                }
 
-        dataObjectModificationQualifier = new DataObjectModificationQualifier(dataBroker);
-        registerOvsdbTreeListener();
+            }
+        }, MoreExecutors.directExecutor());
     }
 
+
     private void registerOvsdbTreeListener() {
+        dataObjectModificationQualifier = new DataObjectModificationQualifier(dataBroker);
         InstanceIdentifier<Node> nodeId = OVSDB_TOPO_IID.child(Node.class);
         registration = dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, nodeId), this);
     }
@@ -124,7 +141,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
             public void onFailure(Throwable t) {
                 LOG.error("No node deleted due to the error", t);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         if (registration != null) {
             LOG.info("closing netconf tree listener");
@@ -214,7 +231,10 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         return new OwnedNodeEdgePointBuilder()
                 .setUuid(uuid)
                 .setKey(new OwnedNodeEdgePointKey(uuid))
-                .setMappedServiceInterfacePoint(Collections.singletonList(sipUuid))
+                .setLinkPortDirection(PortDirection.BIDIRECTIONAL)
+                .setLinkPortRole(PortRole.SYMMETRIC)
+                .setLayerProtocolName(LayerProtocolName.ETH)
+                .setMappedServiceInterfacePoint(Collections.singletonList(TapiUtils.toSipRef(sipUuid, MappedServiceInterfacePoint.class)))
                 .build();
     }
 
@@ -222,9 +242,9 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         Uuid uuid = new Uuid( "sip" + DELIMETER + nep);
         return new ServiceInterfacePointBuilder()
                 .setUuid(uuid)
-                .setKey(new ServiceInterfacePointKey(uuid))
-                .setState(new StateBuilder().setLifecycleState(LifecycleState.Installed).build())
-// TODO donaldh .setDirection(TerminationDirection.Bidirectional)
+//                .setKey(new ServiceInterfacePointKey(uuid))
+                .setLayerProtocolName(Collections.singletonList(LayerProtocolName.ETH))
+                .setLifecycleState(LifecycleState.INSTALLED)
                 .build();
     }
 
@@ -266,7 +286,8 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         return false;
     }
 
-    public static String getOvsNode() {
-        return OVS_NODE;
+    public static String getDriverId() {
+        return OVS_DRIVER_ID;
     }
+
 }

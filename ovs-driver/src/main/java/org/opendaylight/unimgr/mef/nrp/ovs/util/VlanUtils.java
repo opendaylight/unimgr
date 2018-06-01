@@ -8,23 +8,28 @@
 package org.opendaylight.unimgr.mef.nrp.ovs.util;
 
 import com.google.common.collect.Sets;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
 import org.opendaylight.unimgr.mef.nrp.ovs.exception.VlanPoolExhaustedException;
-import org.opendaylight.unimgr.utils.NullAwareDatastoreGetter;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.field._case.SetField;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActions;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatch;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.types.rev180321.PositiveInteger;
+import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.NodeSvmAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.context.topology.node.ServiceVlanMapBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.NodeSvmAugmentation;
+import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.context.topology.node.ServiceVlanMap;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.NodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -35,93 +40,64 @@ import java.util.stream.IntStream;
  * @author marek.ryznar@amartus.com
  */
 public class VlanUtils {
-    private Set<Integer> usedVlans = new HashSet<>();
+
+    private final Set<Integer> usedVlans = new HashSet<>();
+    private Node node;
+    private final DataBroker dataBroker;
 
     private final static Set<Integer> possibleVlans = IntStream.range(1, 4094).boxed().collect(Collectors.toSet());
     private final static String VLAN_POOL_EXHAUSTED_ERROR_MESSAGE = "All VLAN IDs are in use. VLAN pool exhausted.";
 
     private final static Logger LOG = LoggerFactory.getLogger(VlanUtils.class);
 
-    public VlanUtils(List<NullAwareDatastoreGetter<Node>> nodes) throws ResourceNotAvailableException {
-        getAllVlanIDs(nodes);
+
+    public VlanUtils(DataBroker dataBroker, String nodeId ) throws ResourceNotAvailableException {
+        this.dataBroker = dataBroker;
+        try {
+            node = new NrpDao(dataBroker.newReadOnlyTransaction()).getNode(new Uuid(nodeId));
+            if (node == null) throw new ResourceNotAvailableException(MessageFormat.format("Node {} not found", nodeId));
+        } catch (ReadFailedException e) {
+            LOG.warn("Node {} not found", nodeId);
+            throw new ResourceNotAvailableException(MessageFormat.format("Node {} not found", nodeId));
+        }
+
+        node.getAugmentation(NodeSvmAugmentation.class).getServiceVlanMap().forEach(serviceVlanMap -> usedVlans.add(serviceVlanMap.getVlanId().getValue().intValue()));
     }
 
     /**
-     * Method return given vlan ID (if it is not used in OVS network) or generate new one.
+     * Method return vlan ID for service if stored in node property (service-vlan-map) or generate new one.
+     * @param serviceName
      */
-    public Integer generateVlanID() throws ResourceNotAvailableException {
-        return generateVid();
+    public Integer getVlanID(String serviceName) throws ResourceNotAvailableException, TransactionCommitFailedException {
+        Optional<ServiceVlanMap> o = node.getAugmentation(NodeSvmAugmentation.class).getServiceVlanMap().stream().filter(serviceVlanMap -> serviceVlanMap.getServiceId().equals(serviceName)).findFirst();
+        return o.isPresent()? o.get().getVlanId().getValue().intValue() : generateVid(serviceName);
     }
 
-    public boolean isVlanInUse(Integer vlanId) {
-        return usedVlans.contains(vlanId);
-    }
-
-    private Integer generateVid() throws VlanPoolExhaustedException {
+    private Integer generateVid(String serviceName) throws VlanPoolExhaustedException, TransactionCommitFailedException {
         Set<Integer> difference = Sets.difference(possibleVlans, usedVlans);
         if (difference.isEmpty()) {
             LOG.warn(VLAN_POOL_EXHAUSTED_ERROR_MESSAGE);
             throw new VlanPoolExhaustedException(VLAN_POOL_EXHAUSTED_ERROR_MESSAGE);
         }
-        return difference.iterator().next();
+        return updateNodeNewServiceVLAN(serviceName,difference.iterator().next());
     }
 
-    private void getAllVlanIDs(List<NullAwareDatastoreGetter<Node>> nodes) throws ResourceNotAvailableException {
-        for (NullAwareDatastoreGetter<Node> node : nodes) {
-            if (node.get().isPresent()) {
-                Table table = OpenFlowUtils.getTable(node.get().get());
-                if (table != null && table.getFlow() != null) {
-                    for (Flow flow : table.getFlow()) {
-                        checkFlows(flow);
-                    }
-                }
-            }
-        }
+    private Integer updateNodeNewServiceVLAN(String serviceName, Integer vlanId) {
+        List<ServiceVlanMap> list = node.getAugmentation(NodeSvmAugmentation.class).getServiceVlanMap();
+        list.add(new ServiceVlanMapBuilder().setServiceId(serviceName).setVlanId(PositiveInteger.getDefaultInstance(vlanId.toString())).build());
+        node = new NodeBuilder(node).addAugmentation(NodeSvmAugmentation.class ,new NodeSvmAugmentationBuilder().setServiceVlanMap(list).build()).build();
+        ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
+        new NrpDao(tx).updateNode(node);
+        tx.submit();
+        return vlanId;
     }
 
-    private void checkFlows(Flow flow) {
-        getVlanFromActions(flow);
-        Integer vid = getVlanFromMatch(flow.getMatch().getVlanMatch());
-        if (vid != null && !usedVlans.contains(vid)) {
-            usedVlans.add(vid);
-        }
-    }
-
-    private Integer getVlanFromMatch(VlanMatch vlanMatch) {
-        if (vlanMatch != null &&
-            vlanMatch.getVlanId() != null &&
-            vlanMatch.getVlanId().getVlanId() != null)
-        {
-            return vlanMatch.getVlanId().getVlanId().getValue();
-        }
-        return null;
-    }
-
-    private void getVlanFromActions(Flow flow) {
-        if (flow.getInstructions() != null &&
-            !flow.getInstructions().getInstruction().isEmpty())
-        {
-            for (Instruction instruction : flow.getInstructions().getInstruction()) {
-                ApplyActionsCase applyActionsCase = (ApplyActionsCase) instruction.getInstruction();
-                ApplyActions applyActions = applyActionsCase.getApplyActions();
-                List<Action> actions = applyActions.getAction();
-                checkActions(actions);
-            }
-        }
-    }
-
-    private void checkActions(List<Action> actions) {
-        for ( Action action:actions ) {
-            org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action concreteAction = action.getAction();
-            if ( concreteAction instanceof SetField ) {
-                SetField setField = (SetField) concreteAction;
-                if ( setField.getVlanMatch() != null ) {
-                    Integer vid = getVlanFromMatch(setField.getVlanMatch());
-                    if ( vid != null && !usedVlans.contains(vid)) {
-                        usedVlans.add(vid);
-                    }
-                }
-            }
-        }
+    public void releaseServiceVlan(String serviceName) {
+        List<ServiceVlanMap> list = node.getAugmentation(NodeSvmAugmentation.class).getServiceVlanMap();
+        list.removeIf(serviceVlanMap -> serviceVlanMap.getServiceId().equals(serviceName));
+        node = new NodeBuilder(node).addAugmentation(NodeSvmAugmentation.class ,new NodeSvmAugmentationBuilder().setServiceVlanMap(list).build()).build();
+        ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
+        new NrpDao(tx).updateNode(node);
+        tx.submit();
     }
 }
