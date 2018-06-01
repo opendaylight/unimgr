@@ -13,27 +13,27 @@ module nrm-connectivity {
     organization "Metro Ethernet Forum (MEF)";
     contact "MEF";
     description "none";
-    revision 2017-07-12 {
-        description "MEF NRP 1.0.cfc4";
-        reference "ONF-TR-527, ONF-TR-512, ONF-TR-531, RFC 6020 and RFC 6087";
+    revision 2018-03-21 {
+        description "MEF NRP R2";
+        reference "MEF 59, ONF-TR-527, ONF-TR-512, ONF-TR-531, RFC 6020 and RFC 6087";
     }
     /***********************
     * package main
-    **********************/
+    **********************/ 
         /***********************
         * package object-classes
-        **********************/
+        **********************/ 
             grouping carrier-eth-enni-n-resource {
                 leaf tagged-l2cp-processing {
                     type mef-common-types:tagged-l2cp-processing;
                     description "This attribute represents the Tagged L2CP Processing defined in MEF 45 section 8.3 (IEEE 802.1 compliant or 802.1 non-compliant. Desired to be 802.1 compliant). It is one of the ENNI Operator Multi-lateral attributes, which requires the CENs at the ENNI-N to agree on the values but may allow these values to be different.";
                 }
                 uses carrier-eth-interface-resource;
-                description "This class represents ENNI-N management function. It augments the ONF TAPI LayerProtocol class (at the Ethernet frame layer) of ServiceInterfacePoint class. ";
+                description "This class represents ENNI-N management function. It augments the ONF TAPI ServiceInterfacePoint class at the Ethernet frame layer.";
             }
             grouping carrier-eth-inni-n-resource {
                 uses carrier-eth-interface-resource;
-                description "This class represents INNI-N management function. It augments the ONF TAPI LayerProtocol class (at the Ethernet frame layer) of ServiceInterfacePoint class. ";
+                description "This class represents INNI-N management function. It augments the ONF TAPI ServiceInterfacePoint class at the Ethernet frame layer.";
             }
             grouping carrier-eth-uni-n-resource {
                 leaf elmi-pe-mode-enabled {
@@ -43,21 +43,21 @@ module nrm-connectivity {
                 }
                 container ingress-bwp-flow {
                     uses mef-common:bwp-flow;
-                    description "none";
+                    description "This attribute represents the relationship between the UNI-N and the ingress BwpFlow.";
                 }
                 container egress-bwp-flow {
                     uses mef-common:bwp-flow;
-                    description "none";
+                    description "This attribute represents the relationship between the UNI-N and the egress BwpFlow. ";
                 }
                 uses carrier-eth-interface-resource;
-                description "This class represents UNI-N management function. It augments the ONF TAPI LayerProtocol class (at the Ethernet frame layer) of ServiceInterfacePoint class. ";
+                description "This class represents UNI-N management function. It augments the ONF TAPI ServiceInterfacePoint class at the Ethernet frame layer. ";
             }
             grouping carrier-eth-physical-links-resource {
                 list physical-layer-per-link-list {
                     config false;
                     min-elements 1;
                     uses mef-common-types:physical-layer-per-link;
-                    description "This attribute is a list of physical layers, one for each physical link implementing the UNI or ENNI or INNI. Different physical links can use different physical layers. The Physical Layer for each physical link implementing the UNI or ENNI or INNI MUST is one of the PHYs listed in IEEE Std 802.3 – 2012 but excluding 1000BASE-PX-D and 1000BASE-PX-U.";
+                    description "This attribute is a list of physical layers, one for each physical link implementing the UNI or ENNI or INNI. Different physical links can use different physical layers. The Physical Layer for each physical link implementing the UNI or ENNI or INNI MUST be one of the PHYs listed in IEEE Std 802.3 – 2012 but excluding 1000BASE-PX-D and 1000BASE-PX-U.";
                 }
                 list sync-mode-per-link-list {
                     min-elements 1;
@@ -67,7 +67,7 @@ module nrm-connectivity {
                 leaf number-of-links {
                     type mef-common-types:positive-integer;
                     config false;
-                    description "This attribute specifies the number of links at the Carrier Ethernet External Interface (UNI or ENNI or INNI).";
+                    description "This attribute specifies the number of links at the Carrier Ethernet Interface (UNI or ENNI or INNI).";
                 }
                 leaf link-aggregation {
                     type mef-common-types:interface-resiliency;
@@ -83,7 +83,8 @@ module nrm-connectivity {
             grouping carrier-eth-interface-resource {
                 leaf max-frame-size {
                     type mef-common-types:natural-number;
-                    description "This value limits the length of frames carried by the ConnectivityServices associated to this Interface.";
+                    config false;
+                    description "This value indicates the maximum length of frames supported by this Interface.";
                 }
                 list l2cp-peering-list {
                     key 'destination-address';
@@ -110,7 +111,7 @@ module nrm-connectivity {
                 }
                 container color-identifier {
                     uses mef-common:color-identifier;
-                    description "MEF 7.3 (UML): This attribute represents the relationship between the EVC/OVC End Point and a Color Identifier.";
+                    description "This attribute represents the relationship between the Connectivity Service End Point and a Color Identifier.";
                 }
                 container s-vlan-id-list {
                     uses mef-common-types:vlan-id-listing;
@@ -124,26 +125,26 @@ module nrm-connectivity {
                         It is possible to specify whether untagged and priority tagged frames are included in the mapping.
                         Type=LIST: all listed VLAN IDs. Type=EXCEPT: all VLAN IDs except the listed ones. Type=ALL, all VLAN IDs, hence vlanId list is not applicable.";
                 }
-                container root-s-vlan-id {
+                container root-svlan-id {
                     uses mef-common-types:vlan-id;
                     description "This attribute applies only to End Points with Trunk End Point Role. It identifies the S-VLAN ID of frames mapped to either a Root End Point or a Trunk End Point (via the Root S-VLAN ID value) of the Connectivity Service.";
                 }
-                container leaf-s-vlan-id {
+                container leaf-svlan-id {
                     uses mef-common-types:vlan-id;
                     description "This attribute applies only to End Points with Trunk End Point Role. It identifies the S-VLAN ID of frames mapped to either a Leaf End Point or a Trunk End Point (via the Leaf S-VLAN ID value) of the Connectivity Service.";
                 }
                 list cos-identifier-list {
                     key 'cos-name';
                     uses mef-common:cos-identifier;
-                    description "This attribute represents the relationship between the EVC/OVC End Point and the Class of Service Identifier(s).";
+                    description "This attribute represents the relationship between the Connectivity Service End Point and the Class of Service Identifier(s).";
                 }
                 list eec-identifier-list {
                     key 'eec-name';
                     uses mef-common:eec-identifier;
-                    description "This attribute represents the relationship between the EVC/OVC End Point and the Egress Equivalence Class Identifier(s).";
+                    description "This attribute represents the relationship between the Connectivity Service End Point and the Egress Equivalence Class Identifier(s).";
                 }
                 list egress-map-list {
-                    key 'egress-map-type egress-map-id';
+                    key 'egress-map-type';
                     uses mef-common:egress-map;
                     description "This attribute represents the relationship between the End Point and the Egress Map(s).  This attribute is a set of mappings that determine the content of the S-Tag or C-Tag of an egress EI Frame.
                         ";
@@ -154,18 +155,18 @@ module nrm-connectivity {
                 }
                 container egress-bwp-flow {
                     uses mef-common:bwp-flow;
-                    description "none";
+                    description "This attribute denotes the relationship between a Connectivity Service End Point and the bandwidth profile flow. It describes egress policing on all egress EI Frames mapped to a given End Point.";
                 }
                 container ingress-bwp-flow {
                     uses mef-common:bwp-flow;
-                    description "none";
+                    description " This attribute denotes the relationship between a Connectivity Service End Point and the bandwidth profile flow. It describes ingress policing on all ingress EI Frames mapped to a given End Point.";
                 }
-                description "This class models the Connectivity Service End Point. It augments the ONF TAPI ConnectivityServiceEndPoint.";
+                description "This class models the Carrier Ethernet Connectivity Service End Point. It augments the ONF TAPI ConnectivityServiceEndPoint.";
             }
             grouping carrier-eth-connectivity-resource {
                 leaf multipoint-capable {
                     type boolean;
-                    description " A value of “true” indicates that the End Points can be added/removed during Connectivity Service lifecycle.";
+                    description "A value of “true” indicates that the End Points can be added/removed during Connectivity Service lifecycle.";
                 }
                 leaf ce-vlan-pcp-preservation {
                     type boolean;
@@ -177,17 +178,11 @@ module nrm-connectivity {
                 }
                 leaf max-frame-size {
                     type mef-common-types:positive-integer;
-                    description "This attribute denotes the maximum frame size in bytes.";
-                }
-                leaf-list cos-name-list {
-                    type string;
-                    description "This attribute presents the list of Class of Service Names. Each ingress EI Frame or ingress Service Frame is assigned a Class of Service Name via the frame’s Class of Service Identifier.
-                        The Class of Service Name that is assigned to a frame indicates the performance objectives that apply to frame under appropriate conditions.
-                        ";
+                    description "This attribute denotes the maximum frame size in bytes requested for the connectivity service.";
                 }
                 leaf ce-vlan-id-preservation {
                     type mef-common-types:vlan-id-preservation;
-                    description "This attribute describes a relationship between the format of the VLAN ID and related fields values of the frame at one External Interface and the format and VLAN ID  and related fields values of the corresponding frame at another External Interface.
+                    description "This attribute describes a relationship between the format of the VLAN ID and related fields values of the frame at one Interface and the format and VLAN ID and related fields values of the corresponding frame at another Interface.
                         Used the MEF 7.3 OVC type (PRESERVE/STRIP/RETAIN) as it depends on EVC/OVC decomposition performed by SOFs.
                         ";
                 }
@@ -211,75 +206,57 @@ module nrm-connectivity {
                     uses frame-delivery-condition;
                     description "When the value is conditionally, the conditions that determine whether a Data Service Frame is delivered or discarded MUST be specified. Conditions can be described in the name-value pair list.";
                 }
-                description "This class represents the Ethernet end to end connectivity at resource level. It may map an original EVC, OVC, or Service Component (see MEF 55). It augments the ONF TAPI ConnectivityService class, which represents an “intent-like” request for connectivity between two or more ConnectivityServiceEndPoint.";
+                description "This class represents the Ethernet end to end connectivity at resource level. It may map an original EVC, OVC, or Service Component. It augments the TAPI ConnectivityService class, which represents the request for connectivity between two or more ConnectivityServiceEndPoint.";
             }
 
         /***********************
         * package diagrams
-        **********************/
+        **********************/ 
 
         /***********************
         * package type-definitions
-        **********************/
-            identity delivery-action-type {
-                description "none";
-            }
-            identity discard {
-                base delivery-action-type;
-                description "none";
-            }
-            identity conditionally {
-                base delivery-action-type;
-                description "none";
-            }
-            identity unconditionally {
-                base delivery-action-type;
-                description "none";
-            }
-            grouping l2cp-peering {
-                container protocol-id {
-                    uses mef-common-types:l2cp-protocol;
-                    description "none";
-                }
-                leaf destination-address {
-                    type mef-common-types:natural-number;
-                    description "none";
-                }
-                description "none";
-            }
+        **********************/ 
             typedef delivery-action-type {
-                type identityref {
-                    base delivery-action-type;
+                type enumeration {
+                    enum DISCARD {
+                        description "none";
+                    }
+                    enum CONDITIONALLY {
+                        description "none";
+                    }
+                    enum UNCONDITIONALLY {
+                        description "none";
+                    }
                 }
                 description "none";
             }
             grouping frame-delivery-condition {
                 leaf action {
                     type delivery-action-type;
-                    description "none";
+                    description "Data Service Frame disposition.";
                 }
                 list delivery-condition {
                     key 'value-name';
                     uses tapi-common:name-and-value;
-                    description "none";
+                    description "When the value is conditionally, the conditions that determine whether a Data Service Frame is delivered or discarded MUST be specified. Conditions can be described in the name-value pair list, where name is used to represent the condition name or identifier, and value is used to represent the condition details associated to that name/identifier. Interoperability requires further standardization.";
                 }
-                description "none";
+                description "This type allows to specify conditions when the delivery type is conditionally.";
             }
             grouping vlan-id-list-and-untag {
                 leaf vlan-id-mapping-type {
                     type mef-common-types:vlan-id-mapping-type;
-                    description "none";
+                    description "Type=LIST: all listed VLAN IDs. Type=EXCEPT: all VLAN IDs except the listed ones. Type=ALL, all VLAN IDs, hence vlanId list is not applicable.";
                 }
                 leaf untagged-and-prio-tagged-included {
                     type boolean;
-                    description "If true, then untagged and priority tagged frames are included in the mappig, otherwise not.";
+                    description "If true, then untagged and priority tagged frames are included in the mapping, otherwise not.";
                 }
                 list vlan-id {
                     key 'vlan-id';
                     uses mef-common-types:vlan-id;
-                    description "none";
+                    description "This is for VLAN ID from 1 to 4094";
                 }
-                description "none";
+                description "This type allows to specify the list of one or more C-VLAN ID values, to be considered according to the mapping type. In addition, it is possible to specify whether untagged and priority tagged frames are included in the mapping.";
             }
 
 

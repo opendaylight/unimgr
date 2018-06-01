@@ -57,6 +57,7 @@ public class OvsdbTopologyTestUtils {
         nodeBuilder.setNodeId(new NodeId(nodeId));
         nodeBuilder.setTerminationPoint(tps);
         nodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class,createOvsdbBridgeAugmentation(nodeId));
+        nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class, new OvsdbNodeAugmentationBuilder().build());
         return nodeBuilder.build();
     }
 

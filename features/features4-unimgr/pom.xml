@@ -18,7 +18,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 
   <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>features4-unimgr</artifactId>
-  <version>0.3.4-SNAPSHOT</version>
+  <version>0.3.3-SNAPSHOT</version>
   <packaging>feature</packaging>
 
   <dependencies>
@@ -81,13 +81,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>odl-unimgr</artifactId>
-      <version>${project.version}</version>
-      <type>xml</type>
-      <classifier>features</classifier>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>odl-unimgr-presto-api</artifactId>
       <version>${project.version}</version>
       <type>xml</type>
       <classifier>features</classifier>

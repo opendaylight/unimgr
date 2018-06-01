@@ -11,6 +11,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 
   <reference id="dataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker" />
   <reference id="mountPointService" interface="org.opendaylight.controller.md.sal.binding.api.MountPointService" />
+  <reference id="topologyManager" interface="org.opendaylight.unimgr.mef.nrp.api.TopologyManager" />
 
   <service id="xrDriverService" interface="org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder">
     <bean class="org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.driver.XrDriverBuilder">
@@ -22,6 +23,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <bean id="topologyHandler" class="org.opendaylight.unimgr.mef.nrp.cisco.xr.TopologyDataHandler" init-method="init" destroy-method="close">
     <argument ref="dataBroker" />
     <argument ref="mountPointService" />
+    <argument ref="topologyManager" />
   </bean>
 
 </blueprint>

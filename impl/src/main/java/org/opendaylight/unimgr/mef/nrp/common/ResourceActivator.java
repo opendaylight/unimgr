@@ -23,6 +23,8 @@ public interface ResourceActivator {
      * Activate connectivity betwee the provided endpoints.
      * @param endPoints list of endpoint to connect
      * @param serviceName generated service id
+     * @throws ResourceActivatorException activation problem
+     * @throws TransactionCommitFailedException transaction commit failed
      */
     void activate(List<EndPoint> endPoints, String serviceName) throws  ResourceActivatorException, TransactionCommitFailedException;
 
@@ -30,6 +32,8 @@ public interface ResourceActivator {
      * Deactivate connectivity between the provided endpoints.
      * @param endPoints list of endpoint between which connection have to be deactivated
      * @param serviceName generated service id
+     * @throws ResourceActivatorException activation problem
+     * @throws TransactionCommitFailedException transaction commit failed
      */
     void deactivate(List<EndPoint> endPoints, String serviceName) throws TransactionCommitFailedException, ResourceActivatorException;
 }

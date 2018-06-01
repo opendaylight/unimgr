@@ -9,23 +9,9 @@
 package org.opendaylight.unimgr.utils;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.function.BiFunction;
 
 
@@ -46,13 +32,6 @@ public class CapabilitiesService {
 
     public static class NodeContext implements Context<Node> {
         public enum NodeCapability implements Capability<Node> {
-            NETCONF((dbBroker, node) -> node.getAugmentation(NetconfNode.class) != null),
-            NETCONF_CISCO_IOX_L2VPN((dbBroker, node) ->
-                    checkForNetconfCapability(node,NetconfConstants.CAPABILITY_IOX_L2VPN)),
-            NETCONF_CISCO_IOX_IFMGR((dbBroker, node) ->
-                    checkForNetconfCapability(node,NetconfConstants.CAPABILITY_IOX_IFMGR)),
-            NETCONF_CISCO_IOX_POLICYMGR((dbBroker, node) ->
-                    checkForNetconfCapability(node,NetconfConstants.CAPABILITY_IOX_ASR9K_POLICYMGR)),
             OVSDB((dbBroker,node) -> node.getAugmentation(OvsdbBridgeAugmentation.class) != null);
 
             private BiFunction<DataBroker, Node, Boolean> condition;
@@ -64,25 +43,6 @@ public class CapabilitiesService {
             @Override
             public BiFunction<DataBroker, Node, Boolean> getCondition() {
                 return condition;
-            }
-
-            private static boolean checkForNetconfCapability(Node node, String netconf_capability) {
-                NetconfNode netconf = node.getAugmentation(NetconfNode.class);
-                if (netconf == null) {
-                    return false;
-                }
-                if (netconf.getAvailableCapabilities() == null) {
-                    return false;
-                }
-                if (netconf.getAvailableCapabilities().getAvailableCapability() == null) {
-                    return false;
-                }
-
-                return netconf
-                        .getAvailableCapabilities()
-                        .getAvailableCapability()
-                        .stream()
-                        .anyMatch(capability -> capability.getCapability().equals(netconf_capability));
             }
         }
 
@@ -123,9 +83,7 @@ public class CapabilitiesService {
         }
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(CapabilitiesService.class);
-
-    private DataBroker dataBroker;
+    protected DataBroker dataBroker;
 
     public CapabilitiesService(DataBroker dataBroker) {
         this.dataBroker = dataBroker;
@@ -133,29 +91,6 @@ public class CapabilitiesService {
 
     public NodeContext node(Node node) {
         return new NodeContext(this, Optional.of(node));
-    }
-
-    public NodeContext nodeByPort(FcPort port) {
-        return new NodeContext(this, readNode(port));
-    }
-
-    private Optional<Node> readNode(FcPort port) {
-        InstanceIdentifier<Node> nodeIid = InstanceIdentifier.builder(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(port.getTopology()))
-                .child(Node.class, new NodeKey(port.getNode()))
-                .build();
-
-        final ReadTransaction tx = dataBroker.newReadOnlyTransaction();
-        final CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture = tx.read(LogicalDatastoreType.OPERATIONAL, nodeIid);
-        Optional<Node> result = Optional.absent();
-
-        try {
-            result = nodeFuture.checkedGet();
-        } catch (final ReadFailedException e) {
-            LOG.error("Unable to read node with Iid {}", nodeIid, e);
-        }
-
-        return result;
     }
 
     private <T> boolean checkCondition(Capability<T> capability, T data) {

@@ -4,7 +4,7 @@ module unimgr-dhcp {
 
     import ietf-inet-types { prefix inet; revision-date "2013-07-15"; }
     import ietf-yang-types { prefix yang; }
-    import mef-types { prefix mef-types; }
+    import mef-types { prefix mef-types; revision-date 2015-05-26; }
 
     revision "2016-12-14" {
         description "It provides required datastore containers to handle DHCP requests

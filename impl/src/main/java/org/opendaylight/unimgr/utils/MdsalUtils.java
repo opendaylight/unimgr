@@ -8,6 +8,8 @@
 
 package org.opendaylight.unimgr.utils;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
@@ -15,24 +17,15 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.yang.gen.v1.urn.onf.core.network.module.rev160630.g_forwardingconstruct.FcPort;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 
 public class MdsalUtils {
 
@@ -146,6 +139,7 @@ public class MdsalUtils {
      * @param dataBroker The instance of the data broker to create transactions.
      * @param genericNode The instance identifier of a generic node
      * @param store The dataStore where to send and submit the delete call.
+     * @return <code>true</code> if success
      */
     public static boolean deleteNode(DataBroker dataBroker,
                                   InstanceIdentifier<?> genericNode,
@@ -208,32 +202,5 @@ public class MdsalUtils {
             LOG.info("Unable to read topology with Iid {}", topologyInstanceId, e);
         }
         return Optional.absent();
-    }
-
-    /**
-     * Read a TerminationPoint from datastore used in given FcPort.
-     * @param dataBroker The dataBroker instance to create transactions
-     * @param store The datastore type.
-     * @param port FcPort data
-     * @return An Optional TerminationPoint instance
-     */
-    public static Optional<TerminationPoint> readTerminationPoint(DataBroker dataBroker, LogicalDatastoreType store, FcPort port) {
-        InstanceIdentifier tpIid = InstanceIdentifier.builder(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(port.getTopology()))
-                .child(Node.class, new NodeKey(port.getNode()))
-                .child(TerminationPoint.class, new TerminationPointKey(port.getTp()))
-                .build();
-
-        return MdsalUtils.readOptional(dataBroker, store, tpIid);
-    }
-
-    public static Optional<TerminationPoint> readTerminationPoint(DataBroker dataBroker, LogicalDatastoreType store, TopologyId topologyId, NodeId nodeId, TpId tpId) {
-        InstanceIdentifier tpIid = InstanceIdentifier.builder(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(topologyId))
-                .child(Node.class, new NodeKey(nodeId))
-                .child(TerminationPoint.class, new TerminationPointKey(tpId))
-                .build();
-
-        return MdsalUtils.readOptional(dataBroker, store, tpIid);
     }
 }

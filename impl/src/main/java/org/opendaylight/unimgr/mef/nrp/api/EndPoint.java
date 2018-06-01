@@ -8,9 +8,11 @@
 
 package org.opendaylight.unimgr.mef.nrp.api;
 
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.NrpConnectivityServiceEndPointAttrs;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.connectivity.rev170712.ConnectivityServiceEndPoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpConnectivityServiceEndPointAttrs;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ConnectivityServiceEndPoint;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.OwnedNodeEdgePointRef;
+
+import java.util.Objects;
 
 /**
  * @see ConnectivityServiceEndPoint
@@ -25,7 +27,7 @@ public class EndPoint {
      */
     private final NrpConnectivityServiceEndPointAttrs attrs;
 
-    private Uuid systemNepUuid;
+    private OwnedNodeEdgePointRef ref;
 
     /**
      * Initialize endpoint.
@@ -45,12 +47,28 @@ public class EndPoint {
         return attrs;
     }
 
-    public Uuid getSystemNepUuid() {
-        return systemNepUuid;
+
+    public EndPoint setNepRef(OwnedNodeEdgePointRef ref) {
+        this.ref = ref;
+        return this;
     }
 
-    public EndPoint setSystemNepUuid(Uuid systemNepUuid) {
-        this.systemNepUuid = systemNepUuid;
-        return this;
+    public OwnedNodeEdgePointRef getNepRef() {
+        return ref;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EndPoint endPoint = (EndPoint) o;
+        return Objects.equals(endpoint, endPoint.endpoint) &&
+                Objects.equals(attrs, endPoint.attrs) &&
+                Objects.equals(ref, endPoint.ref);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(endpoint, attrs, ref);
     }
 }

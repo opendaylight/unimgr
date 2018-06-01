@@ -10,7 +10,7 @@ package org.opendaylight.unimgr.mef.nrp.api;
 
 import java.util.Optional;
 
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 
 /**
  * This interface is used to request an ActivationDriver for a given MEF service fragment.
@@ -19,10 +19,10 @@ public interface ActivationDriverRepoService {
 
     /**
      * Get driver by universal id.
-     * @param uuid driver uuid
+     * @param activationDriverId driver id
      * @return activation driver
      * @throws ActivationDriverAmbiguousException when multiple drivers declare they can configure port
      * @throws ActivationDriverNotFoundException when no driver found for port
      */
-    Optional<ActivationDriver> getDriver(Uuid uuid);
+    Optional<ActivationDriver> getDriver(String activationDriverId);
 }

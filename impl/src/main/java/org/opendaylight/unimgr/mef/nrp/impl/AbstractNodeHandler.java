@@ -24,12 +24,12 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Context;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.Context1;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.node.OwnedNodeEdgePoint;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.context.Topology;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.topology.rev170712.topology.context.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Context;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.Context1;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.node.OwnedNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.context.Topology;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.context.TopologyKey;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -60,22 +60,27 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
 
     public void init() {
         registration = dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, NRP_TOPOLOGY_SYSTEM_IID), this);
+
+        LOG.debug("AbstractNodeHandler registered: {}", registration);
     }
 
     public void close() {
         if (registration != null) {
             registration.close();
+            LOG.debug("AbstractNodeHandler closed");
         }
     }
 
     @Override
     public void onDataTreeChanged(@Nonnull Collection<DataTreeModification<Topology>> collection) {
 
+
         List<OwnedNodeEdgePoint> toUpdateNeps =
                 collection.stream()
                         .map(DataTreeModification::getRootNode)
                         .flatMap(topo -> topo.getModifiedChildren().stream())
                         .flatMap(node -> node.getModifiedChildren().stream())
+                        .filter(this::isNep)
                         .filter(this::checkIfUpdated)
                         .map(nep -> (OwnedNodeEdgePoint) nep.getDataAfter())
                         .collect(Collectors.toList());
@@ -85,6 +90,7 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
                 .map(DataTreeModification::getRootNode)
                 .flatMap(topo -> topo.getModifiedChildren().stream())
                 .flatMap(node -> node.getModifiedChildren().stream())
+                .filter(this::isNep)
                 .filter(this::checkIfDeleted)
                 .map(nep -> (OwnedNodeEdgePoint) nep.getDataBefore())
                 .collect(Collectors.toList());
@@ -102,7 +108,7 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
 
             @Override
             public void onSuccess(@Nullable Void result) {
-                LOG.info("Abstract TAPI node upadate successful");
+                LOG.info("Abstract TAPI node updated successful");
             }
 
             @Override
@@ -110,6 +116,10 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
                 LOG.warn("Abstract TAPI node upadate failed due to an error", t);
             }
         });
+    }
+
+    private boolean isNep(DataObjectModification dataObjectModificationNep) {
+        return OwnedNodeEdgePoint.class.isAssignableFrom(dataObjectModificationNep.getDataType());
     }
 
     private boolean checkIfDeleted(DataObjectModification dataObjectModificationNep) {

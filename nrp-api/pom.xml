@@ -10,20 +10,24 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <parent>
     <groupId>org.opendaylight.mdsal</groupId>
     <artifactId>binding-parent</artifactId>
-    <version>0.11.4-SNAPSHOT</version>
+    <version>0.11.3</version>
     <relativePath/>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>unimgr-nrp-tapi-api</artifactId>
-  <version>0.3.4-SNAPSHOT</version>
+  <version>0.3.3-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>ietf-network-2015-06-08</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal.model</groupId>
+      <artifactId>yang-ext</artifactId>
     </dependency>
   </dependencies>
 

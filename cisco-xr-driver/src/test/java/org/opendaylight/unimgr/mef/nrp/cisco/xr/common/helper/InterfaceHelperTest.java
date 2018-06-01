@@ -9,8 +9,8 @@ package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.MtuUtils;
-import org.opendaylight.unimgr.mef.nrp.common.ServicePort;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.Mtus;
@@ -103,7 +103,7 @@ public class InterfaceHelperTest {
     public void testBuildSingleMtuL2() {
         //given
         String interfaceNameValue = "GigabitEthernet0/0/1";
-        CiscoIosXrString owner = new CiscoIosXrString("test");
+        CiscoIosXrString owner = new CiscoIosXrString("testAddCeps");
         long mtuValue = 1522L;
         InterfaceName interfaceName = new InterfaceName(interfaceNameValue);
         Optional<Mtus> mtus = Optional.of(MtuUtils.generateMtus(mtuValue, owner));

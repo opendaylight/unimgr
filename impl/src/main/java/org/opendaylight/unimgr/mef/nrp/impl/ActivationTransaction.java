@@ -59,6 +59,32 @@ public class ActivationTransaction {
     }
 
     /**
+     * Update the contents of this transaction.
+     * @return result
+     */
+    public Result update() {
+        if (drivers.isEmpty()) {
+            throw new IllegalStateException("at least one driver required");
+        }
+        sortDrivers();
+        try {
+            for (ActivationDriver d: drivers) {
+                d.update();
+            }
+            commit();
+            LOG.info("Update transaction successful");
+
+            return Result.success();
+        } catch (Exception e) {
+            //XXX add transaction identification ???
+            LOG.warn("Rolling back update transaction ", e);
+            rollback();
+
+            return Result.fail(e.getMessage(), e);
+        }
+    }
+
+    /**
      * Deactivate the contents of this transaction.
      * @return result
      */

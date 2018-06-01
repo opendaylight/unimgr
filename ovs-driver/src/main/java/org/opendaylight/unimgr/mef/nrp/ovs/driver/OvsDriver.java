@@ -15,11 +15,12 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
+import org.opendaylight.unimgr.mef.nrp.common.ResourceActivatorException;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
 import org.opendaylight.unimgr.mef.nrp.ovs.activator.OvsActivator;
 import org.opendaylight.unimgr.mef.nrp.ovs.tapi.TopologyDataHandler;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev170712.NrpConnectivityServiceAttrs;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.tapi.common.rev170712.Uuid;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpConnectivityServiceAttrs;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 
 /**
  * @author marek.ryznar@amartus.com
@@ -59,6 +60,11 @@ public class OvsDriver implements ActivationDriverBuilder {
                 activator.activate(endPoints,serviceId);
             }
 
+			@Override
+			public void update() throws TransactionCommitFailedException, ResourceActivatorException {
+				activator.update(endPoints,serviceId);
+			}
+
             @Override
             public void deactivate() throws TransactionCommitFailedException, ResourceNotAvailableException {
                 activator.deactivate(endPoints,serviceId);
@@ -68,6 +74,8 @@ public class OvsDriver implements ActivationDriverBuilder {
             public int priority() {
                 return 0;
             }
+
+
         };
     }
 
@@ -77,7 +85,7 @@ public class OvsDriver implements ActivationDriverBuilder {
     }
 
     @Override
-    public Uuid getNodeUuid() {
-        return new Uuid(TopologyDataHandler.getOvsNode());
+    public String getActivationDriverId() {
+        return TopologyDataHandler.getDriverId();
     }
 }
