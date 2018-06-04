@@ -92,6 +92,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <type>xml</type>
       <classifier>features</classifier>
     </dependency>
-
-  </dependencies>
+   <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>odl-unimgr-legato-api</artifactId>
+      <version>${project.version}</version>
+      <type>xml</type>
+      <classifier>features</classifier>
+   </dependency>
+</dependencies>
 </project>

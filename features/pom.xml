@@ -10,7 +10,7 @@
     <version>2.0.7</version>
     <relativePath/>
   </parent>
-  <groupId>org.opendaylight.unimgr</groupId>  
+  <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>features-aggregator</artifactId>
   <version>0.3.3-SNAPSHOT</version>
   <packaging>pom</packaging>
@@ -33,5 +33,6 @@
     <module>odl-unimgr-cisco-xr-driver</module>
     <module>odl-unimgr-ovs-driver</module>
     <module>odl-unimgr-template-driver</module>
+    <module>odl-unimgr-legato-api</module>
   </modules>
 </project>

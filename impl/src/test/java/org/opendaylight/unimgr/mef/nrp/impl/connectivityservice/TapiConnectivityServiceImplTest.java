@@ -38,6 +38,7 @@ import org.opendaylight.unimgr.mef.nrp.api.Subrequrest;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceActivatorException;
 import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
 import org.opendaylight.unimgr.mef.nrp.impl.ConnectivityServiceIdResourcePool;
+import org.opendaylight.unimgr.mef.nrp.impl.DefaultValidator;
 import org.opendaylight.unimgr.utils.ActivationDriverMocks;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.PortRole;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
@@ -72,6 +73,7 @@ public class TapiConnectivityServiceImplTest {
     private RequestDecomposer decomposer;
     private RequestValidator validator;
     private ReadWriteTransaction tx;
+    private DataBroker broker;
 
     @Before
     public void setUp() {
@@ -96,7 +98,7 @@ public class TapiConnectivityServiceImplTest {
 
         tx = mock(ReadWriteTransaction.class);
         when(tx.submit()).thenReturn(mock(CheckedFuture.class));
-        DataBroker broker = mock(DataBroker.class);
+        broker = mock(DataBroker.class);
         when(broker.newReadWriteTransaction()).thenReturn(tx);
 
 
@@ -135,6 +137,22 @@ public class TapiConnectivityServiceImplTest {
         verifyZeroInteractions(ad2);
         verifyZeroInteractions(ad3);
     }
+
+    @Test
+    public void withLocalIds() throws Exception {
+        //having
+        CreateConnectivityServiceInput input = input("a", "a", "b");
+        connectivityService.setValidator(new DefaultValidator(broker));
+
+        //when
+        RpcResult<CreateConnectivityServiceOutput> result = this.connectivityService.createConnectivityService(input).get();
+        //then
+        assertFalse(result.isSuccessful());
+        verifyZeroInteractions(ad1);
+        verifyZeroInteractions(ad2);
+        verifyZeroInteractions(ad3);
+    }
+
 
     @Test
     public void failTwoDriversOneFailing() throws ExecutionException, InterruptedException, ResourceActivatorException, TransactionCommitFailedException {
@@ -182,6 +200,16 @@ public class TapiConnectivityServiceImplTest {
                 .setEndPoint(eps)
                 .build();
     }
+
+    private CreateConnectivityServiceInput input(String... localIds) {
+
+        List<EndPoint> eps = Arrays.stream(localIds).map(this::ep).collect(Collectors.toList());
+
+        return new CreateConnectivityServiceInputBuilder()
+                .setEndPoint(eps)
+                .build();
+    }
+
 
     private org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.create.connectivity.service.input.EndPoint ep(String id) {
         return new EndPointBuilder()

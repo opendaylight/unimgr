@@ -15,12 +15,14 @@ import java.util.List;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.CreateConnectivityServiceInput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.UpdateConnectivityServiceInput;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author bartosz.michalik@amartus.com
  */
 public interface RequestValidator {
-    ValidationResult checkValid(CreateConnectivityServiceInput input);
-    ValidationResult checkValid(UpdateConnectivityServiceInput input);
+    @Nonnull ValidationResult checkValid(CreateConnectivityServiceInput input);
+    @Nonnull ValidationResult checkValid(UpdateConnectivityServiceInput input);
 
     class ValidationResult {
         private final List<String> problems;
@@ -41,6 +43,12 @@ public interface RequestValidator {
 
         public boolean isValid() {
             return problems.isEmpty();
+        }
+
+        public ValidationResult merge(ValidationResult other) {
+            if(other == null) return this;
+            this.problems.addAll(other.problems);
+            return this;
         }
     }
 }

@@ -28,6 +28,7 @@ public class EndPoint {
     private final NrpConnectivityServiceEndPointAttrs attrs;
 
     private OwnedNodeEdgePointRef ref;
+    private String localId;
 
     /**
      * Initialize endpoint.
@@ -70,5 +71,13 @@ public class EndPoint {
     @Override
     public int hashCode() {
         return Objects.hash(endpoint, attrs, ref);
+    }
+
+    public void setLocalId(String localId) {
+        this.localId = localId;
+    }
+
+    public String getLocalId() {
+        return localId;
     }
 }

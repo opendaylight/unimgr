@@ -8,6 +8,7 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,10 +34,7 @@ import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev180321.vlan
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.*;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.nrp.connectivity.service.end.point.attrs.NrpCarrierEthConnectivityEndPointResource;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.nrp.connectivity.service.end.point.attrs.NrpCarrierEthConnectivityEndPointResourceBuilder;
-import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.OperationalState;
-import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.PortDirection;
-import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.PortRole;
-import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.*;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.*;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.ConnectionEndPoint;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.Connection;
@@ -59,6 +57,8 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
+import static org.opendaylight.unimgr.utils.PredicateMatcher.fromPredicate;
+
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -138,6 +138,13 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
 
         verifyMefAttributes(connCtx.getConnectivityService().get(0));
         verifyMefAttributes(result.getResult().getService());
+
+        final Set<String> expected = input.getEndPoint().stream().map(LocalClass::getLocalId).collect(Collectors.toSet());
+
+        assertThat(result.getResult().getService().getEndPoint(),
+                CoreMatchers.everyItem(fromPredicate(id -> expected.contains(id.getLocalId())))
+
+        );
 
     }
 

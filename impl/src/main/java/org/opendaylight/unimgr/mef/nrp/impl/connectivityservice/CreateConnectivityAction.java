@@ -82,6 +82,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         try {
             RequestValidator.ValidationResult validationResult = validateInput();
             if (!validationResult.isValid()) {
+                LOG.debug("validation for create connectivity service failed = {}", input);
                 RpcResultBuilder<CreateConnectivityServiceOutput> res = RpcResultBuilder.failed();
                 validationResult.getProblems().forEach(p -> res.withError(RpcError.ErrorType.APPLICATION, p));
                 return res.build();
@@ -90,10 +91,13 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
 
             endpoints = input.getEndPoint().stream().map(ep -> {
                 EndPoint2 nrpAttributes = ep.getAugmentation(EndPoint2.class);
-                return new EndPoint(ep, nrpAttributes);
+                EndPoint endPoint = new EndPoint(ep, nrpAttributes);
+                endPoint.setLocalId(ep.getLocalId());
+                return endPoint;
             }).collect(Collectors.toList());
 
             String uniqueStamp = service.getServiceIdPool().getServiceId();
+            LOG.debug("connectivity service passed validation, request = {}", input);
 
             ActivationTransaction tx = prepareTransaction(toCsId(uniqueStamp));
             if (tx != null) {
@@ -218,7 +222,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
             LOG.error("Error with committing Connections and Connectivity Service for {} within {} ms", uniqueStamp, 500);
             throw e;
         } catch (TransactionCommitFailedException e) {
-            LOG.error("Error with commiting Connections and Connectivity Service for " + uniqueStamp, e);
+            LOG.error("Error with committing Connections and Connectivity Service for " + uniqueStamp, e);
             throw e;
         }
 
@@ -226,14 +230,21 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
     }
 
     private List<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.EndPoint> toConnectivityServiceEps(List<EndPoint> endpoints, String _uniqueStamp) {
-        return endpoints.stream().map(ep -> new EndPointBuilder()
-                .setLocalId("sep:" + Integer.toString(ep.getNepRef().getOwnedNodeEdgePointId().getValue().hashCode(), 16))
+        return endpoints.stream().map(ep -> {
+            String id = ep.getLocalId();
+            if(id == null) {
+                id = "sep:" + Integer.toString(ep.getNepRef().getOwnedNodeEdgePointId().getValue().hashCode(), 16);
+            }
+            return new EndPointBuilder()
+                .setLocalId(id)
                 .setServiceInterfacePoint(ep.getEndpoint().getServiceInterfacePoint())
                 .setDirection(PortDirection.BIDIRECTIONAL)
                 .setLayerProtocolName(LayerProtocolName.ETH)
                 .setRole(PortRole.SYMMETRIC)
                 .addAugmentation(EndPoint1.class, new EndPoint1Builder(ep.getAttrs()).build())
-                .build()
+                .build();
+
+            }
         ).collect(Collectors.toList());
     }
 
