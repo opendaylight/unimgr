@@ -56,16 +56,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <profile>
       <id>main</id>
       <modules>
-        <module>api</module>
         <module>legato-api</module>
         <module>nrp-api</module>
         <module>impl</module>
-        <module>netvirt</module>
         <module>cisco-xr-driver</module>
         <module>ovs-driver</module>
         <module>template-driver</module>
-        <module>dlux</module>
-        <module>cli</module>
         <module>karaf</module>
         <module>features</module>
         <module>artifacts</module>

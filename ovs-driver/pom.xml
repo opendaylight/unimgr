@@ -59,11 +59,18 @@
             <version>${project.version}</version>
         </dependency>
 
-	<dependency>
-		<groupId>org.opendaylight.ovsdb</groupId>
-		<artifactId>utils.mdsal-utils</artifactId>
-		<version>${ovsdb.version}</version>
-	</dependency>
+        <dependency>
+            <groupId>org.opendaylight.ovsdb</groupId>
+            <artifactId>utils.mdsal-utils</artifactId>
+            <version>${ovsdb.version}</version>
+        </dependency>
+
+        <!--     OVSDB dependency -->
+        <dependency>
+            <groupId>org.opendaylight.ovsdb</groupId>
+            <artifactId>southbound-impl</artifactId>
+            <version>${ovsdb.version}</version>
+        </dependency>
 
         <!-- Testing Dependencies -->
         <dependency>

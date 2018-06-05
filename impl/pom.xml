@@ -25,7 +25,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <artifactId>unimgr-impl</artifactId>
     <version>0.3.3-SNAPSHOT</version>
     <packaging>bundle</packaging>
-    <!-- <name> formatting is used by autorelease to parse and notify projects on
+    <!-- <name> formatting is used by autorelse to parse and notify projects on
          build failure. Please do not modify this unless you have a good reason. -->
     <name>ODL :: unimgr :: ${project.artifactId}</name>
     <build>
@@ -74,19 +74,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
             <groupId>org.opendaylight.unimgr</groupId>
             <artifactId>unimgr-nrp-tapi-api</artifactId>
             <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>unimgr-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!--     OVSDB dependency -->
-        <dependency>
-            <groupId>org.opendaylight.ovsdb</groupId>
-            <artifactId>southbound-impl</artifactId>
-            <version>${ovsdb.version}</version>
         </dependency>
 
         <dependency>

@@ -12,7 +12,8 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
 import org.opendaylight.unimgr.utils.MdsalUtils;
-import org.opendaylight.unimgr.utils.NullAwareDatastoreGetter;
+import org.opendaylight.unimgr.mef.nrp.ovs.util.MdsalUtilsExt;
+import org.opendaylight.unimgr.mef.nrp.ovs.util.NullAwareDatastoreGetter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
@@ -113,7 +114,7 @@ public class TopologyTransaction {
      */
     public List<Link> readLinks(Node node) throws ResourceNotAvailableException {
         Optional<Topology> flowTopology
-                = MdsalUtils.readTopology(dataBroker, LogicalDatastoreType.OPERATIONAL, FLOW_TOPOLOGY_NAME);
+                = MdsalUtilsExt.readTopology(dataBroker, LogicalDatastoreType.OPERATIONAL, FLOW_TOPOLOGY_NAME);
 
         if (flowTopology.isPresent()) {
             String nodeId = node.getId().getValue();

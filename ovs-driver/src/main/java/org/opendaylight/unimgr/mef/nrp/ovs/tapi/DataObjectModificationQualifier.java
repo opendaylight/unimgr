@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import static org.opendaylight.unimgr.mef.nrp.ovs.util.OvsCapabilitiesService.NodeCapability.OVSDB;
 import static org.opendaylight.unimgr.utils.CapabilitiesService.Capability.Mode.AND;
-import static org.opendaylight.unimgr.utils.CapabilitiesService.NodeContext.NodeCapability.OVSDB;
 
 /**
  * Class created to classify object according to its modification types.

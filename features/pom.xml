@@ -23,13 +23,8 @@
   </prerequisites>
   <modules>
     <module>features4-unimgr</module>
-    <module>odl-unimgr-api</module>
     <module>odl-unimgr</module>
-    <module>odl-unimgr-netvirt</module>
-    <module>odl-unimgr-dlux</module>
-    <module>odl-unimgr-console</module>
     <module>odl-unimgr-rest</module>
-    <module>odl-unimgr-ui</module>
     <module>odl-unimgr-cisco-xr-driver</module>
     <module>odl-unimgr-ovs-driver</module>
     <module>odl-unimgr-template-driver</module>
