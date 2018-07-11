@@ -161,12 +161,12 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
             return null;
         }
 
-        if(ep.getAugmentation(EndPoint1.class) != null) return ep.getAugmentation(EndPoint1.class).getNrpCarrierEthConnectivityEndPointResource();
-        if(ep.getAugmentation(EndPoint3.class) != null) return ep.getAugmentation(EndPoint3.class).getNrpCarrierEthConnectivityEndPointResource();
-        if(ep.getAugmentation(EndPoint4.class) != null) return ep.getAugmentation(EndPoint4.class).getNrpCarrierEthConnectivityEndPointResource();
-        if(ep.getAugmentation(EndPoint5.class) != null) return ep.getAugmentation(EndPoint5.class).getNrpCarrierEthConnectivityEndPointResource();
-        if(ep.getAugmentation(EndPoint6.class) != null) return ep.getAugmentation(EndPoint5.class).getNrpCarrierEthConnectivityEndPointResource();
-        if(ep.getAugmentation(EndPoint8.class) != null) return ep.getAugmentation(EndPoint8.class).getNrpCarrierEthConnectivityEndPointResource();
+        if(ep.augmentation(EndPoint1.class) != null) return ep.augmentation(EndPoint1.class).getNrpCarrierEthConnectivityEndPointResource();
+        if(ep.augmentation(EndPoint3.class) != null) return ep.augmentation(EndPoint3.class).getNrpCarrierEthConnectivityEndPointResource();
+        if(ep.augmentation(EndPoint4.class) != null) return ep.augmentation(EndPoint4.class).getNrpCarrierEthConnectivityEndPointResource();
+        if(ep.augmentation(EndPoint5.class) != null) return ep.augmentation(EndPoint5.class).getNrpCarrierEthConnectivityEndPointResource();
+        if(ep.augmentation(EndPoint6.class) != null) return ep.augmentation(EndPoint5.class).getNrpCarrierEthConnectivityEndPointResource();
+        if(ep.augmentation(EndPoint8.class) != null) return ep.augmentation(EndPoint8.class).getNrpCarrierEthConnectivityEndPointResource();
 
         return null;
     }
@@ -249,10 +249,10 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         Node node1 = new NrpDao(tx2).getNode(TapiConstants.PRESTO_EXT_TOPO, TapiConstants.PRESTO_ABSTRACT_NODE);
         Node node2 = new NrpDao(tx2).getNode(TapiConstants.PRESTO_SYSTEM_TOPO, uuid1);
         long cEndPoints1 = node1.getOwnedNodeEdgePoint().stream()
-                .map(nep -> nep.getAugmentation(OwnedNodeEdgePoint1.class)).filter(Objects::nonNull)
+                .map(nep -> nep.augmentation(OwnedNodeEdgePoint1.class)).filter(Objects::nonNull)
                 .mapToLong(aug -> aug.getConnectionEndPoint().size()).sum();
         long cEndPoints2 = node2.getOwnedNodeEdgePoint().stream()
-                .map(nep -> nep.getAugmentation(OwnedNodeEdgePoint1.class)).filter(Objects::nonNull)
+                .map(nep -> nep.augmentation(OwnedNodeEdgePoint1.class)).filter(Objects::nonNull)
                 .mapToLong(aug -> aug.getConnectionEndPoint().size()).sum();
         assertEquals(0, cEndPoints1);
         assertEquals(0, cEndPoints2);
@@ -263,7 +263,8 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         //having
         //when
         RpcResult<GetConnectivityServiceListOutput> result =
-                connectivityService.getConnectivityServiceList().get();
+                connectivityService.getConnectivityServiceList(
+                        new GetConnectivityServiceListInputBuilder().build()).get();
         //then
         assertTrue(result.isSuccessful());
         assertEquals(0, result.getResult().getService().size());
@@ -311,7 +312,8 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
 
         //when
         RpcResult<GetConnectivityServiceListOutput> result =
-                connectivityService.getConnectivityServiceList().get();
+                connectivityService.getConnectivityServiceList(
+                        new GetConnectivityServiceListInputBuilder().build()).get();
 
         //then
         assertTrue(result.isSuccessful());

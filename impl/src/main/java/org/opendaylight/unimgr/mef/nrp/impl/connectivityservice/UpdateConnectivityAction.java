@@ -76,7 +76,7 @@ public class UpdateConnectivityAction implements Callable<RpcResult<UpdateConnec
                  return res.build();
              }
 
-            endpoint = new EndPoint(input.getEndPoint(), input.getEndPoint().getAugmentation(EndPoint7.class));
+            endpoint = new EndPoint(input.getEndPoint(), input.getEndPoint().augmentation(EndPoint7.class));
 
             String serviceId = input.getServiceIdOrName();
 
@@ -114,7 +114,7 @@ public class UpdateConnectivityAction implements Callable<RpcResult<UpdateConnec
         if (nepRef.isPresent()) {
             try {
                 Node node = nrpDao.getNode(nepRef.get().getNodeId());
-                NodeAdiAugmentation aug = node.getAugmentation(NodeAdiAugmentation.class);
+                NodeAdiAugmentation aug = node.augmentation(NodeAdiAugmentation.class);
                 if(aug != null) {
                     Optional<ActivationDriver> driver = service.getDriverRepo().getDriver(aug.getActivationDriverId());
                     if (!driver.isPresent()) {

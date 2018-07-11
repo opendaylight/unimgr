@@ -7,7 +7,13 @@
  */
 package org.opendaylight.unimgr.mef.nrp.impl.topologytervice;
 
-import com.google.common.base.Optional;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -17,7 +23,23 @@ import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.Nod
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.NodeSvmAugmentation;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.OwnedNodeEdgePoint1;
-import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.*;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.Context1;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.GetLinkDetailsInput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.GetLinkDetailsOutput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.GetLinkDetailsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.GetNodeDetailsInput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.GetNodeDetailsOutput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.GetNodeDetailsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.GetNodeEdgePointDetailsInput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.GetNodeEdgePointDetailsOutput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.GetTopologyDetailsInput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.GetTopologyDetailsOutput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.GetTopologyDetailsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.GetTopologyListInput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.GetTopologyListOutput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.GetTopologyListOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.TapiTopologyService;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.Topology;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.get.link.details.output.LinkBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.get.node.details.output.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.get.topology.details.output.TopologyBuilder;
@@ -33,10 +55,10 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -47,14 +69,15 @@ public class TapiTopologyServiceImpl implements TapiTopologyService, AutoCloseab
 
 
     // TODO decide on strategy for executor service
-    private ExecutorService executor = null;
+    private ListeningExecutorService executor = null;
 
     public void init() {
         Objects.requireNonNull(broker);
         if(executor == null) {
-            executor = new ThreadPoolExecutor(4, 16,
-                    30, TimeUnit.MINUTES,
-                    new LinkedBlockingQueue<>());
+            executor = MoreExecutors.listeningDecorator(
+                    new ThreadPoolExecutor(4, 16,
+                            30, TimeUnit.MINUTES,
+                            new LinkedBlockingQueue<>()));
         }
         LOG.info("TapiTopologyService initialized");
     }
@@ -66,13 +89,13 @@ public class TapiTopologyServiceImpl implements TapiTopologyService, AutoCloseab
         }
     }
 
-    public void setExecutor(ExecutorService executor) {
+    public void setExecutor(ListeningExecutorService executor) {
         if(executor != null) throw new IllegalStateException();
         this.executor = executor;
     }
 
     @Override
-    public Future<RpcResult<GetNodeDetailsOutput>> getNodeDetails(GetNodeDetailsInput input) {
+    public ListenableFuture<RpcResult<GetNodeDetailsOutput>> getNodeDetails(GetNodeDetailsInput input) {
         return executor.submit(() -> {
             NrpDao nrpDao = new NrpDao(broker.newReadOnlyTransaction());
 
@@ -86,12 +109,12 @@ public class TapiTopologyServiceImpl implements TapiTopologyService, AutoCloseab
     }
 
     @Override
-    public Future<RpcResult<GetNodeEdgePointDetailsOutput>> getNodeEdgePointDetails(GetNodeEdgePointDetailsInput input) {
+    public ListenableFuture<RpcResult<GetNodeEdgePointDetailsOutput>> getNodeEdgePointDetails(GetNodeEdgePointDetailsInput input) {
         return null; //TODO not implemented
     }
 
     @Override
-    public Future<RpcResult<GetLinkDetailsOutput>> getLinkDetails(GetLinkDetailsInput input) {
+    public ListenableFuture<RpcResult<GetLinkDetailsOutput>> getLinkDetails(GetLinkDetailsInput input) {
         return executor.submit(() -> {
             RpcResult<GetLinkDetailsOutput> out = RpcResultBuilder.<GetLinkDetailsOutput>failed().withError(RpcError.ErrorType.APPLICATION, "No link in topology").build();
             try {
@@ -136,12 +159,12 @@ public class TapiTopologyServiceImpl implements TapiTopologyService, AutoCloseab
     }
 
     @Override
-    public Future<RpcResult<GetTopologyListOutput>> getTopologyList() {
+    public ListenableFuture<RpcResult<GetTopologyListOutput>> getTopologyList(GetTopologyListInput i) {
         return executor.submit(this::getTopologies);
     }
 
     @Override
-    public Future<RpcResult<GetTopologyDetailsOutput>> getTopologyDetails(GetTopologyDetailsInput input) {
+    public ListenableFuture<RpcResult<GetTopologyDetailsOutput>> getTopologyDetails(GetTopologyDetailsInput input) {
         return executor.submit(() -> {
             NrpDao nrpDao = new NrpDao(broker.newReadOnlyTransaction());
             Topology topo = nrpDao.getTopology(input.getTopologyIdOrName());

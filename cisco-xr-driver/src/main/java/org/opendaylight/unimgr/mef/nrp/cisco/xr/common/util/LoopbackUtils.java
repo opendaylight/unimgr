@@ -44,7 +44,7 @@ public class LoopbackUtils {
         Optional<Node> nodeOpt = MdsalUtils.readOptional(dataBroker, LogicalDatastoreType.CONFIGURATION, getNodeIid(nodeId,topologyId));
 
         if (nodeOpt.isPresent()) {
-            LoopbackAugmentation la = nodeOpt.get().getAugmentation(LoopbackAugmentation.class);
+            LoopbackAugmentation la = nodeOpt.get().augmentation(LoopbackAugmentation.class);
 
             if (la != null) {
                 loopback = la.getLoopbackAddress().getIpv4Address().getValue();

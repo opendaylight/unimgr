@@ -194,7 +194,7 @@ public class TopologyDataHandler {
 
         Link link = new LinkBuilder()
                 .setUuid(uuid)
-                .setKey(new LinkKey(uuid))
+                .withKey(new LinkKey(uuid))
                 .setDirection(ForwardingDirection.BIDIRECTIONAL)
                 .setLayerProtocolName(Collections.singletonList(LayerProtocolName.ETH))
                 .setNodeEdgePoint(Stream.of(nep1,nep2).collect(Collectors.toList()))

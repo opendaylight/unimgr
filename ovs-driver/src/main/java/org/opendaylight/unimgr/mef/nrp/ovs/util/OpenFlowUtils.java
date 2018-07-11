@@ -73,7 +73,7 @@ public class OpenFlowUtils {
      */
     public static Table getTable(Node node) throws ResourceNotAvailableException {
         String nodeId = node.getId().getValue();
-        FlowCapableNode flowCapableNode = node.getAugmentation(FlowCapableNode.class);
+        FlowCapableNode flowCapableNode = node.augmentation(FlowCapableNode.class);
         if (flowCapableNode == null) {
             LOG.warn(String.format(NODE_NOT_AUGMENTED_ERROR_MESSAGE, nodeId, FlowCapableNode.class.toString()));
             throw new ResourceNotAvailableException(String.format(NODE_NOT_AUGMENTED_ERROR_MESSAGE, nodeId, FlowCapableNode.class.toString()));
@@ -173,7 +173,7 @@ public class OpenFlowUtils {
                                                 .collect(Collectors.toList());
             FlowId flowId = new FlowId(INTERSWITCH_FLOW_ID_PREFIX + "-" + portId);
             Flow flow = new FlowBuilder().setId(flowId)
-                                         .setKey(new FlowKey(flowId))
+                                         .withKey(new FlowKey(flowId))
                                          .setTableId(FLOW_TABLE_ID)
                                          .setPriority(INTERSWITCH_FLOW_PRIORITY)
                                          .setMatch(MatchUtils.createInPortMatch(portId))
@@ -188,7 +188,7 @@ public class OpenFlowUtils {
     private static Flow createDefaultFlow() {
         FlowId dropFlowId = new FlowId(DROP_FLOW_ID);
         return new FlowBuilder().setId(dropFlowId)
-                                .setKey(new FlowKey(dropFlowId))
+                                .withKey(new FlowKey(dropFlowId))
                                 .setTableId(FLOW_TABLE_ID)
                                 .setPriority(DROP_FLOW_PRIORITY)
                                 .setInstructions(ActionUtils.createInstructions(Arrays.asList(ActionUtils.createDropAction(0))))
@@ -215,7 +215,7 @@ public class OpenFlowUtils {
 
         FlowId flowId = new FlowId(getVlanFlowId(serviceName, inputPort));
         return new FlowBuilder().setId(flowId)
-                .setKey(new FlowKey(flowId))
+                .withKey(new FlowKey(flowId))
                 .setTableId(FLOW_TABLE_ID)
                 .setPriority(VLAN_FLOW_PRIORITY)
                 .setMatch(MatchUtils.createVlanMatch(internalVlanId, inputPort))
@@ -250,7 +250,7 @@ public class OpenFlowUtils {
 
         FlowId flowId = new FlowId(getVlanFlowId(serviceName, inputPort));
         return new FlowBuilder().setId(flowId)
-                                .setKey(new FlowKey(flowId))
+                                .withKey(new FlowKey(flowId))
                                 .setTableId(FLOW_TABLE_ID)
                                 .setPriority(VLAN_FLOW_PRIORITY)
 //                                .setMatch(MatchUtils.createVlanMatch(externalVlanId, inputPort))

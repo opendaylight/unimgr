@@ -227,7 +227,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     private OwnedNodeEdgePoint createNep(String nepName, boolean associateSip, TerminationDirection td) {
         Uuid uuid = new Uuid(nepName);
         OwnedNodeEdgePointBuilder builder = new OwnedNodeEdgePointBuilder()
-                .setKey(new OwnedNodeEdgePointKey(uuid))
+                .withKey(new OwnedNodeEdgePointKey(uuid))
                 .setLayerProtocolName(LayerProtocolName.ETH)
                 .setUuid(uuid);
                 // TODO donaldh .setTerminationDirection(td);

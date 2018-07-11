@@ -86,7 +86,7 @@ public class OvsdbTopologyTestUtils {
     public static TerminationPoint createTerminationPoint(String tpId, Long ofName) {
         TerminationPointBuilder terminationPointBuilder = new TerminationPointBuilder();
         terminationPointBuilder.setTpId(new TpId(tpId));
-        terminationPointBuilder.setKey(new TerminationPointKey(new TpId(tpId)));
+        terminationPointBuilder.withKey(new TerminationPointKey(new TpId(tpId)));
         terminationPointBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, createOvsdbTerminationPointAugmentation(ofName));
         TerminationPoint terminationPoint = terminationPointBuilder.build();
         return terminationPoint;

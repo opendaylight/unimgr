@@ -42,7 +42,7 @@ public class DataObjectModificationQualifier {
                     n = (Node) node.getDataAfter();
                     if (!isOvs.apply(n) || n.getTerminationPoint()==null)
                         break;
-                    String bridgeName = n.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue();
+                    String bridgeName = n.augmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue();
                     n.getTerminationPoint().forEach(tp -> toAddMap.put(tp,bridgeName));
                 } break;
                 case SUBTREE_MODIFIED:{
@@ -53,7 +53,7 @@ public class DataObjectModificationQualifier {
                     n = (Node) node.getDataBefore();
                     if (!isOvs.apply(n) || n.getTerminationPoint()==null)
                         break;
-                    String bridgeName = n.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue();
+                    String bridgeName = n.augmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue();
                     n.getTerminationPoint().forEach(tp -> toDeleteMap.put(tp,bridgeName));
                 } break;
                 default:{
@@ -67,7 +67,7 @@ public class DataObjectModificationQualifier {
         Node n = (Node) node.getDataAfter();
         if (!isOvs.apply(n))
             return ;
-        String bridgeName = n.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue();
+        String bridgeName = n.augmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue();
         Collection<DataObjectModification<? extends DataObject>> modifiedChildren = node.getModifiedChildren();
 
         TerminationPoint terminationPoint;

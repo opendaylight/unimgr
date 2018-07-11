@@ -77,7 +77,7 @@ public class NodeTestUtils {
         when(netconfNode.getAvailableCapabilities()).thenReturn(availableCapabilities);
 
         Node mockedNode = mockedNodeOptional.get();
-        when(mockedNode.getAugmentation(NetconfNode.class)).thenReturn(netconfNode);
+        when(mockedNode.augmentation(NetconfNode.class)).thenReturn(netconfNode);
 
         return mockedNodeOptional;
     }
