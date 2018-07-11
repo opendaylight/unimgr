@@ -91,7 +91,7 @@ public class NrpInitializer implements TopologyManager {
         return new TopologyBuilder()
                 .setLayerProtocolName(Collections.singletonList(LayerProtocolName.ETH))
                 .setUuid(topoId)
-                .setKey(new TopologyKey(topoId))
+                .withKey(new TopologyKey(topoId))
                 .setNode(Collections.singletonList(node("mef:presto-nrp-abstract-node")))
                 .build();
     }
@@ -101,6 +101,8 @@ public class NrpInitializer implements TopologyManager {
         return new NodeBuilder()
                 .setLayerProtocolName(Collections.singletonList(LayerProtocolName.ETH))
                 .setEncapTopology(new EncapTopologyBuilder().setTopologyId(new Uuid(PRESTO_SYSTEM_TOPO)).build())
+                .setCostCharacteristic(Collections.emptyList())
+                .setLatencyCharacteristic(Collections.emptyList())
                 .setUuid(uid)
                 .build();
     }

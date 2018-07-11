@@ -8,14 +8,35 @@
 package org.opendaylight.unimgr.mef.nrp.impl.commonservice;
 
 
-import com.google.common.base.Optional;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.*;
-import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.*;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpSipAttrs;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.ServiceInterfacePoint1;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.Sip1;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.Sip1Builder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.Sip2;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.Sip2Builder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Context;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.GetServiceInterfacePointDetailsInput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.GetServiceInterfacePointDetailsOutput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.GetServiceInterfacePointDetailsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.GetServiceInterfacePointListInput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.GetServiceInterfacePointListOutput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.GetServiceInterfacePointListOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.TapiCommonService;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.UpdateServiceInterfacePointInput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.UpdateServiceInterfacePointOutput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.tapi.context.ServiceInterfacePoint;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -23,11 +44,10 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -37,20 +57,21 @@ public class TapiCommonServiceImpl implements TapiCommonService {
     private DataBroker broker;
 
     // TODO decide on strategy for executor service
-    private ExecutorService executor = null;
+    private ListeningExecutorService executor = null;
 
     public void init() {
         Objects.requireNonNull(broker);
         if(executor == null) {
-            executor = new ThreadPoolExecutor(4, 16,
+            executor = MoreExecutors.listeningDecorator(
+                new ThreadPoolExecutor(4, 16,
                     30, TimeUnit.MINUTES,
-                    new LinkedBlockingQueue<>());
+                    new LinkedBlockingQueue<>()));
         }
         LOG.info("TapiCommonServiceImpl initialized");
     }
 
     @Override
-    public Future<RpcResult<GetServiceInterfacePointDetailsOutput>> getServiceInterfacePointDetails(GetServiceInterfacePointDetailsInput input) {
+    public ListenableFuture<RpcResult<GetServiceInterfacePointDetailsOutput>> getServiceInterfacePointDetails(GetServiceInterfacePointDetailsInput input) {
         final String sip = input.getSipIdOrName();
         return executor.submit(() -> {
             NrpDao dao = new NrpDao(broker.newReadOnlyTransaction());
@@ -59,7 +80,7 @@ public class TapiCommonServiceImpl implements TapiCommonService {
                 if(result == null) throw new IllegalArgumentException("Cannot find SIP for uuid " + sip);
                 org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.get.service._interface.point.details.output.SipBuilder sipBuilder
                         = new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.get.service._interface.point.details.output.SipBuilder(result);
-                NrpSipAttrs aug = result.getAugmentation(ServiceInterfacePoint1.class);
+                NrpSipAttrs aug = result.augmentation(ServiceInterfacePoint1.class);
                 if(aug != null)
                     sipBuilder.addAugmentation(Sip1.class, new Sip1Builder(aug).build());
                 return RpcResultBuilder.success(
@@ -78,12 +99,12 @@ public class TapiCommonServiceImpl implements TapiCommonService {
     }
 
     @Override
-    public Future<RpcResult<Void>> updateServiceInterfacePoint(UpdateServiceInterfacePointInput input) {
+    public ListenableFuture<RpcResult<UpdateServiceInterfacePointOutput>> updateServiceInterfacePoint(UpdateServiceInterfacePointInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<GetServiceInterfacePointListOutput>> getServiceInterfacePointList() {
+    public ListenableFuture<RpcResult<GetServiceInterfacePointListOutput>> getServiceInterfacePointList(GetServiceInterfacePointListInput input) {
         return executor.submit(() -> {
             ReadOnlyTransaction rtx = broker.newReadOnlyTransaction();
             RpcResult<GetServiceInterfacePointListOutput> out = RpcResultBuilder.success(new GetServiceInterfacePointListOutputBuilder().build()).build();
@@ -98,7 +119,7 @@ public class TapiCommonServiceImpl implements TapiCommonService {
                     out = RpcResultBuilder.success(
                             new GetServiceInterfacePointListOutputBuilder()
                                     .setSip(sips.stream().map(t -> {
-                                        NrpSipAttrs nrpAug = t.getAugmentation(ServiceInterfacePoint1.class);
+                                        NrpSipAttrs nrpAug = t.augmentation(ServiceInterfacePoint1.class);
                                         org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.get.service._interface.point.list.output.SipBuilder sipBuilder
                                                 = new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.get.service._interface.point.list.output.SipBuilder(t);
                                         if(nrpAug != null)

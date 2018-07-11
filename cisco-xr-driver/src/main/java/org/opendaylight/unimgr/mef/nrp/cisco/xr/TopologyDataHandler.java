@@ -220,14 +220,14 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
     private Pattern gbPort = Pattern.compile(".*(GigabitEthernet|TenGigE)[^.]+$");
 
     final Predicate<InterfaceConfiguration> isNep = ic -> {
-        final String name = ic.getKey().getInterfaceName().getValue();
+        final String name = ic.key().getInterfaceName().getValue();
         return gbPort.matcher(name).matches();
     };
 
     private List<OwnedNodeEdgePoint> toTp(Collection<Node> nodes) {
         OwnedNodeEdgePointBuilder tpBuilder = new OwnedNodeEdgePointBuilder();
         return nodes.stream().flatMap(cn -> {
-            final NodeKey key = cn.getKey();
+            final NodeKey key = cn.key();
             try {
                 KeyedInstanceIdentifier<Node, NodeKey> id = mountIds.get(key);
                 Optional<MountPoint> mountPoint = mountService.getMountPoint(id);
@@ -243,13 +243,13 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
                                 })
                                 .filter(isNep::test)
                                 .map(i -> {
-                                    InterfaceConfigurationKey ikey = i.getKey();
+                                    InterfaceConfigurationKey ikey = i.key();
                                     LOG.debug("found {} interface", ikey);
 
                                     Uuid tpId = new Uuid(cn.getNodeId().getValue() + ":" + ikey.getInterfaceName().getValue());
                                     return tpBuilder
                                             .setUuid(tpId)
-                                            .setKey(new OwnedNodeEdgePointKey(tpId))
+                                            .withKey(new OwnedNodeEdgePointKey(tpId))
                                             .setLinkPortDirection(PortDirection.BIDIRECTIONAL)
                                             .setLinkPortRole(PortRole.SYMMETRIC)
                                             .setLayerProtocolName(LayerProtocolName.ETH)

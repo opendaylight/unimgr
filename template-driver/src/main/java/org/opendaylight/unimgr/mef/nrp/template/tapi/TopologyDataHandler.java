@@ -194,11 +194,16 @@ public class TopologyDataHandler {
 
         Link link = new LinkBuilder()
                 .setUuid(uuid)
-                .setKey(new LinkKey(uuid))
+                .withKey(new LinkKey(uuid))
                 .setDirection(ForwardingDirection.BIDIRECTIONAL)
                 .setLayerProtocolName(Collections.singletonList(LayerProtocolName.ETH))
                 .setNodeEdgePoint(Stream.of(nep1,nep2).collect(Collectors.toList()))
                 .setOperationalState(OperationalState.ENABLED)
+                .setTransitionedLayerProtocolName(Collections.emptyList())
+                .setValidationMechanism(Collections.emptyList())
+                .setCostCharacteristic(Collections.emptyList())
+                .setLatencyCharacteristic(Collections.emptyList())
+                .setRiskCharacteristic(Collections.emptyList())
                 .build();
 
         tx.put(LogicalDatastoreType.OPERATIONAL, NrpDao.topo(PRESTO_SYSTEM_TOPO).child(Link.class, new LinkKey(uuid)), link);

@@ -7,13 +7,27 @@
  */
 package org.opendaylight.unimgr.mef.nrp.impl;
 
-import com.google.common.util.concurrent.CheckedFuture;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
@@ -28,16 +42,7 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.no
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import static org.junit.Assert.*;
+import com.google.common.util.concurrent.FluentFuture;
 
 /**
  * @author marek.ryznar@amartus.com
@@ -73,33 +78,33 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
 
         tx.delete(LogicalDatastoreType.OPERATIONAL, InstanceIdentifier
                 .create(Context.class));
-        tx.submit().get();
+        tx.commit().get();
     }
 
     @Test
-    public void testNodeAddition() throws TransactionCommitFailedException {
+    public void testNodeAddition() throws TransactionCommitFailedException, InterruptedException, ExecutionException {
         //when
-        performNrpDaoAction(addNode,null).checkedGet();
+        performNrpDaoAction(addNode,null).get();
 
         //then
         Node node = getAbstractNodeNotNullNep();
 
         assertEquals(
                 node.getOwnedNodeEdgePoint().stream().map(nep -> nep.getUuid().getValue()).collect(Collectors.toSet()),
-                new HashSet(Arrays.asList(testNepName+"0", testNepName+"1", testNepName+"2", testNepName+"3"))
+                new HashSet<String>(Arrays.asList(testNepName+"0", testNepName+"1", testNepName+"2", testNepName+"3"))
         );
 
     }
 
     @Test
-    public void testNepAddition() throws TransactionCommitFailedException {
+    public void testNepAddition() throws TransactionCommitFailedException, InterruptedException, ExecutionException {
         //given
         String newNepName = "newNep";
-        performNrpDaoAction(addNode,null).checkedGet();
+        performNrpDaoAction(addNode,null).get();
 
         //when
         OwnedNodeEdgePoint newNep = createNep(newNepName,TerminationDirection.BIDIRECTIONAL);
-        performNrpDaoAction(update, newNep).checkedGet();
+        performNrpDaoAction(update, newNep).get();
 
         //then
         Node node = getAbstractNode(n -> n.getOwnedNodeEdgePoint().size() == init_neps_count + 1);
@@ -108,13 +113,13 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void testNepUpdate() throws TransactionCommitFailedException {
+    public void testNepUpdate() throws TransactionCommitFailedException, InterruptedException, ExecutionException {
         //given
-        performNrpDaoAction(addNode, null).checkedGet();
+        performNrpDaoAction(addNode, null).get();
 
         //when changing not sip related attribute
         OwnedNodeEdgePoint toUpdateNep = createNep(testNepName + "1", TerminationDirection.UNDEFINEDORUNKNOWN);
-        performNrpDaoAction(update, toUpdateNep).checkedGet();
+        performNrpDaoAction(update, toUpdateNep).get();
 
 
         Node node = getAbstractNodeNotNullNep();
@@ -128,7 +133,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
         //given
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         Node n1 = n(tx, false, new Uuid("n1"), "d1", "n1:1", "n1:2");
-        tx.submit().get();
+        tx.commit().get();
 
         Node node = getAbstractNode();
         int neps = node.getOwnedNodeEdgePoint() == null ? 0 : node.getOwnedNodeEdgePoint().size();
@@ -141,7 +146,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
                         Collections.singletonList(TapiUtils.toSipRef(new Uuid("sip:n1:1"), MappedServiceInterfacePoint.class)))
                 .build();
         new NrpDao(tx).updateNep("n1", n11);
-        tx.submit().checkedGet();
+        tx.commit().get();
 
         //then
         node = getAbstractNodeNotNullNep();
@@ -155,7 +160,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
         //given we have sips
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         Node n1 = n(tx, true, new Uuid("n1"), "d1", "n1:1", "n1:2");
-        tx.submit().checkedGet();
+        tx.commit().get();
 
         //assert
         Node node = getAbstractNodeNotNullNep();
@@ -167,19 +172,19 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
                 .setMappedServiceInterfacePoint(Collections.emptyList())
                 .build();
         new NrpDao(tx).updateNep("n1", n11);
-        tx.submit().checkedGet();
+        tx.commit().get();
 
         //then a nep was removed
         getAbstractNode(n -> n.getOwnedNodeEdgePoint().size() == 1);
     }
 
     @Test
-    public void testNodeRemoval() throws TransactionCommitFailedException {
+    public void testNodeRemoval() throws TransactionCommitFailedException, InterruptedException, ExecutionException {
         //given
-        performNrpDaoAction(addNode,null).checkedGet();
+        performNrpDaoAction(addNode,null).get();
 
         //when
-        performNrpDaoAction(removeNode,null).checkedGet();
+        performNrpDaoAction(removeNode,null).get();
 
         //then
         Node node = getAbstractNode(n -> n.getOwnedNodeEdgePoint() != null && n.getOwnedNodeEdgePoint().isEmpty());
@@ -187,13 +192,13 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void testNepRemoval() throws TransactionCommitFailedException {
+    public void testNepRemoval() throws TransactionCommitFailedException, InterruptedException, ExecutionException {
         //given
-        performNrpDaoAction(addNode,null).checkedGet();
+        performNrpDaoAction(addNode,null).get();
         String nepNameToRemove = testNepName + "0";
 
         //when
-        performNrpDaoAction(removeNep,nepNameToRemove).checkedGet();
+        performNrpDaoAction(removeNep,nepNameToRemove).get();
 
         //then
         Node node = getAbstractNode(n -> n.getOwnedNodeEdgePoint().size() == init_neps_count - 1);
@@ -207,11 +212,11 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     private BiConsumer<NrpDao,String> addNode = (dao, nepId) -> dao.createNode(TapiConstants.PRESTO_SYSTEM_TOPO, testSystemNodeName, LayerProtocolName.ETH,createTestOwnedNodeEdgePointList());
     private BiConsumer<NrpDao,OwnedNodeEdgePoint> update = (dao, nep) -> dao.updateNep(testSystemNodeName,nep);
 
-    private <T extends Object> CheckedFuture<Void, TransactionCommitFailedException> performNrpDaoAction(BiConsumer<NrpDao,T> action, T attr) {
+    private <T extends Object> @NonNull FluentFuture<? extends @NonNull CommitInfo> performNrpDaoAction(BiConsumer<NrpDao,T> action, T attr) {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         NrpDao nrpDao = new NrpDao(tx);
         action.accept(nrpDao,attr);
-        return tx.submit();
+        return tx.commit();
     }
 
     private List<OwnedNodeEdgePoint> createTestOwnedNodeEdgePointList() {
@@ -227,7 +232,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     private OwnedNodeEdgePoint createNep(String nepName, boolean associateSip, TerminationDirection td) {
         Uuid uuid = new Uuid(nepName);
         OwnedNodeEdgePointBuilder builder = new OwnedNodeEdgePointBuilder()
-                .setKey(new OwnedNodeEdgePointKey(uuid))
+                .withKey(new OwnedNodeEdgePointKey(uuid))
                 .setLayerProtocolName(LayerProtocolName.ETH)
                 .setUuid(uuid);
                 // TODO donaldh .setTerminationDirection(td);

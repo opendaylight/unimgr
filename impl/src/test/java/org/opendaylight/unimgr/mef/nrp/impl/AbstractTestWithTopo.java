@@ -148,10 +148,15 @@ public abstract class AbstractTestWithTopo extends AbstractConcurrentDataBrokerT
 
         Link link = new LinkBuilder()
                 .setUuid(uuid)
-                .setKey(new LinkKey(uuid))
+                .withKey(new LinkKey(uuid))
                 .setDirection(dir)
                 .setLayerProtocolName(Collections.singletonList(LayerProtocolName.ETH))
                 .setOperationalState(state)
+                .setTransitionedLayerProtocolName(Collections.emptyList())
+                .setCostCharacteristic(Collections.emptyList())
+                .setLatencyCharacteristic(Collections.emptyList())
+                .setRiskCharacteristic(Collections.emptyList())
+                .setValidationMechanism(Collections.emptyList())
                 .setNodeEdgePoint(Stream.of(nepRefA, nepRefB).collect(Collectors.toList()))
 
                 .build();
@@ -257,7 +262,7 @@ public abstract class AbstractTestWithTopo extends AbstractConcurrentDataBrokerT
 
         try(ReadOnlyTransaction tx = dataBroker.newReadOnlyTransaction()) {
             Optional<Node> opt =
-                    tx.read(LogicalDatastoreType.OPERATIONAL,NRP_ABSTRACT_NODE_IID).checkedGet();
+                    tx.read(LogicalDatastoreType.OPERATIONAL,NRP_ABSTRACT_NODE_IID).get();
             if (opt.isPresent()) {
                 return opt.get();
             } else {

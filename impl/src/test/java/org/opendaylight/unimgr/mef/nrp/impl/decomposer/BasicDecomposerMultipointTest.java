@@ -24,6 +24,7 @@ import org.opendaylight.yangtools.yang.common.OperationFailedException;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,12 +48,12 @@ public class BasicDecomposerMultipointTest extends AbstractTestWithTopo {
     public ExpectedException expected = ExpectedException.none();
 
     @Test
-    public void singleNodeTest() throws FailureResult, OperationFailedException {
+    public void singleNodeTest() throws FailureResult, OperationFailedException, InterruptedException, ExecutionException {
         //having
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, "n1", "n1:1", "n1:2", "n1:3", "n1:4");
         n(tx, "n2", "n2:1", "n2:2", "n2:3", "n2:4");
-        tx.submit().checkedGet();
+        tx.commit().get();
         //when
         List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:1"), ep("n1:2"), ep("n1:4")), null);
 
@@ -62,7 +63,7 @@ public class BasicDecomposerMultipointTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void twoConnectedNodesTest() throws FailureResult, OperationFailedException {
+    public void twoConnectedNodesTest() throws FailureResult, OperationFailedException, InterruptedException, ExecutionException {
         //having
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, "n1", "n1:1", "n1:2", "n1:3","n1:4");
@@ -70,7 +71,7 @@ public class BasicDecomposerMultipointTest extends AbstractTestWithTopo {
         n(tx, "n3", "n3:1", "n3:2", "n3:3","n3:4");
         l(tx, "n1", "n1:1", "n2", "n2:1", OperationalState.ENABLED);
         l(tx, "n2", "n2:3", "n3", "n3:3", OperationalState.ENABLED);
-        tx.submit().checkedGet();
+        tx.commit().get();
         //when
         List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:2"), ep("n2:2"), ep("n2:3")), null);
         assertNotNull(decomposed);
@@ -80,7 +81,7 @@ public class BasicDecomposerMultipointTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void fourNodesTopology() throws FailureResult, OperationFailedException {
+    public void fourNodesTopology() throws FailureResult, OperationFailedException, InterruptedException, ExecutionException {
         //having
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, "n1", "n1:1", "n1:2", "n1:3", "n1:4");
@@ -92,7 +93,7 @@ public class BasicDecomposerMultipointTest extends AbstractTestWithTopo {
         l(tx, "n4", "n4:1", "n3", "n3:1", OperationalState.ENABLED);
         l(tx, "n4", "n4:2", "n2", "n2:2", OperationalState.ENABLED);
 
-        tx.submit().checkedGet();
+        tx.commit().get();
         //when
         List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:3"), ep("n1:4"), ep("n2:3")), null);
         assertNotNull(decomposed);

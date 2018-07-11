@@ -127,7 +127,7 @@ public class TopologyDataHandlerTestUtils {
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId nodeId =
                 new org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId(oFName);
         nodeBuilder.setId(nodeId);
-        nodeBuilder.setKey(new org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey(nodeId));
+        nodeBuilder.withKey(new org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey(nodeId));
         List<NodeConnector> nodeConnectorList = new ArrayList<>();
         nodeConnectorList.add(createNodeConnector(oFName,tp1OFport,tp1Name));
         nodeConnectorList.add(createNodeConnector(oFName,tp2OFport,tp2Name));
@@ -141,7 +141,7 @@ public class TopologyDataHandlerTestUtils {
         String ofPortName = ofBridgeName + ":" + portNumber.toString();
         NodeConnectorId nodeConnectorId = new NodeConnectorId(ofPortName);
         nodeConnectorBuilder.setId(nodeConnectorId);
-        nodeConnectorBuilder.setKey(new NodeConnectorKey(nodeConnectorId));
+        nodeConnectorBuilder.withKey(new NodeConnectorKey(nodeConnectorId));
         nodeConnectorBuilder.addAugmentation(FlowCapableNodeConnector.class,createFlowCapableNodeConnector(ovsdbPortName,portNumber));
         return nodeConnectorBuilder.build();
     }

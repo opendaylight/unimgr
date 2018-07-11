@@ -90,7 +90,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
             }
 
             endpoints = input.getEndPoint().stream().map(ep -> {
-                EndPoint2 nrpAttributes = ep.getAugmentation(EndPoint2.class);
+                EndPoint2 nrpAttributes = ep.augmentation(EndPoint2.class);
                 EndPoint endPoint = new EndPoint(ep, nrpAttributes);
                 endPoint.setLocalId(ep.getLocalId());
                 return endPoint;
@@ -299,7 +299,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 populateData(builder, csp);
             }
             builder.setUuid(cepRefBuilder.getConnectionEndPointId());
-            builder.setKey(null);
+            builder.withKey(null);
             ConnectionEndPoint cepRef = nrpDao.addConnectionEndPoint(cepRefBuilder.build(), builder.build());
             ceps.add(cepRef);
         }

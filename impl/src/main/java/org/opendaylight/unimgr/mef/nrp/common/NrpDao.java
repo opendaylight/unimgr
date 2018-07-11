@@ -53,11 +53,11 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.Ow
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.node.OwnedNodeEdgePoint;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.node.OwnedNodeEdgePointBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.node.OwnedNodeEdgePointKey;
-import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.context.Topology;
-import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.context.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.context.Topology;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.context.TopologyKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
@@ -102,10 +102,12 @@ public class NrpDao  {
         Uuid uuid = new Uuid(nodeId);
 
         NodeBuilder nb = new NodeBuilder()
-                .setKey(new NodeKey(uuid))
+                .withKey(new NodeKey(uuid))
                 .setUuid(uuid)
                 .setLayerProtocolName(Collections.singletonList(name))
                 .setOwnedNodeEdgePoint(neps)
+                .setCostCharacteristic(Collections.emptyList())
+                .setLatencyCharacteristic(Collections.emptyList())
                 .addAugmentation(NodeAdiAugmentation.class, new NodeAdiAugmentationBuilder().setActivationDriverId(activationDriverId).build());
 
         Node node = serviceVlanMapList == null ? nb.build() : nb.addAugmentation(NodeSvmAugmentation.class, new NodeSvmAugmentationBuilder().setServiceVlanMap(serviceVlanMapList).build()).build();
@@ -190,7 +192,7 @@ public class NrpDao  {
 
         OwnedNodeEdgePoint1Builder builder;
 
-        OwnedNodeEdgePoint1 aug = nep.getAugmentation(OwnedNodeEdgePoint1.class);
+        OwnedNodeEdgePoint1 aug = nep.augmentation(OwnedNodeEdgePoint1.class);
         if(aug == null) {
             builder = new OwnedNodeEdgePoint1Builder();
         } else {
@@ -402,7 +404,7 @@ public class NrpDao  {
     }
 
     public String getActivationDriverId(Uuid nodeUuid) throws ReadFailedException {
-        return getNode(nodeUuid).getAugmentation(NodeAdiAugmentation.class).getActivationDriverId();
+        return getNode(nodeUuid).augmentation(NodeAdiAugmentation.class).getActivationDriverId();
     }
 
     public void removeConnection(Uuid connectionId) {
@@ -436,8 +438,8 @@ public class NrpDao  {
                 .child(EndPoint.class, new EndPointKey(endPoint.getLocalId()));
 
         tx.put(LogicalDatastoreType.OPERATIONAL, epId, ep);
-        if(endPoint.getAugmentation(EndPoint7.class) != null) {
-            tx.put(LogicalDatastoreType.OPERATIONAL, epId.augmentation(EndPoint1.class), new EndPoint1Builder(endPoint.getAugmentation(EndPoint7.class)).build());
+        if(endPoint.augmentation(EndPoint7.class) != null) {
+            tx.put(LogicalDatastoreType.OPERATIONAL, epId.augmentation(EndPoint1.class), new EndPoint1Builder(endPoint.augmentation(EndPoint7.class)).build());
         }
         //XXX do we need to support name as well?
         ConnectivityService cs = getConnectivityService(serviceId);

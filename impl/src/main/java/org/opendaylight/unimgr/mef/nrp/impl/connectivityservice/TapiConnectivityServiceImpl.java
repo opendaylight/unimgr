@@ -9,8 +9,6 @@
 package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +28,7 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev18030
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.GetConnectionDetailsOutput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.GetConnectivityServiceDetailsInput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.GetConnectivityServiceDetailsOutput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.GetConnectivityServiceListInput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.GetConnectivityServiceListOutput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.TapiConnectivityService;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.UpdateConnectivityServiceInput;
@@ -38,6 +37,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -51,7 +54,7 @@ public class TapiConnectivityServiceImpl implements TapiConnectivityService, Aut
     private DataBroker broker;
     private ConnectivityServiceIdResourcePool serviceIdPool;
 
-    private ExecutorService executor = null;
+    private ListeningExecutorService executor = null;
 
     final static InstanceIdentifier<Context1> connectivityCtx = NrpDao.ctx().augmentation(Context1.class);
 
@@ -63,9 +66,10 @@ public class TapiConnectivityServiceImpl implements TapiConnectivityService, Aut
         Objects.requireNonNull(broker);
         Objects.requireNonNull(serviceIdPool);
         if(executor == null) {
-            executor = new ThreadPoolExecutor(4, 16,
-                    30, TimeUnit.MINUTES,
-                    new LinkedBlockingQueue<>());
+            executor = MoreExecutors.listeningDecorator(
+                    new ThreadPoolExecutor(4, 16,
+                            30, TimeUnit.MINUTES,
+                            new LinkedBlockingQueue<>()));
         }
         LOG.info("TapiConnectivityService initialized");
     }
@@ -76,34 +80,34 @@ public class TapiConnectivityServiceImpl implements TapiConnectivityService, Aut
     }
 
     @Override
-    public Future<RpcResult<CreateConnectivityServiceOutput>> createConnectivityService(CreateConnectivityServiceInput input) {
+    public ListenableFuture<RpcResult<CreateConnectivityServiceOutput>> createConnectivityService(CreateConnectivityServiceInput input) {
         return executor.submit(new CreateConnectivityAction(this, input));
     }
 
 
     @Override
-    public Future<RpcResult<UpdateConnectivityServiceOutput>> updateConnectivityService(UpdateConnectivityServiceInput input) {
+    public ListenableFuture<RpcResult<UpdateConnectivityServiceOutput>> updateConnectivityService(UpdateConnectivityServiceInput input) {
     	return executor.submit(new UpdateConnectivityAction(this, input));
     }
 
     @Override
-    public Future<RpcResult<GetConnectionDetailsOutput>> getConnectionDetails(GetConnectionDetailsInput input) {
+    public ListenableFuture<RpcResult<GetConnectionDetailsOutput>> getConnectionDetails(GetConnectionDetailsInput input) {
         return executor.submit(new GetConnectionDetailsAction(this, input));
     }
 
     @Override
-    public Future<RpcResult<GetConnectivityServiceDetailsOutput>> getConnectivityServiceDetails(GetConnectivityServiceDetailsInput input) {
+    public ListenableFuture<RpcResult<GetConnectivityServiceDetailsOutput>> getConnectivityServiceDetails(GetConnectivityServiceDetailsInput input) {
         return executor.submit(new GetConnectivityDetailsAction(this, input));
     }
 
     @Override
-    public Future<RpcResult<DeleteConnectivityServiceOutput>> deleteConnectivityService(DeleteConnectivityServiceInput input) {
+    public ListenableFuture<RpcResult<DeleteConnectivityServiceOutput>> deleteConnectivityService(DeleteConnectivityServiceInput input) {
         return executor.submit(new DeleteConnectivityAction(this,input));
 
     }
 
     @Override
-    public Future<RpcResult<GetConnectivityServiceListOutput>> getConnectivityServiceList() {
+    public ListenableFuture<RpcResult<GetConnectivityServiceListOutput>> getConnectivityServiceList(GetConnectivityServiceListInput input) {
         return executor.submit(new ListConnectivityAction(this));
     }
 
@@ -124,7 +128,7 @@ public class TapiConnectivityServiceImpl implements TapiConnectivityService, Aut
         this.broker = broker;
     }
 
-    public void setExecutor(ExecutorService executor) {
+    public void setExecutor(ListeningExecutorService executor) {
         if(executor != null) throw new IllegalStateException();
         this.executor = executor;
     }

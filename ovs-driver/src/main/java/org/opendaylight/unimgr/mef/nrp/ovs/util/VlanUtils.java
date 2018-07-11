@@ -61,7 +61,7 @@ public class VlanUtils {
             throw new ResourceNotAvailableException(MessageFormat.format("Node {} not found", nodeId));
         }
 
-        node.getAugmentation(NodeSvmAugmentation.class).getServiceVlanMap().forEach(serviceVlanMap -> usedVlans.add(serviceVlanMap.getVlanId().getValue().intValue()));
+        node.augmentation(NodeSvmAugmentation.class).getServiceVlanMap().forEach(serviceVlanMap -> usedVlans.add(serviceVlanMap.getVlanId().getValue().intValue()));
     }
 
     /**
@@ -69,7 +69,7 @@ public class VlanUtils {
      * @param serviceName
      */
     public Integer getVlanID(String serviceName) throws ResourceNotAvailableException, TransactionCommitFailedException {
-        Optional<ServiceVlanMap> o = node.getAugmentation(NodeSvmAugmentation.class).getServiceVlanMap().stream().filter(serviceVlanMap -> serviceVlanMap.getServiceId().equals(serviceName)).findFirst();
+        Optional<ServiceVlanMap> o = node.augmentation(NodeSvmAugmentation.class).getServiceVlanMap().stream().filter(serviceVlanMap -> serviceVlanMap.getServiceId().equals(serviceName)).findFirst();
         return o.isPresent()? o.get().getVlanId().getValue().intValue() : generateVid(serviceName);
     }
 
@@ -83,7 +83,7 @@ public class VlanUtils {
     }
 
     private Integer updateNodeNewServiceVLAN(String serviceName, Integer vlanId) {
-        List<ServiceVlanMap> list = node.getAugmentation(NodeSvmAugmentation.class).getServiceVlanMap();
+        List<ServiceVlanMap> list = node.augmentation(NodeSvmAugmentation.class).getServiceVlanMap();
         list.add(new ServiceVlanMapBuilder().setServiceId(serviceName).setVlanId(PositiveInteger.getDefaultInstance(vlanId.toString())).build());
         node = new NodeBuilder(node).addAugmentation(NodeSvmAugmentation.class ,new NodeSvmAugmentationBuilder().setServiceVlanMap(list).build()).build();
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
@@ -93,7 +93,7 @@ public class VlanUtils {
     }
 
     public void releaseServiceVlan(String serviceName) {
-        List<ServiceVlanMap> list = node.getAugmentation(NodeSvmAugmentation.class).getServiceVlanMap();
+        List<ServiceVlanMap> list = node.augmentation(NodeSvmAugmentation.class).getServiceVlanMap();
         list.removeIf(serviceVlanMap -> serviceVlanMap.getServiceId().equals(serviceName));
         node = new NodeBuilder(node).addAugmentation(NodeSvmAugmentation.class ,new NodeSvmAugmentationBuilder().setServiceVlanMap(list).build()).build();
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();

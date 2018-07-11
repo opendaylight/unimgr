@@ -7,13 +7,15 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs.transaction;
 
-import com.google.common.base.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
-import org.opendaylight.unimgr.utils.MdsalUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.util.MdsalUtilsExt;
 import org.opendaylight.unimgr.mef.nrp.ovs.util.NullAwareDatastoreGetter;
+import org.opendaylight.unimgr.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
@@ -24,8 +26,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.google.common.base.Optional;
 
 /**
  * Performs reading transactions related to openflow topology
@@ -75,7 +76,7 @@ public class TopologyTransaction {
             if (node.get().isPresent()) {
                 for (NodeConnector nodeConnector:node.get().get().getNodeConnector()) {
                     FlowCapableNodeConnector flowCapableNodeConnector
-                            = nodeConnector.getAugmentation(FlowCapableNodeConnector.class);
+                            = nodeConnector.augmentation(FlowCapableNodeConnector.class);
                     if (portName.equals(flowCapableNodeConnector.getName())) {
                         return node.get().get();
                     }

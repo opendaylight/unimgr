@@ -96,7 +96,7 @@ public class InterfaceHelperTest {
         assertNotNull(actualInterfaceConfiguration);
         assertEquals(interfaceName, actualInterfaceConfiguration.getInterfaceName());
         assertNull(actualInterfaceConfiguration.getMtus());
-        assertNull(actualInterfaceConfiguration.getAugmentation(InterfaceConfiguration3.class));
+        assertNull(actualInterfaceConfiguration.augmentation(InterfaceConfiguration3.class));
     }
 
     @Test
@@ -137,7 +137,7 @@ public class InterfaceHelperTest {
         assertEquals(mtuValue, actualMtu.getMtu().longValue());
         assertEquals(owner, actualMtu.getOwner());
 
-        InterfaceConfiguration3 l2Configuration = actualInterfaceConfiguration.getAugmentation(InterfaceConfiguration3.class);
+        InterfaceConfiguration3 l2Configuration = actualInterfaceConfiguration.augmentation(InterfaceConfiguration3.class);
         assertNotNull(l2Configuration);
         assertNotNull(l2Configuration.getL2Transport());
         assertTrue(l2Configuration.getL2Transport().isEnabled());
@@ -172,13 +172,13 @@ public class InterfaceHelperTest {
         assertNotNull(actualInterfaceConfiguration);
         assertEquals(interfaceName1, actualInterfaceConfiguration.getInterfaceName());
         assertNull(actualInterfaceConfiguration.getMtus());
-        assertNull(actualInterfaceConfiguration.getAugmentation(InterfaceConfiguration3.class));
+        assertNull(actualInterfaceConfiguration.augmentation(InterfaceConfiguration3.class));
 
         actualInterfaceConfiguration = actualInterfaceConfigurationList.get(1);
 
         assertNotNull(actualInterfaceConfiguration);
         assertEquals(interfaceName2, actualInterfaceConfiguration.getInterfaceName());
         assertNull(actualInterfaceConfiguration.getMtus());
-        assertNull(actualInterfaceConfiguration.getAugmentation(InterfaceConfiguration3.class));
+        assertNull(actualInterfaceConfiguration.augmentation(InterfaceConfiguration3.class));
     }
 }
