@@ -136,7 +136,7 @@ public class NrpDaoIntTest extends AbstractTestWithTopo {
         assertFalse(topology.getNode().stream().flatMap(n -> n.getOwnedNodeEdgePoint().stream())
                 .anyMatch(nep -> {
                     //find nep with at least single CEP
-                    OwnedNodeEdgePoint1 aug = nep.getAugmentation(OwnedNodeEdgePoint1.class);
+                    OwnedNodeEdgePoint1 aug = nep.augmentation(OwnedNodeEdgePoint1.class);
                     return aug != null && aug.getConnectionEndPoint() != null && aug.getConnectionEndPoint().size() > 0;
                 })
         );
@@ -148,7 +148,7 @@ public class NrpDaoIntTest extends AbstractTestWithTopo {
 
         OwnedNodeEdgePoint nep = new NrpDao(tx).readNep(nodeid, nepid);
         Assert.assertNotNull(nep);
-        OwnedNodeEdgePoint1 aug = nep.getAugmentation(OwnedNodeEdgePoint1.class);
+        OwnedNodeEdgePoint1 aug = nep.augmentation(OwnedNodeEdgePoint1.class);
         Assert.assertNotNull(aug);
         Assert.assertEquals(noCeps, aug.getConnectionEndPoint().size());
         return aug;

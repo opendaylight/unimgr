@@ -148,7 +148,7 @@ public abstract class AbstractTestWithTopo extends AbstractConcurrentDataBrokerT
 
         Link link = new LinkBuilder()
                 .setUuid(uuid)
-                .setKey(new LinkKey(uuid))
+                .withKey(new LinkKey(uuid))
                 .setDirection(dir)
                 .setLayerProtocolName(Collections.singletonList(LayerProtocolName.ETH))
                 .setOperationalState(state)

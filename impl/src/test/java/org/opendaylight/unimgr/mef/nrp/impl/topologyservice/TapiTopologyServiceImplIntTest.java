@@ -49,7 +49,8 @@ public class TapiTopologyServiceImplIntTest extends AbstractTestWithTopo {
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
         tx.submit().checkedGet();
 
-        RpcResult<GetTopologyListOutput> output = tapiTopologyService.getTopologyList().get();
+        RpcResult<GetTopologyListOutput> output = tapiTopologyService.getTopologyList(
+                new GetTopologyListInputBuilder().build()).get();
 
         Assert.assertTrue(output.isSuccessful());
 

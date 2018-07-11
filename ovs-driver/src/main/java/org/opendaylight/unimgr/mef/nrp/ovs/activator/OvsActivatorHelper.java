@@ -103,7 +103,7 @@ class OvsActivatorHelper {
             if (node.get().isPresent()) {
                 for (NodeConnector nodeConnector : node.get().get().getNodeConnector()) {
                     String ofName = nodeConnector.getId().getValue();
-                    FlowCapableNodeConnector flowCapableNodeConnector = nodeConnector.getAugmentation(FlowCapableNodeConnector.class);
+                    FlowCapableNodeConnector flowCapableNodeConnector = nodeConnector.augmentation(FlowCapableNodeConnector.class);
                     String name = flowCapableNodeConnector.getName();
                     portMap.put(name, ofName);
                 }

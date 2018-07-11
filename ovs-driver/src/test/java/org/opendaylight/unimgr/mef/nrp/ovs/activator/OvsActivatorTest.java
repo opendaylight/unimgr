@@ -261,12 +261,12 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
     }
 
     private org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node createOpenFlowNode(Node node) {
-        String ovsdbName = node.getKey().getNodeId().getValue();
+        String ovsdbName = node.key().getNodeId().getValue();
         String ofBridgeName = getOfName(ovsdbName);
 
         List<NodeConnector> nodeConnectors = new ArrayList<>();
         node.getTerminationPoint()
-                .forEach(tp -> nodeConnectors.add(OpenFlowTopologyTestUtils.createNodeConnector(ofBridgeName, tp.getAugmentation(OvsdbTerminationPointAugmentation.class).getOfport(), ovsdbName+"-eth"+tp.getAugmentation(OvsdbTerminationPointAugmentation.class).getOfport())));
+                .forEach(tp -> nodeConnectors.add(OpenFlowTopologyTestUtils.createNodeConnector(ofBridgeName, tp.augmentation(OvsdbTerminationPointAugmentation.class).getOfport(), ovsdbName+"-eth"+tp.augmentation(OvsdbTerminationPointAugmentation.class).getOfport())));
 
         return OpenFlowTopologyTestUtils.createOpenFlowNode(ofBridgeName,nodeConnectors);
     }

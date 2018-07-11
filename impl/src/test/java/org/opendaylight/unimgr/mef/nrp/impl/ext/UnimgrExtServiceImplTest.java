@@ -24,6 +24,7 @@ import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.types.rev180321.Natu
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.ServiceInterfacePoint1;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.AddSipInput;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.AddSipInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.AddSipOutput;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.add.sip.input.sip.type.EnniSpecBuilder;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.add.sip.input.sip.type.InniSpecBuilder;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.add.sip.input.sip.type.UniSpecBuilder;
@@ -49,7 +50,7 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
     @Test
     public void addSipNoNep() throws Exception {
         AddSipInput input = input("non-existing-nep");
-        RpcResult<Void> result = extService.addSip(input).get();
+        RpcResult<AddSipOutput> result = extService.addSip(input).get();
         assertFalse(result.isSuccessful());
     }
 
@@ -62,10 +63,10 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
         tx.submit().checkedGet();
 
         AddSipInput input = input(nodeId + ":1", SipType.enni);
-        RpcResult<Void> result = extService.addSip(input).get();
+        RpcResult<AddSipOutput> result = extService.addSip(input).get();
         assertTrue(result.isSuccessful());
         verifySipExists(nodeId + ":1", sip -> {
-            ServiceInterfacePoint1 lpAug = sip.getAugmentation(ServiceInterfacePoint1.class);
+            ServiceInterfacePoint1 lpAug = sip.augmentation(ServiceInterfacePoint1.class);
             assertNotNull(lpAug);
             assertNotNull(lpAug.getNrpCarrierEthEnniNResource());
         });
@@ -82,7 +83,7 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
         tx.submit().checkedGet();
 
         AddSipInput input = input(nodeId + ":1");
-        RpcResult<Void> result = extService.addSip(input).get();
+        RpcResult<AddSipOutput> result = extService.addSip(input).get();
         assertFalse(result.isSuccessful());
         verifySipExists(nodeId + ":1");
     }

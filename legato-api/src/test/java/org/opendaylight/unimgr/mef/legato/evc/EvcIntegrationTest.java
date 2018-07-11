@@ -119,7 +119,7 @@ public class EvcIntegrationTest {
 
         CosNameBuilder builder = new CosNameBuilder();
         builder.setName(new Identifier1024(Constants.COSNAME));
-        builder.setKey(new CosNameKey(new Identifier1024(Constants.COSNAME)));
+        builder.withKey(new CosNameKey(new Identifier1024(Constants.COSNAME)));
 
         final List<CosName> cosNameList = new ArrayList<CosName>();
         cosNameList.add(builder.build());
@@ -145,7 +145,7 @@ public class EvcIntegrationTest {
         endPointList.add(endPointBuilder1.build());
         endPointList.add(endPointBuilder2.build());
 
-        evc = (Evc) new EvcBuilder().setKey(new EvcKey(new EvcIdType(Constants.EVC_ID_TYPE)))
+        evc = (Evc) new EvcBuilder().withKey(new EvcKey(new EvcIdType(Constants.EVC_ID_TYPE)))
                 .setMaxFrameSize(new MaxFrameSizeType(Constants.MAXFRAME_SIZE_TYPE))
                 .setEvcId(new EvcIdType(Constants.EVC_ID_TYPE))
                 .setSvcType(MefServiceType.Epl)

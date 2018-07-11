@@ -190,7 +190,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
 
     BiConsumer<Map<TerminationPoint,String>,NrpDao> addAction = (map,dao) -> {
         List<OwnedNodeEdgePoint> newNeps = getNewNeps(map);
-        newNeps.forEach(nep -> addEndpoint(dao,nep.getKey().getUuid().getValue()));
+        newNeps.forEach(nep -> addEndpoint(dao,nep.key().getUuid().getValue()));
     };
 
     private void executeDbAction(BiConsumer<Map<TerminationPoint,String>,NrpDao> action,Map<TerminationPoint,String> map) {
@@ -230,7 +230,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         Uuid uuid = new Uuid(nepName);
         return new OwnedNodeEdgePointBuilder()
                 .setUuid(uuid)
-                .setKey(new OwnedNodeEdgePointKey(uuid))
+                .withKey(new OwnedNodeEdgePointKey(uuid))
                 .setLinkPortDirection(PortDirection.BIDIRECTIONAL)
                 .setLinkPortRole(PortRole.SYMMETRIC)
                 .setLayerProtocolName(LayerProtocolName.ETH)
@@ -253,7 +253,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         Uuid tpId = new Uuid(OVS_NODE + DELIMETER + nepId);
         return tpBuilder
                 .setUuid(tpId)
-                .setKey(new OwnedNodeEdgePointKey(tpId))
+                .withKey(new OwnedNodeEdgePointKey(tpId))
                 .build();
     }
 
@@ -265,7 +265,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
 
     //TODO: write better implementation
     private boolean isNep(TerminationPoint terminationPoint) {
-        OvsdbTerminationPointAugmentation ovsdbTerminationPoint = terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+        OvsdbTerminationPointAugmentation ovsdbTerminationPoint = terminationPoint.augmentation(OvsdbTerminationPointAugmentation.class);
         if ( ovsdbTerminationPoint==null || (ovsdbTerminationPoint.getInterfaceType()!=null && ovsdbTerminationPoint.getInterfaceType().equals(InterfaceTypeInternal.class))) {
             return false;
         }

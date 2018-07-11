@@ -225,7 +225,7 @@ public class OvsdbUtils {
 				if (otp.isPresent()) {
 					TerminationPoint tp = otp.get();
 					OvsdbTerminationPointAugmentation ovsdbTpAug = tp
-							.getAugmentation(OvsdbTerminationPointAugmentation.class);
+							.augmentation(OvsdbTerminationPointAugmentation.class);
 					if (ovsdbTpAug != null && ovsdbTpAug.getQosEntry() != null) {
 						for (QosEntry qosEntry : ovsdbTpAug.getQosEntry()) {
 							OvsdbQosRef qosRef = qosEntry.getQosRef();
@@ -359,7 +359,7 @@ public class OvsdbUtils {
 				.child(Topology.class, new TopologyKey(ovsdbTopoId))
 				.child(Node.class, new NodeKey(odlNodeId))
 				.augmentation(OvsdbNodeAugmentation.class)
-				.child(Queues.class, queue.getKey());
+				.child(Queues.class, queue.key());
 	}
 	
 	private static InstanceIdentifier<QosEntries> getQosEntryInstanceIdentifier(QosEntries qosEntries) {
@@ -367,7 +367,7 @@ public class OvsdbUtils {
 				.child(Topology.class, new TopologyKey(ovsdbTopoId))
 				.child(Node.class, new NodeKey(odlNodeId))
 				.augmentation(OvsdbNodeAugmentation.class)
-				.child(QosEntries.class, qosEntries.getKey());
+				.child(QosEntries.class, qosEntries.key());
 	}
 	
     private static InstanceIdentifier<TerminationPoint> getTerminationPointInstanceIdentifier(Node bridgeNode, TerminationPoint tp){
@@ -375,8 +375,8 @@ public class OvsdbUtils {
                         .create(NetworkTopology.class)
                         .child(Topology.class,
                                 new TopologyKey(ovsdbTopoId))
-                        .child(Node.class, bridgeNode.getKey())
-                        .child(TerminationPoint.class, tp.getKey());
+                        .child(Node.class, bridgeNode.key())
+                        .child(TerminationPoint.class, tp.key());
     }
     
     private static InstanceIdentifier<QosEntry> getTerminationPointQosEntryInstanceIdentifier(Node bridgeNode, TerminationPoint tp, QosEntry qosEntry){
@@ -384,15 +384,15 @@ public class OvsdbUtils {
                         .create(NetworkTopology.class)
                         .child(Topology.class,
                                 new TopologyKey(ovsdbTopoId))
-                        .child(Node.class, bridgeNode.getKey())
-                        .child(TerminationPoint.class, tp.getKey())
+                        .child(Node.class, bridgeNode.key())
+                        .child(TerminationPoint.class, tp.key())
                         .augmentation(OvsdbTerminationPointAugmentation.class)
-                        .child(QosEntry.class, qosEntry.getKey());
+                        .child(QosEntry.class, qosEntry.key());
     }
 
     private static TerminationPoint buildTerminationPoint(TerminationPoint tp, InstanceIdentifier<QosEntries> qosInstanceIdentifier){
         TerminationPointBuilder terminationPointBuilder = new TerminationPointBuilder();
-                 terminationPointBuilder.setKey(tp.getKey());
+                 terminationPointBuilder.withKey(tp.key());
                 terminationPointBuilder.setTpId(tp.getTpId());
         terminationPointBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class,addQosToPort(tp.getTpId().getValue(), qosInstanceIdentifier));
         return terminationPointBuilder.build();
@@ -402,7 +402,7 @@ public class OvsdbUtils {
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();        
 		List<QosEntry> qosList = new ArrayList<>();
 		OvsdbQosRef qosRef = new OvsdbQosRef(qosInstanceIdentifier);
-		qosList.add(new QosEntryBuilder().setKey(new QosEntryKey(new Long(SouthboundConstants.PORT_QOS_LIST_KEY)))
+		qosList.add(new QosEntryBuilder().withKey(new QosEntryKey(new Long(SouthboundConstants.PORT_QOS_LIST_KEY)))
 				.setQosRef(qosRef).build());
 		ovsdbTerminationPointAugmentationBuilder.setQosEntry(qosList);
 
