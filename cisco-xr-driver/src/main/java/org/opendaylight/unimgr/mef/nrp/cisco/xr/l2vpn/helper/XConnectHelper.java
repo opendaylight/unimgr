@@ -61,7 +61,7 @@ public class XConnectHelper {
 
     public XconnectGroup build(String name) {
         return new XconnectGroupBuilder()
-            .setKey(new XconnectGroupKey(new CiscoIosXrString(name)))
+            .withKey(new XconnectGroupKey(new CiscoIosXrString(name)))
             .setName(new CiscoIosXrString(name))
             .setP2pXconnects(buildP2pXconnects())
             .build();

@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 public class TapiTopologyServiceImplIntTest extends AbstractTestWithTopo {
 
     private String uuid1 = "uuid1";
-    private String uuid2 = "uuid2";
 
     private TapiTopologyServiceImpl tapiTopologyService;
 
@@ -49,7 +48,8 @@ public class TapiTopologyServiceImplIntTest extends AbstractTestWithTopo {
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
         tx.submit().checkedGet();
 
-        RpcResult<GetTopologyListOutput> output = tapiTopologyService.getTopologyList().get();
+        RpcResult<GetTopologyListOutput> output = tapiTopologyService.getTopologyList(
+                new GetTopologyListInputBuilder().build()).get();
 
         Assert.assertTrue(output.isSuccessful());
 
@@ -141,6 +141,7 @@ public class TapiTopologyServiceImplIntTest extends AbstractTestWithTopo {
     @Test
     public void getLink() throws TransactionCommitFailedException, ExecutionException, InterruptedException {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
+        String uuid2 = "uuid2";
         String linkId = uuid1 + "-" + uuid2;
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
         n(tx, uuid2, uuid2 + ":1", uuid2 + ":2", uuid2 + ":3");

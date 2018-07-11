@@ -8,8 +8,11 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.unimgr.mef.nrp.api.RequestValidator;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.LocalClass;
@@ -17,21 +20,16 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev18030
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.UpdateConnectivityServiceInput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.ConnectivityService;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.update.connectivity.service.input.EndPoint;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
 /**
+ * Simple default validator for RPC inputs.
  * @author bartosz.michalik@amartus.com
  */
 public class DefaultValidator implements RequestValidator {
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultValidator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultValidator.class);
 
     private final  DataBroker dataBroker;
 
@@ -40,19 +38,53 @@ public class DefaultValidator implements RequestValidator {
     }
 
     @Override
-    public ValidationResult checkValid(CreateConnectivityServiceInput input) {
-        log.debug("Validation for requrst started");
-        ValidationResult fromInput= verifyPayloadCorrect(input);
-
+    public @Nonnull ValidationResult checkValid(CreateConnectivityServiceInput input) {
+        LOG.debug("Validation for request started");
+        ValidationResult fromInput = verifyPayloadCorrect(input);
         ValidationResult fromState = validateState(input);
-
-
 
         return fromState.merge(fromInput);
     }
 
+    @Override
+    public @Nonnull ValidationResult checkValid(UpdateConnectivityServiceInput input) {
+        ConnectivityService cs = new NrpDao(dataBroker.newReadOnlyTransaction())
+                .getConnectivityService(input.getServiceIdOrName());
+
+        if (cs == null) {
+            return new ValidationResult()
+                    .problem(String.format("Connectivity service %s does not exists", input.getServiceIdOrName()));
+        }
+
+        EndPoint ep = input.getEndPoint();
+        if (ep == null) {
+            return new ValidationResult()
+                    .problem(String.format("Endpoint not defined for %s", input.getServiceIdOrName()));
+        }
+
+        Optional<
+                org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.EndPoint
+                > epFromCs = cs.getEndPoint().stream()
+                .filter(e -> e.getLocalId().equals(ep.getLocalId())).findFirst();
+        if (! epFromCs.isPresent()) {
+            return new ValidationResult()
+                    .problem(String
+                            .format("No endpoint with local id %1$s defined for %2$s",
+                                    ep.getLocalId(), input.getServiceIdOrName()));
+        }
+
+        if (!epFromCs.get().getServiceInterfacePoint().equals(ep.getServiceInterfacePoint())) {
+            return new ValidationResult()
+                    .problem(String
+                            .format("Sip mapping for endpoint %1$s is not matching for service %2$s",
+                                    ep.getLocalId(), input.getServiceIdOrName()));
+        }
+
+        return new ValidationResult();
+    }
+
     @Nonnull protected  ValidationResult validateState(CreateConnectivityServiceInput input) {
-        // simple usecase to validate port based service
+        // simple use case to validate port based service
         // more complex implementation could use caching techniques
         //TODO implement
 
@@ -63,7 +95,7 @@ public class DefaultValidator implements RequestValidator {
 
         ValidationResult validationResult = new ValidationResult();
 
-        if(input.getEndPoint() == null || input.getEndPoint().isEmpty()) {
+        if (input.getEndPoint() == null || input.getEndPoint().isEmpty()) {
             validationResult.problem("No endpoints specified for a connectivity service");
         } else {
 
@@ -79,28 +111,5 @@ public class DefaultValidator implements RequestValidator {
 
 
         return validationResult;
-    }
-
-    @Override
-    public ValidationResult checkValid(UpdateConnectivityServiceInput input) {
-        ConnectivityService cs = new NrpDao(dataBroker.newReadOnlyTransaction()).getConnectivityService(input.getServiceIdOrName());
-
-        if(cs == null) {
-            return new ValidationResult().problem(String.format("Connectivity service %s does not exists", input.getServiceIdOrName()));
-        }
-
-        EndPoint ep = input.getEndPoint();
-        if(ep == null) return new ValidationResult().problem(String.format("Endpoint not defined for %s", input.getServiceIdOrName()));
-
-        Optional<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.EndPoint> epFromCs = cs.getEndPoint().stream()
-                .filter(e -> e.getLocalId().equals(ep.getLocalId())).findFirst();
-        if(! epFromCs.isPresent())
-            return new ValidationResult().problem(String.format("No endpoint with local id %1$s defined for %2$s", ep.getLocalId(), input.getServiceIdOrName()));
-
-        if(!epFromCs.get().getServiceInterfacePoint().equals(ep.getServiceInterfacePoint())) {
-            return new ValidationResult().problem(String.format("Sip mapping for endpoint %1$s is not matching for service %2$s", ep.getLocalId(), input.getServiceIdOrName()));
-        }
-
-        return new ValidationResult();
     }
 }

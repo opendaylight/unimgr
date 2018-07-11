@@ -75,7 +75,7 @@ public class XConnectHelperTest {
         //then
         assertNotNull(xconnectGroup);
         assertEquals(xConnectGroupName, xconnectGroup.getName().getValue());
-        assertEquals(xConnectGroupName, xconnectGroup.getKey().getName().getValue());
+        assertEquals(xConnectGroupName, xconnectGroup.key().getName().getValue());
 
         P2pXconnects p2pXconnects = xconnectGroup.getP2pXconnects();
         assertEquals(p2pXconnects, xconnectGroup.getP2pXconnects());

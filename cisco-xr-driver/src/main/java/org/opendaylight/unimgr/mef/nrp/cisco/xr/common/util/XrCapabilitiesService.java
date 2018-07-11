@@ -24,7 +24,7 @@ public class XrCapabilitiesService extends CapabilitiesService {
     }
 
     public enum NodeCapability implements Capability<Node> {
-        NETCONF((dbBroker, node) -> node.getAugmentation(NetconfNode.class) != null),
+        NETCONF((dbBroker, node) -> node.augmentation(NetconfNode.class) != null),
         NETCONF_CISCO_IOX_L2VPN((dbBroker, node) ->
                 checkForNetconfCapability(node, NetconfConstants.CAPABILITY_IOX_L2VPN)),
         NETCONF_CISCO_IOX_IFMGR((dbBroker, node) ->
@@ -44,7 +44,7 @@ public class XrCapabilitiesService extends CapabilitiesService {
         }
 
         private static boolean checkForNetconfCapability(Node node, String netconf_capability) {
-            NetconfNode netconf = node.getAugmentation(NetconfNode.class);
+            NetconfNode netconf = node.augmentation(NetconfNode.class);
             if (netconf == null) {
                 return false;
             }

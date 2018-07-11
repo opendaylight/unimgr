@@ -7,13 +7,9 @@
  */
 package org.opendaylight.unimgr.mef.legato.util;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -58,6 +54,9 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 
 /**
  * @author santanu.de@xoriant.com
@@ -255,7 +254,7 @@ public class LegatoUtils {
         org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.update.connectivity.service.input.EndPointBuilder endPointBuilder = new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.update.connectivity.service.input.EndPointBuilder();
         String[] uniArr;
 
-        if (StringUtils.isNotBlank(uniStr)) {
+        if (uniStr != null && !uniStr.trim().isEmpty()) {
             uniArr = uniStr.split("#");
             ServiceInterfacePoint sipRef = new ServiceInterfacePointBuilder()
                     .setServiceInterfacePointId(new Uuid(uniArr[0])).build();

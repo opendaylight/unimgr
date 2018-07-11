@@ -9,12 +9,7 @@
 package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 
 import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -48,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Delete connectivity implementation.
  * @author bartosz.michalik@amartus.com
  */
 public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnectivityServiceOutput>> {
@@ -58,7 +54,8 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
     private Uuid serviceId;
     private List<Uuid> connectionIds = new LinkedList<>();
 
-    DeleteConnectivityAction(TapiConnectivityServiceImpl tapiConnectivityService, DeleteConnectivityServiceInput input) {
+    DeleteConnectivityAction(TapiConnectivityServiceImpl tapiConnectivityService,
+                             DeleteConnectivityServiceInput input) {
         Objects.requireNonNull(tapiConnectivityService);
         Objects.requireNonNull(input);
         this.service = tapiConnectivityService;
@@ -75,7 +72,8 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
         if (cs == null) {
             return RpcResultBuilder
                     .<DeleteConnectivityServiceOutput>failed()
-                    .withError(RpcError.ErrorType.APPLICATION, MessageFormat.format("Service {0} does not exist", input.getServiceIdOrName()))
+                    .withError(RpcError.ErrorType.APPLICATION,
+                            MessageFormat.format("Service {0} does not exist", input.getServiceIdOrName()))
                     .build();
         }
         Map<Uuid, LinkedList<EndPoint>> data;
@@ -85,7 +83,9 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
             LOG.info("Service {} does not exists", input.getServiceIdOrName());
             return RpcResultBuilder
                     .<DeleteConnectivityServiceOutput>failed()
-                    .withError(RpcError.ErrorType.APPLICATION, MessageFormat.format("error while preparing data for service {0} ", input.getServiceIdOrName()))
+                    .withError(RpcError.ErrorType.APPLICATION,
+                            MessageFormat.format("error while preparing data for service {0} ",
+                                    input.getServiceIdOrName()))
                     .build();
         }
 
@@ -106,7 +106,8 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
                             .setService(new ServiceBuilder(response).build()).build();
                     return RpcResultBuilder.success(result).build();
                 } else {
-                    LOG.warn("CreateConnectivityService deactivation failed, reason = {}, request = {}", txResult.getMessage(), input);
+                    LOG.warn("CreateConnectivityService deactivation failed, reason = {}, request = {}",
+                            txResult.getMessage(), input);
                 }
             }
             throw new IllegalStateException("no transaction created for delete connectivity request");
@@ -123,7 +124,8 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
         NrpDao nrpDao = new NrpDao(tx);
         InstanceIdentifier<Context1> conCtx = NrpDao.ctx().augmentation(Context1.class);
         LOG.debug("Removing connectivity service {}", serviceId.getValue());
-        tx.delete(LogicalDatastoreType.OPERATIONAL, conCtx.child(ConnectivityService.class, new ConnectivityServiceKey(serviceId)));
+        tx.delete(LogicalDatastoreType.OPERATIONAL, conCtx.child(ConnectivityService.class,
+                new ConnectivityServiceKey(serviceId)));
         connectionIds.forEach(csId -> {
             LOG.debug("Removing connection {}", csId.getValue());
             nrpDao.removeConnection(csId);
@@ -143,7 +145,8 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
                 LOG.warn("Unable to get activationDriverId for node {}",e.getKey(),e1);
             }
             if (!driver.isPresent()) {
-                throw new IllegalStateException(MessageFormat.format("driver {} cannot be created", e.getKey()));
+                throw new IllegalStateException(MessageFormat
+                        .format("driver {} cannot be created", e.getKey()));
             }
             driver.get().initialize(e.getValue(), serviceId.getValue(), null);
             LOG.debug("driver {} added to deactivation transaction", driver.get());
@@ -173,7 +176,8 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
                     final Uuid nodeId = c.getConnectionEndPoint().get(0).getNodeId();
 
                     return c.getConnectionEndPoint().stream().map(cep -> {
-                        Optional<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.EndPoint> optEndPoint = Optional.empty();
+                        Optional<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+                                .connectivity.service.EndPoint> optEndPoint = Optional.empty();
 
                         OwnedNodeEdgePoint nep = nrpDao.getNepByCep(cep);
 
@@ -183,24 +187,29 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
                                     .filter(csEp -> {
                                         Uuid csSip = csEp.getServiceInterfacePoint().getServiceInterfacePointId();
                                         return nep.getMappedServiceInterfacePoint().stream()
-                                                .map(ServiceInterfacePointRef::getServiceInterfacePointId).anyMatch(mSip -> mSip.equals(csSip));
+                                                .map(ServiceInterfacePointRef::getServiceInterfacePointId)
+                                                .anyMatch(mSip -> mSip.equals(csSip));
                                     })
                                     .findFirst();
                         }
-                        org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.EndPoint endPoint =
-                                optEndPoint.orElse(null);
+                        org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+                                .connectivity.service.EndPoint endPoint = optEndPoint.orElse(null);
 
 
-                        EndPoint ep = new EndPoint(endPoint, null).setNepRef(TapiUtils.toSysNepRef(nodeId, nep.getUuid()));
+                        EndPoint ep = new EndPoint(endPoint, null)
+                                .setNepRef(TapiUtils.toSysNepRef(nodeId, nep.getUuid()));
                         return new Pair(nodeId, ep);
                     });
-                }).collect(Collectors.toMap(Pair::getNodeId, p -> new LinkedList<>(Arrays.asList(p.getEndPoint())), (ol, nl) -> {
-                    ol.addAll(nl);
-                    return ol;
-                }));
+                }).collect(Collectors
+                        .toMap(Pair::getNodeId, p -> new LinkedList<>(Collections.singletonList(p.getEndPoint())),
+                        (ol, nl) -> {
+                            ol.addAll(nl);
+                            return ol;
+                        }
+                ));
     }
 
-    private static  class Pair {
+    private static final class Pair {
         private final Uuid nodeId;
         private final EndPoint endPoint;
 

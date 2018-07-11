@@ -8,14 +8,19 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl;
 
+import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_CTX;
+import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_EXT_TOPO;
+import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_SYSTEM_TOPO;
+
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+import java.util.Arrays;
+import java.util.Collections;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.api.TopologyManager;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Context;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.ContextBuilder;
@@ -32,12 +37,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Collections;
-
-import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.*;
-
 /**
+ * NrpInitializer is responsible for initial TAPI context related entities creation.
  * @author bartosz.michalik@amartus.com
  */
 public class NrpInitializer implements TopologyManager {
@@ -52,7 +53,8 @@ public class NrpInitializer implements TopologyManager {
     public void init() throws Exception {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         InstanceIdentifier<Context> ctxId = InstanceIdentifier.create(Context.class);
-        CheckedFuture<? extends Optional<? extends DataObject>, ReadFailedException> result = tx.read(LogicalDatastoreType.OPERATIONAL, ctxId);
+        CheckedFuture<? extends Optional<? extends DataObject>, ReadFailedException> result =
+                tx.read(LogicalDatastoreType.OPERATIONAL, ctxId);
 
         Optional<? extends DataObject> context = result.checkedGet();
 
@@ -60,8 +62,10 @@ public class NrpInitializer implements TopologyManager {
             LOG.info("initialize Presto NRP context");
             Context ctx = new ContextBuilder()
                     .setUuid(new Uuid(PRESTO_CTX))
-                    .addAugmentation(org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.Context1.class, context())
-                    .addAugmentation(org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.Context1.class, connCtx())
+                    .addAugmentation(org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology
+                                .rev180307.Context1.class, context())
+                    .addAugmentation(org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity
+                                .rev180307.Context1.class, connCtx())
                     .build();
             tx.put(LogicalDatastoreType.OPERATIONAL, ctxId, ctx);
             try {
@@ -91,7 +95,7 @@ public class NrpInitializer implements TopologyManager {
         return new TopologyBuilder()
                 .setLayerProtocolName(Collections.singletonList(LayerProtocolName.ETH))
                 .setUuid(topoId)
-                .setKey(new TopologyKey(topoId))
+                .withKey(new TopologyKey(topoId))
                 .setNode(Collections.singletonList(node("mef:presto-nrp-abstract-node")))
                 .build();
     }
@@ -101,6 +105,8 @@ public class NrpInitializer implements TopologyManager {
         return new NodeBuilder()
                 .setLayerProtocolName(Collections.singletonList(LayerProtocolName.ETH))
                 .setEncapTopology(new EncapTopologyBuilder().setTopologyId(new Uuid(PRESTO_SYSTEM_TOPO)).build())
+                .setCostCharacteristic(Collections.emptyList())
+                .setLatencyCharacteristic(Collections.emptyList())
                 .setUuid(uid)
                 .build();
     }
@@ -121,6 +127,6 @@ public class NrpInitializer implements TopologyManager {
 
     @Override
     public String getSystemTopologyId() {
-        return TapiConstants.PRESTO_SYSTEM_TOPO;
+        return PRESTO_SYSTEM_TOPO;
     }
 }

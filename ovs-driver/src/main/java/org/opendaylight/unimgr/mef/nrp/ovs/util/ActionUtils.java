@@ -46,11 +46,11 @@ class ActionUtils {
     private static final int MAX_LENGTH = 65535;
     private static final int VLAN_TAG_ETHERNET_TYPE = 33024;
 
-    private final static int NUMBER_OF_PORTNAME_PARTS = 3;
-    private final static int INDEX_OF_PORT_NUMBER = 2;
-    private final static String PORTNAME_PARTS_SEPARATOR = ":";
+    private static final int NUMBER_OF_PORTNAME_PARTS = 3;
+    private static final int INDEX_OF_PORT_NUMBER = 2;
+    private static final String PORTNAME_PARTS_SEPARATOR = ":";
 
-    private final static String INVALID_PORT_NAME_FORMAT_ERROR_MESSAGE = "Port name '%s' has invalid format.";
+    private static final String INVALID_PORT_NAME_FORMAT_ERROR_MESSAGE = "Port name '%s' has invalid format.";
 
     static Instructions createInstructions(List<Action> actions) {
         InstructionsBuilder instructionsBuilder = new InstructionsBuilder();
@@ -100,7 +100,7 @@ class ActionUtils {
 
 
     static Action createOutputAction(String port, int order) {
-        ActionBuilder actionBuilder = new ActionBuilder();
+        final ActionBuilder actionBuilder = new ActionBuilder();
 
         OutputActionCaseBuilder outputActionCaseBuilder = new OutputActionCaseBuilder();
         OutputActionBuilder outputActionBuilder = new OutputActionBuilder();
@@ -115,7 +115,7 @@ class ActionUtils {
 
 
     static Action createSetVlanIdAction(int vlan, int order) {
-        ActionBuilder actionBuilder = new ActionBuilder();
+        final ActionBuilder actionBuilder = new ActionBuilder();
 
         VlanId vlanId = new VlanId(vlan);
 
@@ -169,7 +169,7 @@ class ActionUtils {
         }
     }
 
-	static Action createSetQueueNumberAction(long queueNumber, int order) {
+    static Action createSetQueueNumberAction(long queueNumber, int order) {
         ActionBuilder actionBuilder = new ActionBuilder();
 
         SetQueueActionBuilder setQueueActionBuilder = new SetQueueActionBuilder();
@@ -181,5 +181,5 @@ class ActionUtils {
         actionBuilder.setAction(setQueueActionCaseBuilder.build());
         actionBuilder.setOrder(order);
         return actionBuilder.build();
-	}
+    }
 }

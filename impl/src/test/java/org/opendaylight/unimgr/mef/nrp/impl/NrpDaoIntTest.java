@@ -7,8 +7,6 @@
  */
 package org.opendaylight.unimgr.mef.nrp.impl;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
@@ -33,6 +31,8 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.to
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+
+import java.util.Collections;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -61,7 +61,9 @@ public class NrpDaoIntTest extends AbstractTestWithTopo {
 
         ConnectionEndPointBuilder builder = new ConnectionEndPointBuilder()
                 .setConnectionPortDirection(PortDirection.BIDIRECTIONAL)
-                .setLayerProtocolName(LayerProtocolName.ETH);
+                .setLayerProtocolName(LayerProtocolName.ETH)
+                .setClientNodeEdgePoint(Collections.emptyList())
+                .setParentNodeEdgePoint(Collections.emptyList());
 
         ConnectionEndPoint cep1 = builder
                 .setUuid(new Uuid("c001:" + uuid1 + ":1"))
@@ -83,7 +85,9 @@ public class NrpDaoIntTest extends AbstractTestWithTopo {
     @Test
     public void testOverride() throws ReadFailedException, TransactionCommitFailedException {
 
-        ConnectionEndPointBuilder builder = new ConnectionEndPointBuilder();
+        ConnectionEndPointBuilder builder = new ConnectionEndPointBuilder()
+                .setClientNodeEdgePoint(Collections.emptyList())
+                .setParentNodeEdgePoint(Collections.emptyList());
 
         ConnectionEndPoint cep1 = builder
                 .setUuid(new Uuid("c001:" + uuid1 + ":1"))
@@ -136,7 +140,7 @@ public class NrpDaoIntTest extends AbstractTestWithTopo {
         assertFalse(topology.getNode().stream().flatMap(n -> n.getOwnedNodeEdgePoint().stream())
                 .anyMatch(nep -> {
                     //find nep with at least single CEP
-                    OwnedNodeEdgePoint1 aug = nep.getAugmentation(OwnedNodeEdgePoint1.class);
+                    OwnedNodeEdgePoint1 aug = nep.augmentation(OwnedNodeEdgePoint1.class);
                     return aug != null && aug.getConnectionEndPoint() != null && aug.getConnectionEndPoint().size() > 0;
                 })
         );
@@ -148,7 +152,7 @@ public class NrpDaoIntTest extends AbstractTestWithTopo {
 
         OwnedNodeEdgePoint nep = new NrpDao(tx).readNep(nodeid, nepid);
         Assert.assertNotNull(nep);
-        OwnedNodeEdgePoint1 aug = nep.getAugmentation(OwnedNodeEdgePoint1.class);
+        OwnedNodeEdgePoint1 aug = nep.augmentation(OwnedNodeEdgePoint1.class);
         Assert.assertNotNull(aug);
         Assert.assertEquals(noCeps, aug.getConnectionEndPoint().size());
         return aug;

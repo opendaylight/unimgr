@@ -7,6 +7,7 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs.driver;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,9 +21,9 @@ import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
 import org.opendaylight.unimgr.mef.nrp.ovs.activator.OvsActivator;
 import org.opendaylight.unimgr.mef.nrp.ovs.tapi.TopologyDataHandler;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpConnectivityServiceAttrs;
-import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 
 /**
+ * Ovs driver builder.
  * @author marek.ryznar@amartus.com
  */
 public class OvsDriver implements ActivationDriverBuilder {
@@ -51,7 +52,7 @@ public class OvsDriver implements ActivationDriverBuilder {
 
             @Override
             public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context) {
-                this.endPoints = endPoints;
+                this.endPoints = new ArrayList<>(endPoints);
                 this.serviceId = serviceId;
             }
 
@@ -60,10 +61,10 @@ public class OvsDriver implements ActivationDriverBuilder {
                 activator.activate(endPoints,serviceId);
             }
 
-			@Override
-			public void update() throws TransactionCommitFailedException, ResourceActivatorException {
-				activator.update(endPoints,serviceId);
-			}
+            @Override
+            public void update() throws TransactionCommitFailedException, ResourceActivatorException {
+                activator.update(endPoints,serviceId);
+            }
 
             @Override
             public void deactivate() throws TransactionCommitFailedException, ResourceNotAvailableException {

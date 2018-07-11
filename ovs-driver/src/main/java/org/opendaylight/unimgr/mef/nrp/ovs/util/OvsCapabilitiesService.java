@@ -16,7 +16,7 @@ public class OvsCapabilitiesService extends CapabilitiesService {
     }
 
     public enum NodeCapability implements Capability<Node> {
-        OVSDB((dbBroker,node) -> node.getAugmentation(OvsdbBridgeAugmentation.class) != null);
+        OVSDB((dbBroker,node) -> node.augmentation(OvsdbBridgeAugmentation.class) != null);
 
         private BiFunction<DataBroker, Node, Boolean> condition;
 

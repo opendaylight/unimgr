@@ -53,10 +53,15 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
         n(tx, true, "n1","d1", Stream.of(pI("n1:1"), pO("n1:2")));
         n(tx, true, "n2", "d2", Stream.of(pO("n2:1"), pI("n2:2")));
         n(tx, true, "n3", "d3", Stream.of(pI("n3:1")));
-        l(tx, "n1", "n1:1", "n2", "n2:1", OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
+        l(tx, "n1", "n1:1", "n2", "n2:1",
+                OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
         tx.submit().checkedGet();
         //when
-        List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:2", PortDirection.OUTPUT), ep("n2:2", PortDirection.INPUT)), null);
+        List<Subrequrest> decomposed = decomposer.decompose(
+                Arrays.asList(
+                        ep("n1:2", PortDirection.OUTPUT),
+                        ep("n2:2", PortDirection.INPUT)
+                ), null);
         assertNotNull(decomposed);
         assertEquals(2, decomposed.size());
     }
@@ -66,7 +71,10 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
         //having
         threeNodesTopo();
         //when
-        List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:2", PortDirection.OUTPUT), ep("n3:3", PortDirection.INPUT)), null);
+        List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(
+                ep("n1:2", PortDirection.OUTPUT),
+                ep("n3:3", PortDirection.INPUT)
+        ), null);
         assertNotNull(decomposed);
         assertEquals(3, decomposed.size());
         assertEquals(2, decomposed.stream()
@@ -78,7 +86,8 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
         //having
         threeNodesTopo();
         //when
-        decomposer.decompose(Arrays.asList(ep("n1:2", PortDirection.INPUT), ep("n3:3", PortDirection.OUTPUT)), null);
+        decomposer.decompose(Arrays.asList(ep("n1:2", PortDirection.INPUT),
+                ep("n3:3", PortDirection.OUTPUT)), null);
         fail();
     }
 
@@ -88,7 +97,10 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
         fourNodesTopo();
 
         //when
-        List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n2:2"), ep("n3:2")), null);
+        List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(
+                ep("n2:2"),
+                ep("n3:2")
+        ), null);
         assertNotNull(decomposed);
         assertEquals(3, decomposed.size());
         assertEquals(2, decomposed.stream()
@@ -101,7 +113,10 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
         //having
         fourNodesTopo();
         //when
-        List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n2:1", PortDirection.INPUT), ep("n1:1")), null);
+        List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(
+                ep("n2:1", PortDirection.INPUT),
+                ep("n1:1")
+        ), null);
         assertNull(decomposed);
 
     }
@@ -112,7 +127,11 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
         fourNodesTopo();
 
         //when
-        List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:1", PortDirection.OUTPUT), ep("n2:1"), ep("n4:1")), null);
+        List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(
+                ep("n1:1", PortDirection.OUTPUT),
+                ep("n2:1"),
+                ep("n4:1")
+        ), null);
         assertNull(decomposed);
     }
 
@@ -122,8 +141,11 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
         fourNodesTopo();
 
         //when
-        List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:1", PortDirection.INPUT), ep("n2:1", PortDirection.INPUT), ep("n4:1", PortDirection.OUTPUT)),
-                null);
+        List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(
+                ep("n1:1", PortDirection.INPUT),
+                ep("n2:1", PortDirection.INPUT),
+                ep("n4:1", PortDirection.OUTPUT)
+                ), null);
         assertNotNull(decomposed);
     }
 
@@ -135,7 +157,10 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
         fiveNodesTopo();
 
         //when
-        List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:2"), ep("n5:3")), null);
+        List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(
+                ep("n1:2"),
+                ep("n5:3")
+        ), null);
         assertNotNull(decomposed);
         assertEquals(5, decomposed.size());
         assertEquals(2, decomposed.stream()
@@ -147,7 +172,10 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
         //having
         fiveNodesTopo();
         //when
-        List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:2", PortDirection.OUTPUT), ep("n5:3", PortDirection.INPUT)), null);
+        List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(
+                ep("n1:2", PortDirection.OUTPUT),
+                ep("n5:3", PortDirection.INPUT)
+        ), null);
         assertNotNull(decomposed);
         assertEquals(3, decomposed.size());
     }
@@ -161,11 +189,16 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
      */
     private  void threeNodesTopo() {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
-        n(tx, true, "n1", "d1", Stream.of(pI("n1:1"), pO("n1:2"), pI("n1:3")));
-        n(tx, true, "n2", "d2", Stream.of(pO("n2:1"), pI("n2:2")));
-        n(tx, true, "n3", "d3",Stream.of(pO("n3:1"), pO("n3:2"), pI("n3:3")));
-        l(tx, "n1", "n1:3", "n2", "n2:1", OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
-        l(tx, "n2", "n2:2", "n3", "n3:1", OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
+        n(tx, true, "n1", "d1",
+                Stream.of(pI("n1:1"), pO("n1:2"), pI("n1:3")));
+        n(tx, true, "n2", "d2",
+                Stream.of(pO("n2:1"), pI("n2:2")));
+        n(tx, true, "n3", "d3",
+                Stream.of(pO("n3:1"), pO("n3:2"), pI("n3:3")));
+        l(tx, "n1", "n1:3", "n2", "n2:1",
+                OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
+        l(tx, "n2", "n2:2", "n3", "n3:1",
+                OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
         try {
             tx.submit().checkedGet();
         } catch (TransactionCommitFailedException e) {
@@ -184,15 +217,24 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
      */
     private  void fourNodesTopo() {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
-        n(tx, true, "n1", "d1",Stream.of(pB("n1:1"), pB("n1:2"), pI("n1:3"), pO("n1:4"), pO("n1:5")));
-        n(tx, true, "n2", "d2", Stream.of(pB("n2:1"), pB("n2:2"), pO("n2:3"), pI("n2:4"), pI("n2:5")));
-        n(tx, true, "n3", "d3", Stream.of(pB("n3:1"), pB("n3:2"), pO("n3:3"), pO("n3:4"), pI("n3:5")));
-        n(tx, true, "n4", "d4", Stream.of(pB("n4:1"), pB("n4:2"), pI("n4:3"), pI("n4:4"), pO("n4:5")));
-        l(tx, "n1", "n1:5", "n2", "n2:5", OperationalState.ENABLED, ForwardingDirection.UNIDIRECTIONAL);
-        l(tx, "n1", "n1:4", "n4", "n4:4", OperationalState.ENABLED, ForwardingDirection.UNIDIRECTIONAL);
-        l(tx, "n2", "n2:3", "n4", "n4:3", OperationalState.ENABLED, ForwardingDirection.UNIDIRECTIONAL);
-        l(tx, "n3", "n3:4", "n2", "n2:4", OperationalState.ENABLED, ForwardingDirection.UNIDIRECTIONAL);
-        l(tx, "n4", "n4:5", "n3", "n3:5", OperationalState.ENABLED, ForwardingDirection.UNIDIRECTIONAL);
+        n(tx, true, "n1", "d1",
+                Stream.of(pB("n1:1"), pB("n1:2"), pI("n1:3"), pO("n1:4"), pO("n1:5")));
+        n(tx, true, "n2", "d2",
+                Stream.of(pB("n2:1"), pB("n2:2"), pO("n2:3"), pI("n2:4"), pI("n2:5")));
+        n(tx, true, "n3", "d3",
+                Stream.of(pB("n3:1"), pB("n3:2"), pO("n3:3"), pO("n3:4"), pI("n3:5")));
+        n(tx, true, "n4", "d4",
+                Stream.of(pB("n4:1"), pB("n4:2"), pI("n4:3"), pI("n4:4"), pO("n4:5")));
+        l(tx, "n1", "n1:5", "n2", "n2:5",
+                OperationalState.ENABLED, ForwardingDirection.UNIDIRECTIONAL);
+        l(tx, "n1", "n1:4", "n4", "n4:4",
+                OperationalState.ENABLED, ForwardingDirection.UNIDIRECTIONAL);
+        l(tx, "n2", "n2:3", "n4", "n4:3",
+                OperationalState.ENABLED, ForwardingDirection.UNIDIRECTIONAL);
+        l(tx, "n3", "n3:4", "n2", "n2:4",
+                OperationalState.ENABLED, ForwardingDirection.UNIDIRECTIONAL);
+        l(tx, "n4", "n4:5", "n3", "n3:5",
+                OperationalState.ENABLED, ForwardingDirection.UNIDIRECTIONAL);
         try {
             tx.submit().checkedGet();
         } catch (TransactionCommitFailedException e) {
@@ -212,17 +254,28 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
      */
     private  void fiveNodesTopo() {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
-        n(tx, true, "n1", "d1", Stream.of(pI("n1:1"), pB("n1:2"), pI("n1:3"), pO("n1:4")));
-        n(tx, true, "n2", "d2", Stream.of(pI("n2:1"), pB("n2:2"), pO("n2:3"), pI("n2:4")));
-        n(tx, true, "n3", "d3", Stream.of(pO("n3:1"), pB("n3:2"), pO("n3:3"), pI("n3:4")));
-        n(tx, true, "n4", "d4", Stream.of(pO("n4:1"), pI("n4:2"), pB("n4:3"), pB("n4:4")));
-        n(tx, true, "n5", "d5", Stream.of(pI("n5:1"), pB("n5:2"), pB("n5:3"), pO("n5:4")));
-        l(tx, "n2", "n2:3", "n3", "n3:4", OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
-        l(tx, "n3", "n3:1", "n1", "n1:1", OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
-        l(tx, "n3", "n3:3", "n5", "n5:1", OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
-        l(tx, "n4", "n4:1", "n1", "n1:3", OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
-        l(tx, "n1", "n1:4", "n2", "n2:4", OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
-        l(tx, "n5", "n5:4", "n4", "n4:2", OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
+        n(tx, true, "n1", "d1",
+                Stream.of(pI("n1:1"), pB("n1:2"), pI("n1:3"), pO("n1:4")));
+        n(tx, true, "n2", "d2",
+                Stream.of(pI("n2:1"), pB("n2:2"), pO("n2:3"), pI("n2:4")));
+        n(tx, true, "n3", "d3",
+                Stream.of(pO("n3:1"), pB("n3:2"), pO("n3:3"), pI("n3:4")));
+        n(tx, true, "n4", "d4",
+                Stream.of(pO("n4:1"), pI("n4:2"), pB("n4:3"), pB("n4:4")));
+        n(tx, true, "n5", "d5",
+                Stream.of(pI("n5:1"), pB("n5:2"), pB("n5:3"), pO("n5:4")));
+        l(tx, "n2", "n2:3", "n3", "n3:4",
+                OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
+        l(tx, "n3", "n3:1", "n1", "n1:1",
+                OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
+        l(tx, "n3", "n3:3", "n5", "n5:1",
+                OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
+        l(tx, "n4", "n4:1", "n1", "n1:3",
+                OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
+        l(tx, "n1", "n1:4", "n2", "n2:4",
+                OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
+        l(tx, "n5", "n5:4", "n4", "n4:2",
+                 OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
         try {
             tx.submit().checkedGet();
         } catch (TransactionCommitFailedException e) {

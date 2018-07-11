@@ -22,7 +22,6 @@ import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
 import org.opendaylight.unimgr.mef.nrp.impl.ActivationDriverRepoServiceImpl;
-import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -45,7 +44,7 @@ public class ActivationDriverMocks {
         return new Builder();
     }
 
-    public static class Builder {
+    public static final class Builder {
         HashMap<String , ActivationDriver> drivers = new HashMap<>();
 
         private Builder() {}
@@ -57,11 +56,11 @@ public class ActivationDriverMocks {
 
         public ActivationDriverRepoService build() {
             List<ActivationDriverBuilder> builders = drivers.entrySet().stream().map(e -> {
-                ActivationDriverBuilder b = mock(ActivationDriverBuilder.class);
-                when(b.getActivationDriverId()).thenReturn(e.getKey());
-                when(b.driverFor(any(ActivationDriverBuilder.BuilderContext.class))).thenReturn(Optional.of(e.getValue()));
+                ActivationDriverBuilder mock = mock(ActivationDriverBuilder.class);
+                when(mock.getActivationDriverId()).thenReturn(e.getKey());
+                when(mock.driverFor(any(ActivationDriverBuilder.BuilderContext.class))).thenReturn(Optional.of(e.getValue()));
 
-                return b;
+                return mock;
             }).collect(Collectors.toList());
             return new ActivationDriverRepoServiceImpl(builders);
         }

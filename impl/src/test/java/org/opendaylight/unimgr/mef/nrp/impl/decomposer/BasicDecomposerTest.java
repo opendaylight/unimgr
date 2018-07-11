@@ -25,12 +25,9 @@ import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
 import org.opendaylight.unimgr.mef.nrp.api.Subrequrest;
 import org.opendaylight.unimgr.mef.nrp.impl.AbstractTestWithTopo;
 import org.opendaylight.unimgr.mef.nrp.impl.NrpInitializer;
-import org.opendaylight.unimgr.mef.nrp.impl.decomposer.BasicDecomposer;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.OperationalState;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 import org.opendaylight.yangtools.yang.common.OperationFailedException;
-
-import javax.sound.sampled.Port;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -136,7 +133,7 @@ public class BasicDecomposerTest extends AbstractTestWithTopo {
         List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:2"), ep("n3:2")), null);
         assertNotNull(decomposed);
         assertEquals(3, decomposed.size());
-        assertEquals(3, decomposed.stream().map(subrequrest -> subrequrest.getActivationDriverId()).collect(Collectors.toSet()).size());
+        assertEquals(3, decomposed.stream().map(Subrequrest::getActivationDriverId).collect(Collectors.toSet()).size());
     }
 
     @Test
@@ -154,7 +151,7 @@ public class BasicDecomposerTest extends AbstractTestWithTopo {
         assertNotNull(decomposed);
         System.out.println();
         assertEquals(3, decomposed.size());
-        assertEquals(2, decomposed.stream().map(subrequrest -> subrequrest.getActivationDriverId()).collect(Collectors.toSet()).size());
+        assertEquals(2, decomposed.stream().map(Subrequrest::getActivationDriverId).collect(Collectors.toSet()).size());
     }
 
     @Test

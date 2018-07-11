@@ -7,6 +7,9 @@
  */
 package org.opendaylight.unimgr.mef.nrp.impl;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -35,8 +38,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 
 /**
  * TopologyDataHandler listens to presto system topology and propagate significant changes to presto system topology.
@@ -59,7 +60,9 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
     }
 
     public void init() {
-        registration = dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, NRP_TOPOLOGY_SYSTEM_IID), this);
+        registration = dataBroker
+                .registerDataTreeChangeListener(
+                        new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, NRP_TOPOLOGY_SYSTEM_IID), this);
 
         LOG.debug("AbstractNodeHandler registered: {}", registration);
     }
@@ -112,8 +115,8 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
             }
 
             @Override
-            public void onFailure(Throwable t) {
-                LOG.warn("Abstract TAPI node upadate failed due to an error", t);
+            public void onFailure(Throwable throwable) {
+                LOG.warn("Abstract TAPI node update failed due to an error", throwable);
             }
         });
     }
@@ -123,15 +126,15 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
     }
 
     private boolean checkIfDeleted(DataObjectModification dataObjectModificationNep) {
-        OwnedNodeEdgePoint b = (OwnedNodeEdgePoint) dataObjectModificationNep.getDataBefore();
-        OwnedNodeEdgePoint a = (OwnedNodeEdgePoint) dataObjectModificationNep.getDataAfter();
+        OwnedNodeEdgePoint before = (OwnedNodeEdgePoint) dataObjectModificationNep.getDataBefore();
+        OwnedNodeEdgePoint after = (OwnedNodeEdgePoint) dataObjectModificationNep.getDataAfter();
 
-        if (b != null) {
-            if (a == null) {
+        if (before != null) {
+            if (after == null) {
                 return true;
             }
-            if (hasSip(b)) {
-                return ! hasSip(a);
+            if (hasSip(before)) {
+                return ! hasSip(after);
             }
         }
 

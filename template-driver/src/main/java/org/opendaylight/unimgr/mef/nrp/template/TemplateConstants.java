@@ -9,6 +9,7 @@
 package org.opendaylight.unimgr.mef.nrp.template;
 
 /**
+ * Template constants.
  * @author bartosz.michalik@amartus.com
  */
 public interface TemplateConstants {

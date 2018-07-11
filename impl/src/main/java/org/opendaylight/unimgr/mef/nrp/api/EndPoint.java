@@ -8,13 +8,14 @@
 
 package org.opendaylight.unimgr.mef.nrp.api;
 
+import java.util.Objects;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpConnectivityServiceEndPointAttrs;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ConnectivityServiceEndPoint;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.OwnedNodeEdgePointRef;
 
-import java.util.Objects;
 
 /**
+ * Class handling common attributes for presto yang endpoints.
  * @see ConnectivityServiceEndPoint
  * @author bartosz.michalik@amartus.com
  */
@@ -60,12 +61,16 @@ public class EndPoint {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         EndPoint endPoint = (EndPoint) o;
-        return Objects.equals(endpoint, endPoint.endpoint) &&
-                Objects.equals(attrs, endPoint.attrs) &&
-                Objects.equals(ref, endPoint.ref);
+        return Objects.equals(endpoint, endPoint.endpoint)
+                && Objects.equals(attrs, endPoint.attrs)
+                && Objects.equals(ref, endPoint.ref);
     }
 
     @Override

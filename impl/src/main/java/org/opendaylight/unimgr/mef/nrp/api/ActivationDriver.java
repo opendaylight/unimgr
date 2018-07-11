@@ -72,7 +72,7 @@ public interface ActivationDriver {
 
     /**
      * Influences the order in which drivers are called within the transaction.
-     * @return int priority of this driver when resoving ambiguity
+     * @return int priority of this driver when resolving ambiguity
      */
     int priority();
 }
