@@ -7,8 +7,6 @@
  */
 package org.opendaylight.unimgr.mef.nrp.impl;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;

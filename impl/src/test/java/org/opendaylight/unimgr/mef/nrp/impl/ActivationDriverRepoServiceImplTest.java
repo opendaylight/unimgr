@@ -52,7 +52,7 @@ public class ActivationDriverRepoServiceImplTest {
         final Optional<ActivationDriver> driver1 = driverRepo.getDriver(uuid.getValue());
         try {
             driverRepo.getDriver("otherDriver");
-        } catch (ActivationDriverNotFoundException expected) {}
+        } catch (ActivationDriverNotFoundException _expected) {}
 
         assertTrue(driver1.isPresent());
     }

@@ -7,6 +7,8 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs.transaction;
 
+import com.google.common.base.Optional;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,8 +28,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-
 /**
  * Performs reading transactions related to openflow topology
  * during OvsDriver activation/deactivation.
@@ -37,9 +37,12 @@ import com.google.common.base.Optional;
 public class TopologyTransaction {
     private DataBroker dataBroker;
 
-    private static final String NODE_NOT_FOUND_ERROR_MESSAGE = "Node with port '%s' not found in OPERATIONAL data store.";
-    private static final String LINKS_NOT_FOUND_ERROR_MESSAGE = "Links for node '%s' not found in OPERATIONAL data store.";
-    private static final String TOPOLOGY_NOT_FOUND_ERROR_MESSAGE = "Topology '%s' not found in OPERATIONAL data store.";
+    private static final String NODE_NOT_FOUND_ERROR_MESSAGE
+            = "Node with port '%s' not found in OPERATIONAL data store.";
+    private static final String LINKS_NOT_FOUND_ERROR_MESSAGE
+            = "Links for node '%s' not found in OPERATIONAL data store.";
+    private static final String TOPOLOGY_NOT_FOUND_ERROR_MESSAGE
+            = "Topology '%s' not found in OPERATIONAL data store.";
 
     private static final String FLOW_TOPOLOGY_NAME = "flow:1";
     private static final String INTERSWITCH_LINK_ID_REGEX = "openflow:\\d+:\\d+";
@@ -47,7 +50,7 @@ public class TopologyTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(TopologyTransaction.class);
 
     /**
-     * Creates and initialize TopologyTransaction object
+     * Creates and initialize TopologyTransaction object.
      *
      * @param dataBroker access to data tree store
      */
@@ -56,16 +59,18 @@ public class TopologyTransaction {
     }
 
     /**
-     * Returns list of nodes in openflow topology
+     * Returns list of nodes in openflow topology.
      *
      * @return list of nodes
      */
     public List<NullAwareDatastoreGetter<Node>> readNodes() {
-        return new NullAwareDatastoreGetter<Nodes>(MdsalUtils.readOptional(dataBroker, LogicalDatastoreType.OPERATIONAL, getNodesInstanceId())).collectMany(x -> x::getNode);
+        return new NullAwareDatastoreGetter<Nodes>(MdsalUtils
+                .readOptional(dataBroker, LogicalDatastoreType.OPERATIONAL, getNodesInstanceId()))
+                .collectMany(x -> x::getNode);
     }
 
     /**
-     * Returns openflow node containing port portName
+     * Returns openflow node containing port portName.
      *
      * @param portName node's port name
      * @return node
@@ -89,7 +94,7 @@ public class TopologyTransaction {
     }
 
     public Node readNodeOF(String ofportName) throws ResourceNotAvailableException {
-        String ofNodeName = ofportName.split(":")[0]+":"+ofportName.split(":")[1];
+        String ofNodeName = ofportName.split(":")[0] + ":" + ofportName.split(":")[1];
         Nodes nodes = readOpenFLowTopology(dataBroker);
         if (nodes != null) {
             for (Node node: nodes.getNode()) {
@@ -107,7 +112,7 @@ public class TopologyTransaction {
     }
 
     /**
-     * Returns links associated with specified node
+     * Returns links associated with specified node.
      *
      * @param node openflow node
      * @return list of links
@@ -131,12 +136,13 @@ public class TopologyTransaction {
             }
         } else {
             LOG.warn(String.format(TOPOLOGY_NOT_FOUND_ERROR_MESSAGE, FLOW_TOPOLOGY_NAME));
-            throw new ResourceNotAvailableException(String.format(TOPOLOGY_NOT_FOUND_ERROR_MESSAGE, FLOW_TOPOLOGY_NAME));
+            throw new ResourceNotAvailableException(String
+                    .format(TOPOLOGY_NOT_FOUND_ERROR_MESSAGE, FLOW_TOPOLOGY_NAME));
         }
     }
 
     /**
-     * Returns interswitch links (links between openflow nodes) associated with specified node
+     * Returns interswitch links (links between openflow nodes) associated with specified node.
      *
      * @param node openflow node
      * @return list of links

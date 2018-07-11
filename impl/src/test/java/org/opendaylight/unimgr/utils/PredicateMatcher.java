@@ -23,6 +23,7 @@ public class PredicateMatcher<T> extends BaseMatcher<T> {
         this.predicate = predicate;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean matches(Object item) {
         return predicate.test((T) item);
@@ -30,7 +31,7 @@ public class PredicateMatcher<T> extends BaseMatcher<T> {
 
     @Override
     public void describeTo(Description description) {
-        description.appendText("Predicate not fulfiled");
+        description.appendText("Predicate not fulfilled");
     }
 
     public static <U> PredicateMatcher<U> fromPredicate(Predicate<U> predicate) {

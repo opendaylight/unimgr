@@ -8,10 +8,9 @@
 
 package org.opendaylight.unimgr.mef.nrp.common;
 
+import java.util.List;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
-
-import java.util.List;
 
 /**
  * Device facing SPI for activating or deactivating a fragment of an NRP
@@ -26,7 +25,8 @@ public interface ResourceActivator {
      * @throws ResourceActivatorException activation problem
      * @throws TransactionCommitFailedException transaction commit failed
      */
-    void activate(List<EndPoint> endPoints, String serviceName) throws  ResourceActivatorException, TransactionCommitFailedException;
+    void activate(List<EndPoint> endPoints, String serviceName)
+            throws  ResourceActivatorException, TransactionCommitFailedException;
 
     /**
      * Deactivate connectivity between the provided endpoints.
@@ -35,5 +35,6 @@ public interface ResourceActivator {
      * @throws ResourceActivatorException activation problem
      * @throws TransactionCommitFailedException transaction commit failed
      */
-    void deactivate(List<EndPoint> endPoints, String serviceName) throws TransactionCommitFailedException, ResourceActivatorException;
+    void deactivate(List<EndPoint> endPoints, String serviceName)
+            throws TransactionCommitFailedException, ResourceActivatorException;
 }

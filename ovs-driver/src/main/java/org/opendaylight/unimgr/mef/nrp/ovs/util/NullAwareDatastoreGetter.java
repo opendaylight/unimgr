@@ -7,18 +7,17 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs.util;
 
-import org.opendaylight.yangtools.yang.binding.Augmentation;
-import org.opendaylight.yangtools.yang.binding.ChildOf;
-import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import org.opendaylight.yangtools.yang.binding.Augmentation;
+import org.opendaylight.yangtools.yang.binding.ChildOf;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NullAwareDatastoreGetter<T> {
 
@@ -43,28 +42,32 @@ public class NullAwareDatastoreGetter<T> {
         logDataOptionalStatus(function);
 
         return new NullAwareDatastoreGetter<>(
-                dataOptional.isPresent() ? Optional.ofNullable(function.apply(dataOptional.get()).get()) : Optional.empty()
+                dataOptional.isPresent() ? Optional
+                        .ofNullable(function.apply(dataOptional.get()).get()) : Optional.empty()
         );
     }
 
-    public <R extends Augmentation<T>> NullAwareDatastoreGetter<R> collect(Function<T, Function<Class<R>, R>> function, Class<R> cls) {
+    public <R extends Augmentation<T>> NullAwareDatastoreGetter<R> collect(Function<T, Function<Class<R>, R>> function,
+                                                                           Class<R> cls) {
         logDataOptionalStatus(function);
 
         return new NullAwareDatastoreGetter<>(
-                dataOptional.isPresent() ? Optional.ofNullable(function.apply(dataOptional.get()).apply(cls)) : Optional.empty()
+                dataOptional.isPresent() ? Optional
+                        .ofNullable(function.apply(dataOptional.get()).apply(cls)) : Optional.empty()
         );
     }
 
-    public <R extends DataObject, C extends Collection<R>> List<NullAwareDatastoreGetter<R>> collectMany(Function<T, Supplier<C>> function) {
+    public <R extends DataObject, C extends Collection<R>> List<NullAwareDatastoreGetter<R>> collectMany(
+            Function<T, Supplier<C>> function) {
         logDataOptionalStatus(function);
 
         List<NullAwareDatastoreGetter<R>> result = new ArrayList<>();
 
-        Optional<C> dataCollectionOptional = dataOptional.isPresent() ? Optional.ofNullable(function.apply(dataOptional.get()).get()) : Optional.empty();
+        Optional<C> dataCollectionOptional = dataOptional.isPresent() ? Optional
+                .ofNullable(function.apply(dataOptional.get()).get()) : Optional.empty();
 
-        if (dataCollectionOptional.isPresent()) {
-            dataCollectionOptional.get().forEach(dataObject -> result.add(new NullAwareDatastoreGetter<R>(dataObject)));
-        }
+        dataCollectionOptional.ifPresent(rs -> rs
+                .forEach(dataObject -> result.add(new NullAwareDatastoreGetter<R>(dataObject))));
 
         return result;
     }
@@ -75,7 +78,8 @@ public class NullAwareDatastoreGetter<T> {
 
     private void logDataOptionalStatus(Function<?, ?> function) {
         if (dataOptional.isPresent()) {
-            LOG.trace("Before collection of: " + function.toString() + ", currently collected data is non-null: " + dataOptional.get().toString());
+            LOG.trace("Before collection of: " + function.toString()
+                    + ", currently collected data is non-null: " + dataOptional.get().toString());
         } else {
             LOG.debug("Null value encountered during collection of: " + function.toString());
         }

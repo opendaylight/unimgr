@@ -91,7 +91,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
 
         assertEquals(
                 node.getOwnedNodeEdgePoint().stream().map(nep -> nep.getUuid().getValue()).collect(Collectors.toSet()),
-                new HashSet<String>(Arrays.asList(testNepName+"0", testNepName+"1", testNepName+"2", testNepName+"3"))
+                new HashSet<>(Arrays.asList(testNepName + "0", testNepName + "1", testNepName + "2", testNepName + "3"))
         );
 
     }

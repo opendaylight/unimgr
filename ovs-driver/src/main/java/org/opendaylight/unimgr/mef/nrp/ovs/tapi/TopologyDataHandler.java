@@ -7,6 +7,9 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs.tapi;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
@@ -50,9 +53,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-
 /**
  * TopologyDataHandler listens to ovsdb topology and propagate significant changes to presto ext topology.
  *
@@ -91,7 +91,8 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
 
         NrpDao dao = new NrpDao(tx);
 
-        dao.createNode(topologyManager.getSystemTopologyId(), OVS_NODE, OVS_DRIVER_ID, LayerProtocolName.ETH, null, new ArrayList<>());
+        dao.createNode(topologyManager
+                .getSystemTopologyId(), OVS_NODE, OVS_DRIVER_ID, LayerProtocolName.ETH, null, new ArrayList<>());
 
         Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
             @Override
@@ -102,12 +103,13 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
 
             @Override
             public void onFailure(Throwable t) {
-                if(retrialCouter != 0) {
+                if (retrialCouter != 0) {
                     try {
                         TimeUnit.MILLISECONDS.sleep(100);
                     } catch (InterruptedException e) { }
-                    if(retrialCouter != MAX_RETRIALS) {
-                        LOG.debug("Retrying initialization of {} for {} time", OVS_NODE, MAX_RETRIALS - retrialCouter + 1);
+                    if (retrialCouter != MAX_RETRIALS) {
+                        LOG.debug("Retrying initialization of {} for {} time",
+                                OVS_NODE, MAX_RETRIALS - retrialCouter + 1);
                     }
                     initializeWithRetrial(retrialCouter - 1);
                 } else {
@@ -122,7 +124,9 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
     private void registerOvsdbTreeListener() {
         dataObjectModificationQualifier = new DataObjectModificationQualifier(dataBroker);
         InstanceIdentifier<Node> nodeId = OVSDB_TOPO_IID.child(Node.class);
-        registration = dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, nodeId), this);
+        registration = dataBroker
+                .registerDataTreeChangeListener(
+                        new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, nodeId), this);
     }
 
     public void close() {
@@ -169,7 +173,8 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
     BiConsumer<Map<TerminationPoint,String>,NrpDao> updateAction = (map,dao) -> {
         map.entrySet()
                 .forEach(entry -> {
-                    String nepId = OVS_NODE + DELIMETER + getFullPortName(entry.getValue(), entry.getKey().getTpId().getValue());
+                    String nepId = OVS_NODE + DELIMETER
+                            + getFullPortName(entry.getValue(), entry.getKey().getTpId().getValue());
                     OwnedNodeEdgePoint nep;
                     if (dao.hasSip(nepId)) {
                         nep = createNep(nepId);
@@ -183,7 +188,8 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
     BiConsumer<Map<TerminationPoint,String>,NrpDao> deleteAction = (map,dao) -> {
         map.entrySet()
                 .forEach(entry -> {
-                    String nepId = OVS_NODE + DELIMETER + getFullPortName(entry.getValue(), entry.getKey().getTpId().getValue());
+                    String nepId = OVS_NODE + DELIMETER
+                            + getFullPortName(entry.getValue(), entry.getKey().getTpId().getValue());
                     dao.removeNep(OVS_NODE,nepId,true);
                 });
     };
@@ -193,9 +199,11 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         newNeps.forEach(nep -> addEndpoint(dao,nep.key().getUuid().getValue()));
     };
 
-    private void executeDbAction(BiConsumer<Map<TerminationPoint,String>,NrpDao> action,Map<TerminationPoint,String> map) {
-        if (map.isEmpty())
+    private void executeDbAction(BiConsumer<Map<TerminationPoint,String>,NrpDao> action,
+                                 Map<TerminationPoint,String> map) {
+        if (map.isEmpty()) {
             return ;
+        }
         final ReadWriteTransaction topoTx = dataBroker.newReadWriteTransaction();
         NrpDao dao = new NrpDao(topoTx);
 
@@ -234,12 +242,13 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
                 .setLinkPortDirection(PortDirection.BIDIRECTIONAL)
                 .setLinkPortRole(PortRole.SYMMETRIC)
                 .setLayerProtocolName(LayerProtocolName.ETH)
-                .setMappedServiceInterfacePoint(Collections.singletonList(TapiUtils.toSipRef(sipUuid, MappedServiceInterfacePoint.class)))
+                .setMappedServiceInterfacePoint(
+                        Collections.singletonList(TapiUtils.toSipRef(sipUuid, MappedServiceInterfacePoint.class)))
                 .build();
     }
 
     private ServiceInterfacePoint createSip(String nep) {
-        Uuid uuid = new Uuid( "sip" + DELIMETER + nep);
+        Uuid uuid = new Uuid("sip" + DELIMETER + nep);
         return new ServiceInterfacePointBuilder()
                 .setUuid(uuid)
 //                .setKey(new ServiceInterfacePointKey(uuid))
@@ -259,24 +268,29 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
 
     private List<OwnedNodeEdgePoint> getNewNeps(Map<TerminationPoint,String> toAddMap) {
         return toAddMap.entrySet().stream()
-                .map(entry -> createNep(getFullPortName(entry.getValue(),entry.getKey().getTpId().getValue())) )
+                .map(entry -> createNep(getFullPortName(entry.getValue(),entry.getKey().getTpId().getValue())))
                 .collect(Collectors.toList());
     }
 
     //TODO: write better implementation
     private boolean isNep(TerminationPoint terminationPoint) {
-        OvsdbTerminationPointAugmentation ovsdbTerminationPoint = terminationPoint.augmentation(OvsdbTerminationPointAugmentation.class);
-        if ( ovsdbTerminationPoint==null || (ovsdbTerminationPoint.getInterfaceType()!=null && ovsdbTerminationPoint.getInterfaceType().equals(InterfaceTypeInternal.class))) {
+        OvsdbTerminationPointAugmentation ovsdbTerminationPoint
+                = terminationPoint.augmentation(OvsdbTerminationPointAugmentation.class);
+        if (ovsdbTerminationPoint == null
+                || (ovsdbTerminationPoint.getInterfaceType() != null
+                && ovsdbTerminationPoint.getInterfaceType().equals(InterfaceTypeInternal.class))) {
             return false;
         }
 
-        if ( ovsdbTerminationPoint.getOfport() == null )
+        if (ovsdbTerminationPoint.getOfport() == null) {
             return false;
+        }
 
         String ofPortNumber = ovsdbTerminationPoint.getOfport().toString();
         try {
-            org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node = topologyTransaction.readNode(terminationPoint.getTpId().getValue());
-            String ofPortName = node.getId().getValue()+":"+ofPortNumber;
+            org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node
+                    = topologyTransaction.readNode(terminationPoint.getTpId().getValue());
+            String ofPortName = node.getId().getValue() + ":" + ofPortNumber;
             List<Link> links = topologyTransaction.readLinks(node);
             return !links.stream()
                     .anyMatch(link -> link.getSource().getSourceTp().getValue().equals(ofPortName));

@@ -8,6 +8,11 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl.ext;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
@@ -47,12 +52,8 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
-
 /**
+ * Implementation of unimgr specific rpc calls.
  * @author bartosz.michalik@amartus.com
  */
 public class UnimgrExtServiceImpl implements UnimgrExtService {
@@ -78,7 +79,8 @@ public class UnimgrExtServiceImpl implements UnimgrExtService {
 
         return executor.submit(() -> {
             ReadWriteTransaction tx = broker.newReadWriteTransaction();
-            Optional<OwnedNodeEdgePoint> nep = tx.read(LogicalDatastoreType.OPERATIONAL, NrpDao.topo(TapiConstants.PRESTO_SYSTEM_TOPO)
+            Optional<OwnedNodeEdgePoint> nep = tx
+                    .read(LogicalDatastoreType.OPERATIONAL, NrpDao.topo(TapiConstants.PRESTO_SYSTEM_TOPO)
                     .child(Node.class, new NodeKey(nodeId))
                     .child(OwnedNodeEdgePoint.class, new OwnedNodeEdgePointKey(nepId))
             ).checkedGet();
@@ -105,7 +107,8 @@ public class UnimgrExtServiceImpl implements UnimgrExtService {
                 sipBuilder
                     .build());
             nrpDao.updateNep(nodeId, new OwnedNodeEdgePointBuilder(nep.get())
-                    .setMappedServiceInterfacePoint(Collections.singletonList(TapiUtils.toSipRef(sipId, MappedServiceInterfacePoint.class)))
+                    .setMappedServiceInterfacePoint(
+                            Collections.singletonList(TapiUtils.toSipRef(sipId, MappedServiceInterfacePoint.class)))
                     .build()
 
             );
@@ -120,21 +123,24 @@ public class UnimgrExtServiceImpl implements UnimgrExtService {
         ServiceInterfacePoint1 sip = null;
 
         if (sipType instanceof InniSpec) {
-            org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.add.sip.input.sip.type.inni.spec.InniSpec spec = ((InniSpec) sipType).getInniSpec();
+            org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531
+                    .add.sip.input.sip.type.inni.spec.InniSpec spec = ((InniSpec) sipType).getInniSpec();
             if (spec != null) {
                 sip = new ServiceInterfacePoint1Builder()
                     .setNrpCarrierEthInniNResource(new NrpCarrierEthInniNResourceBuilder(spec).build()).build();
             }
 
         } else if (sipType instanceof EnniSpec) {
-            org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.add.sip.input.sip.type.enni.spec.EnniSpec spec = ((EnniSpec) sipType).getEnniSpec();
+            org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531
+                    .add.sip.input.sip.type.enni.spec.EnniSpec spec = ((EnniSpec) sipType).getEnniSpec();
             if (spec != null) {
                 sip = new ServiceInterfacePoint1Builder()
                     .setNrpCarrierEthEnniNResource(new NrpCarrierEthEnniNResourceBuilder(spec).build()).build();
             }
 
         } else if (sipType instanceof UniSpec) {
-            org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.add.sip.input.sip.type.uni.spec.UniSpec spec = ((UniSpec) sipType).getUniSpec();
+            org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531
+                    .add.sip.input.sip.type.uni.spec.UniSpec spec = ((UniSpec) sipType).getUniSpec();
             if (spec != null) {
                 sip = new ServiceInterfacePoint1Builder()
                     .setNrpCarrierEthUniNResource(new NrpCarrierEthUniNResourceBuilder(spec).build()).build();
@@ -149,7 +155,7 @@ public class UnimgrExtServiceImpl implements UnimgrExtService {
     }
 
     private static RpcResult<AddSipOutput> withError(String error, Object ... params) {
-        RpcResultBuilder<AddSipOutput> failed = RpcResultBuilder.<AddSipOutput>failed();
+        RpcResultBuilder<AddSipOutput> failed = RpcResultBuilder.failed();
         if (error != null) {
             if (params.length > 0) {
                 error = MessageFormat.format(error, params);

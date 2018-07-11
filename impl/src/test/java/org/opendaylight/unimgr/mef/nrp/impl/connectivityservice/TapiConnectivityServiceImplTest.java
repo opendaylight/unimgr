@@ -65,21 +65,19 @@ public class TapiConnectivityServiceImplTest {
 
     private Uuid uuid1 = new Uuid("uuid1");
     private Uuid uuid2 = new Uuid("uuid2");
-    private Uuid uuid3 = new Uuid("uuid3");
     private String activationDriverId1 = "d1";
     private String activationDriverId2 = "d2";
-    private String activationDriverId3 = "d3";
     private TapiConnectivityServiceImpl connectivityService;
     private RequestDecomposer decomposer;
-    private RequestValidator validator;
-    private ReadWriteTransaction tx;
     private DataBroker broker;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         ad1 = mock(ActivationDriver.class);
         ad2 = mock(ActivationDriver.class);
         ad3 = mock(ActivationDriver.class);
+        String activationDriverId3 = "d3";
         ActivationDriverRepoService repo = ActivationDriverMocks.builder()
                 .add(activationDriverId1, ad1)
                 .add(activationDriverId2, ad2)
@@ -87,7 +85,7 @@ public class TapiConnectivityServiceImplTest {
                 .build();
 
         decomposer = mock(RequestDecomposer.class);
-        validator = mock(RequestValidator.class);
+        RequestValidator validator = mock(RequestValidator.class);
         when(validator.checkValid(any(CreateConnectivityServiceInput.class))).thenReturn(new RequestValidator.ValidationResult());
         when(validator.checkValid(any(UpdateConnectivityServiceInput.class))).thenReturn(new RequestValidator.ValidationResult());
 
@@ -96,7 +94,7 @@ public class TapiConnectivityServiceImplTest {
         connectivityService.setDecomposer(decomposer);
         connectivityService.setValidator(validator);
 
-        tx = mock(ReadWriteTransaction.class);
+        ReadWriteTransaction tx = mock(ReadWriteTransaction.class);
         when(tx.submit()).thenReturn(mock(CheckedFuture.class));
         broker = mock(DataBroker.class);
         when(broker.newReadWriteTransaction()).thenReturn(tx);
@@ -180,6 +178,7 @@ public class TapiConnectivityServiceImplTest {
     }
 
 
+    @SuppressWarnings("unchecked")
     private void configureDecomposerAnswer(Function<List<org.opendaylight.unimgr.mef.nrp.api.EndPoint>, List<Subrequrest>> resp) {
         try {
             when(decomposer.decompose(any(), any(Constraints.class)))
@@ -188,8 +187,7 @@ public class TapiConnectivityServiceImplTest {
                     eps.forEach(e -> e.setNepRef(TapiUtils.toSysNepRef(new Uuid("node-id"), new Uuid("nep-id"))));
                     return resp.apply(eps);
                 });
-        } catch (FailureResult f) {
-        }
+        } catch (FailureResult _f) { }
     }
 
     private CreateConnectivityServiceInput input(int count) {

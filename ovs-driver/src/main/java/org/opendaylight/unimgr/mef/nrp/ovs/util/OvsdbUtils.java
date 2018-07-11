@@ -7,6 +7,8 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs.util;
 
+import com.google.common.util.concurrent.CheckedFuture;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -54,372 +56,376 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.CheckedFuture;
-
 /**
- * Class responsible for managing OVSDB Nodes
+ * Class responsible for managing OVSDB Nodes.
  *
  * @author marek.ryznar@amartus.com
  */
 public class OvsdbUtils {
-    private static final TopologyId ovsdbTopoId = new TopologyId(new Uri("ovsdb:1"));
-    private static final NodeId odlNodeId = new NodeId(new Uri("odl"));
+    private static final TopologyId OVSDB_TOPO_ID = new TopologyId(new Uri("ovsdb:1"));
+    private static final NodeId ODL_NODE_ID = new NodeId(new Uri("odl"));
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbUtils.class);
-    
-    /**
-	 * Configures ovs egress qos shaping with following steps:
-	 * <ul>
-	 * 
-	 * <li>Create qos queue on all port (tp + output ports)</li>
-	 * <li>Create qos entry with queues created in previous step</li>
-	 * <li>Add created qos entries to termination point</li> 
-	 * </ul>
-	 * 
-	 * @param dataBroker
-	 *            access to data tree store
-	 * @param tpId
-	 *            termination point id
-	 * @param outputPorts
-	 *            list of output aka interswitch/internal ports
-	 * @param minRate
-	 *            qos min-rate
-	 * @param maxRate
-	 *            qos max-rate
-	 * @param serviceName
-	 *            name of service
-	 * @param queueNumber
-	 *            qos queue number
-	 */
-    public static void createEgressQos(DataBroker dataBroker, String tpId, List<String> outputPorts, Long minRate, Long maxRate, String serviceName, Long queueNumber){
-    	
-    	String qosQueueId = serviceName + "_queue_" + queueNumber;
-    	String qosEntryId = serviceName + "_qos_" + queueNumber;
-    	
-    	//create queue
-    	Queues queue = createQueue(minRate, maxRate, qosQueueId);
-        InstanceIdentifier<Queues> queueInstanceIdentifier = getQueueInstanceIdentifier(queue);
-    	addQueueToConfigDatastore(dataBroker, queue, queueInstanceIdentifier);
 
-		// create qos entry that contains ref to queue uuid, it has to be
-		// present in operational config, that's why it happens separate tx
-    	QosEntries qosEntry = createQosEntry(qosEntryId, queueNumber, queueInstanceIdentifier);
+    /**
+     * Configures ovs egress qos shaping with following steps:
+     * <ul>
+     * <li>Create qos queue on all port (tp + output ports)</li>
+     * <li>Create qos entry with queues created in previous step</li>
+     * <li>Add created qos entries to termination point</li>
+     * </ul>
+     *
+     * @param dataBroker  access to data tree store
+     * @param tpId        termination point id
+     * @param outputPorts list of output aka interswitch/internal ports
+     * @param minRate     qos min-rate
+     * @param maxRate     qos max-rate
+     * @param serviceName name of service
+     * @param queueNumber qos queue number
+     */
+    public static void createEgressQos(DataBroker dataBroker, String tpId,
+                                       List<String> outputPorts, Long minRate,
+                                       Long maxRate, String serviceName, Long queueNumber) {
+
+        String qosQueueId = serviceName + "_queue_" + queueNumber;
+        String qosEntryId = serviceName + "_qos_" + queueNumber;
+
+        //create queue
+        Queues queue = createQueue(minRate, maxRate, qosQueueId);
+        InstanceIdentifier<Queues> queueInstanceIdentifier = getQueueInstanceIdentifier(queue);
+        addQueueToConfigDatastore(dataBroker, queue, queueInstanceIdentifier);
+
+        // create qos entry that contains ref to queue uuid, it has to be
+        // present in operational config, that's why it happens separate tx
+        QosEntries qosEntry = createQosEntry(qosEntryId, queueNumber, queueInstanceIdentifier);
         InstanceIdentifier<QosEntries> qosInstanceIdentifier = getQosEntryInstanceIdentifier(qosEntry);
         addQosEntryToConfigDatastore(dataBroker, qosEntry, qosInstanceIdentifier);
 
 
-  		//bind created qos to endpoint + all interswitchLinks on this this node
-		Optional<TerminationPoint> otp = findTerminationPoint(dataBroker, tpId);
-		Optional<Node> optNode = findBridgeNode(dataBroker, tpId);
-		
-		addQosEntryToTerminationPoint(dataBroker, qosInstanceIdentifier, otp, optNode);
-		
-		for (String outputTpId : outputPorts) {
-			otp = findTerminationPoint(dataBroker, outputTpId);
-			addQosEntryToTerminationPoint(dataBroker, qosInstanceIdentifier, otp, optNode);
-		}
-    }    
+        //bind created qos to endpoint + all interswitchLinks on this this node
+        Optional<TerminationPoint> otp = findTerminationPoint(dataBroker, tpId);
+        Optional<Node> optNode = findBridgeNode(dataBroker, tpId);
 
-	private static void deleteQosFromConfigDatastore(DataBroker dataBroker, InstanceIdentifier<?> qosId) {
-		WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
-		tx.delete(LogicalDatastoreType.CONFIGURATION, qosId);
-		final CheckedFuture<Void, TransactionCommitFailedException> future = tx.submit();
-		try {
-			future.checkedGet();
-			LOG.info("Succesfully removed Qos entry from Config datastore: {}", qosId.toString());
-		} catch (final TransactionCommitFailedException e) {
-			LOG.warn("Failed to remove Qos entry from Config datastore: {}", qosId.toString(), e);
-		}
-	}
-	
+        addQosEntryToTerminationPoint(dataBroker, qosInstanceIdentifier, otp, optNode);
 
-	private static void deleteQueueFromConfigDatastore(DataBroker dataBroker, InstanceIdentifier<?> queueId) {
-		WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
-		tx.delete(LogicalDatastoreType.CONFIGURATION, queueId);
-		final CheckedFuture<Void, TransactionCommitFailedException> future = tx.submit();
-		try {
-			future.checkedGet();
-			LOG.info("Succesfully removed Qos Queue from Config datastore: {}", queueId.toString());
-		} catch (final TransactionCommitFailedException e) {
-			LOG.warn("Failed to remove Qos Queue from Config datastore: {}", queueId.toString(), e);
-		}
-	}
-	
-	private static void deleteTerminationPointQosEntryFromConfigDatastore(DataBroker dataBroker, InstanceIdentifier<QosEntry> qosEntryId) {
-		WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
-		tx.delete(LogicalDatastoreType.CONFIGURATION, qosEntryId);
-		final CheckedFuture<Void, TransactionCommitFailedException> future = tx.submit();
-		try {
-			future.checkedGet();
-			LOG.info("Succesfully removed Termination Point Qos entry from  Config datastore: {}", qosEntryId.toString());
-		} catch (final TransactionCommitFailedException e) {
-			LOG.warn("Failed to remove Termination Point Qos entry from Config datastore: {}", qosEntryId.toString(), e);
-		}
-	}
+        for (String outputTpId : outputPorts) {
+            otp = findTerminationPoint(dataBroker, outputTpId);
+            addQosEntryToTerminationPoint(dataBroker, qosInstanceIdentifier, otp, optNode);
+        }
+    }
 
-	private static void addQosEntryToTerminationPoint(DataBroker dataBroker,
-			InstanceIdentifier<QosEntries> qosInstanceIdentifier, Optional<TerminationPoint> otp,
-			Optional<Node> optNode) {
-		if (otp.isPresent() && optNode.isPresent()) {
-			TerminationPoint tp = otp.get();
-			tp = buildTerminationPoint(tp, qosInstanceIdentifier);
-			InstanceIdentifier<TerminationPoint> tpIid = getTerminationPointInstanceIdentifier(optNode.get(), tp);
-			
-	    	final NotifyingDataChangeListener qosEntryToTpOperationalListener = new NotifyingDataChangeListener(
-					LogicalDatastoreType.OPERATIONAL, tpIid, null);
-	    	qosEntryToTpOperationalListener.registerDataChangeListener(dataBroker);
-			
-			WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
-			tx.merge(LogicalDatastoreType.CONFIGURATION, tpIid, tp, true);
-			
-			
-			final CheckedFuture<Void, TransactionCommitFailedException> future = tx.submit();
-			try {
-				future.checkedGet();
-				LOG.info("Succesfully added Qos Uiid to termination point: {}", tp.getTpId().getValue());
-			} catch (final TransactionCommitFailedException e) {
-				LOG.warn("Failed to add Qos Uiid to termination point: {} ", tp.getTpId().getValue(), e);
-			}
-			
-			try {
-				qosEntryToTpOperationalListener.waitForUpdate();
-			} catch (InterruptedException e) {
-				LOG.warn("Sleep interrupted while waiting for Qos entry to Termination Point update {}", qosInstanceIdentifier, e);
-			} finally {
-				try {
-					qosEntryToTpOperationalListener.close();
-				} catch (Exception e) {
-					LOG.debug(
-							"Failed to properly close qosEntryToTpOperationalListener while waiting for qos entry to TerminationPoint update oper {}",
-							qosInstanceIdentifier, e);
-				}
-			}
-		}
+    private static void deleteQosFromConfigDatastore(DataBroker dataBroker, InstanceIdentifier<?> qosId) {
+        WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
+        tx.delete(LogicalDatastoreType.CONFIGURATION, qosId);
+        final CheckedFuture<Void, TransactionCommitFailedException> future = tx.submit();
+        try {
+            future.checkedGet();
+            LOG.info("Succesfully removed Qos entry from Config datastore: {}", qosId.toString());
+        } catch (final TransactionCommitFailedException e) {
+            LOG.warn("Failed to remove Qos entry from Config datastore: {}", qosId.toString(), e);
+        }
+    }
 
-	}
+
+    private static void deleteQueueFromConfigDatastore(DataBroker dataBroker, InstanceIdentifier<?> queueId) {
+        WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
+        tx.delete(LogicalDatastoreType.CONFIGURATION, queueId);
+        final CheckedFuture<Void, TransactionCommitFailedException> future = tx.submit();
+        try {
+            future.checkedGet();
+            LOG.info("Succesfully removed Qos Queue from Config datastore: {}", queueId.toString());
+        } catch (final TransactionCommitFailedException e) {
+            LOG.warn("Failed to remove Qos Queue from Config datastore: {}", queueId.toString(), e);
+        }
+    }
+
+    private static void deleteTerminationPointQosEntryFromConfigDatastore(DataBroker dataBroker,
+                                                                          InstanceIdentifier<QosEntry> qosEntryId) {
+        WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
+        tx.delete(LogicalDatastoreType.CONFIGURATION, qosEntryId);
+        final CheckedFuture<Void, TransactionCommitFailedException> future = tx.submit();
+        try {
+            future.checkedGet();
+            LOG.info("Succesfully removed Termination Point Qos entry from  Config datastore: {}",
+                    qosEntryId.toString());
+        } catch (final TransactionCommitFailedException e) {
+            LOG.warn("Failed to remove Termination Point Qos entry from Config datastore: {}",
+                    qosEntryId.toString(), e);
+        }
+    }
+
+    private static void addQosEntryToTerminationPoint(DataBroker dataBroker,
+                                                      InstanceIdentifier<QosEntries> qosInstanceIdentifier,
+                                                      Optional<TerminationPoint> otp,
+                                                      Optional<Node> optNode) {
+        if (otp.isPresent() && optNode.isPresent()) {
+            TerminationPoint tp = otp.get();
+            tp = buildTerminationPoint(tp, qosInstanceIdentifier);
+            InstanceIdentifier<TerminationPoint> tpIid = getTerminationPointInstanceIdentifier(optNode.get(), tp);
+
+            final NotifyingDataChangeListener qosEntryToTpOperationalListener = new NotifyingDataChangeListener(
+                    LogicalDatastoreType.OPERATIONAL, tpIid, null);
+            qosEntryToTpOperationalListener.registerDataChangeListener(dataBroker);
+
+            WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
+            tx.merge(LogicalDatastoreType.CONFIGURATION, tpIid, tp, true);
+
+
+            final CheckedFuture<Void, TransactionCommitFailedException> future = tx.submit();
+            try {
+                future.checkedGet();
+                LOG.info("Succesfully added Qos Uiid to termination point: {}", tp.getTpId().getValue());
+            } catch (final TransactionCommitFailedException e) {
+                LOG.warn("Failed to add Qos Uiid to termination point: {} ", tp.getTpId().getValue(), e);
+            }
+
+            try {
+                qosEntryToTpOperationalListener.waitForUpdate();
+            } catch (InterruptedException e) {
+                LOG.warn("Sleep interrupted while waiting for Qos entry to Termination Point update {}",
+                        qosInstanceIdentifier, e);
+            } finally {
+                try {
+                    qosEntryToTpOperationalListener.close();
+                } catch (Exception e) {
+                    LOG.debug(
+                            "Failed to properly close qosEntryToTpOperationalListener while waiting for qos entry "
+                                    +  "to TerminationPoint update oper {}",
+                            qosInstanceIdentifier, e);
+                }
+            }
+        }
+
+    }
 
     /**
-	 * Removes egress qos shaping from ovsdb for specified service:
-	 * <ul>
-	 * <li>Remove all qos entries to TerminationPoints assignments for specified
-	 * service from config datastore</li>
-	 * <li>Remove all qos entries assinged to specified TerminationPoints and
-	 * service from config datastore</li>
-	 * <li>Remove all queues assigned to qos entries for specified TerminationPoints
-	 * and service from config datastore</li>
-	 * </ul>
-	 * 
-	 * @param dataBroker
-	 *            access to data tree store
-	 * @param serviceName
-	 *            name of the service
-	 * @param tpsWithQos
-	 *            list of TerminationPoints that might contain QoS
-	 */
-	public static void removeQosEntryFromTerminationPoints(DataBroker dataBroker, String serviceName,
-			List<String> tpsWithQos) {
-		Optional<Node> optNode = findBridgeNode(dataBroker, tpsWithQos.get(0));
-		Set<InstanceIdentifier<?>> qosEntriesTodelete = new HashSet<>();
-		if (optNode.isPresent()) {
-			for (String tpId : tpsWithQos) {
-				Optional<TerminationPoint> otp = findTerminationPoint(dataBroker, tpId);
-				if (otp.isPresent()) {
-					TerminationPoint tp = otp.get();
-					OvsdbTerminationPointAugmentation ovsdbTpAug = tp
-							.augmentation(OvsdbTerminationPointAugmentation.class);
-					if (ovsdbTpAug != null && ovsdbTpAug.getQosEntry() != null) {
-						for (QosEntry qosEntry : ovsdbTpAug.getQosEntry()) {
-							OvsdbQosRef qosRef = qosEntry.getQosRef();
-							if (qosRef.getValue().toString().contains(serviceName)) {
-								deleteTerminationPointQosEntryFromConfigDatastore(dataBroker,
-										getTerminationPointQosEntryInstanceIdentifier(optNode.get(), tp, qosEntry));
-								qosEntriesTodelete.add(qosRef.getValue());
-							}
-						}
-					}
-				}
-			}
-		}
-		for (InstanceIdentifier<?> qosEntryToDeleteId : qosEntriesTodelete) {
-			QosEntries qosEntries = (QosEntries) MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL,
-					qosEntryToDeleteId);
-			if (qosEntries != null) {
-				List<QueueList> queueList = qosEntries.getQueueList();
-				deleteQosFromConfigDatastore(dataBroker, qosEntryToDeleteId);
-				queueList.stream()
-						.forEach(ql -> deleteQueueFromConfigDatastore(dataBroker, ql.getQueueRef().getValue()));
-			}
-		}
-	}
+     * Removes egress qos shaping from ovsdb for specified service:
+     * <ul>
+     * <li>Remove all qos entries to TerminationPoints assignments for specified
+     * service from config datastore</li>
+     * <li>Remove all qos entries assinged to specified TerminationPoints and
+     * service from config datastore</li>
+     * <li>Remove all queues assigned to qos entries for specified TerminationPoints
+     * and service from config datastore</li>
+     * </ul>
+     *
+     * @param dataBroker  access to data tree store
+     * @param serviceName name of the service
+     * @param tpsWithQos  list of TerminationPoints that might contain QoS
+     */
+    public static void removeQosEntryFromTerminationPoints(DataBroker dataBroker, String serviceName,
+                                                           List<String> tpsWithQos) {
+        Optional<Node> optNode = findBridgeNode(dataBroker, tpsWithQos.get(0));
+        Set<InstanceIdentifier<?>> qosEntriesTodelete = new HashSet<>();
+        if (optNode.isPresent()) {
+            for (String tpId : tpsWithQos) {
+                Optional<TerminationPoint> otp = findTerminationPoint(dataBroker, tpId);
+                if (otp.isPresent()) {
+                    TerminationPoint tp = otp.get();
+                    OvsdbTerminationPointAugmentation ovsdbTpAug = tp
+                            .augmentation(OvsdbTerminationPointAugmentation.class);
+                    if (ovsdbTpAug != null && ovsdbTpAug.getQosEntry() != null) {
+                        for (QosEntry qosEntry : ovsdbTpAug.getQosEntry()) {
+                            OvsdbQosRef qosRef = qosEntry.getQosRef();
+                            if (qosRef.getValue().toString().contains(serviceName)) {
+                                deleteTerminationPointQosEntryFromConfigDatastore(dataBroker,
+                                        getTerminationPointQosEntryInstanceIdentifier(optNode.get(), tp, qosEntry));
+                                qosEntriesTodelete.add(qosRef.getValue());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for (InstanceIdentifier<?> qosEntryToDeleteId : qosEntriesTodelete) {
+            QosEntries qosEntries = (QosEntries) MdsalUtils.read(dataBroker, LogicalDatastoreType.OPERATIONAL,
+                    qosEntryToDeleteId);
+            if (qosEntries != null) {
+                List<QueueList> queueList = qosEntries.getQueueList();
+                deleteQosFromConfigDatastore(dataBroker, qosEntryToDeleteId);
+                queueList.stream()
+                        .forEach(ql -> deleteQueueFromConfigDatastore(dataBroker, ql.getQueueRef().getValue()));
+            }
+        }
+    }
 
-	private static void addQueueToConfigDatastore(DataBroker dataBroker, Queues queue,
-			InstanceIdentifier<Queues> queueInstanceIdentifier) {
-		
-    	final NotifyingDataChangeListener queueCreateOperationalListener = new NotifyingDataChangeListener(
-				LogicalDatastoreType.OPERATIONAL, queueInstanceIdentifier, null);
-		queueCreateOperationalListener.registerDataChangeListener(dataBroker);
-		
-		WriteTransaction createQoSQueueTx = dataBroker.newWriteOnlyTransaction();
-		createQoSQueueTx.merge(LogicalDatastoreType.CONFIGURATION, queueInstanceIdentifier, queue, true);
+    private static void addQueueToConfigDatastore(DataBroker dataBroker, Queues queue,
+                                                  InstanceIdentifier<Queues> queueInstanceIdentifier) {
 
-		final CheckedFuture<Void, TransactionCommitFailedException> futureCreateQoSQueueTx = createQoSQueueTx.submit();
-		try {
-			futureCreateQoSQueueTx.checkedGet();
-			LOG.info("Succesfully created QoS queue :{}", queueInstanceIdentifier);
-		} catch (final TransactionCommitFailedException e) {
-			LOG.warn("Failed to create new QoS queue: {} ", queueInstanceIdentifier, e);
-		}
+        final NotifyingDataChangeListener queueCreateOperationalListener = new NotifyingDataChangeListener(
+                LogicalDatastoreType.OPERATIONAL, queueInstanceIdentifier, null);
+        queueCreateOperationalListener.registerDataChangeListener(dataBroker);
 
-		try {
-			queueCreateOperationalListener.waitForCreation();
-		} catch (InterruptedException e) {
-			LOG.warn("Sleep interrupted while waiting for Qos queue creation {}", queueInstanceIdentifier, e);
-		} finally {
-			try {
-				queueCreateOperationalListener.close();
-			} catch (Exception e) {
-				LOG.debug(
-						"Failed to properly close queueCreateOperationalListener while waiting for qos queue creation {}",
-						queueInstanceIdentifier, e);
-			}
-		}
+        WriteTransaction createQoSQueueTx = dataBroker.newWriteOnlyTransaction();
+        createQoSQueueTx.merge(LogicalDatastoreType.CONFIGURATION, queueInstanceIdentifier, queue, true);
 
-	}
+        final CheckedFuture<Void, TransactionCommitFailedException> futureCreateQoSQueueTx = createQoSQueueTx.submit();
+        try {
+            futureCreateQoSQueueTx.checkedGet();
+            LOG.info("Succesfully created QoS queue :{}", queueInstanceIdentifier);
+        } catch (final TransactionCommitFailedException e) {
+            LOG.warn("Failed to create new QoS queue: {} ", queueInstanceIdentifier, e);
+        }
 
-	public static void addQosEntryToConfigDatastore(DataBroker dataBroker, QosEntries qosEntry, InstanceIdentifier<QosEntries> qosInstanceIdentifier) {
-    	final NotifyingDataChangeListener qosEntryOperationalListener = new NotifyingDataChangeListener(
-				LogicalDatastoreType.OPERATIONAL, qosInstanceIdentifier, null);
-		qosEntryOperationalListener.registerDataChangeListener(dataBroker);
-		
-    	WriteTransaction createQosEntryTx = dataBroker.newWriteOnlyTransaction();
-    	createQosEntryTx.merge(LogicalDatastoreType.CONFIGURATION, qosInstanceIdentifier, qosEntry, true);
-    	
+        try {
+            queueCreateOperationalListener.waitForCreation();
+        } catch (InterruptedException e) {
+            LOG.warn("Sleep interrupted while waiting for Qos queue creation {}", queueInstanceIdentifier, e);
+        } finally {
+            try {
+                queueCreateOperationalListener.close();
+            } catch (Exception e) {
+                LOG.debug(
+                    "Failed to properly close queueCreateOperationalListener while waiting for qos queue creation {}",
+                    queueInstanceIdentifier, e);
+            }
+        }
+
+    }
+
+    public static void addQosEntryToConfigDatastore(DataBroker dataBroker, QosEntries qosEntry,
+                                                    InstanceIdentifier<QosEntries> qosInstanceIdentifier) {
+        final NotifyingDataChangeListener qosEntryOperationalListener = new NotifyingDataChangeListener(
+                LogicalDatastoreType.OPERATIONAL, qosInstanceIdentifier, null);
+        qosEntryOperationalListener.registerDataChangeListener(dataBroker);
+
+        WriteTransaction createQosEntryTx = dataBroker.newWriteOnlyTransaction();
+        createQosEntryTx.merge(LogicalDatastoreType.CONFIGURATION, qosInstanceIdentifier, qosEntry, true);
+
         final CheckedFuture<Void, TransactionCommitFailedException> futureCreateQosEntryTx = createQosEntryTx.submit();
         try {
-        	futureCreateQosEntryTx.checkedGet();
-        	LOG.info("Succesfully created QoS entry: {}", qosInstanceIdentifier);
+            futureCreateQosEntryTx.checkedGet();
+            LOG.info("Succesfully created QoS entry: {}", qosInstanceIdentifier);
         } catch (final TransactionCommitFailedException e) {
             LOG.warn("Failed to create new QoS entry: {} ", qosInstanceIdentifier, e);
-		}
-        
-		try {
-			qosEntryOperationalListener.waitForCreation();
-		} catch (InterruptedException e) {
-			LOG.warn("Sleep interrupted while waiting for qos entry creation {}", qosInstanceIdentifier, e);
-		} finally {
-			try {
-				qosEntryOperationalListener.close();
-			} catch (Exception e) {
-				LOG.debug(
-						"Failed to properly close qosEntryOperationalListener while waiting for qos entry creation {}",
-						qosInstanceIdentifier, e);
-			}
-		}
+        }
+
+        try {
+            qosEntryOperationalListener.waitForCreation();
+        } catch (InterruptedException e) {
+            LOG.warn("Sleep interrupted while waiting for qos entry creation {}", qosInstanceIdentifier, e);
+        } finally {
+            try {
+                qosEntryOperationalListener.close();
+            } catch (Exception e) {
+                LOG.debug(
+                        "Failed to properly close qosEntryOperationalListener while waiting for qos entry creation {}",
+                        qosInstanceIdentifier, e);
+            }
+        }
     }
 
-	private static QosEntries createQosEntry(String qosEntryId, Long queueNumber, InstanceIdentifier<Queues> queueId) {
-		QosEntriesBuilder qosEntriesBuilder = new QosEntriesBuilder();
-		qosEntriesBuilder.setQosId(new Uri(qosEntryId));
-		qosEntriesBuilder.setQosType(QosTypeLinuxHtb.class);
+    private static QosEntries createQosEntry(String qosEntryId, Long queueNumber, InstanceIdentifier<Queues> queueId) {
+        QosEntriesBuilder qosEntriesBuilder = new QosEntriesBuilder();
+        qosEntriesBuilder.setQosId(new Uri(qosEntryId));
+        qosEntriesBuilder.setQosType(QosTypeLinuxHtb.class);
 
-		QueueListBuilder queueListBuilder = new QueueListBuilder();
-		queueListBuilder.setQueueNumber(queueNumber);
-		queueListBuilder.setQueueRef(new OvsdbQueueRef(queueId));
-		
-		List<QueueList> queueList = new LinkedList<>();
-		queueList.add(queueListBuilder.build());
-		
-		qosEntriesBuilder.setQueueList(queueList);
-		
-		return qosEntriesBuilder.build();
-	}
+        QueueListBuilder queueListBuilder = new QueueListBuilder();
+        queueListBuilder.setQueueNumber(queueNumber);
+        queueListBuilder.setQueueRef(new OvsdbQueueRef(queueId));
 
-	private static Queues createQueue(Long minRate, Long maxRate, String qosQueueId) {
-		QueuesBuilder queuesBuilder = new QueuesBuilder();
-		queuesBuilder.setQueueId(new Uri(qosQueueId));
+        List<QueueList> queueList = new LinkedList<>();
+        queueList.add(queueListBuilder.build());
 
-		LinkedList<QueuesOtherConfig> queuesOtherConfigList = new LinkedList<>();
-		QueuesOtherConfigBuilder queuesMaxRateOtherConfigBuilder = new QueuesOtherConfigBuilder();
-		queuesMaxRateOtherConfigBuilder.setQueueOtherConfigKey("max-rate");
-		queuesMaxRateOtherConfigBuilder.setQueueOtherConfigValue(maxRate.toString());
-		queuesOtherConfigList.add(queuesMaxRateOtherConfigBuilder.build());
-		
-		QueuesOtherConfigBuilder queuesMinRateOtherConfigBuilder = new QueuesOtherConfigBuilder();
-		queuesMinRateOtherConfigBuilder.setQueueOtherConfigKey("min-rate");
-		queuesMinRateOtherConfigBuilder.setQueueOtherConfigValue(minRate.toString());
-		queuesOtherConfigList.add(queuesMinRateOtherConfigBuilder.build());
+        qosEntriesBuilder.setQueueList(queueList);
 
-		queuesBuilder.setQueuesOtherConfig(queuesOtherConfigList);
+        return qosEntriesBuilder.build();
+    }
 
-		return queuesBuilder.build();
-	}
+    private static Queues createQueue(Long minRate, Long maxRate, String qosQueueId) {
+        QueuesBuilder queuesBuilder = new QueuesBuilder();
+        queuesBuilder.setQueueId(new Uri(qosQueueId));
 
-	
-	private static InstanceIdentifier<Queues> getQueueInstanceIdentifier(Queues queue) {
-		return InstanceIdentifier.create(NetworkTopology.class)
-				.child(Topology.class, new TopologyKey(ovsdbTopoId))
-				.child(Node.class, new NodeKey(odlNodeId))
-				.augmentation(OvsdbNodeAugmentation.class)
-				.child(Queues.class, queue.key());
-	}
-	
-	private static InstanceIdentifier<QosEntries> getQosEntryInstanceIdentifier(QosEntries qosEntries) {
-		return InstanceIdentifier.create(NetworkTopology.class)
-				.child(Topology.class, new TopologyKey(ovsdbTopoId))
-				.child(Node.class, new NodeKey(odlNodeId))
-				.augmentation(OvsdbNodeAugmentation.class)
-				.child(QosEntries.class, qosEntries.key());
-	}
-	
-    private static InstanceIdentifier<TerminationPoint> getTerminationPointInstanceIdentifier(Node bridgeNode, TerminationPoint tp){
+        LinkedList<QueuesOtherConfig> queuesOtherConfigList = new LinkedList<>();
+        QueuesOtherConfigBuilder queuesMaxRateOtherConfigBuilder = new QueuesOtherConfigBuilder();
+        queuesMaxRateOtherConfigBuilder.setQueueOtherConfigKey("max-rate");
+        queuesMaxRateOtherConfigBuilder.setQueueOtherConfigValue(maxRate.toString());
+        queuesOtherConfigList.add(queuesMaxRateOtherConfigBuilder.build());
+
+        QueuesOtherConfigBuilder queuesMinRateOtherConfigBuilder = new QueuesOtherConfigBuilder();
+        queuesMinRateOtherConfigBuilder.setQueueOtherConfigKey("min-rate");
+        queuesMinRateOtherConfigBuilder.setQueueOtherConfigValue(minRate.toString());
+        queuesOtherConfigList.add(queuesMinRateOtherConfigBuilder.build());
+
+        queuesBuilder.setQueuesOtherConfig(queuesOtherConfigList);
+
+        return queuesBuilder.build();
+    }
+
+
+    private static InstanceIdentifier<Queues> getQueueInstanceIdentifier(Queues queue) {
+        return InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(OVSDB_TOPO_ID))
+                .child(Node.class, new NodeKey(ODL_NODE_ID))
+                .augmentation(OvsdbNodeAugmentation.class)
+                .child(Queues.class, queue.key());
+    }
+
+    private static InstanceIdentifier<QosEntries> getQosEntryInstanceIdentifier(QosEntries qosEntries) {
+        return InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(OVSDB_TOPO_ID))
+                .child(Node.class, new NodeKey(ODL_NODE_ID))
+                .augmentation(OvsdbNodeAugmentation.class)
+                .child(QosEntries.class, qosEntries.key());
+    }
+
+    private static InstanceIdentifier<TerminationPoint> getTerminationPointInstanceIdentifier(Node bridgeNode,
+                                                                                              TerminationPoint tp) {
         return InstanceIdentifier
-                        .create(NetworkTopology.class)
-                        .child(Topology.class,
-                                new TopologyKey(ovsdbTopoId))
-                        .child(Node.class, bridgeNode.key())
-                        .child(TerminationPoint.class, tp.key());
-    }
-    
-    private static InstanceIdentifier<QosEntry> getTerminationPointQosEntryInstanceIdentifier(Node bridgeNode, TerminationPoint tp, QosEntry qosEntry){
-        return InstanceIdentifier
-                        .create(NetworkTopology.class)
-                        .child(Topology.class,
-                                new TopologyKey(ovsdbTopoId))
-                        .child(Node.class, bridgeNode.key())
-                        .child(TerminationPoint.class, tp.key())
-                        .augmentation(OvsdbTerminationPointAugmentation.class)
-                        .child(QosEntry.class, qosEntry.key());
+                .create(NetworkTopology.class)
+                .child(Topology.class,
+                        new TopologyKey(OVSDB_TOPO_ID))
+                .child(Node.class, bridgeNode.key())
+                .child(TerminationPoint.class, tp.key());
     }
 
-    private static TerminationPoint buildTerminationPoint(TerminationPoint tp, InstanceIdentifier<QosEntries> qosInstanceIdentifier){
+    private static InstanceIdentifier<QosEntry> getTerminationPointQosEntryInstanceIdentifier(Node bridgeNode,
+                                                                                              TerminationPoint tp,
+                                                                                              QosEntry qosEntry) {
+        return InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class,
+                        new TopologyKey(OVSDB_TOPO_ID))
+                .child(Node.class, bridgeNode.key())
+                .child(TerminationPoint.class, tp.key())
+                .augmentation(OvsdbTerminationPointAugmentation.class)
+                .child(QosEntry.class, qosEntry.key());
+    }
+
+    private static TerminationPoint buildTerminationPoint(TerminationPoint tp,
+                                                          InstanceIdentifier<QosEntries> qosInstanceIdentifier) {
         TerminationPointBuilder terminationPointBuilder = new TerminationPointBuilder();
-                 terminationPointBuilder.withKey(tp.key());
-                terminationPointBuilder.setTpId(tp.getTpId());
-        terminationPointBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class,addQosToPort(tp.getTpId().getValue(), qosInstanceIdentifier));
+        terminationPointBuilder.withKey(tp.key());
+        terminationPointBuilder.setTpId(tp.getTpId());
+        terminationPointBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class,
+                addQosToPort(tp.getTpId().getValue(), qosInstanceIdentifier));
         return terminationPointBuilder.build();
     }
 
-    private static OvsdbTerminationPointAugmentation addQosToPort(String name, InstanceIdentifier<QosEntries> qosInstanceIdentifier){
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();        
-		List<QosEntry> qosList = new ArrayList<>();
-		OvsdbQosRef qosRef = new OvsdbQosRef(qosInstanceIdentifier);
-		qosList.add(new QosEntryBuilder().withKey(new QosEntryKey(new Long(SouthboundConstants.PORT_QOS_LIST_KEY)))
-				.setQosRef(qosRef).build());
-		ovsdbTerminationPointAugmentationBuilder.setQosEntry(qosList);
+    private static OvsdbTerminationPointAugmentation addQosToPort(String name,
+                                                              InstanceIdentifier<QosEntries> qosInstanceIdentifier) {
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointAugmentationBuilder
+                = new OvsdbTerminationPointAugmentationBuilder();
+        List<QosEntry> qosList = new ArrayList<>();
+        OvsdbQosRef qosRef = new OvsdbQosRef(qosInstanceIdentifier);
+        qosList.add(new QosEntryBuilder().withKey(new QosEntryKey(new Long(SouthboundConstants.PORT_QOS_LIST_KEY)))
+                .setQosRef(qosRef).build());
+        ovsdbTerminationPointAugmentationBuilder.setQosEntry(qosList);
 
         ovsdbTerminationPointAugmentationBuilder.setName(name);
 
 
         return ovsdbTerminationPointAugmentationBuilder.build();
     }
-    
-    private static Optional<TerminationPoint> findTerminationPoint(DataBroker dataBroker, String port){
+
+    private static Optional<TerminationPoint> findTerminationPoint(DataBroker dataBroker, String port) {
         List<Node> ovsdbNodes = getOvsdbNodes(dataBroker);
         Optional<TerminationPoint> terminationPoint = Optional.empty();
         if (!ovsdbNodes.isEmpty()) {
             terminationPoint = ovsdbNodes.stream()
                     .flatMap(node -> {
-                        if(node.getTerminationPoint()!=null)
+                        if (node.getTerminationPoint() != null) {
                             return node.getTerminationPoint().stream();
+                        }
                         return Stream.empty();
                     })
                     .filter(tp -> tp.getTpId().getValue().equals(port))
@@ -429,11 +435,11 @@ public class OvsdbUtils {
         return terminationPoint;
     }
 
-    private static Optional<Node> findBridgeNode(DataBroker dataBroker, String tpId){
+    private static Optional<Node> findBridgeNode(DataBroker dataBroker, String tpId) {
         List<Node> ovsdbNodes = getOvsdbNodes(dataBroker);
         return ovsdbNodes.stream()
                 .filter(node -> {
-                            if(node.getTerminationPoint()!=null){
+                            if (node.getTerminationPoint() != null) {
                                 return node.getTerminationPoint().stream()
                                         .anyMatch(tp -> tp.getTpId().getValue().equals(tpId));
                             } else {
@@ -454,18 +460,18 @@ public class OvsdbUtils {
         final InstanceIdentifier<Topology> ovsdbTopoIdentifier = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class,
-                        new TopologyKey(ovsdbTopoId));
+                        new TopologyKey(OVSDB_TOPO_ID));
 
         Topology topology = MdsalUtils.read(dataBroker,
                 LogicalDatastoreType.OPERATIONAL,
                 ovsdbTopoIdentifier);
 
-        if ((topology != null) && (topology.getNode() != null)){
+        if ((topology != null) && (topology.getNode() != null)) {
             return topology.getNode();
         }
         return Collections.emptyList();
     }
-    
+
     /**
      * Retrieve a Ovsdb Odl node from the Operational DataStore.
      *
@@ -476,8 +482,8 @@ public class OvsdbUtils {
         final InstanceIdentifier<Node> ovsdbOdlNodeIdentifier = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class,
-                        new TopologyKey(ovsdbTopoId))
-                .child(Node.class, new NodeKey(odlNodeId));
+                        new TopologyKey(OVSDB_TOPO_ID))
+                .child(Node.class, new NodeKey(ODL_NODE_ID));
 
         return MdsalUtils.read(dataBroker,
                 LogicalDatastoreType.OPERATIONAL,

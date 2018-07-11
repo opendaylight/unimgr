@@ -8,6 +8,7 @@
 
 package org.opendaylight.unimgr.mef.nrp.template.driver;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,11 +24,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Example driver builder
+ * Example driver builder.
  * @author bartosz.michalik@amartus.com
  */
 public class TemplateDriver implements ActivationDriverBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(TemplateDriver.class);
+
     @Override
     public Optional<ActivationDriver> driverFor(BuilderContext context) {
         // build a stateful driver
@@ -54,7 +56,7 @@ public class TemplateDriver implements ActivationDriverBuilder {
             @Override
             public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context) {
                 this.serviceId = serviceId;
-                this.endpoints = endPoints;
+                this.endpoints = new ArrayList<>(endPoints);
 
                 LOG.info("Driver initialized with: " + epsInfo());
             }

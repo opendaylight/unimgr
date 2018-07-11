@@ -8,11 +8,13 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
 import org.opendaylight.unimgr.mef.nrp.api.RequestDecomposer;
@@ -38,16 +40,14 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
-
 /**
+ * TapiConnectivity RPC implementation.
  * @author bartosz.michalik@amartus.com
  */
 public class TapiConnectivityServiceImpl implements TapiConnectivityService, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(TapiConnectivityServiceImpl.class);
+    static final InstanceIdentifier<Context1> CONNECTIVITY_CTX = NrpDao.ctx().augmentation(Context1.class);
     private ActivationDriverRepoService driverRepo;
     private RequestDecomposer decomposer;
     private RequestValidator validator;
@@ -56,8 +56,6 @@ public class TapiConnectivityServiceImpl implements TapiConnectivityService, Aut
 
     private ListeningExecutorService executor = null;
 
-    final static InstanceIdentifier<Context1> connectivityCtx = NrpDao.ctx().augmentation(Context1.class);
-
 
     public void init() {
         Objects.requireNonNull(driverRepo);
@@ -65,7 +63,7 @@ public class TapiConnectivityServiceImpl implements TapiConnectivityService, Aut
         Objects.requireNonNull(validator);
         Objects.requireNonNull(broker);
         Objects.requireNonNull(serviceIdPool);
-        if(executor == null) {
+        if (executor == null) {
             executor = MoreExecutors.listeningDecorator(
                     new ThreadPoolExecutor(4, 16,
                             30, TimeUnit.MINUTES,
@@ -80,34 +78,40 @@ public class TapiConnectivityServiceImpl implements TapiConnectivityService, Aut
     }
 
     @Override
-    public ListenableFuture<RpcResult<CreateConnectivityServiceOutput>> createConnectivityService(CreateConnectivityServiceInput input) {
+    public ListenableFuture<RpcResult<CreateConnectivityServiceOutput>> createConnectivityService(
+            CreateConnectivityServiceInput input) {
         return executor.submit(new CreateConnectivityAction(this, input));
     }
 
 
     @Override
-    public ListenableFuture<RpcResult<UpdateConnectivityServiceOutput>> updateConnectivityService(UpdateConnectivityServiceInput input) {
-    	return executor.submit(new UpdateConnectivityAction(this, input));
+    public ListenableFuture<RpcResult<UpdateConnectivityServiceOutput>> updateConnectivityService(
+            UpdateConnectivityServiceInput input) {
+        return executor.submit(new UpdateConnectivityAction(this, input));
     }
 
     @Override
-    public ListenableFuture<RpcResult<GetConnectionDetailsOutput>> getConnectionDetails(GetConnectionDetailsInput input) {
+    public ListenableFuture<RpcResult<GetConnectionDetailsOutput>> getConnectionDetails(
+            GetConnectionDetailsInput input) {
         return executor.submit(new GetConnectionDetailsAction(this, input));
     }
 
     @Override
-    public ListenableFuture<RpcResult<GetConnectivityServiceDetailsOutput>> getConnectivityServiceDetails(GetConnectivityServiceDetailsInput input) {
+    public ListenableFuture<RpcResult<GetConnectivityServiceDetailsOutput>> getConnectivityServiceDetails(
+            GetConnectivityServiceDetailsInput input) {
         return executor.submit(new GetConnectivityDetailsAction(this, input));
     }
 
     @Override
-    public ListenableFuture<RpcResult<DeleteConnectivityServiceOutput>> deleteConnectivityService(DeleteConnectivityServiceInput input) {
+    public ListenableFuture<RpcResult<DeleteConnectivityServiceOutput>> deleteConnectivityService(
+            DeleteConnectivityServiceInput input) {
         return executor.submit(new DeleteConnectivityAction(this,input));
 
     }
 
     @Override
-    public ListenableFuture<RpcResult<GetConnectivityServiceListOutput>> getConnectivityServiceList(GetConnectivityServiceListInput input) {
+    public ListenableFuture<RpcResult<GetConnectivityServiceListOutput>> getConnectivityServiceList(
+            GetConnectivityServiceListInput input) {
         return executor.submit(new ListConnectivityAction(this));
     }
 
@@ -129,7 +133,9 @@ public class TapiConnectivityServiceImpl implements TapiConnectivityService, Aut
     }
 
     public void setExecutor(ListeningExecutorService executor) {
-        if(executor != null) throw new IllegalStateException();
+        if (executor != null) {
+            throw new IllegalStateException();
+        }
         this.executor = executor;
     }
 

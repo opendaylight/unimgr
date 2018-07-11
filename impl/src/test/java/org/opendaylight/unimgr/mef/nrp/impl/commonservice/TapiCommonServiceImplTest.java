@@ -30,7 +30,6 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 public class TapiCommonServiceImplTest extends AbstractTestWithTopo {
 
     private String uuid1 = "uuid1";
-    private String uuid2 = "uuid2";
 
     private TapiCommonServiceImpl tapiCommonService;
 
@@ -63,6 +62,7 @@ public class TapiCommonServiceImplTest extends AbstractTestWithTopo {
     public void getServiceInterfacePointDetails() throws Exception {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
+        String uuid2 = "uuid2";
         n(tx, uuid2, uuid2 + ":1", uuid2 + ":2", uuid2 + ":3");
         tx.submit().checkedGet();
 

@@ -8,6 +8,8 @@
 
 package org.opendaylight.unimgr.mef.nrp.template.tapi;
 
+import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_SYSTEM_TOPO;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -45,16 +47,18 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.to
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_SYSTEM_TOPO;
-
 /**
+ * Template driver topology handler. It demonstrates how to add topology information to the system.
+ * Real driver uses infrastructure related information to populate this model and is responsible to keep it in sync
+ * in case of topology changes.
  * @author bartosz.michalik@amartus.com
  */
 public class TopologyDataHandler {
     private static final Logger LOG = LoggerFactory.getLogger(TopologyDataHandler.class);
     private DataBroker dataBroker;
     private TopologyManager topologyManager;
-    private enum SIPType {uni, enni, inni}
+
+    private enum SIPType { uni, enni, inni }
 
     public TopologyDataHandler(DataBroker dataBroker, TopologyManager topologyManager) {
         this.dataBroker = dataBroker;
@@ -74,12 +78,16 @@ public class TopologyDataHandler {
             // MD-SAL but you can use tx.put tx.merge etc. by yourself if you prefere to
             NrpDao nrpDao = new NrpDao(tx);
 
-            Node node1 = nrpDao.createNode(topologyManager.getSystemTopologyId(), "node-id-1",TemplateConstants.DRIVER_ID, LayerProtocolName.ETH, null);
-            Node node2 = nrpDao.createNode(topologyManager.getSystemTopologyId(), "node-id-2",TemplateConstants.DRIVER_ID, LayerProtocolName.ETH, null);
+            Node node1 = nrpDao.createNode(topologyManager.getSystemTopologyId(), "node-id-1",
+                    TemplateConstants.DRIVER_ID, LayerProtocolName.ETH, null);
+            Node node2 = nrpDao.createNode(topologyManager.getSystemTopologyId(), "node-id-2",
+                    TemplateConstants.DRIVER_ID, LayerProtocolName.ETH, null);
 
             //we are creating a list of NodeEdgePoints for the nodes no sips are added to the system
-            List<OwnedNodeEdgePoint> node1Endpoints = createSomeEndpoints(node1.getUuid().getValue(), 1, 2, 5, 7);
-            List<OwnedNodeEdgePoint> node2Endpoints = createSomeEndpoints(node2.getUuid().getValue(), 1, 2, 5, 7);
+            List<OwnedNodeEdgePoint> node1Endpoints = createSomeEndpoints(node1.getUuid()
+                    .getValue(), 1, 2, 5, 7);
+            List<OwnedNodeEdgePoint> node2Endpoints = createSomeEndpoints(node2.getUuid()
+                    .getValue(), 1, 2, 5, 7);
             nrpDao.updateNep(node1.getUuid().getValue(), node1Endpoints.get(0));
             nrpDao.updateNep(node2.getUuid().getValue(), node2Endpoints.get(0));
             createLink(tx,node1,node1Endpoints.get(0),node2,node2Endpoints.get(0));
@@ -131,7 +139,7 @@ public class TopologyDataHandler {
         ServiceInterfacePoint1Builder sipBuilder = new ServiceInterfacePoint1Builder();
 
 
-        switch(type) {
+        switch (type) {
             case enni:
                 sipBuilder.setNrpCarrierEthEnniNResource(new NrpCarrierEthEnniNResourceBuilder()
                     .setMaxFrameSize(new NaturalNumber(new Long(1024)))
@@ -176,11 +184,13 @@ public class TopologyDataHandler {
                 .build()).collect(Collectors.toList());
     }
 
-    private void createLink(ReadWriteTransaction tx, Node n1, OwnedNodeEdgePoint onep1, Node n2, OwnedNodeEdgePoint onep2){
-        Uuid uuid = new Uuid(onep1.getUuid().getValue()+onep2.getUuid().getValue());
+    private void createLink(ReadWriteTransaction tx, Node n1, OwnedNodeEdgePoint onep1, Node n2,
+                            OwnedNodeEdgePoint onep2) {
+        Uuid uuid = new Uuid(onep1.getUuid().getValue() + onep2.getUuid().getValue());
 
 
-        NodeEdgePointBuilder builder = new NodeEdgePointBuilder().setTopologyId(new Uuid(TapiConstants.PRESTO_SYSTEM_TOPO));
+        NodeEdgePointBuilder builder = new NodeEdgePointBuilder()
+                .setTopologyId(new Uuid(TapiConstants.PRESTO_SYSTEM_TOPO));
 
         NodeEdgePoint nep1 = builder
                 .setNodeId(n1.getUuid())
@@ -206,7 +216,8 @@ public class TopologyDataHandler {
                 .setRiskCharacteristic(Collections.emptyList())
                 .build();
 
-        tx.put(LogicalDatastoreType.OPERATIONAL, NrpDao.topo(PRESTO_SYSTEM_TOPO).child(Link.class, new LinkKey(uuid)), link);
+        tx.put(LogicalDatastoreType.OPERATIONAL,
+                NrpDao.topo(PRESTO_SYSTEM_TOPO).child(Link.class, new LinkKey(uuid)), link);
     }
 
     public void close() {

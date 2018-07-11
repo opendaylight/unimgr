@@ -10,6 +10,7 @@ package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -68,11 +69,10 @@ public class UpdateConnectivityAction implements Callable<RpcResult<UpdateConnec
             // TODO validate input
              RequestValidator.ValidationResult validationResult = service.getValidator().checkValid(input);
 
-             if (!validationResult.isValid()) {
-                 RpcResultBuilder<UpdateConnectivityServiceOutput> res =
-                 RpcResultBuilder.failed();
+             if (validationResult.invalid()) {
+                 RpcResultBuilder<UpdateConnectivityServiceOutput> res = RpcResultBuilder.failed();
                  validationResult.getProblems().forEach(p ->
-                 res.withError(RpcError.ErrorType.APPLICATION, p));
+                    res.withError(RpcError.ErrorType.APPLICATION, p));
                  return res.build();
              }
 
@@ -80,17 +80,17 @@ public class UpdateConnectivityAction implements Callable<RpcResult<UpdateConnec
 
             String serviceId = input.getServiceIdOrName();
 
-            ActivationTransaction tx = prepareTransaction(nrpDao, serviceId);
+            ActivationTransaction tx = prepareTransaction(serviceId);
             if (tx != null) {
                 ActivationTransaction.Result txResult = tx.update();
                 if (txResult.isSuccessful()) {
                     LOG.info("ConnectivityService construct updated successfully, request = {} ", input);
 
                     //XXX we might be also supporting CS constraints update
-                    ConnectivityService service = nrpDao.updateCsEndPoint(serviceId, input.getEndPoint());
+                    ConnectivityService cs = nrpDao.updateCsEndPoint(serviceId, input.getEndPoint());
 
                     UpdateConnectivityServiceOutput result = new UpdateConnectivityServiceOutputBuilder()
-                            .setService(new ServiceBuilder(service).build()).build();
+                            .setService(new ServiceBuilder(cs).build()).build();
                     return RpcResultBuilder.success(result).build();
                 } else {
                     LOG.warn("UpdateConnectivityService failed, reason = {}, request = {}", txResult.getMessage(),
@@ -107,23 +107,24 @@ public class UpdateConnectivityAction implements Callable<RpcResult<UpdateConnec
 
     }
 
-    private ActivationTransaction prepareTransaction(NrpDao nrpDao, String serviceId) throws FailureResult {
+    private ActivationTransaction prepareTransaction(String serviceId) throws FailureResult {
         ActivationTransaction tx = new ActivationTransaction();
 
-        Optional<? extends OwnedNodeEdgePointRef> nepRef = getNep(nrpDao);
-        if (nepRef.isPresent()) {
+        Optional<? extends OwnedNodeEdgePointRef> nepRef = getNep();
+        nepRef.ifPresent(ownedNodeEdgePointRef -> {
             try {
-                Node node = nrpDao.getNode(nepRef.get().getNodeId());
+                Node node = nrpDao.getNode(ownedNodeEdgePointRef.getNodeId());
                 NodeAdiAugmentation aug = node.augmentation(NodeAdiAugmentation.class);
-                if(aug != null) {
+                if (aug != null) {
                     Optional<ActivationDriver> driver = service.getDriverRepo().getDriver(aug.getActivationDriverId());
                     if (!driver.isPresent()) {
-                        throw new IllegalStateException(MessageFormat.format("driver {} cannot be constructed", aug.getActivationDriverId()));
+                        throw new IllegalStateException(MessageFormat
+                                .format("driver {} cannot be constructed", aug.getActivationDriverId()));
                     }
 
-                    endpoint.setNepRef(nepRef.get());
+                    endpoint.setNepRef(ownedNodeEdgePointRef);
 
-                    driver.get().initialize(Arrays.asList(endpoint), serviceId, null);
+                    driver.get().initialize(Collections.singletonList(endpoint), serviceId, null);
                     tx.addDriver(driver.get());
                 } else {
                     LOG.warn("No driver information for node {}", node.getUuid());
@@ -131,13 +132,12 @@ public class UpdateConnectivityAction implements Callable<RpcResult<UpdateConnec
             } catch (ReadFailedException e) {
                 LOG.warn("Error while reading node", e);
             }
-
-        }
+        });
         return tx;
 
     }
 
-    private Optional<? extends OwnedNodeEdgePointRef> getNep(NrpDao nrpDao) throws FailureResult {
+    private Optional<? extends OwnedNodeEdgePointRef> getNep() throws FailureResult {
 
         try {
             Topology prestoTopo = nrpDao.getTopology(TapiConstants.PRESTO_SYSTEM_TOPO);
@@ -145,15 +145,18 @@ public class UpdateConnectivityAction implements Callable<RpcResult<UpdateConnec
                 throw new FailureResult("There are no nodes in {0} topology", TapiConstants.PRESTO_SYSTEM_TOPO);
             }
 
-            final Predicate<OwnedNodeEdgePoint> hasSip = nep -> nep.getMappedServiceInterfacePoint().stream()
+            final Predicate<OwnedNodeEdgePoint> hasSip = nep -> nep.getMappedServiceInterfacePoint() != null
+                    && nep.getMappedServiceInterfacePoint().stream()
                     .anyMatch(sip ->
                          sip.getServiceInterfacePointId().equals(
                                  endpoint.getEndpoint().getServiceInterfacePoint().getServiceInterfacePointId()
                          )
                     );
 
-            final NodeEdgePointBuilder nepBuilder = new NodeEdgePointBuilder().setTopologyId(new Uuid(TapiConstants.PRESTO_SYSTEM_TOPO));
-            final Function<Node, Optional<? extends OwnedNodeEdgePointRef>> getSip = (Node node) -> node.getOwnedNodeEdgePoint()
+            final NodeEdgePointBuilder nepBuilder = new NodeEdgePointBuilder()
+                    .setTopologyId(new Uuid(TapiConstants.PRESTO_SYSTEM_TOPO));
+            final Function<Node, Optional<? extends OwnedNodeEdgePointRef>> getSip =
+                    (Node node) -> node.getOwnedNodeEdgePoint()
                     .stream().filter(nep -> nep.getMappedServiceInterfacePoint() != null)
                     .filter(hasSip)
                     .map(nep -> {

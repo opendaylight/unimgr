@@ -8,6 +8,14 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl.decomposer;
 
+
+import java.util.*;
+
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
@@ -33,13 +41,9 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.to
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
+ * Decompose request into sub-requests {@link Subrequrest} for drivers using graph path computation.
  * @author bartosz.michalik@amartus.com
  */
 class DecompositionAction {
@@ -65,19 +69,22 @@ class DecompositionAction {
 
 
 
-        Set<String> missingSips = endpoints.stream().filter(e -> sipToNep.get(toUuid.apply(e.getEndpoint().getServiceInterfacePoint())) == null)
-                .map(e -> toUuid.apply(e.getEndpoint().getServiceInterfacePoint()).getValue()).collect(Collectors.toSet());
-        if(!missingSips.isEmpty()) {
-            throw new FailureResult("Some service interface points not found in the system: " +
-                    missingSips.stream().collect(Collectors.joining(",", "[", "]")));
+        Set<String> missingSips = endpoints.stream()
+                .filter(e -> sipToNep.get(toUuid.apply(e.getEndpoint().getServiceInterfacePoint())) == null)
+                .map(e -> toUuid.apply(e.getEndpoint().getServiceInterfacePoint()).getValue())
+                .collect(Collectors.toSet());
+        if (!missingSips.isEmpty()) {
+            throw new FailureResult("Some service interface points not found in the system: "
+                    + missingSips.stream().collect(Collectors.joining(",", "[", "]")));
         }
 
         List<Vertex> vertices = endpoints.stream().map(e -> {
             Vertex v = sipToNep.get(toUuid.apply(e.getEndpoint().getServiceInterfacePoint()));
-            if((v.dir == PortDirection.OUTPUT && e.getEndpoint().getDirection() != PortDirection.OUTPUT) ||
-               (v.dir == PortDirection.INPUT && e.getEndpoint().getDirection() != PortDirection.INPUT)) {
-                throw new IllegalArgumentException("Port direction for " + e.getEndpoint().getLocalId() + " incompatible with NEP." +
-                        "CEP " + e.getEndpoint().getDirection() + "  NEP " + v.dir);
+            if ((v.dir == PortDirection.OUTPUT && e.getEndpoint().getDirection() != PortDirection.OUTPUT)
+                    ||  (v.dir == PortDirection.INPUT && e.getEndpoint().getDirection() != PortDirection.INPUT)) {
+                throw new IllegalArgumentException("Port direction for "
+                        + e.getEndpoint().getLocalId() + " incompatible with NEP."
+                        + "CEP " + e.getEndpoint().getDirection() + "  NEP " + v.dir);
             }
             return new Vertex(v, e.getEndpoint().getDirection());
         }).collect(Collectors.toList());
@@ -93,38 +100,51 @@ class DecompositionAction {
         inV.forEach(i ->
                 outV.stream().filter(o -> i != o).forEach(o -> {
                     GraphPath<Vertex, DefaultEdge> path = DijkstraShortestPath.findPathBetween(graph, i, o);
-                    if(path != null) {
+                    if (path != null) {
                         LOG.debug("Couldn't find path between {} and  {}", i, o);
                     }
                     paths.add(path);
                 })
         );
 
-        if(paths.stream().anyMatch(Objects::isNull)) {
+        if (paths.stream().anyMatch(Objects::isNull)) {
             LOG.info("At least single path between endpoints not found");
             return null;
         }
 
-        List<Subrequrest> result = paths.stream()
-                .flatMap(gp -> gp.getVertexList().stream()).collect(Collectors.groupingBy(Vertex::getNodeUuid))
-                .entrySet().stream()
-                .map(e -> {
-                    Set<EndPoint> endpoints = e.getValue().stream().map(this::toEndPoint).collect(Collectors.toSet());
-                    return new Subrequrest(e.getKey(), new ArrayList<>(endpoints),e.getValue().stream().findFirst().get().getActivationDriverId());
-                }).collect(Collectors.toList());
+        List<Subrequrest> result = toSublists(paths);
         return result.isEmpty() ? null : result;
     }
 
+    private List<Subrequrest> toSublists(Set<GraphPath<Vertex, DefaultEdge>> paths) {
+        return paths.stream()
+                .flatMap(gp -> gp.getVertexList().stream()).collect(Collectors.groupingBy(Vertex::getNodeUuid))
+                .entrySet().stream()
+                .map(e -> {
+                    Set<EndPoint> fromVertexes = e.getValue().stream()
+                            .map(this::toEndPoint).collect(Collectors.toSet());
+                    return new Subrequrest(
+                            e.getKey(),
+                            new ArrayList<>(fromVertexes),
+                            e.getValue().stream().findFirst().get().getActivationDriverId());
+                }).collect(Collectors.toList());
+    }
+
     private EndPoint toEndPoint(Vertex v) {
-        EndPoint ep = endpoints.stream().filter(e -> e.getEndpoint().getServiceInterfacePoint().getServiceInterfacePointId().equals(v.getSip())).findFirst()
+        EndPoint ep = endpoints.stream()
+                .filter(e -> e.getEndpoint().getServiceInterfacePoint()
+                        .getServiceInterfacePointId().equals(v.getSip()))
+                .findFirst()
                 .orElse(new EndPoint(null, null));
         Objects.requireNonNull(v.getUuid());
         ep.setNepRef(TapiUtils.toSysNepRef(v.getNodeUuid(), v.getUuid()));
         return ep;
     }
 
-    private final Predicate<Vertex> isInput = v -> v.getDir() == PortDirection.BIDIRECTIONAL|| v.getDir() == PortDirection.INPUT;
-    private final Predicate<Vertex> isOutput = v -> v.getDir() == PortDirection.BIDIRECTIONAL || v.getDir() == PortDirection.OUTPUT;
+    private final Predicate<Vertex> isInput = v -> v.getDir() == PortDirection.BIDIRECTIONAL
+            || v.getDir() == PortDirection.INPUT;
+    private final Predicate<Vertex> isOutput = v -> v.getDir() == PortDirection.BIDIRECTIONAL
+            || v.getDir() == PortDirection.OUTPUT;
 
     private void interconnectNode(Graph<Vertex, DefaultEdge> graph, List<Vertex> vertices) {
         vertices.forEach(graph::addVertex);
@@ -170,7 +190,8 @@ class DecompositionAction {
                         .forEach(l -> {
                             //we probably need to take link bidir/unidir into consideration as well
                     List<Vertex> vertices = l.getNodeEdgePoint().stream()
-                            .map(nep -> graph.vertexSet().stream().filter(v -> v.getUuid().equals(nep.getOwnedNodeEdgePointId())).findFirst())
+                            .map(nep -> graph.vertexSet().stream()
+                                    .filter(v -> v.getUuid().equals(nep.getOwnedNodeEdgePointId())).findFirst())
                             .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
                     interconnectLink(graph, vertices);
                 });
@@ -188,10 +209,11 @@ class DecompositionAction {
 
 
         return n.getOwnedNodeEdgePoint().stream()
-            .filter(ep -> ep.getLinkPortDirection() != null && ep.getLinkPortDirection() != PortDirection.UNIDENTIFIEDORUNKNOWN)
+            .filter(ep -> ep.getLinkPortDirection() != null
+                    && ep.getLinkPortDirection() != PortDirection.UNIDENTIFIEDORUNKNOWN)
             .map(nep -> {
                 List<Uuid> sips = Collections.emptyList();
-                if(nep.getMappedServiceInterfacePoint() != null) {
+                if (nep.getMappedServiceInterfacePoint() != null) {
                     sips = nep.getMappedServiceInterfacePoint().stream()
                         .map(ServiceInterfacePointRef::getServiceInterfacePointId)
                         .collect(Collectors.toList());
@@ -201,7 +223,8 @@ class DecompositionAction {
                     return  new Vertex(nodeUuid, nep.getUuid(), null, nep.getLinkPortDirection(),activationDriverId);
                 }
                 if (sips.size() > 1) {
-                    LOG.warn("NodeEdgePoint {} have multiple ServiceInterfacePoint mapped, selecting first one", nep.getUuid());
+                    LOG.warn("NodeEdgePoint {} have multiple ServiceInterfacePoint mapped, selecting first one",
+                            nep.getUuid());
                 }
                 return new Vertex(nodeUuid, nep.getUuid(), sips.get(0), nep.getLinkPortDirection(),activationDriverId);
 
@@ -248,7 +271,9 @@ class DecompositionAction {
             return sip;
         }
 
-        public String getActivationDriverId() { return activationDriverId; }
+        public String getActivationDriverId() {
+            return activationDriverId;
+        }
 
         @Override
         public boolean equals(Object o) {

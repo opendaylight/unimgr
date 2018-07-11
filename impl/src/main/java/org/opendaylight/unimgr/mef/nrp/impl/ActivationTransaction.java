@@ -125,18 +125,18 @@ public class ActivationTransaction {
     public static class Result {
         private boolean successful;
 
-        private Optional<String> message;
+        private final String message;
 
-        private Optional<Throwable> cause;
+        private final Throwable cause;
 
-        private Result(boolean successful, Optional<String> message, Optional<Throwable> cause) {
+        private Result(boolean successful, String message, Throwable cause) {
             this.successful = successful;
             this.message = message;
             this.cause = cause;
         }
 
         public Optional<Throwable> getCause() {
-            return cause;
+            return Optional.ofNullable(cause);
         }
 
         public boolean isSuccessful() {
@@ -144,15 +144,15 @@ public class ActivationTransaction {
         }
 
         public Optional<String> getMessage() {
-            return message;
+            return Optional.ofNullable(message);
         }
 
         public static Result success() {
-            return new Result(true, Optional.empty(), Optional.empty());
+            return new Result(true, null, null);
         }
 
         public static Result fail(String message, Throwable cause) {
-            return new Result(false, Optional.of(message), Optional.of(cause));
+            return new Result(false, message, cause);
         }
     }
 

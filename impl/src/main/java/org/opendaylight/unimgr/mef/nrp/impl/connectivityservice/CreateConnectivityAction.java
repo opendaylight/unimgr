@@ -58,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Create connectivity implementation.
  * @author bartosz.michalik@amartus.com
  */
 class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityServiceOutput>> {
@@ -68,7 +69,8 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
     private List<Subrequrest> decomposedRequest;
     private List<EndPoint> endpoints;
 
-    CreateConnectivityAction(TapiConnectivityServiceImpl tapiConnectivityService, CreateConnectivityServiceInput input) {
+    CreateConnectivityAction(TapiConnectivityServiceImpl tapiConnectivityService,
+                             CreateConnectivityServiceInput input) {
         Objects.requireNonNull(tapiConnectivityService);
         Objects.requireNonNull(input);
         this.service = tapiConnectivityService;
@@ -81,7 +83,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
 
         try {
             RequestValidator.ValidationResult validationResult = validateInput();
-            if (!validationResult.isValid()) {
+            if (validationResult.invalid()) {
                 LOG.debug("validation for create connectivity service failed = {}", input);
                 RpcResultBuilder<CreateConnectivityServiceOutput> res = RpcResultBuilder.failed();
                 validationResult.getProblems().forEach(p -> res.withError(RpcError.ErrorType.APPLICATION, p));
@@ -107,12 +109,13 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
 
                     // XXX [bm] when createConnectivityModel methods throws an exception we have desync
                     // (devices are configured but no data stored in MD-SAL. How should we address that?
-                    ConnectivityService service = createConnectivityModel(uniqueStamp);
+                    ConnectivityService cs = createConnectivityModel(uniqueStamp);
                     CreateConnectivityServiceOutput result = new CreateConnectivityServiceOutputBuilder()
-                            .setService(new ServiceBuilder(service).build()).build();
+                            .setService(new ServiceBuilder(cs).build()).build();
                     return RpcResultBuilder.success(result).build();
                 } else {
-                    LOG.warn("CreateConnectivityService failed, reason = {}, request = {}", txResult.getMessage(), input);
+                    LOG.warn("CreateConnectivityService failed, reason = {}, request = {}",
+                            txResult.getMessage(), input);
                 }
             }
             throw new IllegalStateException("no transaction created for create connectivity request");
@@ -131,16 +134,20 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         LOG.debug("decompose request");
         decomposedRequest = service.getDecomposer().decompose(endpoints, null);
 
-        if(decomposedRequest == null || decomposedRequest.isEmpty()) throw new FailureResult("Cannot define activation scheme for "
-                + endpoints.stream().map(e -> e.getEndpoint().getServiceInterfacePoint().getServiceInterfacePointId().getValue())
-                    .collect(Collectors.joining(",", "[", "]")));
+        if (decomposedRequest == null || decomposedRequest.isEmpty()) {
+            throw new FailureResult("Cannot define activation scheme for "
+                            + endpoints.stream().map(e -> e.getEndpoint().getServiceInterfacePoint()
+                            .getServiceInterfacePointId().getValue())
+                            .collect(Collectors.joining(",", "[", "]")));
+        }
 
         ActivationTransaction tx = new ActivationTransaction();
 
         decomposedRequest.stream().map(s -> {
             Optional<ActivationDriver> driver = service.getDriverRepo().getDriver(s.getActivationDriverId());
             if (!driver.isPresent()) {
-                throw new IllegalStateException(MessageFormat.format("driver {} cannot be created", s.getNodeUuid()));
+                throw new IllegalStateException(MessageFormat
+                        .format("driver {} cannot be created", s.getNodeUuid()));
             }
             driver.get().initialize(s.getEndpoints(), serviceId, null);
             LOG.debug("driver {} added to activation transaction", driver.get());
@@ -158,7 +165,8 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         return "cs:" + uniqueStamp;
     }
 
-    private ConnectivityService createConnectivityModel(String uniqueStamp) throws TransactionCommitFailedException, TimeoutException {
+    private ConnectivityService createConnectivityModel(String uniqueStamp)
+            throws TransactionCommitFailedException, TimeoutException {
         assert decomposedRequest != null : "this method can be only run after request was successfuly decomposed";
         //sort of unique ;)
 
@@ -174,7 +182,8 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 .setLayerProtocolName(LayerProtocolName.ETH)
 
                 .setConnectionEndPoint(
-                        createSystemConnectionPoints(nrpDao, TapiUtils.toNodeRef(s.getNodeUuid()), s.getEndpoints(), uniqueStamp))
+                        createSystemConnectionPoints(nrpDao, TapiUtils
+                                .toNodeRef(s.getNodeUuid()), s.getEndpoints(), uniqueStamp))
                 .build())
             .collect(Collectors.toList());
 
@@ -185,7 +194,8 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 .setLayerProtocolName(LayerProtocolName.ETH)
 //                .setContainerNode(new Uuid(TapiConstants.PRESTO_ABSTRACT_NODE))
                 .setConnectionEndPoint(
-                        createSystemConnectionPoints(nrpDao, TapiUtils.toNodeRef(new Uuid(TapiConstants.PRESTO_ABSTRACT_NODE)), endpoints, uniqueStamp))
+                        createSystemConnectionPoints(nrpDao, TapiUtils
+                                .toNodeRef(new Uuid(TapiConstants.PRESTO_ABSTRACT_NODE)), endpoints, uniqueStamp))
                 .setRoute(Collections.singletonList(new RouteBuilder()
                         .setLocalId("route")
                         .setConnectionEndPoint(systemConnections.stream()
@@ -197,20 +207,24 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         ConnConstraint connConstraint = input.getConnConstraint() == null
                 ? new ConnConstraintBuilder().build() : new ConnConstraintBuilder(input.getConnConstraint()).build();
 
-        org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.ConnectivityService cs =
-                new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.ConnectivityServiceBuilder(connConstraint)
+        org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+                .connectivity.context.ConnectivityService cs =
+                new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+                        .connectivity.context.ConnectivityServiceBuilder(connConstraint)
                 .setUuid(new Uuid(toCsId(uniqueStamp)))
                 .setConnection(Collections.singletonList(globalConnection.getUuid()))
-                .setEndPoint(toConnectivityServiceEps(endpoints, uniqueStamp))
+                .setEndPoint(toConnectivityServiceEps(endpoints))
                 .build();
 
         systemConnections.forEach(c -> tx.put(LogicalDatastoreType.OPERATIONAL, TapiConnectivityServiceImpl
-                .connectivityCtx.child(Connection.class, new ConnectionKey(c.getUuid())), c));
+                .CONNECTIVITY_CTX.child(Connection.class, new ConnectionKey(c.getUuid())), c));
         tx.put(LogicalDatastoreType.OPERATIONAL,
-                TapiConnectivityServiceImpl.connectivityCtx.child(org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.ConnectivityService.class,
+                TapiConnectivityServiceImpl.CONNECTIVITY_CTX.child(org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi
+                                .connectivity.rev180307.connectivity.context.ConnectivityService.class,
                         new ConnectivityServiceKey(cs.getUuid())), cs);
 
-        tx.put(LogicalDatastoreType.OPERATIONAL, TapiConnectivityServiceImpl.connectivityCtx.child(Connection.class, new ConnectionKey(globalConnection.getUuid())), globalConnection);
+        tx.put(LogicalDatastoreType.OPERATIONAL, TapiConnectivityServiceImpl.CONNECTIVITY_CTX.child(Connection.class,
+                new ConnectionKey(globalConnection.getUuid())), globalConnection);
 
         LOG.debug("Storing connectivity related model for {} to operational data store", uniqueStamp);
 
@@ -219,7 +233,8 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
             tx.submit().checkedGet(500, TimeUnit.MILLISECONDS);
             LOG.info("Success with serializing Connections and Connectivity Service for {}", uniqueStamp);
         } catch (TimeoutException e) {
-            LOG.error("Error with committing Connections and Connectivity Service for {} within {} ms", uniqueStamp, 500);
+            LOG.error("Error with committing Connections and Connectivity Service for {} within {} ms",
+                    uniqueStamp, 500);
             throw e;
         } catch (TransactionCommitFailedException e) {
             LOG.error("Error with committing Connections and Connectivity Service for " + uniqueStamp, e);
@@ -229,11 +244,13 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         return new ConnectivityServiceBuilder(cs).build();
     }
 
-    private List<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.EndPoint> toConnectivityServiceEps(List<EndPoint> endpoints, String _uniqueStamp) {
-        return endpoints.stream().map(ep -> {
+    private List<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+            .connectivity.service.EndPoint> toConnectivityServiceEps(List<EndPoint> eps) {
+        return eps.stream().map(ep -> {
             String id = ep.getLocalId();
-            if(id == null) {
-                id = "sep:" + Integer.toString(ep.getNepRef().getOwnedNodeEdgePointId().getValue().hashCode(), 16);
+            if (id == null) {
+                id = "sep:" + Integer.toString(ep.getNepRef()
+                        .getOwnedNodeEdgePointId().getValue().hashCode(), 16);
             }
             return new EndPointBuilder()
                 .setLocalId(id)
@@ -248,7 +265,8 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         ).collect(Collectors.toList());
     }
 
-    private ConnectionEndPointBuilder populateData(ConnectionEndPointBuilder builder, ConnectivityServiceEndPoint csep) {
+    private ConnectionEndPointBuilder populateData(ConnectionEndPointBuilder builder,
+                                                   ConnectivityServiceEndPoint csep) {
         Objects.requireNonNull(builder);
         Objects.requireNonNull(csep);
 
@@ -261,13 +279,15 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         return builder;
     }
 
-    private List<ConnectionEndPoint> createSystemConnectionPoints(NrpDao nrpDao, NodeRef ref, List<EndPoint> endpoints, String uniqueStamp) {
+    private List<ConnectionEndPoint> createSystemConnectionPoints(NrpDao nrpDao, NodeRef ref,
+                                                                  List<EndPoint> eps, String uniqueStamp) {
 
-        Optional<ConnectivityServiceEndPoint> defaultCsEp = endpoints.stream().filter(ep -> ep.getEndpoint() != null).map(EndPoint::getEndpoint).findFirst();
+        Optional<ConnectivityServiceEndPoint> defaultCsEp = eps.stream()
+                .filter(ep -> ep.getEndpoint() != null).map(EndPoint::getEndpoint).findFirst();
 
         ConnectionEndPointBuilder defB = new ConnectionEndPointBuilder();
 
-        if(defaultCsEp.isPresent()) {
+        if (defaultCsEp.isPresent()) {
             populateData(defB, defaultCsEp.get());
         } else {
             defB
@@ -278,24 +298,29 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 .setConnectionPortDirection(PortDirection.BIDIRECTIONAL);
         }
 
-        org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.cep.list.ConnectionEndPoint defaultVal = defB.build();
+        org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.cep.list
+                .ConnectionEndPoint defaultVal = defB.build();
 
-        org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.ConnectionEndPointBuilder cepRefBuilder
-                = new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.ConnectionEndPointBuilder();
+        org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection
+                .ConnectionEndPointBuilder cepRefBuilder
+                = new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+                .connection.ConnectionEndPointBuilder();
         cepRefBuilder
                 .setTopologyId(ref.getTopologyId())
                 .setNodeId(ref.getNodeId());
 
 
-        List<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.ConnectionEndPoint> ceps = new LinkedList<>();
+        List<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+                .connection.ConnectionEndPoint> ceps = new LinkedList<>();
 
-        for(EndPoint ep : endpoints) {
+        for (EndPoint ep : eps) {
             ConnectionEndPointBuilder builder = new ConnectionEndPointBuilder(defaultVal);
             ConnectivityServiceEndPoint csp = ep.getEndpoint();
             OwnedNodeEdgePointRef nepRef = ep.getNepRef();
             cepRefBuilder.setOwnedNodeEdgePointId(nepRef.getOwnedNodeEdgePointId());
-            cepRefBuilder.setConnectionEndPointId(new Uuid("cep:" + nepRef.getOwnedNodeEdgePointId().getValue() + ":" + uniqueStamp));
-            if(csp != null) {
+            cepRefBuilder.setConnectionEndPointId(new Uuid("cep:"
+                    + nepRef.getOwnedNodeEdgePointId().getValue() + ":" + uniqueStamp));
+            if (csp != null) {
                 populateData(builder, csp);
             }
             builder.setUuid(cepRefBuilder.getConnectionEndPointId());

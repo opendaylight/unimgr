@@ -65,7 +65,7 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
 
             @Override
             public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context) {
-                this.endPoints = endPoints;
+                this.endPoints = new ArrayList<>(endPoints);
                 this.serviceId = serviceId;
 
                 localActivator = new L2vpnLocalConnectActivator(dataBroker,mountPointService);
@@ -91,17 +91,21 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
                 endPoints.forEach(endPoint -> connectWithAllNeighbors(action,endPoint,endPoints));
             }
 
-            private void connectWithAllNeighbors(BiConsumer<List<EndPoint>,AbstractL2vpnActivator> action, EndPoint endPoint, List<EndPoint> neighbors) {
+            private void connectWithAllNeighbors(BiConsumer<List<EndPoint>,AbstractL2vpnActivator> action,
+                                                 EndPoint endPoint, List<EndPoint> neighbors) {
                 neighbors.stream()
                         .filter(neighbor -> !neighbor.equals(endPoint))
                         .forEach(neighbor -> activateNeighbors(action,endPoint,neighbor));
             }
 
-            private void activateNeighbors(BiConsumer<List<EndPoint>,AbstractL2vpnActivator> action, EndPoint portA, EndPoint portZ) {
+            private void activateNeighbors(BiConsumer<List<EndPoint>,AbstractL2vpnActivator> action,
+                                           EndPoint portA, EndPoint portZ) {
                 List<EndPoint> endPointsToActivate = Arrays.asList(portA,portZ);
 
-                if (SipHandler.isTheSameDevice(portA.getEndpoint().getServiceInterfacePoint(),portZ.getEndpoint().getServiceInterfacePoint())) {
-                    if (bridgeActivatedPairs==null) {
+                if (SipHandler.isTheSameDevice(
+                        portA.getEndpoint().getServiceInterfacePoint(),
+                        portZ.getEndpoint().getServiceInterfacePoint())) {
+                    if (bridgeActivatedPairs == null) {
                         bridgeActivatedPairs = new ArrayList<>();
                     }
                     if (isPairActivated(portA,portZ)) {

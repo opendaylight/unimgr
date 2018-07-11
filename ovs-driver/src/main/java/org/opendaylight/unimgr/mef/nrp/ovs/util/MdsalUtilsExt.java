@@ -6,20 +6,22 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Utility functions.
  * @author bartosz.michalik@amartus.com
  */
 public class MdsalUtilsExt {
     private static final Logger LOG = LoggerFactory.getLogger(MdsalUtilsExt.class);
+
     /**
      * Read a specific Link from a specific datastore.
      * @param dataBroker The dataBroker instance to create transactions
@@ -36,7 +38,8 @@ public class MdsalUtilsExt {
                 = InstanceIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(topologyId))
                 .build();
-        final CheckedFuture<Optional<Topology>, ReadFailedException> topologyFuture = read.read(store, topologyInstanceId);
+        final CheckedFuture<Optional<Topology>, ReadFailedException> topologyFuture =
+                read.read(store, topologyInstanceId);
 
         try {
             return topologyFuture.checkedGet();

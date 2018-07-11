@@ -55,7 +55,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.opendaylight.unimgr.utils.PredicateMatcher.fromPredicate;
 
@@ -86,8 +85,10 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
                 .build();
 
         RequestValidator validator = mock(RequestValidator.class);
-        when(validator.checkValid(any(CreateConnectivityServiceInput.class))).thenReturn(new RequestValidator.ValidationResult());
-        when(validator.checkValid(any(UpdateConnectivityServiceInput.class))).thenReturn(new RequestValidator.ValidationResult());
+        when(validator.checkValid(any(CreateConnectivityServiceInput.class)))
+                .thenReturn(new RequestValidator.ValidationResult());
+        when(validator.checkValid(any(UpdateConnectivityServiceInput.class)))
+                .thenReturn(new RequestValidator.ValidationResult());
 
 
         mockPool = mock(ConnectivityServiceIdResourcePool.class);
@@ -119,7 +120,8 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
 
 
         //when
-        RpcResult<CreateConnectivityServiceOutput> result = this.connectivityService.createConnectivityService(input).get();
+        RpcResult<CreateConnectivityServiceOutput> result = this.connectivityService
+                .createConnectivityService(input).get();
         //then
         assertTrue(result.isSuccessful());
         verify(ad1, times(1)).activate();
@@ -128,7 +130,8 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
 
         ReadOnlyTransaction tx2 = dataBroker.newReadOnlyTransaction();
 
-        Context1 connCtx = tx2.read(LogicalDatastoreType.OPERATIONAL, TapiConnectivityServiceImpl.connectivityCtx).get().get();
+        Context1 connCtx = tx2
+                .read(LogicalDatastoreType.OPERATIONAL, TapiConnectivityServiceImpl.CONNECTIVITY_CTX).get().get();
         assertEquals(2, connCtx.getConnection().size());
         connCtx.getConnection().forEach(this::verifyConnection);
 
@@ -139,7 +142,8 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         verifyMefAttributes(connCtx.getConnectivityService().get(0));
         verifyMefAttributes(result.getResult().getService());
 
-        final Set<String> expected = input.getEndPoint().stream().map(LocalClass::getLocalId).collect(Collectors.toSet());
+        final Set<String> expected = input.getEndPoint().stream().map(LocalClass::getLocalId)
+                .collect(Collectors.toSet());
 
         assertThat(result.getResult().getService().getEndPoint(),
                 CoreMatchers.everyItem(fromPredicate(id -> expected.contains(id.getLocalId())))
@@ -148,25 +152,35 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
 
     }
 
-    private void verifyMefAttributes(org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ConnectivityService connectivityService) {
+    private void verifyMefAttributes(org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+                                             .ConnectivityService connectivityService) {
         assertTrue(connectivityService.getEndPoint().stream().allMatch(ep -> toAugmentation(ep) != null));
     }
 
     @SuppressWarnings("unchecked")
-    private NrpCarrierEthConnectivityEndPointResource toAugmentation(org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.EndPoint ep) {
+    private NrpCarrierEthConnectivityEndPointResource toAugmentation(
+            org.opendaylight.yang.gen.v1.urn.onf.otcc.yang
+                    .tapi.connectivity.rev180307.connectivity.service.EndPoint ep) {
         if(ep instanceof AugmentationHolder) {
-            Optional<NrpConnectivityServiceEndPointAttrs> o = ((AugmentationHolder) ep).augmentations().values().stream()
+            Optional<NrpConnectivityServiceEndPointAttrs> o = ((AugmentationHolder) ep).augmentations().values()
+                    .stream()
                     .filter(a -> a instanceof NrpConnectivityServiceEndPointAttrs).findFirst();
             if(o.isPresent()) return o.get().getNrpCarrierEthConnectivityEndPointResource();
             return null;
         }
 
-        if(ep.augmentation(EndPoint1.class) != null) return ep.augmentation(EndPoint1.class).getNrpCarrierEthConnectivityEndPointResource();
-        if(ep.augmentation(EndPoint3.class) != null) return ep.augmentation(EndPoint3.class).getNrpCarrierEthConnectivityEndPointResource();
-        if(ep.augmentation(EndPoint4.class) != null) return ep.augmentation(EndPoint4.class).getNrpCarrierEthConnectivityEndPointResource();
-        if(ep.augmentation(EndPoint5.class) != null) return ep.augmentation(EndPoint5.class).getNrpCarrierEthConnectivityEndPointResource();
-        if(ep.augmentation(EndPoint6.class) != null) return ep.augmentation(EndPoint5.class).getNrpCarrierEthConnectivityEndPointResource();
-        if(ep.augmentation(EndPoint8.class) != null) return ep.augmentation(EndPoint8.class).getNrpCarrierEthConnectivityEndPointResource();
+        if(ep.augmentation(EndPoint1.class) != null) return ep.augmentation(EndPoint1.class)
+                .getNrpCarrierEthConnectivityEndPointResource();
+        if(ep.augmentation(EndPoint3.class) != null) return ep.augmentation(EndPoint3.class)
+                .getNrpCarrierEthConnectivityEndPointResource();
+        if(ep.augmentation(EndPoint4.class) != null) return ep.augmentation(EndPoint4.class)
+                .getNrpCarrierEthConnectivityEndPointResource();
+        if(ep.augmentation(EndPoint5.class) != null) return ep.augmentation(EndPoint5.class)
+                .getNrpCarrierEthConnectivityEndPointResource();
+        if(ep.augmentation(EndPoint6.class) != null) return ep.augmentation(EndPoint5.class)
+                .getNrpCarrierEthConnectivityEndPointResource();
+        if(ep.augmentation(EndPoint8.class) != null) return ep.augmentation(EndPoint8.class)
+                .getNrpCarrierEthConnectivityEndPointResource();
 
         return null;
     }
@@ -186,15 +200,16 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         n(tx, new Uuid(uuid1), activationDriverId1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
         n(tx, new Uuid(uuid2), activationDriverId2, uuid2 + ":1", uuid2 + ":2", uuid2 + ":3");
         n(tx, new Uuid(uuid3), activationDriverId2, uuid3 + ":1", uuid3 + ":2", uuid3 + ":3");
-        l(tx, uuid1, uuid1+":2", uuid2, uuid2 + ":1", OperationalState.ENABLED);
-        l(tx, uuid2, uuid2+":3", uuid3, uuid3 + ":2", OperationalState.ENABLED);
+        l(tx, uuid1, uuid1 +":2", uuid2, uuid2 + ":1", OperationalState.ENABLED);
+        l(tx, uuid2, uuid2 +":3", uuid3, uuid3 + ":2", OperationalState.ENABLED);
 
         when(mockPool.getServiceId()).thenReturn(servId);
 
         tx.commit().get();
 
         //when
-        RpcResult<CreateConnectivityServiceOutput> result = this.connectivityService.createConnectivityService(input).get();
+        RpcResult<CreateConnectivityServiceOutput> result = this.connectivityService
+                .createConnectivityService(input).get();
         //then
         assertTrue(result.isSuccessful());
         verify(ad1, times(1)).activate();
@@ -204,7 +219,8 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
 
         ReadOnlyTransaction tx2 = dataBroker.newReadOnlyTransaction();
 
-        Context1 connCtx = tx2.read(LogicalDatastoreType.OPERATIONAL, TapiConnectivityServiceImpl.connectivityCtx).get().get();
+        Context1 connCtx = tx2
+                .read(LogicalDatastoreType.OPERATIONAL, TapiConnectivityServiceImpl.CONNECTIVITY_CTX).get().get();
         assertEquals(4, connCtx.getConnection().size());
         connCtx.getConnection().forEach(this::verifyConnection);
 
@@ -216,14 +232,16 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
 
     @Test
     public void testNoServiceDeactivation() throws ExecutionException, InterruptedException {
-        DeleteConnectivityServiceInput input = new DeleteConnectivityServiceInputBuilder().setServiceIdOrName("some-service").build();
+        DeleteConnectivityServiceInput input = new DeleteConnectivityServiceInputBuilder()
+                .setServiceIdOrName("some-service").build();
         RpcResult<DeleteConnectivityServiceOutput> result = connectivityService.deleteConnectivityService(input).get();
         assertFalse(result.isSuccessful());
     }
 
 
     @Test
-    public void testServiceDeactivationWithSingleDriver() throws ExecutionException, InterruptedException, TransactionCommitFailedException, ReadFailedException, ResourceActivatorException {
+    public void testServiceDeactivationWithSingleDriver() throws ExecutionException, InterruptedException,
+            TransactionCommitFailedException, ReadFailedException, ResourceActivatorException {
         //having
 
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
@@ -235,13 +253,15 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         createConnectivityService();
 
         //when
-        DeleteConnectivityServiceInput input = new DeleteConnectivityServiceInputBuilder().setServiceIdOrName("some-service").build();
+        DeleteConnectivityServiceInput input = new DeleteConnectivityServiceInputBuilder()
+                .setServiceIdOrName("some-service").build();
         RpcResult<DeleteConnectivityServiceOutput> result = connectivityService.deleteConnectivityService(input).get();
 
         //then
         assertTrue(result.isSuccessful());
         ReadOnlyTransaction tx2 = dataBroker.newReadOnlyTransaction();
-        Context1 connCtx = tx2.read(LogicalDatastoreType.OPERATIONAL, TapiConnectivityServiceImpl.connectivityCtx).get().get();
+        Context1 connCtx = tx2
+                .read(LogicalDatastoreType.OPERATIONAL, TapiConnectivityServiceImpl.CONNECTIVITY_CTX).get().get();
         verify(ad1).deactivate();
         verify(ad1).commit();
         assertEquals(0, connCtx.getConnection().size());
@@ -280,7 +300,8 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
             try {
                 Node node = nrpDao.getNode(TapiConstants.PRESTO_EXT_TOPO, TapiConstants.PRESTO_ABSTRACT_NODE);
                 if(node != null && node.getOwnedNodeEdgePoint() != null) {
-                    long neps = node.getOwnedNodeEdgePoint().stream().map(nep -> nep.getUuid().getValue()).filter(required::contains).count();
+                    long neps = node.getOwnedNodeEdgePoint().stream()
+                            .map(nep -> nep.getUuid().getValue()).filter(required::contains).count();
                     if(neps == required.size()) return;
                 }
 
@@ -295,7 +316,8 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
             }
         }
 
-        Assert.fail("NEPs are not added to abstract node " + Arrays.stream(uuid).collect(Collectors.joining(",", "[", "]")));
+        Assert.fail("NEPs are not added to abstract node " + Arrays.stream(uuid)
+                .collect(Collectors.joining(",", "[", "]")));
     }
 
     @Test
@@ -353,7 +375,8 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void testGetServiceDetails() throws InterruptedException, ExecutionException, TransactionCommitFailedException {
+    public void testGetServiceDetails()
+            throws InterruptedException, ExecutionException, TransactionCommitFailedException {
         //having
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
@@ -423,7 +446,8 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void getGetConnectionDetailsByServiceName() throws InterruptedException, ExecutionException, TransactionCommitFailedException {
+    public void getGetConnectionDetailsByServiceName()
+            throws InterruptedException, ExecutionException, TransactionCommitFailedException {
         //having
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
@@ -446,11 +470,13 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
     }
 
 
-    private void createConnectivityService() throws TransactionCommitFailedException, InterruptedException, ExecutionException {
+    private void createConnectivityService()
+            throws TransactionCommitFailedException, InterruptedException, ExecutionException {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, new Uuid(uuid1), activationDriverId1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
         Connection system = c(tx, uuid1, uuid1 + ":1", uuid1 + ":2");
-        Connection global = c(tx, TapiConstants.PRESTO_ABSTRACT_NODE, Collections.singletonList(system.getUuid()), uuid1 + ":1", uuid1 + ":2");
+        Connection global = c(tx, TapiConstants.PRESTO_ABSTRACT_NODE,
+                Collections.singletonList(system.getUuid()), uuid1 + ":1", uuid1 + ":2");
         cs(tx,"some-service", global);
 
         tx.commit().get();
@@ -458,8 +484,10 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
 
 
     private void verifyConnection(Connection connection) {
-        assertNotNull("Connection " + connection.getUuid().getValue() + " should have at least 2 end points", connection.getConnectionEndPoint());
-        assertFalse("Connection " + connection.getUuid().getValue() + " should have at least 2 end points", connection.getConnectionEndPoint().isEmpty());
+        assertNotNull("Connection " + connection.getUuid().getValue() + " should have at least 2 end points",
+                connection.getConnectionEndPoint());
+        assertFalse("Connection " + connection.getUuid().getValue() + " should have at least 2 end points",
+                connection.getConnectionEndPoint().isEmpty());
     }
 
     private List<EndPoint> eps(String ... uuids) {
@@ -483,7 +511,8 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
                 .build()).collect(Collectors.toList());
     }
 
-    private org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.ConnectivityService cs(ReadWriteTransaction tx, String csId, Connection connection) {
+    private org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+            .connectivity.context.ConnectivityService cs(ReadWriteTransaction tx, String csId, Connection connection) {
         ConnectivityService cs = new ConnectivityServiceBuilder()
                 .setUuid(new Uuid(csId))
                 .setConnection(Collections.singletonList(connection.getUuid()))

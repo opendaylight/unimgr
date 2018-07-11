@@ -9,6 +9,7 @@
 package org.opendaylight.unimgr.mef.nrp.api;
 
 /**
+ * Presto model constants.
  * @author bartosz.michalik@amartus.com
  */
 public interface TapiConstants {
