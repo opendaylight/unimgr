@@ -189,7 +189,7 @@ public class NrpDao  {
     }
 
     private Function<OwnedNodeEdgePointRef, KeyedInstanceIdentifier<OwnedNodeEdgePoint, OwnedNodeEdgePointKey>> toPath =
-            ref -> topo(ref.getTopologyId())
+        ref -> topo(ref.getTopologyId())
                 .child(Node.class, new NodeKey(new Uuid(ref.getNodeId())))
                 .child(OwnedNodeEdgePoint.class, new OwnedNodeEdgePointKey(ref.getOwnedNodeEdgePointId()));
 

@@ -8,12 +8,21 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl.decomposer;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Stream;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
 import org.opendaylight.unimgr.mef.nrp.api.Subrequrest;
 import org.opendaylight.unimgr.mef.nrp.impl.AbstractTestWithTopo;
@@ -23,15 +32,7 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Oper
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.PortDirection;
 import org.opendaylight.yangtools.yang.common.OperationFailedException;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
 
-import static org.junit.Assert.*;
-
-/**
- * @author bartosz.michalik@amartus.com
- */
 public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo {
 
     private BasicDecomposer decomposer;
@@ -48,14 +49,15 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
     public ExpectedException expected = ExpectedException.none();
 
     @Test
-    public void twoNodesTestDirection() throws FailureResult, OperationFailedException {
+    public void twoNodesTestDirection()
+            throws FailureResult, OperationFailedException, InterruptedException, ExecutionException {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, true, "n1","d1", Stream.of(pI("n1:1"), pO("n1:2")));
         n(tx, true, "n2", "d2", Stream.of(pO("n2:1"), pI("n2:2")));
         n(tx, true, "n3", "d3", Stream.of(pI("n3:1")));
         l(tx, "n1", "n1:1", "n2", "n2:1",
                 OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
-        tx.submit().checkedGet();
+        tx.commit().get();
         //when
         List<Subrequrest> decomposed = decomposer.decompose(
                 Arrays.asList(
@@ -67,7 +69,8 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
     }
 
     @Test
-    public void threeNodesTestAll() throws FailureResult, OperationFailedException {
+    public void threeNodesTestAll()
+            throws FailureResult, OperationFailedException, InterruptedException, ExecutionException {
         //having
         threeNodesTopo();
         //when
@@ -82,7 +85,8 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void threeNodesTestIncompatible() throws FailureResult, OperationFailedException {
+    public void threeNodesTestIncompatible()
+            throws FailureResult, OperationFailedException, InterruptedException, ExecutionException {
         //having
         threeNodesTopo();
         //when
@@ -92,7 +96,8 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
     }
 
     @Test
-    public void fourNodesTestThreeSelected() throws FailureResult, OperationFailedException {
+    public void fourNodesTestThreeSelected()
+            throws FailureResult, OperationFailedException, InterruptedException, ExecutionException {
         //having
         fourNodesTopo();
 
@@ -109,7 +114,8 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
 
 
     @Test
-    public void fourNodesTestNone() throws FailureResult, OperationFailedException {
+    public void fourNodesTestNone()
+            throws FailureResult, OperationFailedException, InterruptedException, ExecutionException {
         //having
         fourNodesTopo();
         //when
@@ -122,7 +128,8 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
     }
 
     @Test
-    public void fourTestPartialPath() throws FailureResult {
+    public void fourTestPartialPath()
+            throws FailureResult, InterruptedException, ExecutionException {
         //having
         fourNodesTopo();
 
@@ -136,7 +143,7 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
     }
 
     @Test
-    public void fourTestSingleSink() throws FailureResult {
+    public void fourTestSingleSink() throws FailureResult, InterruptedException, ExecutionException {
         //having
         fourNodesTopo();
 
@@ -149,10 +156,9 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
         assertNotNull(decomposed);
     }
 
-
-
     @Test
-    public void fiveNodesTestAll() throws FailureResult, OperationFailedException {
+    public void fiveNodesTestAll()
+            throws FailureResult, OperationFailedException, InterruptedException, ExecutionException {
         //having
         fiveNodesTopo();
 
@@ -168,7 +174,7 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
     }
 
     @Test
-    public void fiveNodesTestDirected() throws FailureResult {
+    public void fiveNodesTestDirected() throws FailureResult, InterruptedException, ExecutionException {
         //having
         fiveNodesTopo();
         //when
@@ -187,7 +193,7 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
     n3--(1)-->--(2)--n2
 
      */
-    private  void threeNodesTopo() {
+    private void threeNodesTopo() throws InterruptedException, ExecutionException {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, true, "n1", "d1",
                 Stream.of(pI("n1:1"), pO("n1:2"), pI("n1:3")));
@@ -199,11 +205,7 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
                 OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
         l(tx, "n2", "n2:2", "n3", "n3:1",
                 OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
-        try {
-            tx.submit().checkedGet();
-        } catch (TransactionCommitFailedException e) {
-            e.printStackTrace();
-        }
+        tx.commit().get();
     }
 
     /*
@@ -215,7 +217,7 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
     n4--(5)-->--(5)--n3
 
      */
-    private  void fourNodesTopo() {
+    private void fourNodesTopo() throws InterruptedException, ExecutionException {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, true, "n1", "d1",
                 Stream.of(pB("n1:1"), pB("n1:2"), pI("n1:3"), pO("n1:4"), pO("n1:5")));
@@ -235,11 +237,7 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
                 OperationalState.ENABLED, ForwardingDirection.UNIDIRECTIONAL);
         l(tx, "n4", "n4:5", "n3", "n3:5",
                 OperationalState.ENABLED, ForwardingDirection.UNIDIRECTIONAL);
-        try {
-            tx.submit().checkedGet();
-        } catch (TransactionCommitFailedException e) {
-            e.printStackTrace();
-        }
+        tx.commit().get();
     }
 
     /*
@@ -252,7 +250,7 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
     n5--(4)-->--(2)--n4
 
      */
-    private  void fiveNodesTopo() {
+    private  void fiveNodesTopo() throws InterruptedException, ExecutionException {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, true, "n1", "d1",
                 Stream.of(pI("n1:1"), pB("n1:2"), pI("n1:3"), pO("n1:4")));
@@ -276,11 +274,7 @@ public class BasicDecomposerForDirectedTopologyTest extends AbstractTestWithTopo
                 OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
         l(tx, "n5", "n5:4", "n4", "n4:2",
                  OperationalState.ENABLED, ForwardingDirection.BIDIRECTIONAL);
-        try {
-            tx.submit().checkedGet();
-        } catch (TransactionCommitFailedException e) {
-            e.printStackTrace();
-        }
+        tx.commit().get();
     }
 
 

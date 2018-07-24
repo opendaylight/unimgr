@@ -16,6 +16,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import com.google.common.util.concurrent.CheckedFuture;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -50,11 +52,7 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev18030
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.create.connectivity.service.input.EndPointBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-import com.google.common.util.concurrent.CheckedFuture;
 
-/**
- * @author bartosz.michalik@amartus.com
- */
 public class TapiConnectivityServiceImplTest {
 
 
@@ -74,6 +72,13 @@ public class TapiConnectivityServiceImplTest {
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
+        decomposer = mock(RequestDecomposer.class);
+        RequestValidator validator = mock(RequestValidator.class);
+        when(validator.checkValid(any(CreateConnectivityServiceInput.class)))
+            .thenReturn(new RequestValidator.ValidationResult());
+        when(validator.checkValid(any(UpdateConnectivityServiceInput.class)))
+            .thenReturn(new RequestValidator.ValidationResult());
+
         ad1 = mock(ActivationDriver.class);
         ad2 = mock(ActivationDriver.class);
         ad3 = mock(ActivationDriver.class);
@@ -84,11 +89,6 @@ public class TapiConnectivityServiceImplTest {
                 .add(activationDriverId3, ad3)
                 .build();
 
-        decomposer = mock(RequestDecomposer.class);
-        RequestValidator validator = mock(RequestValidator.class);
-        when(validator.checkValid(any(CreateConnectivityServiceInput.class))).thenReturn(new RequestValidator.ValidationResult());
-        when(validator.checkValid(any(UpdateConnectivityServiceInput.class))).thenReturn(new RequestValidator.ValidationResult());
-
         connectivityService = new TapiConnectivityServiceImpl();
         connectivityService.setDriverRepo(repo);
         connectivityService.setDecomposer(decomposer);
@@ -98,8 +98,6 @@ public class TapiConnectivityServiceImplTest {
         when(tx.submit()).thenReturn(mock(CheckedFuture.class));
         broker = mock(DataBroker.class);
         when(broker.newReadWriteTransaction()).thenReturn(tx);
-
-
         when(broker.newWriteOnlyTransaction()).thenReturn(tx);
         connectivityService.setBroker(broker);
         connectivityService.setServiceIdPool(new ConnectivityServiceIdResourcePool());
@@ -113,7 +111,8 @@ public class TapiConnectivityServiceImplTest {
         CreateConnectivityServiceInput empty = new CreateConnectivityServiceInputBuilder()
                 .build();
         //when
-        RpcResult<CreateConnectivityServiceOutput> result = this.connectivityService.createConnectivityService(empty).get();
+        RpcResult<CreateConnectivityServiceOutput> result =
+                this.connectivityService.createConnectivityService(empty).get();
         //then
         assertFalse(result.isSuccessful());
         verifyZeroInteractions(ad1);
@@ -128,7 +127,8 @@ public class TapiConnectivityServiceImplTest {
         configureDecomposerAnswer(eps -> null);
 
         //when
-        RpcResult<CreateConnectivityServiceOutput> result = this.connectivityService.createConnectivityService(input).get();
+        RpcResult<CreateConnectivityServiceOutput> result =
+                this.connectivityService.createConnectivityService(input).get();
         //then
         assertFalse(result.isSuccessful());
         verifyZeroInteractions(ad1);
@@ -143,7 +143,8 @@ public class TapiConnectivityServiceImplTest {
         connectivityService.setValidator(new DefaultValidator(broker));
 
         //when
-        RpcResult<CreateConnectivityServiceOutput> result = this.connectivityService.createConnectivityService(input).get();
+        RpcResult<CreateConnectivityServiceOutput> result =
+                this.connectivityService.createConnectivityService(input).get();
         //then
         assertFalse(result.isSuccessful());
         verifyZeroInteractions(ad1);
@@ -153,7 +154,9 @@ public class TapiConnectivityServiceImplTest {
 
 
     @Test
-    public void failTwoDriversOneFailing() throws ExecutionException, InterruptedException, ResourceActivatorException, TransactionCommitFailedException {
+    public void failTwoDriversOneFailing()
+            throws ExecutionException, InterruptedException, ResourceActivatorException,
+                TransactionCommitFailedException {
         //having
         CreateConnectivityServiceInput input = input(4);
 
@@ -167,7 +170,8 @@ public class TapiConnectivityServiceImplTest {
         doThrow(new ResourceActivatorException()).when(ad2).activate();
 
         //when
-        RpcResult<CreateConnectivityServiceOutput> result = this.connectivityService.createConnectivityService(input).get();
+        RpcResult<CreateConnectivityServiceOutput> result =
+                this.connectivityService.createConnectivityService(input).get();
         //then
         assertFalse(result.isSuccessful());
         verify(ad1).activate();
@@ -177,9 +181,9 @@ public class TapiConnectivityServiceImplTest {
         verifyZeroInteractions(ad3);
     }
 
-
-    @SuppressWarnings("unchecked")
-    private void configureDecomposerAnswer(Function<List<org.opendaylight.unimgr.mef.nrp.api.EndPoint>, List<Subrequrest>> resp) {
+    @SuppressWarnings({"unchecked", "checkstyle:emptyblock"})
+    private void configureDecomposerAnswer(
+            Function<List<org.opendaylight.unimgr.mef.nrp.api.EndPoint>, List<Subrequrest>> resp) {
         try {
             when(decomposer.decompose(any(), any(Constraints.class)))
                 .thenAnswer(a -> {
@@ -208,8 +212,8 @@ public class TapiConnectivityServiceImplTest {
                 .build();
     }
 
-
-    private org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.create.connectivity.service.input.EndPoint ep(String id) {
+    private org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+                .create.connectivity.service.input.EndPoint ep(String id) {
         return new EndPointBuilder()
                 .setLocalId(id)
                 .setRole(PortRole.SYMMETRIC)

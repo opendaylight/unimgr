@@ -50,8 +50,8 @@ public class EndPoint {
     }
 
 
-    public EndPoint setNepRef(OwnedNodeEdgePointRef ref) {
-        this.ref = ref;
+    public EndPoint setNepRef(OwnedNodeEdgePointRef newRef) {
+        ref = newRef;
         return this;
     }
 
@@ -60,14 +60,14 @@ public class EndPoint {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object other) {
+        if (this == other) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (other == null || getClass() != other.getClass()) {
             return false;
         }
-        EndPoint endPoint = (EndPoint) o;
+        EndPoint endPoint = (EndPoint) other;
         return Objects.equals(endpoint, endPoint.endpoint)
                 && Objects.equals(attrs, endPoint.attrs)
                 && Objects.equals(ref, endPoint.ref);

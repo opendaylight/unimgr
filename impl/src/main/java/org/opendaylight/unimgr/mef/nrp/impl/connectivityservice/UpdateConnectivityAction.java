@@ -9,7 +9,6 @@
 package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
@@ -18,7 +17,11 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.unimgr.mef.nrp.api.*;
+import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
+import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
+import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
+import org.opendaylight.unimgr.mef.nrp.api.RequestValidator;
+import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.impl.ActivationTransaction;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.EndPoint7;
@@ -60,6 +63,7 @@ public class UpdateConnectivityAction implements Callable<RpcResult<UpdateConnec
     }
 
     @Override
+    @SuppressWarnings("checkstyle:illegalcatch")
     public RpcResult<UpdateConnectivityServiceOutput> call() {
 
         LOG.debug("running UpdateConnectivityService task");
@@ -67,14 +71,14 @@ public class UpdateConnectivityAction implements Callable<RpcResult<UpdateConnec
         nrpDao = new NrpDao(service.getBroker().newReadWriteTransaction());
         try {
             // TODO validate input
-             RequestValidator.ValidationResult validationResult = service.getValidator().checkValid(input);
+            RequestValidator.ValidationResult validationResult = service.getValidator().checkValid(input);
 
-             if (validationResult.invalid()) {
-                 RpcResultBuilder<UpdateConnectivityServiceOutput> res = RpcResultBuilder.failed();
-                 validationResult.getProblems().forEach(p ->
-                    res.withError(RpcError.ErrorType.APPLICATION, p));
-                 return res.build();
-             }
+            if (validationResult.invalid()) {
+                RpcResultBuilder<UpdateConnectivityServiceOutput> res = RpcResultBuilder.failed();
+                validationResult.getProblems().forEach(
+                    p -> res.withError(RpcError.ErrorType.APPLICATION, p));
+                return res.build();
+            }
 
             endpoint = new EndPoint(input.getEndPoint(), input.getEndPoint().augmentation(EndPoint7.class));
 
@@ -156,7 +160,7 @@ public class UpdateConnectivityAction implements Callable<RpcResult<UpdateConnec
             final NodeEdgePointBuilder nepBuilder = new NodeEdgePointBuilder()
                     .setTopologyId(new Uuid(TapiConstants.PRESTO_SYSTEM_TOPO));
             final Function<Node, Optional<? extends OwnedNodeEdgePointRef>> getSip =
-                    (Node node) -> node.getOwnedNodeEdgePoint()
+                (Node node) -> node.getOwnedNodeEdgePoint()
                     .stream().filter(nep -> nep.getMappedServiceInterfacePoint() != null)
                     .filter(hasSip)
                     .map(nep -> {

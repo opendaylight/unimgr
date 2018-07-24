@@ -8,6 +8,7 @@
 package org.opendaylight.unimgr.mef.nrp.impl.commonservice;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,9 +25,7 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.GetS
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.get.service._interface.point.list.output.Sip;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-/**
- * @author bartosz.michalik@amartus.com
- */
+
 public class TapiCommonServiceImplTest extends AbstractTestWithTopo {
 
     private String uuid1 = "uuid1";
@@ -39,14 +38,16 @@ public class TapiCommonServiceImplTest extends AbstractTestWithTopo {
         tapiCommonService.setBroker(dataBroker);
         tapiCommonService.init();
     }
+
     @Test
-    public void getServiceInterfacePointList() throws Exception {
+    public void getServiceInterfacePointList() throws InterruptedException, ExecutionException {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
-        tx.submit().checkedGet();
+        tx.commit().get();
 
-        RpcResult<GetServiceInterfacePointListOutput> output = tapiCommonService.getServiceInterfacePointList(
-                new GetServiceInterfacePointListInputBuilder().build()).get();
+        RpcResult<GetServiceInterfacePointListOutput> output =
+                tapiCommonService.getServiceInterfacePointList(
+                        new GetServiceInterfacePointListInputBuilder().build()).get();
 
         Assert.assertTrue(output.isSuccessful());
 
@@ -59,21 +60,25 @@ public class TapiCommonServiceImplTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void getServiceInterfacePointDetails() throws Exception {
+    public void getServiceInterfacePointDetails() throws InterruptedException, ExecutionException {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
         String uuid2 = "uuid2";
         n(tx, uuid2, uuid2 + ":1", uuid2 + ":2", uuid2 + ":3");
-        tx.submit().checkedGet();
+        tx.commit().get();
 
+        GetServiceInterfacePointDetailsInput input =
+                new GetServiceInterfacePointDetailsInputBuilder()
+                .setSipIdOrName("sip:" + uuid2 + ":1")
+                .build();
 
-        GetServiceInterfacePointDetailsInput input = new GetServiceInterfacePointDetailsInputBuilder().setSipIdOrName("sip:" + uuid2 + ":1").build();
-
-        RpcResult<GetServiceInterfacePointDetailsOutput> output = tapiCommonService.getServiceInterfacePointDetails(input).get();
+        RpcResult<GetServiceInterfacePointDetailsOutput> output =
+                tapiCommonService.getServiceInterfacePointDetails(input).get();
 
         Assert.assertTrue(output.isSuccessful());
 
-        org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.get.service._interface.point.details.output.Sip sip = output.getResult().getSip();
+        org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307
+            .get.service._interface.point.details.output.Sip sip = output.getResult().getSip();
 
         Assert.assertNotNull(sip.augmentation(Sip1.class));
     }

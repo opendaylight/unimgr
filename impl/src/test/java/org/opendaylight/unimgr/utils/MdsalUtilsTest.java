@@ -8,9 +8,20 @@
 
 package org.opendaylight.unimgr.utils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import ch.qos.logback.core.Appender;
+
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,8 +41,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({LogicalDatastoreType.class})
@@ -93,7 +102,8 @@ public class MdsalUtilsTest {
         when(optionalDataObject.get()).thenReturn(exceptedNode);
 
         //when
-        Optional<Node> actualNodeOptional = MdsalUtils.readOptional(dataBroker, LogicalDatastoreType.CONFIGURATION, nodeIid);
+        Optional<Node> actualNodeOptional =
+                MdsalUtils.readOptional(dataBroker, LogicalDatastoreType.CONFIGURATION, nodeIid);
 
         //then
         assertNotNull(actualNodeOptional);
@@ -121,7 +131,8 @@ public class MdsalUtilsTest {
         when(optionalDataObject.isPresent()).thenReturn(false);
 
         //when
-        Optional<Node> actualNodeOptional = MdsalUtils.readOptional(dataBroker, LogicalDatastoreType.CONFIGURATION, nodeIid);
+        Optional<Node> actualNodeOptional =
+                MdsalUtils.readOptional(dataBroker, LogicalDatastoreType.CONFIGURATION, nodeIid);
 
         //then
         assertNotNull(actualNodeOptional);
