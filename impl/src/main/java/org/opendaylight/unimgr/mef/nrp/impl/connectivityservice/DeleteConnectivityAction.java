@@ -9,8 +9,14 @@
 package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -63,6 +69,7 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
     }
 
     @Override
+    @SuppressWarnings("checkstyle:illegalcatch")
     public RpcResult<DeleteConnectivityServiceOutput> call() {
         serviceId = new Uuid(input.getServiceIdOrName());
         NrpDao nrpDao = new NrpDao(service.getBroker().newReadOnlyTransaction());
@@ -119,7 +126,9 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
         }
     }
 
-    private void removeConnectivity() throws TransactionCommitFailedException {
+    private void removeConnectivity()
+            throws TransactionCommitFailedException, InterruptedException, ExecutionException {
+
         ReadWriteTransaction tx = service.getBroker().newReadWriteTransaction();
         NrpDao nrpDao = new NrpDao(tx);
         InstanceIdentifier<Context1> conCtx = NrpDao.ctx().augmentation(Context1.class);
@@ -131,7 +140,7 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
             nrpDao.removeConnection(csId);
         });
         //TODO should be transactional with operations on deactivation
-        tx.submit().checkedGet();
+        tx.commit().get();
     }
 
     private ActivationTransaction prepareTransaction(Map<Uuid, LinkedList<EndPoint>> data, NrpDao nrpDao) {

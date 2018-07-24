@@ -7,14 +7,12 @@
  */
 package org.opendaylight.unimgr.utils;
 
+import java.util.function.Predicate;
+
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 
-import java.util.function.Predicate;
 
-/**
- * @author bartosz.michalik@amartus.com
- */
 public class PredicateMatcher<T> extends BaseMatcher<T> {
 
     private final Predicate<T> predicate;

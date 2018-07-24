@@ -8,9 +8,15 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl.decomposer;
 
-
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -79,14 +85,14 @@ class DecompositionAction {
         }
 
         List<Vertex> vertices = endpoints.stream().map(e -> {
-            Vertex v = sipToNep.get(toUuid.apply(e.getEndpoint().getServiceInterfacePoint()));
-            if ((v.dir == PortDirection.OUTPUT && e.getEndpoint().getDirection() != PortDirection.OUTPUT)
-                    ||  (v.dir == PortDirection.INPUT && e.getEndpoint().getDirection() != PortDirection.INPUT)) {
+            Vertex vertex = sipToNep.get(toUuid.apply(e.getEndpoint().getServiceInterfacePoint()));
+            if ((vertex.dir == PortDirection.OUTPUT && e.getEndpoint().getDirection() != PortDirection.OUTPUT)
+                    ||  (vertex.dir == PortDirection.INPUT && e.getEndpoint().getDirection() != PortDirection.INPUT)) {
                 throw new IllegalArgumentException("Port direction for "
                         + e.getEndpoint().getLocalId() + " incompatible with NEP."
-                        + "CEP " + e.getEndpoint().getDirection() + "  NEP " + v.dir);
+                        + "CEP " + e.getEndpoint().getDirection() + "  NEP " + vertex.dir);
             }
-            return new Vertex(v, e.getEndpoint().getDirection());
+            return new Vertex(vertex, e.getEndpoint().getDirection());
         }).collect(Collectors.toList());
 
         assert vertices.size() > 1;
@@ -130,14 +136,14 @@ class DecompositionAction {
                 }).collect(Collectors.toList());
     }
 
-    private EndPoint toEndPoint(Vertex v) {
+    private EndPoint toEndPoint(Vertex vertex) {
         EndPoint ep = endpoints.stream()
                 .filter(e -> e.getEndpoint().getServiceInterfacePoint()
-                        .getServiceInterfacePointId().equals(v.getSip()))
+                        .getServiceInterfacePointId().equals(vertex.getSip()))
                 .findFirst()
                 .orElse(new EndPoint(null, null));
-        Objects.requireNonNull(v.getUuid());
-        ep.setNepRef(TapiUtils.toSysNepRef(v.getNodeUuid(), v.getUuid()));
+        Objects.requireNonNull(vertex.getUuid());
+        ep.setNepRef(TapiUtils.toSysNepRef(vertex.getNodeUuid(), vertex.getUuid()));
         return ep;
     }
 
@@ -186,15 +192,15 @@ class DecompositionAction {
 
             if (topo.getLink() != null) {
                 topo.getLink().stream()
-                        .filter(l -> OperationalState.ENABLED == l.getOperationalState())
-                        .forEach(l -> {
-                            //we probably need to take link bidir/unidir into consideration as well
-                    List<Vertex> vertices = l.getNodeEdgePoint().stream()
+                    .filter(l -> OperationalState.ENABLED == l.getOperationalState())
+                    .forEach(l -> {
+                        //we probably need to take link bidir/unidir into consideration as well
+                        List<Vertex> vertices = l.getNodeEdgePoint().stream()
                             .map(nep -> graph.vertexSet().stream()
                                     .filter(v -> v.getUuid().equals(nep.getOwnedNodeEdgePointId())).findFirst())
                             .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
-                    interconnectLink(graph, vertices);
-                });
+                        interconnectLink(graph, vertices);
+                    });
             }
 
             return graph;
@@ -203,12 +209,12 @@ class DecompositionAction {
         }
     }
 
-    private Stream<Vertex> nodeToGraph(Node n) {
-        Uuid nodeUuid = n.getUuid();
-        String activationDriverId = n.augmentation(NodeAdiAugmentation.class).getActivationDriverId();
+    private Stream<Vertex> nodeToGraph(Node node) {
+        Uuid nodeUuid = node.getUuid();
+        String activationDriverId = node.augmentation(NodeAdiAugmentation.class).getActivationDriverId();
 
 
-        return n.getOwnedNodeEdgePoint().stream()
+        return node.getOwnedNodeEdgePoint().stream()
             .filter(ep -> ep.getLinkPortDirection() != null
                     && ep.getLinkPortDirection() != PortDirection.UNIDENTIFIEDORUNKNOWN)
             .map(nep -> {
@@ -276,14 +282,14 @@ class DecompositionAction {
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) {
+        public boolean equals(Object other) {
+            if (this == other) {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()) {
+            if (other == null || getClass() != other.getClass()) {
                 return false;
             }
-            Vertex vertex = (Vertex) o;
+            Vertex vertex = (Vertex) other;
             return Objects.equals(uuid, vertex.uuid);
         }
 
@@ -297,11 +303,11 @@ class DecompositionAction {
         }
 
         @Override
-        public int compareTo(Vertex o) {
-            if (o == null) {
+        public int compareTo(Vertex other) {
+            if (other == null) {
                 return -1;
             }
-            return uuid.getValue().compareTo(o.uuid.getValue());
+            return uuid.getValue().compareTo(other.uuid.getValue());
         }
 
         @Override

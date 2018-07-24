@@ -7,6 +7,12 @@
  */
 package org.opendaylight.unimgr.mef.nrp.impl;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+
+import java.util.Collections;
+import java.util.concurrent.ExecutionException;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
@@ -29,18 +35,10 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.li
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.node.OwnedNodeEdgePoint;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.context.Topology;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 
-import java.util.Collections;
-
-/**
- * @author bartosz.michalik@amartus.com
- */
 public class NrpDaoIntTest extends AbstractTestWithTopo {
 
     private String uuid1 = "uuid1";
-    private String uuid2 = "uuid2";
 
     private OwnedNodeEdgePointRef toRef(String nodeId, String nepId) {
         return new NodeEdgePointBuilder()
@@ -51,12 +49,14 @@ public class NrpDaoIntTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void testAddCeps() throws ReadFailedException, TransactionCommitFailedException {
+    public void testAddCeps()
+            throws ReadFailedException, TransactionCommitFailedException, InterruptedException, ExecutionException {
+
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
 
         NrpDao nrpDao = new NrpDao(tx);
-        OwnedNodeEdgePointRef nepRef = toRef(uuid1, uuid1 +":1");
+        OwnedNodeEdgePointRef nepRef = toRef(uuid1, uuid1 + ":1");
 
 
         ConnectionEndPointBuilder builder = new ConnectionEndPointBuilder()
@@ -76,66 +76,70 @@ public class NrpDaoIntTest extends AbstractTestWithTopo {
 
         nrpDao.addConnectionEndPoint(nepRef, cep1);
         nrpDao.addConnectionEndPoint(nepRef, cep2);
-        tx.submit().checkedGet();
+        tx.commit().get();
 
         checkCeps(uuid1, uuid1 + ":1", 2);
 
     }
 
     @Test
-    public void testOverride() throws ReadFailedException, TransactionCommitFailedException {
+    public void testOverride()
+            throws ReadFailedException, TransactionCommitFailedException, InterruptedException, ExecutionException {
 
         ConnectionEndPointBuilder builder = new ConnectionEndPointBuilder()
                 .setClientNodeEdgePoint(Collections.emptyList())
                 .setParentNodeEdgePoint(Collections.emptyList());
 
-        ConnectionEndPoint cep1 = builder
-                .setUuid(new Uuid("c001:" + uuid1 + ":1"))
-                .setLifecycleState(LifecycleState.INSTALLED)
-                .build();
-        ConnectionEndPoint cep2 = builder
-                .setUuid(new Uuid("c001:" + uuid1 + ":1"))
-                .setLifecycleState(LifecycleState.PENDINGREMOVAL)
-                .build();
-        OwnedNodeEdgePointRef nepRef = toRef(uuid1, uuid1 +":1");
+        OwnedNodeEdgePointRef nepRef = toRef(uuid1, uuid1 + ":1");
 
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
 
         NrpDao nrpDao = new NrpDao(tx);
+        ConnectionEndPoint cep1 = builder
+                .setUuid(new Uuid("c001:" + uuid1 + ":1"))
+                .setLifecycleState(LifecycleState.INSTALLED)
+                .build();
         nrpDao.addConnectionEndPoint(nepRef, cep1);
-        tx.submit().checkedGet();
+        tx.commit().get();
 
         tx = dataBroker.newReadWriteTransaction();
 
         nrpDao = new NrpDao(tx);
+        ConnectionEndPoint cep2 = builder
+                .setUuid(new Uuid("c001:" + uuid1 + ":1"))
+                .setLifecycleState(LifecycleState.PENDINGREMOVAL)
+                .build();
         nrpDao.addConnectionEndPoint(nepRef, cep2);
-        tx.submit().checkedGet();
+        tx.commit().get();
 
         OwnedNodeEdgePoint1 aug = checkCeps(uuid1, uuid1 + ":1", 1);
         ConnectionEndPoint endPoint = aug.getConnectionEndPoint().get(0);
         Assert.assertEquals(LifecycleState.PENDINGREMOVAL, endPoint.getLifecycleState());
 
     }
+
     @Test
-    public void testRemoveConnection() throws TransactionCommitFailedException, ReadFailedException {
+    public void testRemoveConnection()
+            throws TransactionCommitFailedException, ReadFailedException, InterruptedException, ExecutionException {
+
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
         Connection connection = c(tx, uuid1, uuid1 + ":1", uuid1 + ":2");
-        tx.submit().checkedGet();
+        tx.commit().get();
 
         //when
         tx = dataBroker.newReadWriteTransaction();
         NrpDao nrpDao = new NrpDao(tx);
         nrpDao.removeConnection(connection.getUuid());
-        tx.submit().checkedGet();
+        tx.commit().get();
 
         //then
         tx = dataBroker.newReadWriteTransaction();
         assertNull(new NrpDao(tx).getConnection(connection.getUuid()));
 
         Topology topology = tx.read(LogicalDatastoreType.OPERATIONAL, NrpDao.topo(TapiConstants.PRESTO_SYSTEM_TOPO))
-                .checkedGet().get();
+                .get().get();
 
         assertFalse(topology.getNode().stream().flatMap(n -> n.getOwnedNodeEdgePoint().stream())
                 .anyMatch(nep -> {

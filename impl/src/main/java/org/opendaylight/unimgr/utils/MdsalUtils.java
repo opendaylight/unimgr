@@ -10,6 +10,7 @@ package org.opendaylight.unimgr.utils;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -18,7 +19,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MdsalUtils {
+public final class MdsalUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(MdsalUtils.class);
 

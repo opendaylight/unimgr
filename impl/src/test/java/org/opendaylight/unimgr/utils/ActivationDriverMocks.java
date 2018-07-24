@@ -23,10 +23,12 @@ import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
 import org.opendaylight.unimgr.mef.nrp.impl.ActivationDriverRepoServiceImpl;
 
-/**
- * @author bartosz.michalik@amartus.com
- */
-public class ActivationDriverMocks {
+
+public final class ActivationDriverMocks {
+
+    private ActivationDriverMocks() {
+    }
+
     /**
      * Prepare mock {@link ActivationDriverBuilder}. The driver is produced via provided producer function. This covers
      * single port requests.
@@ -35,7 +37,8 @@ public class ActivationDriverMocks {
      */
     public static ActivationDriverBuilder prepareDriver(Supplier<ActivationDriver> supplier) {
         final ActivationDriverBuilder mock = mock(ActivationDriverBuilder.class);
-        doAnswer(inv -> Optional.ofNullable(supplier.get())).when(mock).driverFor(any(ActivationDriverBuilder.BuilderContext.class));
+        doAnswer(inv -> Optional.ofNullable(
+                supplier.get())).when(mock).driverFor(any(ActivationDriverBuilder.BuilderContext.class));
         return mock;
     }
 
@@ -58,7 +61,8 @@ public class ActivationDriverMocks {
             List<ActivationDriverBuilder> builders = drivers.entrySet().stream().map(e -> {
                 ActivationDriverBuilder mock = mock(ActivationDriverBuilder.class);
                 when(mock.getActivationDriverId()).thenReturn(e.getKey());
-                when(mock.driverFor(any(ActivationDriverBuilder.BuilderContext.class))).thenReturn(Optional.of(e.getValue()));
+                when(mock.driverFor(any(ActivationDriverBuilder.BuilderContext.class)))
+                    .thenReturn(Optional.of(e.getValue()));
 
                 return mock;
             }).collect(Collectors.toList());

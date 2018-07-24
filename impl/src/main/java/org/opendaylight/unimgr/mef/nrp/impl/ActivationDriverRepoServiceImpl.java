@@ -13,11 +13,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
-import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverAmbiguousException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverNotFoundException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
@@ -42,21 +39,6 @@ public class ActivationDriverRepoServiceImpl implements ActivationDriverRepoServ
     public ActivationDriverRepoServiceImpl(List<ActivationDriverBuilder> builders) {
         LOG.debug("Activation drivers initialized");
         this.builders = builders;
-    }
-
-    protected ActivationDriver getDriver(Function<ActivationDriverBuilder, Optional<ActivationDriver>> driver) {
-        final List<ActivationDriver> drivers = builders.stream().map(driver)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-
-        if (drivers.size() > 1) {
-            throw new ActivationDriverAmbiguousException();
-        }
-        if (drivers.size() == 0) {
-            throw new ActivationDriverNotFoundException();
-        }
-        return drivers.get(0);
     }
 
     public void bind(ActivationDriverBuilder builder) {

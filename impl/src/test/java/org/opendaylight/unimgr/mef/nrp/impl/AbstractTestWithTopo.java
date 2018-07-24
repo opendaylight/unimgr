@@ -8,7 +8,19 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl;
 
+import static org.junit.Assert.fail;
+import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_SYSTEM_TOPO;
+
 import com.google.common.base.Optional;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.junit.Before;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
@@ -30,7 +42,15 @@ import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.Servic
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.ServiceInterfacePoint1Builder;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.nrp.connectivity.service.end.point.attrs.NrpCarrierEthConnectivityEndPointResourceBuilder;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.nrp.sip.attrs.NrpCarrierEthInniNResourceBuilder;
-import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.*;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Context;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.ForwardingDirection;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.LayerProtocolName;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.LifecycleState;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.OperationalState;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.PortDirection;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.PortRole;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.TerminationDirection;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.tapi.context.ServiceInterfacePointBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ConnectivityServiceEndPoint;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.ConnectionEndPoint;
@@ -46,25 +66,15 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.li
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.link.NodeEdgePointBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.node.OwnedNodeEdgePointBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.node.edge.point.MappedServiceInterfacePoint;
-import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.*;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.Link;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.LinkBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.LinkKey;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.context.Topology;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.context.TopologyKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.junit.Assert.fail;
-import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_SYSTEM_TOPO;
-
-/**
- * @author bartosz.michalik@amartus.com
- */
 public abstract class AbstractTestWithTopo extends AbstractConcurrentDataBrokerTest {
     protected static final InstanceIdentifier<Node> NRP_ABSTRACT_NODE_IID = InstanceIdentifier
             .create(Context.class)
@@ -117,21 +127,22 @@ public abstract class AbstractTestWithTopo extends AbstractConcurrentDataBrokerT
                 ).build();
     }
 
-    protected Link l(ReadWriteTransaction tx, String nA, String nepA, String nB, String nepB, OperationalState state) {
-        return l(tx, nA, nepA, nB, nepB, state, ForwardingDirection.BIDIRECTIONAL);
+    protected Link l(ReadWriteTransaction tx, String nameA, String nepA, String nameB, String nepB,
+                     OperationalState state) {
+        return l(tx, nameA, nepA, nameB, nepB, state, ForwardingDirection.BIDIRECTIONAL);
     }
 
-    protected Link l(ReadWriteTransaction tx, String nA, String nepA, String nB, String nepB,
+    protected Link l(ReadWriteTransaction tx, String nameA, String nepA, String nameB, String nepB,
                      OperationalState state, ForwardingDirection dir) {
         Uuid uuid = new Uuid(nepA + "-" + nepB);
 
         NrpDao dao = new NrpDao(tx);
 
-        if(dao.hasSip(nepA)) {
+        if (dao.hasSip(nepA)) {
             dao.removeSip(new Uuid("sip:" + nepA));
         }
 
-        if(dao.hasSip(nepB)) {
+        if (dao.hasSip(nepB)) {
             dao.removeSip(new Uuid("sip:" + nepB));
         }
 
@@ -139,12 +150,12 @@ public abstract class AbstractTestWithTopo extends AbstractConcurrentDataBrokerT
                 .setTopologyId(new Uuid(TapiConstants.PRESTO_SYSTEM_TOPO));
 
         NodeEdgePoint nepRefA = builder
-                .setNodeId(new Uuid(nA))
+                .setNodeId(new Uuid(nameA))
                 .setOwnedNodeEdgePointId(new Uuid(nepA))
                 .build();
 
         NodeEdgePoint nepRefB = builder
-                .setNodeId(new Uuid(nB))
+                .setNodeId(new Uuid(nameB))
                 .setOwnedNodeEdgePointId(new Uuid(nepB))
                 .build();
 
@@ -164,50 +175,15 @@ public abstract class AbstractTestWithTopo extends AbstractConcurrentDataBrokerT
 
                 .build();
 
-        tx.put(LogicalDatastoreType.OPERATIONAL, NrpDao.topo(PRESTO_SYSTEM_TOPO).child(Link.class, new LinkKey(uuid)), link);
+        tx.put(LogicalDatastoreType.OPERATIONAL,
+                NrpDao.topo(PRESTO_SYSTEM_TOPO).child(Link.class, new LinkKey(uuid)), link);
         return link;
     }
 
-    protected Node n(ReadWriteTransaction tx, boolean addSips, Uuid node,
-                     String activationDriverId, String ... endpoints) {
-        return n(tx, addSips, node.getValue(), activationDriverId, Arrays.stream(endpoints)
-                .map(i -> new Pair(i, PortDirection.BIDIRECTIONAL)));
-    }
+    protected org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+                .connectivity.context.Connection
+        c(ReadWriteTransaction tx, String nodeUuid, List<Uuid> route, String... neps) {
 
-    protected Node n(ReadWriteTransaction tx, boolean addSips, String node,
-                     String activationDriverId, Stream<Pair> endpoints) {
-        List<Pair> eps = endpoints.collect(Collectors.toList());
-        NrpDao nrpDao = new NrpDao(tx);
-        if (addSips) {
-
-            ServiceInterfacePoint1Builder sipBuilder = new ServiceInterfacePoint1Builder();
-            sipBuilder.setNrpCarrierEthInniNResource(new NrpCarrierEthInniNResourceBuilder()
-                    .setMaxFrameSize(new NaturalNumber(2048L))
-            .build());
-
-            eps.stream().map(e -> new ServiceInterfacePointBuilder()
-                    .setUuid(new Uuid("sip:" + e.getId()))
-                    .setLayerProtocolName(Collections.singletonList(LayerProtocolName.ETH))
-                    .addAugmentation(ServiceInterfacePoint1.class, sipBuilder.build())
-                    .build())
-                    .forEach(nrpDao::addSip);
-        }
-
-        return nrpDao.createNode(TapiConstants.PRESTO_SYSTEM_TOPO, node,
-                activationDriverId, LayerProtocolName.ETH, eps.stream()
-                .map(e-> {
-                    OwnedNodeEdgePointBuilder builder = new OwnedNodeEdgePointBuilder()
-                            .setLinkPortDirection(e.getDir())
-                            .setLayerProtocolName(LayerProtocolName.ETH)
-                            .setUuid(new Uuid(e.getId()));
-                    if (addSips) {
-                        builder.setMappedServiceInterfacePoint(Collections.singletonList(TapiUtils.toSipRef(new Uuid("sip:" + e.getId()), MappedServiceInterfacePoint.class)));
-                    }
-                    return builder.build();
-                }).collect(Collectors.toList()));
-    }
-
-    protected org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.Connection c(ReadWriteTransaction tx, String nodeUuid, List<Uuid> route, String... neps) {
         ConnectionBuilder builder = new ConnectionBuilder()
                 .setUuid(new Uuid("c:" + nodeUuid))
                 .setConnectionEndPoint(ceps(tx, nodeUuid, neps));
@@ -223,7 +199,8 @@ public abstract class AbstractTestWithTopo extends AbstractConcurrentDataBrokerT
         Connection connection = builder.build();
         InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang
                 .tapi.connectivity.rev180307.Context1> connectivityCtx = NrpDao.ctx()
-                .augmentation(org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.Context1.class);
+                .augmentation(
+                        org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.Context1.class);
         tx.put(LogicalDatastoreType.OPERATIONAL, connectivityCtx.child(Connection.class,
                 new ConnectionKey(connection.getUuid())), connection);
 
@@ -248,8 +225,10 @@ public abstract class AbstractTestWithTopo extends AbstractConcurrentDataBrokerT
 
     private OwnedNodeEdgePointRef toRef(String nodeId, String nepId) {
         return new NodeEdgePointBuilder()
-                .setTopologyId(new Uuid(TapiConstants.PRESTO_ABSTRACT_NODE.equals(nodeId) ?
-                        TapiConstants.PRESTO_EXT_TOPO : TapiConstants.PRESTO_SYSTEM_TOPO ))
+                .setTopologyId(new Uuid(
+                        TapiConstants.PRESTO_ABSTRACT_NODE.equals(nodeId)
+                        ? TapiConstants.PRESTO_EXT_TOPO
+                                : TapiConstants.PRESTO_SYSTEM_TOPO))
                 .setNodeId(new Uuid(nodeId))
                 .setOwnedNodeEdgePointId(new Uuid(nepId))
                 .build();
@@ -271,10 +250,10 @@ public abstract class AbstractTestWithTopo extends AbstractConcurrentDataBrokerT
                 .build();
     }
 
-
+    @SuppressWarnings("checkstyle:illegalcatch")
     protected Node getAbstractNode() {
 
-        try(ReadOnlyTransaction tx = dataBroker.newReadOnlyTransaction()) {
+        try (ReadOnlyTransaction tx = dataBroker.newReadOnlyTransaction()) {
             Optional<Node> opt =
                     tx.read(LogicalDatastoreType.OPERATIONAL,NRP_ABSTRACT_NODE_IID).get();
             if (opt.isPresent()) {
@@ -289,24 +268,21 @@ public abstract class AbstractTestWithTopo extends AbstractConcurrentDataBrokerT
         return null;
     }
 
-
+    @SuppressWarnings("checkstyle:emptyblock")
     protected Node getAbstractNode(Predicate<Node> nodePredicate) {
 
-        for(int i = 0; i < 5; ++i) {
+        for (int i = 0; i < 5; ++i) {
             Node node = getAbstractNode();
-            if(node != null && nodePredicate.test(node)) {
+            if (node != null && nodePredicate.test(node)) {
                 return node;
             }
             try {
                 TimeUnit.MILLISECONDS.sleep(10);
             } catch (InterruptedException e) {
-                e.printStackTrace();
             }
         }
         throw new IllegalStateException("No NEPs matching predicate");
     }
-
-
 
     protected static class Pair {
         private String id;
@@ -332,5 +308,47 @@ public abstract class AbstractTestWithTopo extends AbstractConcurrentDataBrokerT
 
     protected Node n(ReadWriteTransaction tx, Uuid node, String activationDriverId, String ... endpoints) {
         return n(tx,true, node, activationDriverId, endpoints);
+    }
+
+    protected Node n(ReadWriteTransaction tx, boolean addSips, Uuid node,
+            String activationDriverId, String ... endpoints) {
+        return n(tx, addSips, node.getValue(), activationDriverId, Arrays.stream(endpoints)
+                .map(i -> new Pair(i, PortDirection.BIDIRECTIONAL)));
+    }
+
+    protected Node n(ReadWriteTransaction tx, boolean addSips, String node,
+            String activationDriverId, Stream<Pair> endpoints) {
+        List<Pair> eps = endpoints.collect(Collectors.toList());
+        NrpDao nrpDao = new NrpDao(tx);
+        if (addSips) {
+            ServiceInterfacePoint1Builder sipBuilder = new ServiceInterfacePoint1Builder();
+            sipBuilder.setNrpCarrierEthInniNResource(new NrpCarrierEthInniNResourceBuilder()
+                    .setMaxFrameSize(new NaturalNumber(2048L))
+                    .build());
+
+            eps.stream().map(e -> new ServiceInterfacePointBuilder()
+                    .setUuid(new Uuid("sip:" + e.getId()))
+                    .setLayerProtocolName(Collections.singletonList(LayerProtocolName.ETH))
+                    .addAugmentation(ServiceInterfacePoint1.class, sipBuilder.build())
+                    .build())
+            .forEach(nrpDao::addSip);
+        }
+
+        return nrpDao.createNode(TapiConstants.PRESTO_SYSTEM_TOPO, node,
+                activationDriverId, LayerProtocolName.ETH, eps.stream()
+                .map(e -> {
+                    OwnedNodeEdgePointBuilder builder = new OwnedNodeEdgePointBuilder()
+                            .setLinkPortDirection(e.getDir())
+                            .setLayerProtocolName(LayerProtocolName.ETH)
+                            .setUuid(new Uuid(e.getId()));
+                    if (addSips) {
+                        builder.setMappedServiceInterfacePoint(
+                                Collections.singletonList(
+                                        TapiUtils.toSipRef(
+                                                new Uuid("sip:" + e.getId()),
+                                                MappedServiceInterfacePoint.class)));
+                    }
+                    return builder.build();
+                }).collect(Collectors.toList()));
     }
 }
