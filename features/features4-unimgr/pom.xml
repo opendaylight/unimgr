@@ -6,54 +6,26 @@ This program and the accompanying materials are made available under the
 terms of the Eclipse Public License v1.0 which accompanies this distribution,
 and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>feature-repo-parent</artifactId>
-    <version>3.0.2</version>
-    <relativePath />
+    <version>3.1.2</version>
+    <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>features4-unimgr</artifactId>
   <version>0.4.0-SNAPSHOT</version>
   <packaging>feature</packaging>
+  <name>ODL :: unimgr :: ${project.artifactId}</name>
 
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>odl-unimgr-netvirt</artifactId>
-      <version>${project.version}</version>
-      <type>xml</type>
-      <classifier>features</classifier>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>odl-unimgr-dlux</artifactId>
-      <version>${project.version}</version>
-      <type>xml</type>
-      <classifier>features</classifier>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>odl-unimgr-console</artifactId>
-      <version>${project.version}</version>
-      <type>xml</type>
-      <classifier>features</classifier>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
       <artifactId>odl-unimgr-rest</artifactId>
-      <version>${project.version}</version>
-      <type>xml</type>
-      <classifier>features</classifier>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>odl-unimgr-ui</artifactId>
       <version>${project.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
@@ -86,13 +58,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <type>xml</type>
       <classifier>features</classifier>
     </dependency>
-    <dependency>
+   <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>odl-unimgr-api</artifactId>
+      <artifactId>odl-unimgr-legato-api</artifactId>
       <version>${project.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
-    </dependency>
-
-  </dependencies>
+   </dependency>
+</dependencies>
 </project>

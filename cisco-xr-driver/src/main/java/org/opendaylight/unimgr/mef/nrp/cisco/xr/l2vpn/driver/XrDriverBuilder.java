@@ -24,10 +24,8 @@ import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.AbstractL2vpnActivator;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnLocalConnectActivator;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnP2pConnectActivator;
-import org.opendaylight.unimgr.utils.DriverConstants;
-import org.opendaylight.unimgr.utils.SipHandler;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.NrpConnectivityServiceAttrs;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.SipHandler;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpConnectivityServiceAttrs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +33,9 @@ import org.slf4j.LoggerFactory;
  * @author marek.ryznar@amartus.com
  */
 public class XrDriverBuilder implements ActivationDriverBuilder {
+
+    public static final String XR_NODE = "xr-node";
+
     private static final Logger LOG = LoggerFactory.getLogger(XrDriverBuilder.class);
     private DataBroker dataBroker;
     private MountPointService mountPointService;
@@ -64,7 +65,7 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
 
             @Override
             public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context) {
-                this.endPoints = endPoints;
+                this.endPoints = new ArrayList<>(endPoints);
                 this.serviceId = serviceId;
 
                 localActivator = new L2vpnLocalConnectActivator(dataBroker,mountPointService);
@@ -90,17 +91,21 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
                 endPoints.forEach(endPoint -> connectWithAllNeighbors(action,endPoint,endPoints));
             }
 
-            private void connectWithAllNeighbors(BiConsumer<List<EndPoint>,AbstractL2vpnActivator> action, EndPoint endPoint, List<EndPoint> neighbors) {
+            private void connectWithAllNeighbors(BiConsumer<List<EndPoint>,AbstractL2vpnActivator> action,
+                                                 EndPoint endPoint, List<EndPoint> neighbors) {
                 neighbors.stream()
                         .filter(neighbor -> !neighbor.equals(endPoint))
                         .forEach(neighbor -> activateNeighbors(action,endPoint,neighbor));
             }
 
-            private void activateNeighbors(BiConsumer<List<EndPoint>,AbstractL2vpnActivator> action, EndPoint portA, EndPoint portZ) {
+            private void activateNeighbors(BiConsumer<List<EndPoint>,AbstractL2vpnActivator> action,
+                                           EndPoint portA, EndPoint portZ) {
                 List<EndPoint> endPointsToActivate = Arrays.asList(portA,portZ);
 
-                if (SipHandler.isTheSameDevice(portA.getEndpoint().getServiceInterfacePoint(),portZ.getEndpoint().getServiceInterfacePoint())) {
-                    if (bridgeActivatedPairs==null) {
+                if (SipHandler.isTheSameDevice(
+                        portA.getEndpoint().getServiceInterfacePoint(),
+                        portZ.getEndpoint().getServiceInterfacePoint())) {
+                    if (bridgeActivatedPairs == null) {
                         bridgeActivatedPairs = new ArrayList<>();
                     }
                     if (isPairActivated(portA,portZ)) {
@@ -151,7 +156,7 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
     }
 
     @Override
-    public Uuid getNodeUuid() {
-        return new Uuid(DriverConstants.XR_NODE);
+    public String getActivationDriverId() {
+        return XR_NODE;
     }
 }

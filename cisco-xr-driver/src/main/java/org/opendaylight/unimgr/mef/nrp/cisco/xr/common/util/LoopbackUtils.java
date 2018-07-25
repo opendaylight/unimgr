@@ -10,10 +10,10 @@ package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util;
 import com.google.common.base.Optional;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.unimgr.mef.nrp.common.ServicePort;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.unimgr.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4AddressNoZone;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.unimgr.rev151012.LoopbackAugmentation;
+import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.topology.ext.rev180531.LoopbackAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
@@ -44,7 +44,7 @@ public class LoopbackUtils {
         Optional<Node> nodeOpt = MdsalUtils.readOptional(dataBroker, LogicalDatastoreType.CONFIGURATION, getNodeIid(nodeId,topologyId));
 
         if (nodeOpt.isPresent()) {
-            LoopbackAugmentation la = nodeOpt.get().getAugmentation(LoopbackAugmentation.class);
+            LoopbackAugmentation la = nodeOpt.get().augmentation(LoopbackAugmentation.class);
 
             if (la != null) {
                 loopback = la.getLoopbackAddress().getIpv4Address().getValue();

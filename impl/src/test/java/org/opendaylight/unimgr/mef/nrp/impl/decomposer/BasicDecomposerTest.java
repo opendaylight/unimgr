@@ -8,6 +8,15 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl.decomposer;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,17 +26,11 @@ import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
 import org.opendaylight.unimgr.mef.nrp.api.Subrequrest;
 import org.opendaylight.unimgr.mef.nrp.impl.AbstractTestWithTopo;
 import org.opendaylight.unimgr.mef.nrp.impl.NrpInitializer;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.OperationalState;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.OperationalState;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 import org.opendaylight.yangtools.yang.common.OperationFailedException;
 
-import java.util.Arrays;
-import java.util.List;
 
-import static org.junit.Assert.*;
-
-/**
- * @author bartosz.michalik@amartus.com
- */
 public class BasicDecomposerTest extends AbstractTestWithTopo {
     private BasicDecomposer decomposer;
 
@@ -49,12 +52,13 @@ public class BasicDecomposerTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void singleNodeTest() throws FailureResult, OperationFailedException {
+    public void singleNodeTest()
+            throws FailureResult, OperationFailedException, InterruptedException, ExecutionException {
         //having
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, "n1", "n1:1", "n1:2", "n1:3");
         n(tx, "n2", "n2:1", "n2:2", "n2:3");
-        tx.submit().checkedGet();
+        tx.commit().get();
         //when
         List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:1"), ep("n1:2")), null);
 
@@ -62,19 +66,49 @@ public class BasicDecomposerTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void noPathTest() throws FailureResult, OperationFailedException {
+    public void singleNodeTestSameEndpoint()
+            throws FailureResult, OperationFailedException, InterruptedException, ExecutionException {
         //having
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, "n1", "n1:1", "n1:2", "n1:3");
         n(tx, "n2", "n2:1", "n2:2", "n2:3");
-        tx.submit().checkedGet();
+        tx.commit().get();
+        //when
+        List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:1"), ep("n1:1")), null);
+
+        assertNull(decomposed);
+
+    }
+
+    @Test
+    public void nonExistingEndpoint()
+            throws FailureResult, OperationFailedException, InterruptedException, ExecutionException {
+        expected.expect(FailureResult.class);
+        //having
+        ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
+        n(tx, "n1", "n1:1", "n1:2", "n1:3");
+        n(tx, "n2", "n2:1", "n2:2", "n2:3");
+        tx.commit().get();
+        //when
+        decomposer.decompose(Arrays.asList(ep("n1:1"), ep("n3:1")), null);
+    }
+
+    @Test
+    public void noPathTest()
+            throws FailureResult, OperationFailedException, InterruptedException, ExecutionException {
+        //having
+        ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
+        n(tx, "n1", "n1:1", "n1:2", "n1:3");
+        n(tx, "n2", "n2:1", "n2:2", "n2:3");
+        tx.commit().get();
         //when
         List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:1"), ep("n2:2")), null);
         assertNull(decomposed);
     }
 
     @Test
-    public void twoNodesTest() throws FailureResult, OperationFailedException {
+    public void twoNodesTest()
+            throws FailureResult, OperationFailedException, InterruptedException, ExecutionException {
         //having three nodes, but only two nodes connected
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, "n1", "n1:1", "n1:2", "n1:3");
@@ -82,7 +116,7 @@ public class BasicDecomposerTest extends AbstractTestWithTopo {
         n(tx, "n3", "n3:1", "n3:2", "n3:3");
         l(tx, "n1", "n1:1", "n2", "n2:1", OperationalState.ENABLED);
         l(tx, "n2", "n2:3", "n3", "n3:3", OperationalState.ENABLED);
-        tx.submit().checkedGet();
+        tx.commit().get();
         //when
         List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:2"), ep("n2:2")), null);
         assertNotNull(decomposed);
@@ -90,7 +124,8 @@ public class BasicDecomposerTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void threeNodesTest() throws FailureResult, OperationFailedException {
+    public void threeNodesTest()
+            throws FailureResult, OperationFailedException, InterruptedException, ExecutionException {
         //having
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, "n1", "n1:1", "n1:2", "n1:3");
@@ -98,15 +133,35 @@ public class BasicDecomposerTest extends AbstractTestWithTopo {
         n(tx, "n3", "n3:1", "n3:2", "n3:3");
         l(tx, "n1", "n1:1", "n2", "n2:1", OperationalState.ENABLED);
         l(tx, "n2", "n2:3", "n3", "n3:3", OperationalState.ENABLED);
-        tx.submit().checkedGet();
+        tx.commit().get();
         //when
         List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:2"), ep("n3:2")), null);
         assertNotNull(decomposed);
         assertEquals(3, decomposed.size());
+        assertEquals(3, decomposed.stream().map(Subrequrest::getActivationDriverId).collect(Collectors.toSet()).size());
     }
 
     @Test
-    public void threeNodesDisabledLinkTest() throws FailureResult, OperationFailedException {
+    public void threeNodesTwoDriversTest()
+            throws FailureResult, OperationFailedException, InterruptedException, ExecutionException {
+        //having
+        ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
+        n(tx, new Uuid("n1"),"d1", "n1:1", "n1:2", "n1:3");
+        n(tx, new Uuid("n2"),"d2", "n2:1", "n2:2", "n2:3");
+        n(tx, new Uuid("n3"),"d1", "n3:1", "n3:2", "n3:3");
+        l(tx, "n1", "n1:1", "n2", "n2:1", OperationalState.ENABLED);
+        l(tx, "n2", "n2:3", "n3", "n3:3", OperationalState.ENABLED);
+        tx.commit().get();
+        //when
+        List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:2"), ep("n3:2")), null);
+        assertNotNull(decomposed);
+        assertEquals(3, decomposed.size());
+        assertEquals(2, decomposed.stream().map(Subrequrest::getActivationDriverId).collect(Collectors.toSet()).size());
+    }
+
+    @Test
+    public void threeNodesDisabledLinkTest()
+            throws FailureResult, OperationFailedException, InterruptedException, ExecutionException {
         //having
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, "n1", "n1:1", "n1:2", "n1:3");
@@ -114,11 +169,9 @@ public class BasicDecomposerTest extends AbstractTestWithTopo {
         n(tx, "n3", "n3:1", "n3:2", "n3:3");
         l(tx, "n1", "n1:1", "n2", "n2:1", OperationalState.DISABLED);
         l(tx, "n2", "n2:3", "n3", "n3:3", OperationalState.ENABLED);
-        tx.submit().checkedGet();
+        tx.commit().get();
         //when
         List<Subrequrest> decomposed = decomposer.decompose(Arrays.asList(ep("n1:2"), ep("n3:2")), null);
         assertNull(decomposed);
     }
-
-
 }

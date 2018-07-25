@@ -11,7 +11,7 @@ import java.util.List;
 
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceActivatorException;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.NrpConnectivityServiceAttrs;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpConnectivityServiceAttrs;
 
 /**
  * Interface of a driver that maps NRP concepts to the configuration of underlying infrastructure.
@@ -47,15 +47,15 @@ public interface ActivationDriver {
 
     /**
      * Performs the activation action.
-     * @throws TransactionCommitFailedException
-     * @throws ResourceActivatorException
+     * @throws TransactionCommitFailedException transaction commit failed
+     * @throws ResourceActivatorException activation problem
      */
     void activate() throws TransactionCommitFailedException, ResourceActivatorException;
 
     /**
      * Performs the update action.
-     * @throws TransactionCommitFailedException
-     * @throws ResourceActivatorException
+     * @throws TransactionCommitFailedException transaction commit failed
+     * @throws ResourceActivatorException activation problem
      */
     default void update() throws TransactionCommitFailedException, ResourceActivatorException {
         deactivate();
@@ -64,15 +64,15 @@ public interface ActivationDriver {
 
     /**
      * Performs the deactivation action.
-     * @throws TransactionCommitFailedException
-     * @throws ResourceActivatorException
+     * @throws TransactionCommitFailedException transaction commit failed
+     * @throws ResourceActivatorException activation problem
      */
     void deactivate() throws TransactionCommitFailedException, ResourceActivatorException;
 
 
     /**
      * Influences the order in which drivers are called within the transaction.
-     * @return int priority of this driver when resoving ambiguity
+     * @return int priority of this driver when resolving ambiguity
      */
     int priority();
 }

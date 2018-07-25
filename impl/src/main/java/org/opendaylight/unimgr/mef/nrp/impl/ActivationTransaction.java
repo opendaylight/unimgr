@@ -36,6 +36,7 @@ public class ActivationTransaction {
      * Activate the contents of this transaction.
      * @return result
      */
+    @SuppressWarnings("checkstyle:illegalcatch")
     public Result activate() {
         if (drivers.isEmpty()) {
             throw new IllegalStateException("at least one driver required");
@@ -49,7 +50,7 @@ public class ActivationTransaction {
             LOG.info("Activate transaction successful");
 
             return Result.success();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             //XXX add transaction identification ???
             LOG.warn("Rolling back activate transaction ", e);
             rollback();
@@ -62,6 +63,7 @@ public class ActivationTransaction {
      * Update the contents of this transaction.
      * @return result
      */
+    @SuppressWarnings("checkstyle:illegalcatch")
     public Result update() {
         if (drivers.isEmpty()) {
             throw new IllegalStateException("at least one driver required");
@@ -75,7 +77,7 @@ public class ActivationTransaction {
             LOG.info("Update transaction successful");
 
             return Result.success();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             //XXX add transaction identification ???
             LOG.warn("Rolling back update transaction ", e);
             rollback();
@@ -88,6 +90,7 @@ public class ActivationTransaction {
      * Deactivate the contents of this transaction.
      * @return result
      */
+    @SuppressWarnings("checkstyle:illegalcatch")
     public Result deactivate() {
         if (drivers.isEmpty()) {
             throw new IllegalStateException("at least one driver required");
@@ -101,7 +104,7 @@ public class ActivationTransaction {
             commit();
 
             return Result.success();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             //XXX add transaction identification ???
             LOG.warn("Rolling back deactivate transaction ", e);
             rollback();
@@ -122,21 +125,21 @@ public class ActivationTransaction {
         drivers.sort(Comparator.comparingInt(ActivationDriver::priority));
     }
 
-    public static class Result {
+    public static final class Result {
         private boolean successful;
 
-        private Optional<String> message;
+        private final String message;
 
-        private Optional<Throwable> cause;
+        private final Throwable cause;
 
-        private Result(boolean successful, Optional<String> message, Optional<Throwable> cause) {
+        private Result(boolean successful, String message, Throwable cause) {
             this.successful = successful;
             this.message = message;
             this.cause = cause;
         }
 
         public Optional<Throwable> getCause() {
-            return cause;
+            return Optional.ofNullable(cause);
         }
 
         public boolean isSuccessful() {
@@ -144,15 +147,15 @@ public class ActivationTransaction {
         }
 
         public Optional<String> getMessage() {
-            return message;
+            return Optional.ofNullable(message);
         }
 
         public static Result success() {
-            return new Result(true, Optional.empty(), Optional.empty());
+            return new Result(true, null, null);
         }
 
         public static Result fail(String message, Throwable cause) {
-            return new Result(false, Optional.of(message), Optional.of(cause));
+            return new Result(false, message, cause);
         }
     }
 

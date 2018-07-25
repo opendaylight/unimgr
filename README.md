@@ -6,10 +6,8 @@ reference points to provide management of connectivity services across multi-ven
 devices. Currently supported devices are:
 
 * Cisco IOS-XR devices managed via Netconf
+* Cisco IOS-XE devices managed via CLI
 * Openflow switches managed via OVSDB
-
-There is also a template-driver which is a skeleton driver that can be copied when writing a new
-driver.
 
 Building unimgr
 ----

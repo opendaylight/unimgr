@@ -36,9 +36,9 @@ public class BasicDecomposer implements RequestDecomposer {
 
     /**
      * We currently support only one-to-one mapping between nep and sip.
-     * @param endpoints
-     * @param constraint
-     * @return
+     * @param endpoints list of endpoints
+     * @param constraint decomposition constraints
+     * @return decomposed request
      */
     @Override
     public List<Subrequrest> decompose(List<EndPoint> endpoints, Constraints constraint) throws FailureResult {

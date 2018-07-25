@@ -11,14 +11,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent-lite</artifactId>
-    <version>3.0.2</version>
+    <version>3.1.2</version>
     <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>unimgr-aggregator</artifactId>
   <version>0.4.0-SNAPSHOT</version>
-  <name>unimgr</name>
+  <name>ODL :: unimgr :: ${project.artifactId}</name>
   <packaging>pom</packaging>
   <modelVersion>4.0.0</modelVersion>
   <prerequisites>
@@ -56,16 +56,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <profile>
       <id>main</id>
       <modules>
-        <module>api</module>
         <module>legato-api</module>
         <module>nrp-api</module>
         <module>impl</module>
-        <module>netvirt</module>
         <module>cisco-xr-driver</module>
         <module>ovs-driver</module>
         <module>template-driver</module>
-        <module>dlux</module>
-        <module>cli</module>
         <module>karaf</module>
         <module>features</module>
         <module>artifacts</module>

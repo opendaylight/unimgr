@@ -13,15 +13,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
-import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverAmbiguousException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverNotFoundException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,21 +41,6 @@ public class ActivationDriverRepoServiceImpl implements ActivationDriverRepoServ
         this.builders = builders;
     }
 
-    protected ActivationDriver getDriver(Function<ActivationDriverBuilder, Optional<ActivationDriver>> driver) {
-        final List<ActivationDriver> drivers = builders.stream().map(driver)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-
-        if (drivers.size() > 1) {
-            throw new ActivationDriverAmbiguousException();
-        }
-        if (drivers.size() == 0) {
-            throw new ActivationDriverNotFoundException();
-        }
-        return drivers.get(0);
-    }
-
     public void bind(ActivationDriverBuilder builder) {
         LOG.debug("builder {} bound", builder);
     }
@@ -69,10 +50,12 @@ public class ActivationDriverRepoServiceImpl implements ActivationDriverRepoServ
     }
 
     @Override
-    public Optional<ActivationDriver> getDriver(Uuid uuid) {
+    public Optional<ActivationDriver> getDriver(String activationDriverId) {
         ActivationDriverBuilder builder = builders.stream()
-                .filter(db -> db.getNodeUuid().equals(uuid))
-                .findFirst().orElseThrow(() -> new ActivationDriverNotFoundException(MessageFormat.format("No driver with id {0} registered", uuid)));
+                .filter(db -> db.getActivationDriverId().equals(activationDriverId))
+                .findFirst().orElseThrow(() ->
+                        new ActivationDriverNotFoundException(MessageFormat
+                                .format("No driver with id {0} registered", activationDriverId)));
         return builder.driverFor(new ActivationDriverBuilder.BuilderContext());
 
     }

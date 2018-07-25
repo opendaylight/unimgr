@@ -1,51 +1,94 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-Copyright (c) 2015 Cable Television Laboratories, Inc. All rights reserved.
-
-This program and the accompanying materials are made available under the
-terms of the Eclipse Public License v1.0 which accompanies this distribution,
-and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
+ * Copyright (c) 2018 Xoriant Corporation and others. All rights reserved.
+ *
+  * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <parent>
-    <groupId>org.opendaylight.mdsal</groupId>
-    <artifactId>binding-parent</artifactId>
-    <version>0.12.0-SNAPSHOT</version>
-    <relativePath/>
-  </parent>
+    <parent>
+        <groupId>org.opendaylight.mdsal</groupId>
+        <artifactId>binding-parent</artifactId>
+        <version>0.13.0-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
 
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.opendaylight.unimgr</groupId>
-  <artifactId>unimgr-legato-api</artifactId>
-  <version>0.4.0-SNAPSHOT</version>
-  <packaging>bundle</packaging>
-  <!-- <name> formatting is used by autorelease to parse and notify projects on
-       build failure. Please do not modify this unless you have a good reason. -->
-  <name>ODL :: unimgr :: ${project.artifactId}</name>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.opendaylight.unimgr</groupId>
+    <artifactId>unimgr-legato-api</artifactId>
+    <version>0.4.0-SNAPSHOT</version>
 
-  <properties>
-    <ovsdb.version>1.6.0-SNAPSHOT</ovsdb.version>
-    <netvirt.version>0.6.0-SNAPSHOT</netvirt.version>
-  </properties>
+    <packaging>bundle</packaging>
+    <!-- <name> formatting is used by autorelease to parse and notify projects on
+    build failure. Please do not modify this unless you have a good reason. -->
+    <name>ODL :: unimgr :: ${project.artifactId}</name>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.opendaylight.mdsal.model</groupId>
-      <artifactId>ietf-yang-types-20130715</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.mdsal.model</groupId>
-      <artifactId>ietf-topology</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.mdsal.model</groupId>
-      <artifactId>yang-ext</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>southbound-api</artifactId>
-      <version>${ovsdb.version}</version>
-    </dependency>
-  </dependencies>
+    <properties>
+        <mdsal.version>1.8.0-SNAPSHOT</mdsal.version>
+    </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.opendaylight.mdsal.model</groupId>
+            <artifactId>ietf-yang-types-20130715</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.mdsal.model</groupId>
+            <artifactId>ietf-topology</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.mdsal.model</groupId>
+            <artifactId>yang-ext</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>unimgr-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Testing Dependencies -->
+        <dependency>
+            <groupId>org.opendaylight.controller.model</groupId>
+            <artifactId>model-inventory</artifactId>
+            <version>${mdsal.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-support</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-reflect</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>

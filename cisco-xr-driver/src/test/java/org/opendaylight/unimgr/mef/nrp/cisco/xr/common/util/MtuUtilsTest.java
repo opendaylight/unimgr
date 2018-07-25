@@ -27,7 +27,7 @@ public class MtuUtilsTest {
     public void testGenerateMtusSingle() {
         //given
         Long mtuValue = 1522L;
-        CiscoIosXrString owner = new CiscoIosXrString("test");
+        CiscoIosXrString owner = new CiscoIosXrString("testAddCeps");
 
         //when
         Mtus actual = MtuUtils.generateMtus(mtuValue, owner);
@@ -50,7 +50,7 @@ public class MtuUtilsTest {
         mtuValues.add(1522L);
         mtuValues.add(3000L);
 
-        CiscoIosXrString owner = new CiscoIosXrString("test");
+        CiscoIosXrString owner = new CiscoIosXrString("testAddCeps");
 
         //when
         Mtus actual = MtuUtils.generateMtus(mtuValues, owner);
