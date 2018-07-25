@@ -20,22 +20,20 @@ import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverNotFoundException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 
-/**
- * @author bartosz.michalik@amartus.com
- */
+
 public class ActivationDriverRepoServiceImplTest {
 
     @Test(expected = ActivationDriverNotFoundException.class)
     public void testEmptyBuilderList() throws Exception {
 
         ActivationDriverRepoService driverRepo = new ActivationDriverRepoServiceImpl(Collections.emptyList());
-        driverRepo.getDriver(new Uuid("non-existing"));
+        driverRepo.getDriver("non-existing");
     }
 
-
     @Test
+    @SuppressWarnings("checkstyle:emptyblock")
     public void testMatchingByUuid() throws Exception {
 
         final Uuid uuid = new Uuid("aDriver");
@@ -43,16 +41,17 @@ public class ActivationDriverRepoServiceImplTest {
         final ActivationDriver driver = mock(ActivationDriver.class);
 
         ActivationDriverBuilder builder = prepareDriver(() -> driver);
-        when(builder.getNodeUuid()).thenReturn(uuid);
+        when(builder.getActivationDriverId()).thenReturn(uuid.getValue());
 
         ActivationDriverRepoService driverRepo = new ActivationDriverRepoServiceImpl(Collections.singletonList(
                 builder
         ));
 
-        final Optional<ActivationDriver> driver1 = driverRepo.getDriver(uuid);
+        final Optional<ActivationDriver> driver1 = driverRepo.getDriver(uuid.getValue());
         try {
-            driverRepo.getDriver(new Uuid("otherDriver"));
-        } catch (ActivationDriverNotFoundException expected) {}
+            driverRepo.getDriver("otherDriver");
+        } catch (ActivationDriverNotFoundException _expected) {
+        }
 
         assertTrue(driver1.isPresent());
     }

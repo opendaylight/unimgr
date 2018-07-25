@@ -13,7 +13,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent-lite</artifactId>
-    <version>3.0.2</version>
+    <version>3.1.2</version>
     <relativePath/>
   </parent>
 
@@ -29,11 +29,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <dependencies>
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>unimgr-api</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
         <artifactId>unimgr-impl</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -45,11 +40,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>ovs-driver</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>unimgr-netvirt</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

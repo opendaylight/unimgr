@@ -4,8 +4,8 @@ module mef-common-types {
     organization "Metro Ethernet Forum (MEF)";
     contact "MEF";
     description "none";
-    revision 2017-12-21 {
-        description "MEF NRP 1.0.beta";
+    revision 2018-03-21 {
+        description "MEF NRP R2";
         reference "ONF-TR-527, ONF-TR-512, ONF-TR-531, RFC 6020 and RFC 6087";
     }
     /***********************

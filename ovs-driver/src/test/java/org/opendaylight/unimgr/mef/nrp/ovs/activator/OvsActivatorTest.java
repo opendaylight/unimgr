@@ -28,22 +28,29 @@ import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
+import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
+import org.opendaylight.unimgr.mef.nrp.api.TopologyManager;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
+import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.FlowTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.OpenFlowTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.OvsdbTopologyTestUtils;
+import org.opendaylight.unimgr.mef.nrp.ovs.tapi.TopologyDataHandler;
+import org.opendaylight.unimgr.mef.nrp.ovs.tapi.TopologyDataHandlerTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.util.OpenFlowUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.util.OvsdbUtils;
 import org.opendaylight.unimgr.utils.MdsalUtils;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.types.rev171221.NaturalNumber;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.types.rev171221.PositiveInteger;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev171221.carrier.eth.connectivity.end.point.resource.CeVlanIdListAndUntag;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev171221.carrier.eth.connectivity.end.point.resource.IngressBwpFlow;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev171221.vlan.id.list.and.untag.VlanId;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.NrpConnectivityServiceEndPointAttrs;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.nrp.connectivity.service.end.point.attrs.NrpCarrierEthConnectivityEndPointResource;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.ConnectivityServiceEndPoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.types.rev180321.NaturalNumber;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.types.rev180321.PositiveInteger;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev180321.carrier.eth.connectivity.end.point.resource.CeVlanIdListAndUntag;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev180321.carrier.eth.connectivity.end.point.resource.IngressBwpFlow;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev180321.vlan.id.list.and.untag.VlanId;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpConnectivityServiceEndPointAttrs;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.nrp.connectivity.service.end.point.attrs.NrpCarrierEthConnectivityEndPointResource;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ConnectivityServiceEndPoint;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.end.point.ServiceInterfacePoint;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.OwnedNodeEdgePointRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
@@ -67,6 +74,7 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
     private static final String ofPort2Name = "openflow:5";
     private static final Integer expectedVlanId = 200;
     private static final String serviceId = "serviceId";
+    private static final String nodeId = "ovs-node";
 
     private static final String interswitchName = "interswitch-openflow";
     private static final String vlanName = "vlan-openflow";
@@ -83,6 +91,12 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
         OvsdbTopologyTestUtils.createOvsdbTopology(dataBroker);
         initTopologies();
         FlowTopologyTestUtils.createFlowTopology(dataBroker, getLinkList());
+
+        TopologyDataHandlerTestUtils helper = new TopologyDataHandlerTestUtils(dataBroker);
+        TopologyManager topologyManager = mock(TopologyManager.class);
+        when(topologyManager.getSystemTopologyId()).thenReturn(TapiConstants.PRESTO_SYSTEM_TOPO);
+        helper.createPrestoSystemTopology();
+        new TopologyDataHandler(dataBroker, topologyManager).init();
     }
 
     @Test
@@ -101,6 +115,7 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
 
         //then
         Nodes nodes = readOpenFLowTopology(dataBroker);
+        Node odlNode = OvsdbUtils.getOdlNode(dataBroker);
         checkTable(nodes,activated);
         System.out.println("Before deactivation: "+ nodes.toString());
 
@@ -156,9 +171,9 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
                 .forEach(node -> {
                     try {
                         Table t = OpenFlowUtils.getTable(node);
-                        if (node.getKey().getId().getValue().equals(ofPort1Name)) {
+                        if (node.key().getId().getValue().equals(ofPort1Name)) {
                             checkTable.accept(t,of1InterwitchPorts);
-                        } else if (node.getKey().getId().getValue().equals(ofPort2Name)) {
+                        } else if (node.key().getId().getValue().equals(ofPort2Name)) {
                             checkTable.accept(t,of2InterwitchPorts);
                         }
                     } catch (ResourceNotAvailableException e) {
@@ -178,8 +193,9 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
         ConnectivityServiceEndPoint connectivityServiceEndPoint = mock(ConnectivityServiceEndPoint.class);
         NrpConnectivityServiceEndPointAttrs attrs = mock(NrpConnectivityServiceEndPointAttrs.class);
         //UNI port mock
+        ServiceInterfacePoint sipRef = TapiUtils.toSipRef(new Uuid(portName), ServiceInterfacePoint.class);
         when(connectivityServiceEndPoint.getServiceInterfacePoint())
-                .thenReturn(new Uuid(portName));
+                .thenReturn(sipRef);
 
         //Vlan Id mock
         VlanId vlanIdList = mock(VlanId.class);
@@ -209,7 +225,10 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
         when(attrs.getNrpCarrierEthConnectivityEndPointResource())
                 .thenReturn(nrpCgEthFrameFlowCpaAspec);
 
-        return new EndPoint(connectivityServiceEndPoint,attrs);
+        EndPoint ep = new EndPoint(connectivityServiceEndPoint,attrs);
+        ep.setNepRef(mock(OwnedNodeEdgePointRef.class));
+        when(ep.getNepRef().getNodeId()).thenReturn(new Uuid(nodeId));
+        return ep;
     }
 
     /**
@@ -223,6 +242,7 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
         bridges.add(createBridge("s3",4));
         bridges.add(createBridge("s4",3));
         bridges.add(createBridge("s5",4));
+
         bridges.add(createBridge("odl", 0));
 
         bridges.forEach(node -> {
@@ -241,12 +261,12 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
     }
 
     private org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node createOpenFlowNode(Node node) {
-        String ovsdbName = node.getKey().getNodeId().getValue();
+        String ovsdbName = node.key().getNodeId().getValue();
         String ofBridgeName = getOfName(ovsdbName);
 
         List<NodeConnector> nodeConnectors = new ArrayList<>();
         node.getTerminationPoint()
-                .forEach(tp -> nodeConnectors.add(OpenFlowTopologyTestUtils.createNodeConnector(ofBridgeName, tp.getAugmentation(OvsdbTerminationPointAugmentation.class).getOfport(), ovsdbName+"-eth"+tp.getAugmentation(OvsdbTerminationPointAugmentation.class).getOfport())));
+                .forEach(tp -> nodeConnectors.add(OpenFlowTopologyTestUtils.createNodeConnector(ofBridgeName, tp.augmentation(OvsdbTerminationPointAugmentation.class).getOfport(), ovsdbName+"-eth"+tp.augmentation(OvsdbTerminationPointAugmentation.class).getOfport())));
 
         return OpenFlowTopologyTestUtils.createOpenFlowNode(ofBridgeName,nodeConnectors);
     }

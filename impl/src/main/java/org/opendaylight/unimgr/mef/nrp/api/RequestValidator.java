@@ -11,14 +11,20 @@ package org.opendaylight.unimgr.mef.nrp.api;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import javax.annotation.Nonnull;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.CreateConnectivityServiceInput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.UpdateConnectivityServiceInput;
 
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.CreateConnectivityServiceInput;
+
 
 /**
+ * Simple request validator.
  * @author bartosz.michalik@amartus.com
  */
 public interface RequestValidator {
-    ValidationResult checkValid(CreateConnectivityServiceInput input);
+    @Nonnull ValidationResult checkValid(CreateConnectivityServiceInput input);
+
+    @Nonnull ValidationResult checkValid(UpdateConnectivityServiceInput input);
 
     class ValidationResult {
         private final List<String> problems;
@@ -37,8 +43,16 @@ public interface RequestValidator {
             return new ArrayList<>(problems);
         }
 
-        public boolean isValid() {
-            return problems.isEmpty();
+        public boolean invalid() {
+            return ! problems.isEmpty();
+        }
+
+        public ValidationResult merge(ValidationResult other) {
+            if (other == null) {
+                return this;
+            }
+            this.problems.addAll(other.problems);
+            return this;
         }
     }
 }

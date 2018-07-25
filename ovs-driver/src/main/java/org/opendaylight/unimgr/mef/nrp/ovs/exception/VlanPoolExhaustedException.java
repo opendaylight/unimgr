@@ -10,7 +10,7 @@ package org.opendaylight.unimgr.mef.nrp.ovs.exception;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
 
 /**
- * Exception thrown when VLAN pool is exhausted
+ * Exception thrown when VLAN pool is exhausted.
  *
  * @author marek.ryznar@amartus.com
  */

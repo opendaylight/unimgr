@@ -9,8 +9,8 @@ package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.MtuUtils;
-import org.opendaylight.unimgr.mef.nrp.common.ServicePort;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.Mtus;
@@ -96,14 +96,14 @@ public class InterfaceHelperTest {
         assertNotNull(actualInterfaceConfiguration);
         assertEquals(interfaceName, actualInterfaceConfiguration.getInterfaceName());
         assertNull(actualInterfaceConfiguration.getMtus());
-        assertNull(actualInterfaceConfiguration.getAugmentation(InterfaceConfiguration3.class));
+        assertNull(actualInterfaceConfiguration.augmentation(InterfaceConfiguration3.class));
     }
 
     @Test
     public void testBuildSingleMtuL2() {
         //given
         String interfaceNameValue = "GigabitEthernet0/0/1";
-        CiscoIosXrString owner = new CiscoIosXrString("test");
+        CiscoIosXrString owner = new CiscoIosXrString("testAddCeps");
         long mtuValue = 1522L;
         InterfaceName interfaceName = new InterfaceName(interfaceNameValue);
         Optional<Mtus> mtus = Optional.of(MtuUtils.generateMtus(mtuValue, owner));
@@ -137,7 +137,7 @@ public class InterfaceHelperTest {
         assertEquals(mtuValue, actualMtu.getMtu().longValue());
         assertEquals(owner, actualMtu.getOwner());
 
-        InterfaceConfiguration3 l2Configuration = actualInterfaceConfiguration.getAugmentation(InterfaceConfiguration3.class);
+        InterfaceConfiguration3 l2Configuration = actualInterfaceConfiguration.augmentation(InterfaceConfiguration3.class);
         assertNotNull(l2Configuration);
         assertNotNull(l2Configuration.getL2Transport());
         assertTrue(l2Configuration.getL2Transport().isEnabled());
@@ -172,13 +172,13 @@ public class InterfaceHelperTest {
         assertNotNull(actualInterfaceConfiguration);
         assertEquals(interfaceName1, actualInterfaceConfiguration.getInterfaceName());
         assertNull(actualInterfaceConfiguration.getMtus());
-        assertNull(actualInterfaceConfiguration.getAugmentation(InterfaceConfiguration3.class));
+        assertNull(actualInterfaceConfiguration.augmentation(InterfaceConfiguration3.class));
 
         actualInterfaceConfiguration = actualInterfaceConfigurationList.get(1);
 
         assertNotNull(actualInterfaceConfiguration);
         assertEquals(interfaceName2, actualInterfaceConfiguration.getInterfaceName());
         assertNull(actualInterfaceConfiguration.getMtus());
-        assertNull(actualInterfaceConfiguration.getAugmentation(InterfaceConfiguration3.class));
+        assertNull(actualInterfaceConfiguration.augmentation(InterfaceConfiguration3.class));
     }
 }

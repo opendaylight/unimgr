@@ -14,11 +14,11 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.GetConnectivityServiceListOutput;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.GetConnectivityServiceListOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.connectivity.context.ConnectivityService;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.get.connectivity.service.list.output.Service;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.get.connectivity.service.list.output.ServiceBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.GetConnectivityServiceListOutput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.GetConnectivityServiceListOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.ConnectivityService;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.get.connectivity.service.list.output.Service;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.get.connectivity.service.list.output.ServiceBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
@@ -26,14 +26,14 @@ public class ListConnectivityAction implements Callable<RpcResult<GetConnectivit
 
     private final TapiConnectivityServiceImpl service;
 
-    public ListConnectivityAction(TapiConnectivityServiceImpl service) {
+    ListConnectivityAction(TapiConnectivityServiceImpl service) {
         Objects.requireNonNull(service);
         this.service = service;
     }
 
     @Override
-    public RpcResult<GetConnectivityServiceListOutput> call() throws Exception {
-        List<Service> services = new ArrayList<Service>();
+    public RpcResult<GetConnectivityServiceListOutput> call() {
+        List<Service> services = new ArrayList<>();
 
         NrpDao nrpDao = new NrpDao(service.getBroker().newReadOnlyTransaction());
         List<ConnectivityService> connectivityServices = nrpDao.getConnectivityServiceList();

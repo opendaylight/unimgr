@@ -26,9 +26,9 @@ import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.api.TopologyManager;
 import org.opendaylight.unimgr.mef.nrp.ovs.FlowTopologyTestUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.OvsdbTopologyTestUtils;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.context.attrs.ServiceInterfacePoint;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.topology.rev171113.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.tapi.context.ServiceInterfacePoint;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
 
 /**
@@ -132,8 +132,10 @@ public class TopologyDataHandlerTest extends AbstractDataBrokerTest{
 
     private BiFunction<Node, String, Boolean> checkNep = (node,nepName) ->
             node.getOwnedNodeEdgePoint().stream()
-                    .anyMatch(ownedNep -> ownedNep.getMappedServiceInterfacePoint().contains(new Uuid(sip_prefix + ovs_nep_prefix + nepName))
-                                && ownedNep.getUuid().getValue().equals(ovs_nep_prefix + nepName)
+                    .filter(ownedNep -> ownedNep.getUuid().getValue().equals(ovs_nep_prefix + nepName))
+                    .flatMap(ownedNep -> ownedNep.getMappedServiceInterfacePoint().stream())
+                    .anyMatch(sipRef ->
+                        sipRef.getServiceInterfacePointId().equals(new Uuid(sip_prefix + ovs_nep_prefix + nepName))
                     );
 
     private void checkNeps(Node node,String ... neps) {

@@ -7,6 +7,7 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs.driver;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,10 +20,10 @@ import org.opendaylight.unimgr.mef.nrp.common.ResourceActivatorException;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
 import org.opendaylight.unimgr.mef.nrp.ovs.activator.OvsActivator;
 import org.opendaylight.unimgr.mef.nrp.ovs.tapi.TopologyDataHandler;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev171221.NrpConnectivityServiceAttrs;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.common.rev171113.Uuid;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpConnectivityServiceAttrs;
 
 /**
+ * Ovs driver builder.
  * @author marek.ryznar@amartus.com
  */
 public class OvsDriver implements ActivationDriverBuilder {
@@ -51,7 +52,7 @@ public class OvsDriver implements ActivationDriverBuilder {
 
             @Override
             public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context) {
-                this.endPoints = endPoints;
+                this.endPoints = new ArrayList<>(endPoints);
                 this.serviceId = serviceId;
             }
 
@@ -60,10 +61,10 @@ public class OvsDriver implements ActivationDriverBuilder {
                 activator.activate(endPoints,serviceId);
             }
 
-			@Override
-			public void update() throws TransactionCommitFailedException, ResourceActivatorException {
-				activator.update(endPoints,serviceId);
-			}
+            @Override
+            public void update() throws TransactionCommitFailedException, ResourceActivatorException {
+                activator.update(endPoints,serviceId);
+            }
 
             @Override
             public void deactivate() throws TransactionCommitFailedException, ResourceNotAvailableException {
@@ -74,6 +75,8 @@ public class OvsDriver implements ActivationDriverBuilder {
             public int priority() {
                 return 0;
             }
+
+
         };
     }
 
@@ -83,7 +86,7 @@ public class OvsDriver implements ActivationDriverBuilder {
     }
 
     @Override
-    public Uuid getNodeUuid() {
-        return new Uuid(TopologyDataHandler.getOvsNode());
+    public String getActivationDriverId() {
+        return TopologyDataHandler.getDriverId();
     }
 }
