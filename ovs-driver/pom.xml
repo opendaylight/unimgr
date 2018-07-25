@@ -15,7 +15,6 @@
         <powermock.version>1.6.4</powermock.version>
         <openflow.version>0.7.0-SNAPSHOT</openflow.version>
         <ovsdb.version>1.7.0-SNAPSHOT</ovsdb.version>
-        <controller.version>0.13.3</controller.version>
         <mdsal.version>1.8.0-SNAPSHOT</mdsal.version>
     </properties>
 
@@ -136,11 +135,6 @@
             <groupId>org.opendaylight.openflowplugin.model</groupId>
             <artifactId>model-flow-statistics</artifactId>
             <version>${openflow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>liblldp</artifactId>
-            <version>${controller.version}</version>
         </dependency>
     </dependencies>
 </project>

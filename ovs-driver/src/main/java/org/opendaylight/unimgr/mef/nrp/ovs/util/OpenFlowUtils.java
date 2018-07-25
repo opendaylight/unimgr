@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.opendaylight.controller.liblldp.EtherTypes;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
@@ -40,6 +39,7 @@ public class OpenFlowUtils {
     private static final int VLAN_FLOW_PRIORITY = 20;
     private static final int INTERSWITCH_FLOW_PRIORITY = 10;
     private static final int DROP_FLOW_PRIORITY = 0;
+    private static final long ETH_TYPE_LLDP = 35020;
 
     private static final String FLOW_TABLE_NOT_PRESENT_ERROR_MESSAGE = "Flow table is not present in node '%s'.";
     private static final String NODE_NOT_AUGMENTED_ERROR_MESSAGE = "Node '%s' does not have '%s' augmentation.";
@@ -154,7 +154,7 @@ public class OpenFlowUtils {
                 .filter(flow -> {
                     try {
                         return ! (flow.getMatch().getEthernetMatch().getEthernetType().getType().getValue()
-                                .equals((long) EtherTypes.LLDP.intValue()));
+                                .equals(ETH_TYPE_LLDP));
                     } catch (NullPointerException npe) {
                         return true;
                     }
