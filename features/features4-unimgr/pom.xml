@@ -20,6 +20,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <artifactId>features4-unimgr</artifactId>
   <version>0.4.0-SNAPSHOT</version>
   <packaging>feature</packaging>
+  <name>ODL :: unimgr :: ${project.artifactId}</name>
 
   <dependencies>
     <dependency>
