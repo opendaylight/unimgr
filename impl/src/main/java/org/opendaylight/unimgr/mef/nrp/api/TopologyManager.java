@@ -8,6 +8,7 @@
 package org.opendaylight.unimgr.mef.nrp.api;
 
 /**
+ * Interface to the Unimgr topology.
  * @author bartosz.michalik@amartus.com
  */
 public interface TopologyManager {

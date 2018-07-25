@@ -19,10 +19,12 @@ public class ConnectivityServiceIdResourcePool {
 
     private static Random r = new Random();
 
-    private static String pattern = "{0}:{1}";
-
     public String getServiceId() {
-        return MessageFormat.format(pattern,Long.toString(System.currentTimeMillis(), 16), Integer.toString(r.nextInt(), 16));
+        return MessageFormat.format(
+                "{0}:{1}",
+                Long.toString(System.currentTimeMillis(), 16),
+                Integer.toString(r.nextInt(), 16)
+        );
     }
 
 }

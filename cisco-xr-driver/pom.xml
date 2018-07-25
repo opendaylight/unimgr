@@ -12,13 +12,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <parent>
         <groupId>org.opendaylight.mdsal</groupId>
         <artifactId>binding-parent</artifactId>
-        <version>0.12.0-SNAPSHOT</version>
+        <version>0.13.0-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
     <properties>
         <checkstyle.skip>true</checkstyle.skip>
         <powermock.version>1.6.4</powermock.version>
+        <mdsal.version>1.8.0-SNAPSHOT</mdsal.version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
@@ -42,18 +43,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
             </plugin>
         </plugins>
     </build>
-
-    <dependencyManagement>
-      <dependencies>
-        <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>mdsal-artifacts</artifactId>
-          <version>1.7.0-SNAPSHOT</version>
-          <type>pom</type>
-          <scope>import</scope>
-        </dependency>
-      </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -81,14 +70,17 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-broker-impl</artifactId>
+            <version>${mdsal.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-broker-impl</artifactId>
+            <version>${mdsal.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
+
         <!-- Testing Dependencies -->
         <dependency>
             <groupId>junit</groupId>

@@ -13,11 +13,11 @@ import java.util.concurrent.Callable;
 
 import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.GetConnectivityServiceDetailsInput;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.GetConnectivityServiceDetailsOutput;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.GetConnectivityServiceDetailsOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.connectivity.context.ConnectivityService;
-import org.opendaylight.yang.gen.v1.urn.onf.params.xml.ns.yang.tapi.connectivity.rev171113.get.connectivity.service.details.output.ServiceBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.GetConnectivityServiceDetailsInput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.GetConnectivityServiceDetailsOutput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.GetConnectivityServiceDetailsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.ConnectivityService;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.get.connectivity.service.details.output.ServiceBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -27,14 +27,14 @@ public class GetConnectivityDetailsAction implements Callable<RpcResult<GetConne
     private final TapiConnectivityServiceImpl service;
     private final GetConnectivityServiceDetailsInput input;
 
-    public GetConnectivityDetailsAction(TapiConnectivityServiceImpl service, GetConnectivityServiceDetailsInput input) {
+    GetConnectivityDetailsAction(TapiConnectivityServiceImpl service, GetConnectivityServiceDetailsInput input) {
         Objects.requireNonNull(service);
         this.service = service;
         this.input = input;
     }
 
     @Override
-    public RpcResult<GetConnectivityServiceDetailsOutput> call() throws Exception {
+    public RpcResult<GetConnectivityServiceDetailsOutput> call() {
 
         try {
             if (input.getServiceIdOrName() == null) {

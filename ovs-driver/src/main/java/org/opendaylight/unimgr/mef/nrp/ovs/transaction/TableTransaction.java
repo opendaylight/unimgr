@@ -7,6 +7,8 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs.transaction;
 
+import java.util.List;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -21,8 +23,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 
 /**
@@ -39,7 +39,7 @@ public class TableTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(TableTransaction.class);
 
     /**
-     * Creates and initialize TableTransaction object
+     * Creates and initialize TableTransaction object.
      *
      * @param dataBroker access to data tree store
      * @param node       openflow network node
@@ -47,11 +47,11 @@ public class TableTransaction {
      */
     public TableTransaction(DataBroker dataBroker, Node node, Table table) {
         this.dataBroker = dataBroker;
-        this.tableInstanceId = getTableIid(node.getKey(), table.getKey());
+        this.tableInstanceId = getTableIid(node.key(), table.key());
     }
 
     /**
-     * Writes flows to the flow table
+     * Writes flows to the flow table.
      *
      * @param flows list of flows to be added
      * @throws TransactionCommitFailedException if writing flows transaction fails
@@ -63,26 +63,28 @@ public class TableTransaction {
     }
 
     /**
-     * Writes flow to the flow table
+     * Writes flow to the flow table.
      *
      * @param flow flow to be added
      * @throws TransactionCommitFailedException if writing flow transaction fails
      */
     public void writeFlow(Flow flow) throws TransactionCommitFailedException {
         WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-        LOG.debug("Writing flow '" + flow.getId().getValue() + "' to " + LogicalDatastoreType.CONFIGURATION + " data store.");
+        LOG.debug("Writing flow '" + flow.getId().getValue()
+                + "' to " + LogicalDatastoreType.CONFIGURATION + " data store.");
         transaction.put(LogicalDatastoreType.CONFIGURATION, getFlowIid(flow), flow, true);
         transaction.submit().checkedGet();
     }
 
     /**
-     * Deletes flows from the flow table
+     * Deletes flows from the flow table.
      *
      * @param flows list of flows to be deleted
      * @param writeToConfigurationDataStoreFirst if set flows are written to CONFIGURATION data store before deletion
      * @throws TransactionCommitFailedException if writing/deleting flows transaction fails
      */
-    public void deleteFlows(List<Flow> flows, boolean writeToConfigurationDataStoreFirst) throws TransactionCommitFailedException {
+    public void deleteFlows(List<Flow> flows, boolean writeToConfigurationDataStoreFirst)
+            throws TransactionCommitFailedException {
         if (writeToConfigurationDataStoreFirst) {
             writeFlows(flows);
         }
@@ -92,14 +94,15 @@ public class TableTransaction {
     }
 
     /**
-     * Deletes flow from the flow table
+     * Deletes flow from the flow table.
      *
      * @param flow flow to be deleted
      * @throws TransactionCommitFailedException if deleting flow transaction fails
      */
     public void deleteFlow(Flow flow) throws TransactionCommitFailedException {
         WriteTransaction deleteTransaction = dataBroker.newWriteOnlyTransaction();
-        LOG.debug("Deleting flow '" + flow.getId().getValue() + "' from " + LogicalDatastoreType.CONFIGURATION + " data store.");
+        LOG.debug("Deleting flow '" + flow.getId().getValue()
+                + "' from " + LogicalDatastoreType.CONFIGURATION + " data store.");
         deleteTransaction.delete(LogicalDatastoreType.CONFIGURATION, getFlowIid(flow));
         deleteTransaction.submit().checkedGet();
     }
@@ -113,6 +116,6 @@ public class TableTransaction {
     }
 
     private InstanceIdentifier<Flow> getFlowIid(Flow flow) {
-        return tableInstanceId.child(Flow.class, flow.getKey());
+        return tableInstanceId.child(Flow.class, flow.key());
     }
 }

@@ -9,6 +9,7 @@
 package org.opendaylight.unimgr.mef.nrp.api;
 
 /**
+ * Placeholder for constraints.
  * @author bartosz.michalik@amartus.com
  */
 public class Constraints {

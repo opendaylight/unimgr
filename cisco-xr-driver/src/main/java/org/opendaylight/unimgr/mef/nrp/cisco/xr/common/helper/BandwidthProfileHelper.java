@@ -7,7 +7,7 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper;
 
-import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.qos.ServicePort;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.asr9k.policymgr.cfg.rev150518.PolicyManager;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.asr9k.policymgr.cfg.rev150518.PolicyManagerBuilder;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.asr9k.policymgr.cfg.rev150518.RateUnits;
@@ -20,7 +20,7 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.asr9k.po
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.asr9k.policymgr.cfg.rev150518.policy.map.rule.policy.map.rule.Police;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.asr9k.policymgr.cfg.rev150518.policy.map.rule.policy.map.rule.PoliceBuilder;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.asr9k.policymgr.cfg.rev150518.policy.map.rule.policy.map.rule.police.*;
-import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.rev171221.BwpFlow;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.rev180321.BwpFlow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
