@@ -27,13 +27,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opendaylight.mdsal.model</groupId>
-            <artifactId>odl-mdsal-models</artifactId>
-            <version>${mdsal.model.version}</version>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
             <groupId>org.opendaylight.unimgr</groupId>
             <artifactId>unimgr-legato-api</artifactId>
             <version>${project.version}</version>
