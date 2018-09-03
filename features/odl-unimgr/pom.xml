@@ -12,14 +12,14 @@
   </parent>
   <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>odl-unimgr</artifactId>
-  <version>0.4.0-SNAPSHOT</version>
+  <version>0.4.0</version>
   <packaging>feature</packaging>
 
   <name>ODL :: unimgr :: ${project.artifactId}</name>
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <controller.mdsal.version>1.8.0-SNAPSHOT</controller.mdsal.version>
+    <controller.mdsal.version>1.8.0</controller.mdsal.version>
   </properties>
 
   <build>

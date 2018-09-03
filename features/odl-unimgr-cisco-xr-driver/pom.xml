@@ -12,14 +12,14 @@
   </parent>
   <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>odl-unimgr-cisco-xr-driver</artifactId>
-  <version>0.4.0-SNAPSHOT</version>
+  <version>0.4.0</version>
   <packaging>feature</packaging>
 
   <name>ODL :: unimgr :: ${project.artifactId}</name>
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <netconf.version>1.5.0-SNAPSHOT</netconf.version>
+    <netconf.version>1.5.0</netconf.version>
   </properties>
 
   <dependencies>
