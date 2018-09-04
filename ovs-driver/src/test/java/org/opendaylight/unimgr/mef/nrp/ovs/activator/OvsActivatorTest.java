@@ -277,7 +277,7 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
     }
 
     public static Nodes readOpenFLowTopology(DataBroker dataBroker) {
-        InstanceIdentifier instanceIdentifier = InstanceIdentifier.builder(Nodes.class).build();
+        InstanceIdentifier<Nodes> instanceIdentifier = InstanceIdentifier.builder(Nodes.class).build();
         return (Nodes) MdsalUtils.read(dataBroker,LogicalDatastoreType.CONFIGURATION,instanceIdentifier);
     }
 

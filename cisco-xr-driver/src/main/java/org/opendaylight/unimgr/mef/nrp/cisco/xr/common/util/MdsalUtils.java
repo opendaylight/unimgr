@@ -42,7 +42,7 @@ public class MdsalUtils {
     }
 
     public static Optional<TerminationPoint> readTerminationPoint(DataBroker dataBroker, LogicalDatastoreType store, TopologyId topologyId, NodeId nodeId, TpId tpId) {
-        InstanceIdentifier tpIid = InstanceIdentifier.builder(NetworkTopology.class)
+        InstanceIdentifier<TerminationPoint> tpIid = InstanceIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(topologyId))
                 .child(Node.class, new NodeKey(nodeId))
                 .child(TerminationPoint.class, new TerminationPointKey(tpId))

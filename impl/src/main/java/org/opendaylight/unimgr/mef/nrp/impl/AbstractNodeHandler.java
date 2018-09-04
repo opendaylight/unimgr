@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractNodeHandler.class);
-    private static final InstanceIdentifier NRP_TOPOLOGY_SYSTEM_IID = InstanceIdentifier
+    private static final InstanceIdentifier<Topology> NRP_TOPOLOGY_SYSTEM_IID = InstanceIdentifier
             .create(Context.class)
             .augmentation(Context1.class)
             .child(Topology.class, new TopologyKey(new Uuid(TapiConstants.PRESTO_SYSTEM_TOPO)));
@@ -121,11 +121,11 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
         });
     }
 
-    private boolean isNep(DataObjectModification dataObjectModificationNep) {
+    private boolean isNep(DataObjectModification<?> dataObjectModificationNep) {
         return OwnedNodeEdgePoint.class.isAssignableFrom(dataObjectModificationNep.getDataType());
     }
 
-    private boolean checkIfDeleted(DataObjectModification dataObjectModificationNep) {
+    private boolean checkIfDeleted(DataObjectModification<?> dataObjectModificationNep) {
         OwnedNodeEdgePoint before = (OwnedNodeEdgePoint) dataObjectModificationNep.getDataBefore();
         OwnedNodeEdgePoint after = (OwnedNodeEdgePoint) dataObjectModificationNep.getDataAfter();
 
@@ -141,7 +141,7 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
         return false;
     }
 
-    private boolean checkIfUpdated(DataObjectModification dataObjectModificationNep) {
+    private boolean checkIfUpdated(DataObjectModification<?> dataObjectModificationNep) {
         OwnedNodeEdgePoint before = (OwnedNodeEdgePoint) dataObjectModificationNep.getDataBefore();
         OwnedNodeEdgePoint after = (OwnedNodeEdgePoint) dataObjectModificationNep.getDataAfter();
         if (after == null) {

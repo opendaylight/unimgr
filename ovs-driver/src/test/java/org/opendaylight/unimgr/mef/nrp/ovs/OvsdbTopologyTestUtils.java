@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class OvsdbTopologyTestUtils {
     private static final TopologyId ovsdbTopologyId = new TopologyId(new Uri("ovsdb:1"));
-    private static final InstanceIdentifier ovsdbTopology =
+    private static final InstanceIdentifier<Topology> ovsdbTopology =
             InstanceIdentifier
                     .create(NetworkTopology.class)
                     .child(Topology.class, new TopologyKey(ovsdbTopologyId));
@@ -48,7 +48,7 @@ public class OvsdbTopologyTestUtils {
     }
 
     public static void writeBridge(Node node, DataBroker dataBroker) {
-        InstanceIdentifier bridgeIid = getNodeInstanceIdentifier(node.getNodeId());
+        InstanceIdentifier<Node> bridgeIid = getNodeInstanceIdentifier(node.getNodeId());
         DataStoreTestUtils.write(node,bridgeIid,dataBroker);
     }
 
@@ -61,7 +61,7 @@ public class OvsdbTopologyTestUtils {
         return nodeBuilder.build();
     }
 
-    public static InstanceIdentifier getNodeInstanceIdentifier(NodeId nodeId) {
+    public static InstanceIdentifier<Node> getNodeInstanceIdentifier(NodeId nodeId) {
         return InstanceIdentifier
                 .builder(NetworkTopology.class)
                 .child(Topology.class,
@@ -71,7 +71,7 @@ public class OvsdbTopologyTestUtils {
                 .build();
     }
 
-    public static InstanceIdentifier getPortInstanceIdentifier(String nodeName, String portName) {
+    public static InstanceIdentifier<TerminationPoint> getPortInstanceIdentifier(String nodeName, String portName) {
         return getNodeInstanceIdentifier(new NodeId(nodeName))
                 .child(TerminationPoint.class,
                         new TerminationPointKey(new TpId(portName)));

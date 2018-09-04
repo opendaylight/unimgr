@@ -159,7 +159,7 @@ class OvsActivatorHelper {
     }
 
     public static void validateExternalVLANs(List<EndPoint> endPoints) throws ResourceNotAvailableException {
-        Set<Optional> vlans = endPoints.stream().map(ep -> {
+        Set<Optional<?>> vlans = endPoints.stream().map(ep -> {
             try {
                 return new OvsActivatorHelper(ep).getCeVlanId();
             } catch (ResourceNotAvailableException e) {

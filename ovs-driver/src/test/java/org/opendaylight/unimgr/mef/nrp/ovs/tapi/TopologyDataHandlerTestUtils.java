@@ -24,6 +24,7 @@ import org.opendaylight.unimgr.mef.nrp.ovs.OvsdbTopologyTestUtils;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Context;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.Context1;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.context.Topology;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnectorBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.port.rev130925.PortNumberUni;
@@ -34,6 +35,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.No
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -75,12 +77,12 @@ public class TopologyDataHandlerTestUtils {
         tps.add(OvsdbTopologyTestUtils.createTerminationPoint(tp3Name,tp3OFport));
 
         org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node node = OvsdbTopologyTestUtils.createBridge(bridgeName,tps);
-        InstanceIdentifier instanceIdentifier = OvsdbTopologyTestUtils.getNodeInstanceIdentifier(node.getNodeId());
+        InstanceIdentifier<Node> instanceIdentifier = OvsdbTopologyTestUtils.getNodeInstanceIdentifier(node.getNodeId());
         DataStoreTestUtils.write(node,instanceIdentifier,dataBroker);
     }
 
     protected void deleteTestBridge() {
-        InstanceIdentifier instanceIdentifier = OvsdbTopologyTestUtils.getNodeInstanceIdentifier(new NodeId(bridgeName));
+        InstanceIdentifier<?> instanceIdentifier = OvsdbTopologyTestUtils.getNodeInstanceIdentifier(new NodeId(bridgeName));
         DataStoreTestUtils.delete(instanceIdentifier,dataBroker);
     }
 
@@ -181,13 +183,13 @@ public class TopologyDataHandlerTestUtils {
         return null;
     }
 
-    private static InstanceIdentifier getNodeIid() {
+    private static InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.Node> getNodeIid() {
         return getTopoIid()
                 .child(org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.Node.class,
                         new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.NodeKey(new Uuid(ovsNodeId)));
     }
 
-    private static InstanceIdentifier getTopoIid() {
+    private static InstanceIdentifier<Topology> getTopoIid() {
         return InstanceIdentifier.create(Context.class)
                 .augmentation(Context1.class)
                 .child(org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.context.Topology.class,

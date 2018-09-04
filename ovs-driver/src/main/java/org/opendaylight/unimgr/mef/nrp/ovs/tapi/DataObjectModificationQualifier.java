@@ -32,11 +32,11 @@ public class DataObjectModificationQualifier {
 
     private Function<Node,Boolean> isOvs = node -> capabilitiesService.node(node).isSupporting(AND, OVSDB);
 
-    protected void checkNodes(List<DataObjectModification> nodes,
+    protected void checkNodes(List<DataObjectModification<? extends DataObject>> nodes,
                               Map<TerminationPoint,String> toAddMap,
                               Map<TerminationPoint,String> toUpdateMap, Map<TerminationPoint,String> toDeleteMap) {
         Node n;
-        for (DataObjectModification node: nodes) {
+        for (DataObjectModification<?> node: nodes) {
             switch (node.getModificationType()) {
                 //new ovs node
                 case WRITE :
@@ -66,7 +66,7 @@ public class DataObjectModificationQualifier {
         }
     }
 
-    private void checkTerminationPoints(DataObjectModification node,
+    private void checkTerminationPoints(DataObjectModification<?> node,
                                         Map<TerminationPoint,String> toAddMap,
                                         Map<TerminationPoint,String> toUpdateMap,
                                         Map<TerminationPoint,String> toDeleteMap) {
@@ -75,10 +75,10 @@ public class DataObjectModificationQualifier {
             return ;
         }
         String bridgeName = n.augmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue();
-        Collection<DataObjectModification<? extends DataObject>> modifiedChildren = node.getModifiedChildren();
+        Collection<? extends DataObjectModification<? extends DataObject>> modifiedChildren = node.getModifiedChildren();
 
         TerminationPoint terminationPoint;
-        for (DataObjectModification tp: modifiedChildren) {
+        for (DataObjectModification<?> tp: modifiedChildren) {
             if (!tp.getDataType().equals(TerminationPoint.class)) {
                 continue;
             }
