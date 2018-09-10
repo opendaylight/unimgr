@@ -21,13 +21,14 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.TopologyManager;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
@@ -105,9 +106,9 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         dao.createNode(topologyManager
                 .getSystemTopologyId(), OVS_NODE, OVS_DRIVER_ID, LayerProtocolName.ETH, null, new ArrayList<>());
 
-        Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
+        Futures.addCallback(tx.commit(), new FutureCallback<CommitInfo>() {
             @Override
-            public void onSuccess(@Nullable Void result) {
+            public void onSuccess(@Nullable CommitInfo result) {
                 LOG.info("Node {} created", OVS_NODE);
                 registerOvsdbTreeListener();
             }
@@ -137,7 +138,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         InstanceIdentifier<Node> nodeId = OVSDB_TOPO_IID.child(Node.class);
         registration = dataBroker
                 .registerDataTreeChangeListener(
-                        new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, nodeId), this);
+                        DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, nodeId), this);
     }
 
     public void close() {
@@ -146,9 +147,9 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         NrpDao dao = new NrpDao(tx);
         dao.removeNode(OVS_NODE, true);
 
-        Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
+        Futures.addCallback(tx.commit(), new FutureCallback<CommitInfo>() {
             @Override
-            public void onSuccess(@Nullable Void result) {
+            public void onSuccess(@Nullable CommitInfo result) {
                 LOG.info("Node {} deleted", OVS_NODE);
             }
 
@@ -220,10 +221,10 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
 
         action.accept(map,dao);
 
-        Futures.addCallback(topoTx.submit(), new FutureCallback<Void>() {
+        Futures.addCallback(topoTx.commit(), new FutureCallback<CommitInfo>() {
 
             @Override
-            public void onSuccess(@Nullable Void result) {
+            public void onSuccess(@Nullable CommitInfo result) {
                 LOG.debug("Ovs TAPI node action executed successfully");
             }
 
@@ -231,7 +232,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
             public void onFailure(Throwable t) {
                 LOG.warn("Ovs TAPI node action execution failed due to an error", t);
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 
     private String getFullPortName(String switchName, String portName) {

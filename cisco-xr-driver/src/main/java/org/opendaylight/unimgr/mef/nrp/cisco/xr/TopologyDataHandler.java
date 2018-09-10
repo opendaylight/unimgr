@@ -8,16 +8,39 @@
 
 package org.opendaylight.unimgr.mef.nrp.cisco.xr;
 
-import com.google.common.base.Optional;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.MoreExecutors;
-import org.opendaylight.controller.md.sal.binding.api.*;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.XrCapabilitiesService.NodeCapability.NETCONF;
+import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.XrCapabilitiesService.NodeCapability.NETCONF_CISCO_IOX_IFMGR;
+import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.XrCapabilitiesService.NodeCapability.NETCONF_CISCO_IOX_L2VPN;
+import static org.opendaylight.unimgr.utils.CapabilitiesService.Capability.Mode.AND;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.MountPoint;
+import org.opendaylight.mdsal.binding.api.MountPointService;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.TopologyManager;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.InterfaceHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.XrCapabilitiesService;
@@ -50,21 +73,12 @@ import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.XrCapabilitiesService.NodeCapability.*;
-import static org.opendaylight.unimgr.utils.CapabilitiesService.Capability.Mode.AND;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -118,9 +132,9 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         NrpDao dao = new NrpDao(tx);
         dao.createNode(topologyManager.getSystemTopologyId(), XrDriverBuilder.XR_NODE, LayerProtocolName.ETH, null);
 
-        Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
+        Futures.addCallback(tx.commit(), new FutureCallback<CommitInfo>() {
             @Override
-            public void onSuccess(@Nullable Void result) {
+            public void onSuccess(@Nullable CommitInfo result) {
                 LOG.info("Node {} created", XrDriverBuilder.XR_NODE);
                 capabilitiesService = new XrCapabilitiesService(dataBroker);
                 registerNetconfTreeListener();
@@ -156,14 +170,16 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
 
         InstanceIdentifier<Node> nodeId = NETCONF_TOPO_IID.child(Node.class);
 
-        registration = dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, nodeId), this);
+        registration = dataBroker.registerDataTreeChangeListener(
+                DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, nodeId), this);
         LOG.info("netconf tree listener registered");
     }
 
 
-
-    Function<DataObjectModification<Node>, Node> addedNode = mod -> (mod.getModificationType() == DataObjectModification.ModificationType.WRITE || mod.getModificationType() == DataObjectModification.ModificationType.SUBTREE_MODIFIED) ?
-            mod.getDataAfter() : null;
+    Function<DataObjectModification<Node>, Node> addedNode =
+            mod -> (mod.getModificationType() == DataObjectModification.ModificationType.WRITE
+            || mod.getModificationType() == DataObjectModification.ModificationType.SUBTREE_MODIFIED)
+            ? mod.getDataAfter() : null;
 
     @Override
     public void onDataTreeChanged(@Nonnull Collection<DataTreeModification<Node>> changes) {
@@ -202,10 +218,10 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
             dao.updateNep(XrDriverBuilder.XR_NODE, nep);
         });
 
-        Futures.addCallback(topoTx.submit(), new FutureCallback<Void>() {
+        Futures.addCallback(topoTx.commit(), new FutureCallback<CommitInfo>() {
 
             @Override
-            public void onSuccess(@Nullable Void result) {
+            public void onSuccess(@Nullable CommitInfo result) {
                 LOG.debug("TAPI node upadate successful");
             }
 
@@ -213,7 +229,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
             public void onFailure(Throwable t) {
                 LOG.warn("TAPI node upadate failed due to an error", t);
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 
     //simplyfied version of selecting
@@ -230,12 +246,12 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
             final NodeKey key = cn.key();
             try {
                 KeyedInstanceIdentifier<Node, NodeKey> id = mountIds.get(key);
-                Optional<MountPoint> mountPoint = mountService.getMountPoint(id);
+                Optional<MountPoint> mountPoint = mountService.getMountPoint(id).toJavaUtil();
                 if (mountPoint.isPresent()) {
                     DataBroker deviceBroker = mountPoint.get().getService(DataBroker.class).get();
                     LOG.debug(deviceBroker.toString());
                     List<OwnedNodeEdgePoint> tps;
-                    try(ReadOnlyTransaction tx = deviceBroker.newReadOnlyTransaction()) {
+                    try(ReadTransaction tx = deviceBroker.newReadOnlyTransaction()) {
                         tps = ports(tx)
                                 .filter(i -> {
                                     boolean shutdown = i != null && i.isShutdown() != null && i.isShutdown();
@@ -271,8 +287,8 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         }).collect(Collectors.toList());
     }
 
-    private Stream<InterfaceConfiguration> ports(ReadOnlyTransaction tx) throws ReadFailedException {
-        Optional<InterfaceConfigurations> interfaces = tx.read(LogicalDatastoreType.OPERATIONAL, InterfaceHelper.getInterfaceConfigurationsId()).checkedGet();
+    private Stream<InterfaceConfiguration> ports(ReadTransaction tx) throws InterruptedException, ExecutionException {
+        Optional<InterfaceConfigurations> interfaces = tx.read(LogicalDatastoreType.OPERATIONAL, InterfaceHelper.getInterfaceConfigurationsId()).get();
         if (interfaces.isPresent()) {
             return interfaces.get().getInterfaceConfiguration().stream();
         }

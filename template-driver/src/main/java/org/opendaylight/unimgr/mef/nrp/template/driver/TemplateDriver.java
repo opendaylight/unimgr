@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
@@ -62,19 +61,19 @@ public class TemplateDriver implements ActivationDriverBuilder {
             }
 
             @Override
-            public void activate() throws TransactionCommitFailedException, ResourceActivatorException {
+            public void activate() throws ResourceActivatorException {
                 // method can fail if you wish
                 LOG.info("activate was triggered for {}", serviceId);
             }
 
             @Override
-            public void deactivate() throws TransactionCommitFailedException, ResourceActivatorException {
+            public void deactivate() throws ResourceActivatorException {
                 // method can fail if you wish
                 LOG.info("dectivate was triggered for {}", serviceId);
             }
 
             @Override
-            public void update() throws TransactionCommitFailedException, ResourceActivatorException {
+            public void update() throws ResourceActivatorException {
 
             }
 

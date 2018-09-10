@@ -9,6 +9,7 @@ package org.opendaylight.unimgr.mef.nrp.impl;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,13 +19,14 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Context;
@@ -62,7 +64,7 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
     public void init() {
         registration = dataBroker
                 .registerDataTreeChangeListener(
-                        new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, NRP_TOPOLOGY_SYSTEM_IID), this);
+                        DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, NRP_TOPOLOGY_SYSTEM_IID), this);
 
         LOG.debug("AbstractNodeHandler registered: {}", registration);
     }
@@ -107,10 +109,10 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
         toDeleteNeps
                 .forEach(dao::deleteAbstractNep);
 
-        Futures.addCallback(topoTx.submit(), new FutureCallback<Void>() {
+        Futures.addCallback(topoTx.commit(), new FutureCallback<CommitInfo>() {
 
             @Override
-            public void onSuccess(@Nullable Void result) {
+            public void onSuccess(@Nullable CommitInfo result) {
                 LOG.info("Abstract TAPI node updated successful");
             }
 
@@ -118,7 +120,7 @@ public class AbstractNodeHandler implements DataTreeChangeListener<Topology> {
             public void onFailure(Throwable throwable) {
                 LOG.warn("Abstract TAPI node update failed due to an error", throwable);
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 
     private boolean isNep(DataObjectModification<?> dataObjectModificationNep) {

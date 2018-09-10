@@ -15,6 +15,8 @@ import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
  * @author marek.ryznar@amartus.com
  */
 public class VlanPoolExhaustedException extends ResourceNotAvailableException {
+    private static final long serialVersionUID = 1365362221222856383L;
+
     public VlanPoolExhaustedException(String message) {
         super(message);
     }

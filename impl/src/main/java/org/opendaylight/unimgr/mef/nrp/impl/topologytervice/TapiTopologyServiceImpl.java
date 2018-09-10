@@ -8,22 +8,22 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl.topologytervice;
 
-import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.NodeAdiAugmentation;
 import org.opendaylight.yang.gen.v1.urn.odl.unimgr.yang.unimgr.ext.rev170531.NodeSvmAugmentation;
@@ -120,21 +120,15 @@ public class TapiTopologyServiceImpl implements TapiTopologyService, AutoCloseab
         return executor.submit(() -> {
             RpcResult<GetLinkDetailsOutput> out = RpcResultBuilder.<GetLinkDetailsOutput>failed()
                     .withError(RpcError.ErrorType.APPLICATION, "No link in topology").build();
-            try {
-                ReadOnlyTransaction rtx = broker.newReadOnlyTransaction();
-                KeyedInstanceIdentifier<Link, LinkKey> linkId = NrpDao.topo(input.getTopologyIdOrName())
-                        .child(Link.class, new LinkKey(new Uuid(input.getLinkIdOrName())));
-                Optional<Link> optional = rtx.read(LogicalDatastoreType.OPERATIONAL, linkId).checkedGet();
-                if (optional.isPresent()) {
-                    out = RpcResultBuilder
-                            .success(new GetLinkDetailsOutputBuilder()
-                                    .setLink(new LinkBuilder(optional.get()).build()).build())
-                            .build();
-                }
-            } catch (ReadFailedException e) {
-                out = RpcResultBuilder.<GetLinkDetailsOutput>failed()
-                        .withError(RpcError.ErrorType.APPLICATION,
-                                String.format("Cannot read link %s", input.getLinkIdOrName()), e).build();
+            ReadTransaction rtx = broker.newReadOnlyTransaction();
+            KeyedInstanceIdentifier<Link, LinkKey> linkId = NrpDao.topo(input.getTopologyIdOrName())
+                    .child(Link.class, new LinkKey(new Uuid(input.getLinkIdOrName())));
+            Optional<Link> optional = rtx.read(LogicalDatastoreType.OPERATIONAL, linkId).get();
+            if (optional.isPresent()) {
+                out = RpcResultBuilder
+                        .success(new GetLinkDetailsOutputBuilder()
+                                .setLink(new LinkBuilder(optional.get()).build()).build())
+                        .build();
             }
             return out;
         });
@@ -165,13 +159,13 @@ public class TapiTopologyServiceImpl implements TapiTopologyService, AutoCloseab
     }
 
     private RpcResult<GetTopologyListOutput> getTopologies() {
-        ReadOnlyTransaction rtx = broker.newReadOnlyTransaction();
+        ReadTransaction rtx = broker.newReadOnlyTransaction();
         RpcResult<GetTopologyListOutput> out = RpcResultBuilder
                 .success(new GetTopologyListOutputBuilder().build()).build();
         try {
             List<? extends Topology> topologies;
             Optional<Context1> ctx = rtx.read(LogicalDatastoreType.OPERATIONAL, NrpDao.ctx()
-                    .augmentation(Context1.class)).checkedGet();
+                    .augmentation(Context1.class)).get();
             if (ctx.isPresent()) {
                 topologies = ctx.get().getTopology();
 
@@ -184,7 +178,7 @@ public class TapiTopologyServiceImpl implements TapiTopologyService, AutoCloseab
                                 ).collect(Collectors.toList()))
                 ).build();
             }
-        } catch (ReadFailedException | NullPointerException e) {
+        } catch (NullPointerException | InterruptedException | ExecutionException e) {
             out = RpcResultBuilder.<GetTopologyListOutput>failed()
                     .withError(RpcError.ErrorType.APPLICATION, "Cannot read topologies", e).build();
         }

@@ -7,13 +7,21 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util;
 
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.utils.NetconfConstants;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.connection.status.AvailableCapabilities;
@@ -23,27 +31,20 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import com.google.common.util.concurrent.FluentFuture;
 
 public class NodeTestUtils {
     public static final String DEVICE_ID = "device";
 
 
+    @SuppressWarnings("unchecked")
     public static DataBroker mockDataBroker(Optional<Node> nodeOptional) {
         DataBroker dataBroker = mock(DataBroker.class);
-        final ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
-        final CheckedFuture transactionResult = mock(CheckedFuture.class);
+        final ReadTransaction transaction = mock(ReadTransaction.class);
+        final FluentFuture<Optional<Node>> transactionResult = mock(FluentFuture.class);
 
         try {
-            when(transactionResult.checkedGet()).thenReturn(nodeOptional);
+            when(transactionResult.get()).thenReturn(nodeOptional);
         } catch (Exception e) {
             fail("Cannot create mocks : " + e.getMessage());
         }

@@ -7,7 +7,7 @@
  */
 
 package org.opendaylight.unimgr.mef.legato.global.bwp;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,14 +19,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.unimgr.mef.legato.LegatoBwpProfileController;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.bwp.flow.parameter.profiles.Profile;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.ChildOf;
+import org.opendaylight.yangtools.yang.binding.ChoiceIn;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.Identifier;
@@ -122,6 +123,34 @@ public class LegatoBwpDataTreeChangeListenerTest {
 
             @Override
             public Profile getDataAfter() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public <C extends ChildOf<? super Profile>> Collection<DataObjectModification<C>> getModifiedChildren(
+                    Class<C> childType) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public <H extends ChoiceIn<? super Profile> & DataObject, C extends ChildOf<? super H>> Collection<DataObjectModification<C>> getModifiedChildren(
+                    Class<H> caseType, Class<C> childType) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public <H extends ChoiceIn<? super Profile> & DataObject, C extends ChildOf<? super H>> DataObjectModification<C> getModifiedChildContainer(
+                    Class<H> caseType, Class<C> child) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public <H extends ChoiceIn<? super Profile> & DataObject, C extends Identifiable<K> & ChildOf<? super H>, K extends Identifier<C>> DataObjectModification<C> getModifiedChildListItem(
+                    Class<H> caseType, Class<C> listItem, K listKey) {
                 // TODO Auto-generated method stub
                 return null;
             }

@@ -15,11 +15,10 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.LayerProtocolName;
@@ -50,7 +49,7 @@ public class NrpDaoIntTest extends AbstractTestWithTopo {
 
     @Test
     public void testAddCeps()
-            throws ReadFailedException, TransactionCommitFailedException, InterruptedException, ExecutionException {
+            throws ReadFailedException, InterruptedException, ExecutionException {
 
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
@@ -84,7 +83,7 @@ public class NrpDaoIntTest extends AbstractTestWithTopo {
 
     @Test
     public void testOverride()
-            throws ReadFailedException, TransactionCommitFailedException, InterruptedException, ExecutionException {
+            throws ReadFailedException, InterruptedException, ExecutionException {
 
         ConnectionEndPointBuilder builder = new ConnectionEndPointBuilder()
                 .setClientNodeEdgePoint(Collections.emptyList())
@@ -121,7 +120,7 @@ public class NrpDaoIntTest extends AbstractTestWithTopo {
 
     @Test
     public void testRemoveConnection()
-            throws TransactionCommitFailedException, ReadFailedException, InterruptedException, ExecutionException {
+            throws ReadFailedException, InterruptedException, ExecutionException {
 
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
@@ -151,8 +150,10 @@ public class NrpDaoIntTest extends AbstractTestWithTopo {
 
     }
 
-    private OwnedNodeEdgePoint1 checkCeps(String nodeid, String nepid, int noCeps) throws ReadFailedException {
-        ReadOnlyTransaction tx = dataBroker.newReadOnlyTransaction();
+    private OwnedNodeEdgePoint1 checkCeps(String nodeid, String nepid, int noCeps)
+            throws InterruptedException, ExecutionException {
+
+        ReadTransaction tx = dataBroker.newReadOnlyTransaction();
 
         OwnedNodeEdgePoint nep = new NrpDao(tx).readNep(nodeid, nepid);
         Assert.assertNotNull(nep);

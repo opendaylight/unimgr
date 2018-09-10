@@ -10,7 +10,7 @@ package org.opendaylight.unimgr.mef.nrp.impl.decomposer;
 
 import java.util.List;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.unimgr.mef.nrp.api.Constraints;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.api.FailureResult;

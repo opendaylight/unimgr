@@ -9,7 +9,8 @@
 package org.opendaylight.unimgr.mef.nrp.common;
 
 import java.util.List;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import java.util.concurrent.ExecutionException;
+
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 
 /**
@@ -23,18 +24,20 @@ public interface ResourceActivator {
      * @param endPoints list of endpoint to connect
      * @param serviceName generated service id
      * @throws ResourceActivatorException activation problem
-     * @throws TransactionCommitFailedException transaction commit failed
+     * @throws ExecutionException transaction execution failed
+     * @throws InterruptedException transaction was interrupted
      */
     void activate(List<EndPoint> endPoints, String serviceName)
-            throws  ResourceActivatorException, TransactionCommitFailedException;
+            throws  ResourceActivatorException, InterruptedException, ExecutionException;
 
     /**
      * Deactivate connectivity between the provided endpoints.
      * @param endPoints list of endpoint between which connection have to be deactivated
      * @param serviceName generated service id
      * @throws ResourceActivatorException activation problem
-     * @throws TransactionCommitFailedException transaction commit failed
+     * @throws ExecutionException transaction execution failed
+     * @throws InterruptedException transaction was interrupted
      */
     void deactivate(List<EndPoint> endPoints, String serviceName)
-            throws TransactionCommitFailedException, ResourceActivatorException;
+            throws ResourceActivatorException, InterruptedException, ExecutionException;
 }

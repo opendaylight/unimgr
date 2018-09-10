@@ -10,9 +10,9 @@ package org.opendaylight.unimgr.mef.nrp.ovs.driver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
@@ -57,17 +57,17 @@ public class OvsDriver implements ActivationDriverBuilder {
             }
 
             @Override
-            public void activate() throws TransactionCommitFailedException, ResourceNotAvailableException {
+            public void activate() throws ResourceNotAvailableException, InterruptedException, ExecutionException {
                 activator.activate(endPoints,serviceId);
             }
 
             @Override
-            public void update() throws TransactionCommitFailedException, ResourceActivatorException {
+            public void update() throws ResourceActivatorException, InterruptedException, ExecutionException {
                 activator.update(endPoints,serviceId);
             }
 
             @Override
-            public void deactivate() throws TransactionCommitFailedException, ResourceNotAvailableException {
+            public void deactivate() throws ResourceNotAvailableException, InterruptedException, ExecutionException {
                 activator.deactivate(endPoints,serviceId);
             }
 

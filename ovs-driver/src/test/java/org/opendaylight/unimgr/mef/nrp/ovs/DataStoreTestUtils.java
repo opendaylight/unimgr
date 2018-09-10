@@ -7,21 +7,25 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import static org.junit.Assert.fail;
+
+import java.util.Optional;
+
+import javax.annotation.Nullable;
+
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-
-import static org.junit.Assert.fail;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 
 /**
  * @author marek.ryznar@amartus.com
@@ -41,9 +45,9 @@ public class DataStoreTestUtils {
         ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
         transaction.put(LogicalDatastoreType.OPERATIONAL,instanceIdentifier,object,true);
 
-        Futures.addCallback(transaction.submit(), new FutureCallback<Void>() {
+        Futures.addCallback(transaction.commit(), new FutureCallback<CommitInfo>() {
             @Override
-            public void onSuccess(@Nullable Void result) {
+            public void onSuccess(@Nullable CommitInfo result) {
                 LOG.debug("Object: {} created.",object.toString());
             }
 
@@ -52,16 +56,16 @@ public class DataStoreTestUtils {
                 LOG.debug("Object: {} wasn't created due to a error: {}",object.toString(), t.getMessage());
                 fail("Object  wasn't created due to a error: "+ t.getMessage());
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 
     public static void delete(InstanceIdentifier<?> instanceIdentifier, DataBroker dataBroker) {
         ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
         transaction.delete(LogicalDatastoreType.OPERATIONAL, instanceIdentifier);
 
-        Futures.addCallback(transaction.submit(), new FutureCallback<Void>() {
+        Futures.addCallback(transaction.commit(), new FutureCallback<CommitInfo>() {
             @Override
-            public void onSuccess(@Nullable Void result) {
+            public void onSuccess(@Nullable CommitInfo result) {
                 LOG.debug("Object: {} deleted.",instanceIdentifier.toString());
             }
 
@@ -70,13 +74,13 @@ public class DataStoreTestUtils {
                 LOG.debug("Object: {} wasn't deleted due to a error: {}",instanceIdentifier.toString(), t.getMessage());
                 fail("Object wasn't deleted due to a error: "+ t.getMessage());
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 
     private static <T extends DataObject> T read(InstanceIdentifier<?> instanceIdentifier, DataBroker dataBroker, LogicalDatastoreType type) {
-        ReadOnlyTransaction transaction = dataBroker.newReadOnlyTransaction();
+        ReadTransaction transaction = dataBroker.newReadOnlyTransaction();
         try {
-            Optional<T> opt = (Optional<T>) transaction.read(type,instanceIdentifier).checkedGet();
+            Optional<T> opt = (Optional<T>) transaction.read(type,instanceIdentifier).get();
             if (opt.isPresent()) {
                 return opt.get();
             } else {

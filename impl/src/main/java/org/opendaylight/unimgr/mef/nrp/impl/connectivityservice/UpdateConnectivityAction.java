@@ -13,10 +13,10 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
@@ -133,7 +133,7 @@ public class UpdateConnectivityAction implements Callable<RpcResult<UpdateConnec
                 } else {
                     LOG.warn("No driver information for node {}", node.getUuid());
                 }
-            } catch (ReadFailedException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 LOG.warn("Error while reading node", e);
             }
         });
@@ -176,8 +176,8 @@ public class UpdateConnectivityAction implements Callable<RpcResult<UpdateConnec
                     .filter(Optional::isPresent)
                     .findFirst().orElse(Optional.empty());
 
-        } catch (ReadFailedException e) {
-            throw new FailureResult("Cannot read {0} topology", TapiConstants.PRESTO_SYSTEM_TOPO);
+        } catch (InterruptedException | ExecutionException e) {
+            throw new FailureResult("Cannot read {0} topology - {1}", TapiConstants.PRESTO_SYSTEM_TOPO, e.getMessage());
         }
     }
 }

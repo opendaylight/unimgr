@@ -7,25 +7,37 @@
  */
 
 package org.opendaylight.unimgr.mef.legato.evc;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 
-import com.google.common.base.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.binding.api.*;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.legato.LegatoServiceController;
 import org.opendaylight.unimgr.mef.legato.util.LegatoUtils;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.carrier.ethernet.subscriber.services.Evc;
-import org.opendaylight.yangtools.yang.binding.*;
+import org.opendaylight.yangtools.yang.binding.Augmentation;
+import org.opendaylight.yangtools.yang.binding.ChildOf;
+import org.opendaylight.yangtools.yang.binding.ChoiceIn;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.Identifiable;
+import org.opendaylight.yangtools.yang.binding.Identifier;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -69,7 +81,7 @@ public class EvcDataTreeChangeListenerTest {
         collection.add(evc);
 
 
-        when(LegatoUtils.readEvc(any(DataBroker.class), any(LogicalDatastoreType.class), any())).thenReturn(Optional.absent());
+        when(LegatoUtils.readEvc(any(DataBroker.class), any(LogicalDatastoreType.class), any())).thenReturn(Optional.empty());
 
         legatoServiceController.onDataTreeChanged(collection);
         verify(legatoServiceController, times(1)).add(any(DataTreeModification.class));
@@ -136,12 +148,40 @@ public class EvcDataTreeChangeListenerTest {
             public Evc getDataAfter() {
                 return after;
             }
+
+            @Override
+            public <C extends ChildOf<? super Evc>> Collection<DataObjectModification<C>> getModifiedChildren(
+                    Class<C> childType) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public <H extends ChoiceIn<? super Evc> & DataObject, C extends ChildOf<? super H>> Collection<DataObjectModification<C>> getModifiedChildren(
+                    Class<H> caseType, Class<C> childType) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public <H extends ChoiceIn<? super Evc> & DataObject, C extends ChildOf<? super H>> DataObjectModification<C> getModifiedChildContainer(
+                    Class<H> caseType, Class<C> child) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public <H extends ChoiceIn<? super Evc> & DataObject, C extends Identifiable<K> & ChildOf<? super H>, K extends Identifier<C>> DataObjectModification<C> getModifiedChildListItem(
+                    Class<H> caseType, Class<C> listItem, K listKey) {
+                // TODO Auto-generated method stub
+                return null;
+            }
         };
 
         DataTreeModification<Evc> modifiedEvc = new DataTreeModification<Evc>() {
             @Override
             public DataTreeIdentifier<Evc> getRootPath() {
-                return new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, InstanceIdentifier.create(Evc.class));
+                return DataTreeIdentifier.create(LogicalDatastoreType.CONFIGURATION, InstanceIdentifier.create(Evc.class));
             }
 
             @Override

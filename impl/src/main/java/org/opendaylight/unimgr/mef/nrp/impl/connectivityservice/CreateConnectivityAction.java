@@ -15,13 +15,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
@@ -103,12 +103,13 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
 
             }
 
-            endpoints = input.getEndPoint().stream().map(ep -> {
-                EndPoint2 nrpAttributes = ep.augmentation(EndPoint2.class);
-                EndPoint endPoint = new EndPoint(ep, nrpAttributes);
-                endPoint.setLocalId(ep.getLocalId());
-                return endPoint;
-            }).collect(Collectors.toList());
+            endpoints = input.getEndPoint() == null ? Collections.emptyList() :
+                input.getEndPoint().stream().map(ep -> {
+                    EndPoint2 nrpAttributes = ep.augmentation(EndPoint2.class);
+                    EndPoint endPoint = new EndPoint(ep, nrpAttributes);
+                    endPoint.setLocalId(ep.getLocalId());
+                    return endPoint;
+                }).collect(Collectors.toList());
 
             String uniqueStamp = service.getServiceIdPool().getServiceId();
             LOG.debug("connectivity service passed validation, request = {}", input);
@@ -147,9 +148,10 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
 
         if (decomposedRequest == null || decomposedRequest.isEmpty()) {
             throw new FailureResult("Cannot define activation scheme for "
-                            + endpoints.stream().map(e -> e.getEndpoint().getServiceInterfacePoint()
-                            .getServiceInterfacePointId().getValue())
-                            .collect(Collectors.joining(",", "[", "]")));
+                    + endpoints.stream().map(e -> e.getEndpoint()
+                            .getServiceInterfacePoint().getServiceInterfacePointId().getValue()
+                            )
+                    .collect(Collectors.joining(",", "[", "]")));
         }
 
         ActivationTransaction tx = new ActivationTransaction();
@@ -177,7 +179,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
     }
 
     private ConnectivityService createConnectivityModel(String uniqueStamp)
-            throws TransactionCommitFailedException, TimeoutException {
+            throws TimeoutException, InterruptedException, ExecutionException {
         assert decomposedRequest != null : "this method can be only run after request was successfuly decomposed";
         //sort of unique ;)
 
@@ -241,14 +243,11 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
 
 
         try {
-            tx.submit().checkedGet(500, TimeUnit.MILLISECONDS);
+            tx.commit().get(500, TimeUnit.MILLISECONDS);
             LOG.info("Success with serializing Connections and Connectivity Service for {}", uniqueStamp);
-        } catch (TimeoutException e) {
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
             LOG.error("Error with committing Connections and Connectivity Service for {} within {} ms",
                     uniqueStamp, 500);
-            throw e;
-        } catch (TransactionCommitFailedException e) {
-            LOG.error("Error with committing Connections and Connectivity Service for " + uniqueStamp, e);
             throw e;
         }
 
@@ -282,6 +281,8 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         Objects.requireNonNull(csep);
 
         builder
+               .setParentNodeEdgePoint(Collections.emptyList())
+               .setClientNodeEdgePoint(Collections.emptyList())
                 .setOperationalState(csep.getOperationalState())
                 .setLayerProtocolName(csep.getLayerProtocolName())
                 .setLifecycleState(csep.getLifecycleState())

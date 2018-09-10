@@ -8,17 +8,17 @@
 
 package org.opendaylight.unimgr.mef.legato;
 
-import com.google.common.base.Optional;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Future;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
 import org.opendaylight.unimgr.mef.legato.dao.EVCDao;
 import org.opendaylight.unimgr.mef.legato.util.LegatoConstants;
@@ -81,7 +81,7 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
         assert prestoConnectivityService != null;
 
         dataTreeChangeListenerRegistration = dataBroker
-                .registerDataTreeChangeListener(new DataTreeIdentifier<Evc>(
+                .registerDataTreeChangeListener(DataTreeIdentifier.create(
                         LogicalDatastoreType.CONFIGURATION, EVC_IID), this);
     }
 

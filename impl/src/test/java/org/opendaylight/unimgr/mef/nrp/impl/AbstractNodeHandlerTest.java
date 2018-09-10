@@ -26,10 +26,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
@@ -66,7 +65,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     public void tearDown() throws Exception {
 
         abstractNodeHandler.close();
-        removeContext();
+        //removeContext();
 
     }
 
@@ -80,7 +79,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
 
     @Test
     public void testNodeAddition()
-            throws TransactionCommitFailedException, InterruptedException, ExecutionException {
+            throws InterruptedException, ExecutionException {
         //when
         performNrpDaoAction(addNode,null).get();
 
@@ -98,7 +97,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
 
     @Test
     public void testNepAddition()
-            throws TransactionCommitFailedException, InterruptedException, ExecutionException {
+            throws InterruptedException, ExecutionException {
         //given
         String newNepName = "newNep";
         performNrpDaoAction(addNode,null).get();
@@ -114,7 +113,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void testNepUpdate() throws TransactionCommitFailedException, InterruptedException, ExecutionException {
+    public void testNepUpdate() throws InterruptedException, ExecutionException {
         //given
         performNrpDaoAction(addNode, null).get();
 
@@ -131,7 +130,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
 
     @Test
     public void testNepUpdatedWithSipAddition()
-            throws ExecutionException, InterruptedException, TransactionCommitFailedException {
+            throws ExecutionException, InterruptedException {
 
         //given
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
@@ -162,7 +161,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
 
     @Test
     public void testNepUpdatedWithSipRemoval()
-            throws ExecutionException, InterruptedException, TransactionCommitFailedException {
+            throws ExecutionException, InterruptedException {
         //given we have sips
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         final Node n1 = n(tx, true, new Uuid("n1"), "d1", "n1:1", "n1:2");
@@ -185,7 +184,7 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void testNodeRemoval() throws TransactionCommitFailedException, InterruptedException, ExecutionException {
+    public void testNodeRemoval() throws InterruptedException, ExecutionException {
         //given
         performNrpDaoAction(addNode,null).get();
 
@@ -193,12 +192,12 @@ public class AbstractNodeHandlerTest extends AbstractTestWithTopo {
         performNrpDaoAction(removeNode,null).get();
 
         //then
-        Node node = getAbstractNode(n -> n.getOwnedNodeEdgePoint() != null && n.getOwnedNodeEdgePoint().isEmpty());
-        assertTrue(node.getOwnedNodeEdgePoint().isEmpty());
+        Node node = getAbstractNode(n -> n.getOwnedNodeEdgePoint() == null || n.getOwnedNodeEdgePoint().isEmpty());
+        assertTrue(node.getOwnedNodeEdgePoint() == null || node.getOwnedNodeEdgePoint().isEmpty());
     }
 
     @Test
-    public void testNepRemoval() throws TransactionCommitFailedException, InterruptedException, ExecutionException {
+    public void testNepRemoval() throws InterruptedException, ExecutionException {
         //given
         performNrpDaoAction(addNode,null).get();
         String nepNameToRemove = TEST_NEP_NAME + "0";

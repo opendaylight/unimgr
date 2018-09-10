@@ -7,13 +7,22 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.junit.runner.RunWith;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.PortDirection;
@@ -23,19 +32,21 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev18030
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import com.google.common.util.concurrent.FluentFuture;
 
 /**
  * @author bartosz.michalik@amartus.com
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({Optional.class})
 public class MdsalUtilsTest {
+    @SuppressWarnings("unchecked")
     @Test
-    public void testReadTerminationPoint() throws ReadFailedException {
+    public void testReadTerminationPoint() throws InterruptedException, ExecutionException {
         //given
         TerminationPoint expectedTp = mock(TerminationPoint.class);
 
@@ -51,13 +62,13 @@ public class MdsalUtilsTest {
 
 
         DataBroker dataBroker = mock(DataBroker.class);
-        ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
-        Optional<TerminationPoint> optionalDataObject = mock(Optional.class);
-        CheckedFuture<Optional<TerminationPoint>, ReadFailedException> future = mock(CheckedFuture.class);
+        ReadTransaction transaction = mock(ReadTransaction.class);
+        Optional<TerminationPoint> optionalDataObject = PowerMockito.mock(Optional.class);
+        FluentFuture<Optional<TerminationPoint>> future = mock(FluentFuture.class);
 
         when(dataBroker.newReadOnlyTransaction()).thenReturn(transaction);
         when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(future);
-        when(future.checkedGet()).thenReturn(optionalDataObject);
+        when(future.get()).thenReturn(optionalDataObject);
         when(optionalDataObject.isPresent()).thenReturn(true);
         when(optionalDataObject.get()).thenReturn(expectedTp);
 

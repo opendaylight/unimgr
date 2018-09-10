@@ -13,7 +13,7 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.unimgr.mef.nrp.impl.AbstractTestWithTopo;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.Sip1;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.Sip2;

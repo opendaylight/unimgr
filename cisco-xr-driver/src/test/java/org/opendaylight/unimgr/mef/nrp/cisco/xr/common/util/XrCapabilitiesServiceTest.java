@@ -7,20 +7,24 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util;
 
-import com.google.common.base.Optional;
-import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.NodeTestUtils.mockDataBroker;
+import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.NodeTestUtils.mockNetconfNode;
+import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.NodeTestUtils.mockNode;
 import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.XrCapabilitiesService.NodeCapability.NETCONF;
 import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.XrCapabilitiesService.NodeCapability.NETCONF_CISCO_IOX_IFMGR;
 import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.XrCapabilitiesService.NodeCapability.NETCONF_CISCO_IOX_L2VPN;
 import static org.opendaylight.unimgr.utils.CapabilitiesService.Capability.Mode.AND;
-import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.NodeTestUtils.mockDataBroker;
-import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.NodeTestUtils.mockNetconfNode;
-import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.NodeTestUtils.mockNode;
+
+import java.util.Optional;
+
+import org.junit.Test;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractConcurrentDataBrokerTest;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 /**
  * @author bartosz.michalik@amartus.com
@@ -31,7 +35,7 @@ public class XrCapabilitiesServiceTest extends AbstractConcurrentDataBrokerTest 
     public void testNode() {
         //given
         Optional<Node> mockedNodeOptional = mockNode();
-        DataBroker mockedDataBrocker = mockDataBroker(Optional.absent());
+        DataBroker mockedDataBrocker = mockDataBroker(Optional.empty());
         XrCapabilitiesService capabilitiesService = new XrCapabilitiesService(mockedDataBrocker);
 
         //when
@@ -47,7 +51,7 @@ public class XrCapabilitiesServiceTest extends AbstractConcurrentDataBrokerTest 
     public void testNodeIsSupportingMultipleCapabilitiesNegative() {
         //given
         Optional<Node> mockedNodeOptional = mockNode();
-        DataBroker mockedDataBrocker = mockDataBroker(Optional.absent());
+        DataBroker mockedDataBrocker = mockDataBroker(Optional.empty());
 
         //when
         boolean result = new XrCapabilitiesService(mockedDataBrocker)
@@ -62,7 +66,7 @@ public class XrCapabilitiesServiceTest extends AbstractConcurrentDataBrokerTest 
     public void testNodeIsSupportingMultipleCapabilitiesPositive() {
         //given
         Optional<Node> mockedNodeOptional = mockNetconfNode(true);
-        DataBroker mockedDataBrocker = mockDataBroker(Optional.absent());
+        DataBroker mockedDataBrocker = mockDataBroker(Optional.empty());
 
         //when
         boolean result = new XrCapabilitiesService(mockedDataBrocker)
@@ -77,7 +81,7 @@ public class XrCapabilitiesServiceTest extends AbstractConcurrentDataBrokerTest 
     public void testNodeIsSupportingSingleCapabilityNegative() {
         //given
         Optional<Node> mockedNodeOptional = mockNode();
-        DataBroker mockedDataBrocker = mockDataBroker(Optional.absent());
+        DataBroker mockedDataBrocker = mockDataBroker(Optional.empty());
 
         //when
         boolean result = new XrCapabilitiesService(mockedDataBrocker)
@@ -92,7 +96,7 @@ public class XrCapabilitiesServiceTest extends AbstractConcurrentDataBrokerTest 
     public void testNodeIsSupportingSingleCapabilityPositive() {
         //given
         Optional<Node> mockedNodeOptional = mockNetconfNode(false);
-        DataBroker mockedDataBrocker = mockDataBroker(Optional.absent());
+        DataBroker mockedDataBrocker = mockDataBroker(Optional.empty());
 
         //when
         boolean result = new XrCapabilitiesService(mockedDataBrocker)

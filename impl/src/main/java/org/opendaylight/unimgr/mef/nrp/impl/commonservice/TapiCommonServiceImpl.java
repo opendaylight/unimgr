@@ -7,22 +7,22 @@
  */
 package org.opendaylight.unimgr.mef.nrp.impl.commonservice;
 
-import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpSipAttrs;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.ServiceInterfacePoint1;
@@ -96,7 +96,7 @@ public class TapiCommonServiceImpl implements TapiCommonService {
                                 .build())
                         .build();
 
-            } catch (ReadFailedException | IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 return  RpcResultBuilder.<GetServiceInterfacePointDetailsOutput>failed()
                         .withError(RpcError.ErrorType.APPLICATION,
                         String.format("Cannot read SIP with uuid: %s", sip) ,e).build();
@@ -114,40 +114,35 @@ public class TapiCommonServiceImpl implements TapiCommonService {
     public ListenableFuture<RpcResult<GetServiceInterfacePointListOutput>> getServiceInterfacePointList(
             GetServiceInterfacePointListInput input) {
         return executor.submit(() -> {
-            ReadOnlyTransaction rtx = broker.newReadOnlyTransaction();
+            ReadTransaction rtx = broker.newReadOnlyTransaction();
             RpcResult<GetServiceInterfacePointListOutput> out = RpcResultBuilder
                     .success(new GetServiceInterfacePointListOutputBuilder().build()).build();
-            try {
-                List<ServiceInterfacePoint> sips;
-                Optional<Context> ctx = rtx.read(LogicalDatastoreType.OPERATIONAL, NrpDao.ctx()).checkedGet();
-                if (ctx.isPresent()) {
-                    sips = ctx.get().getServiceInterfacePoint();
+            List<ServiceInterfacePoint> sips;
+            Optional<Context> ctx = rtx.read(LogicalDatastoreType.OPERATIONAL, NrpDao.ctx()).get();
+            if (ctx.isPresent()) {
+                sips = ctx.get().getServiceInterfacePoint();
 
-                    if (sips == null) {
-                        sips = Collections.emptyList();
-                    }
-
-                    out = RpcResultBuilder.success(
-                            new GetServiceInterfacePointListOutputBuilder()
-                                    .setSip(sips.stream().map(t -> {
-                                        NrpSipAttrs nrpAug = t.augmentation(ServiceInterfacePoint1.class);
-                                        org.opendaylight.yang.gen.v1.urn.onf.otcc.yang
-                                                .tapi.common.rev180307
-                                                .get.service._interface.point.list.output.SipBuilder sipBuilder
-                                                = new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang
-                                                .tapi.common.rev180307
-                                                .get.service._interface.point.list.output.SipBuilder(t);
-                                        if (nrpAug != null) {
-                                            sipBuilder.addAugmentation(Sip2.class, new Sip2Builder(nrpAug).build());
-                                        }
-
-                                        return sipBuilder.build();
-                                    }).collect(Collectors.toList())).build()
-                    ).build();
+                if (sips == null) {
+                    sips = Collections.emptyList();
                 }
-            } catch (ReadFailedException e) {
-                out = RpcResultBuilder.<GetServiceInterfacePointListOutput>failed()
-                        .withError(RpcError.ErrorType.APPLICATION, "Cannot read SIPs" ,e).build();
+
+                out = RpcResultBuilder.success(
+                        new GetServiceInterfacePointListOutputBuilder()
+                                .setSip(sips.stream().map(t -> {
+                                    NrpSipAttrs nrpAug = t.augmentation(ServiceInterfacePoint1.class);
+                                    org.opendaylight.yang.gen.v1.urn.onf.otcc.yang
+                                            .tapi.common.rev180307
+                                            .get.service._interface.point.list.output.SipBuilder sipBuilder
+                                            = new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang
+                                            .tapi.common.rev180307
+                                            .get.service._interface.point.list.output.SipBuilder(t);
+                                    if (nrpAug != null) {
+                                        sipBuilder.addAugmentation(Sip2.class, new Sip2Builder(nrpAug).build());
+                                    }
+
+                                    return sipBuilder.build();
+                                }).collect(Collectors.toList())).build()
+                ).build();
             }
             return out;
         });

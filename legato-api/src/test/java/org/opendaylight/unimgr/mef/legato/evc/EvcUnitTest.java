@@ -9,21 +9,16 @@
 package org.opendaylight.unimgr.mef.legato.evc;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ch.qos.logback.classic.spi.LoggingEvent;
-import ch.qos.logback.core.Appender;
-
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,11 +26,11 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.unimgr.mef.legato.LegatoServiceController;
 import org.opendaylight.unimgr.mef.legato.dao.EVCDao;
 import org.opendaylight.unimgr.mef.legato.util.LegatoUtils;
@@ -76,26 +71,30 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.FluentFuture;
+
+import ch.qos.logback.classic.spi.LoggingEvent;
+import ch.qos.logback.core.Appender;
+
 
 /**
  * @author Arif.Hussain@Xoriant.Com
  *
  */
 
-@SuppressWarnings("deprecation")
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({InstanceIdentifier.class, LogicalDatastoreType.class, LegatoUtils.class})
+@PrepareForTest({LogicalDatastoreType.class, LegatoUtils.class, Optional.class})
 public class EvcUnitTest {
 
     @Mock  private LegatoServiceController legatoServiceController;
     @Mock  private TapiConnectivityService prestoConnectivityService;
     @Mock  private DataBroker dataBroker;
     @SuppressWarnings("rawtypes")
-    @Mock  private CheckedFuture checkedFuture;
+    @Mock  private FluentFuture checkedFuture;
     @SuppressWarnings("rawtypes")
     @Mock  private Appender mockAppender;
     @Mock  private WriteTransaction transaction;
-    @Mock  private ReadOnlyTransaction readTxn ;
+    @Mock  private ReadTransaction readTxn ;
     private EndPointBuilder endPointBuilder1;
     private EndPointBuilder endPointBuilder2;
     private Evc evc;
@@ -170,7 +169,7 @@ public class EvcUnitTest {
                     .child(CarrierEthernet.class).child(SubscriberServices.class)
                     .child(Evc.class, new EvcKey(new EvcIdType(evc.getEvcId())));
 
-            final Optional<Evc> optEvc = mock(Optional.class);
+            final Optional<Evc> optEvc = PowerMockito.mock(Optional.class);
             when(optEvc.isPresent()).thenReturn(true);
             when(optEvc.get()).thenReturn(evc);
 
@@ -194,7 +193,7 @@ public class EvcUnitTest {
                     LegatoUtils.updateEvcInOperationalDB(evc, instanceIdentifier, dataBroker));
             verify(transaction).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                     any(Evc.class));
-            verify(transaction).submit();
+            verify(transaction).commit();
 
         } catch (Exception ex) {
         }
@@ -238,7 +237,7 @@ public class EvcUnitTest {
                     LogicalDatastoreType.class, InstanceIdentifier.class));
             LegatoUtils.deleteFromOperationalDB(evcKey, any(DataBroker.class));
             verify(transaction).delete(LogicalDatastoreType.OPERATIONAL, evcKey);
-            verify(transaction).submit();
+            verify(transaction).commit();
             when(optEvc.isPresent()).thenReturn(true);
             doNothing().when(transaction).put(any(LogicalDatastoreType.class),
                     any(InstanceIdentifier.class), any(Evc.class));
@@ -251,12 +250,12 @@ public class EvcUnitTest {
             when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction2);
             doNothing().when(transaction2).put(any(LogicalDatastoreType.class),
                     any(InstanceIdentifier.class), any(Evc.class));
-            when(transaction2.submit()).thenReturn(checkedFuture);
+            when(transaction2.commit()).thenReturn(checkedFuture);
             assertEquals(true,
                     LegatoUtils.updateEvcInOperationalDB(evc, instanceIdentifier, dataBroker));
             verify(transaction2).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                     any(Evc.class));
-            verify(transaction2).submit();
+            verify(transaction2).commit();
         } catch (Exception e) {
         }
     }
@@ -274,10 +273,10 @@ public class EvcUnitTest {
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class));
-        when(transaction.submit()).thenReturn(checkedFuture);
+        when(transaction.commit()).thenReturn(checkedFuture);
         assertEquals(true, LegatoUtils.deleteFromOperationalDB(evcKey, dataBroker));
         verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(transaction).submit();
+        verify(transaction).commit();
         verify(mockAppender).doAppend(argThat(new ArgumentMatcher() {
             @Override
             public boolean matches(final Object argument) {

@@ -8,11 +8,11 @@
 package org.opendaylight.unimgr.mef.nrp.ovs.transaction;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
@@ -54,9 +54,10 @@ public class TableTransaction {
      * Writes flows to the flow table.
      *
      * @param flows list of flows to be added
-     * @throws TransactionCommitFailedException if writing flows transaction fails
+     * @throws ExecutionException transaction execution error
+     * @throws InterruptedException transaction interrupted
      */
-    public void writeFlows(List<Flow> flows) throws TransactionCommitFailedException {
+    public void writeFlows(List<Flow> flows) throws InterruptedException, ExecutionException {
         for (Flow flow : flows) {
             writeFlow(flow);
         }
@@ -66,14 +67,15 @@ public class TableTransaction {
      * Writes flow to the flow table.
      *
      * @param flow flow to be added
-     * @throws TransactionCommitFailedException if writing flow transaction fails
+     * @throws ExecutionException transaction execution error
+     * @throws InterruptedException transaction interrupted
      */
-    public void writeFlow(Flow flow) throws TransactionCommitFailedException {
+    public void writeFlow(Flow flow) throws InterruptedException, ExecutionException {
         WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
         LOG.debug("Writing flow '" + flow.getId().getValue()
                 + "' to " + LogicalDatastoreType.CONFIGURATION + " data store.");
         transaction.put(LogicalDatastoreType.CONFIGURATION, getFlowIid(flow), flow, true);
-        transaction.submit().checkedGet();
+        transaction.commit().get();
     }
 
     /**
@@ -81,10 +83,11 @@ public class TableTransaction {
      *
      * @param flows list of flows to be deleted
      * @param writeToConfigurationDataStoreFirst if set flows are written to CONFIGURATION data store before deletion
-     * @throws TransactionCommitFailedException if writing/deleting flows transaction fails
+     * @throws ExecutionException transaction execution error
+     * @throws InterruptedException transaction interrupted
      */
     public void deleteFlows(List<Flow> flows, boolean writeToConfigurationDataStoreFirst)
-            throws TransactionCommitFailedException {
+            throws InterruptedException, ExecutionException {
         if (writeToConfigurationDataStoreFirst) {
             writeFlows(flows);
         }
@@ -97,14 +100,15 @@ public class TableTransaction {
      * Deletes flow from the flow table.
      *
      * @param flow flow to be deleted
-     * @throws TransactionCommitFailedException if deleting flow transaction fails
+     * @throws ExecutionException transaction execution error
+     * @throws InterruptedException transaction interrupted
      */
-    public void deleteFlow(Flow flow) throws TransactionCommitFailedException {
+    public void deleteFlow(Flow flow) throws InterruptedException, ExecutionException {
         WriteTransaction deleteTransaction = dataBroker.newWriteOnlyTransaction();
         LOG.debug("Deleting flow '" + flow.getId().getValue()
                 + "' from " + LogicalDatastoreType.CONFIGURATION + " data store.");
         deleteTransaction.delete(LogicalDatastoreType.CONFIGURATION, getFlowIid(flow));
-        deleteTransaction.submit().checkedGet();
+        deleteTransaction.commit().get();
     }
 
     private InstanceIdentifier<Table> getTableIid(NodeKey nodeKey, TableKey tableKey) {
