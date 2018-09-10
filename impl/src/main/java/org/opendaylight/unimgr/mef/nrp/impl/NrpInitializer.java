@@ -12,15 +12,14 @@ import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_CTX;
 import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_EXT_TOPO;
 import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_SYSTEM_TOPO;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 import java.util.Arrays;
 import java.util.Collections;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import java.util.Optional;
+
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.TopologyManager;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Context;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.ContextBuilder;
@@ -36,6 +35,8 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.util.concurrent.FluentFuture;
 
 /**
  * NrpInitializer is responsible for initial TAPI context related entities creation.
@@ -53,10 +54,10 @@ public class NrpInitializer implements TopologyManager {
     public void init() throws Exception {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         InstanceIdentifier<Context> ctxId = InstanceIdentifier.create(Context.class);
-        CheckedFuture<? extends Optional<? extends DataObject>, ReadFailedException> result =
+        FluentFuture<Optional<Context>> result =
                 tx.read(LogicalDatastoreType.OPERATIONAL, ctxId);
 
-        Optional<? extends DataObject> context = result.checkedGet();
+        Optional<? extends DataObject> context = result.get();
 
         if (! context.isPresent()) {
             LOG.info("initialize Presto NRP context");
@@ -68,13 +69,8 @@ public class NrpInitializer implements TopologyManager {
                                 .rev180307.Context1.class, connCtx())
                     .build();
             tx.put(LogicalDatastoreType.OPERATIONAL, ctxId, ctx);
-            try {
-                tx.submit().checkedGet();
-                LOG.debug("Presto context model created");
-            } catch (TransactionCommitFailedException e) {
-                LOG.error("Failed to create presto context model");
-                throw new IllegalStateException("cannot create presto context", e);
-            }
+            tx.commit().get();
+            LOG.debug("Presto context model created");
         }
     }
 

@@ -9,14 +9,16 @@ package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.concurrent.ExecutionException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractConcurrentDataBrokerTest;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnTestUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
@@ -33,12 +35,12 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 
 /**
  * @author marek.ryznar@amartus.com
  */
-public class LoopbackUtilsTest extends AbstractDataBrokerTest {
+public class LoopbackUtilsTest extends AbstractConcurrentDataBrokerTest {
     private static final Logger LOG = LoggerFactory.getLogger(LoopbackUtilsTest.class);
     private DataBroker broker;
     private static String nodeName = "192.168.2.1";
@@ -113,10 +115,10 @@ public class LoopbackUtilsTest extends AbstractDataBrokerTest {
 
         transaction.put(LogicalDatastoreType.CONFIGURATION, nodeInstanceId, node,true);
         try {
-            CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-            future.checkedGet();
+            FluentFuture<? extends CommitInfo> future = transaction.commit();
+            future.get();
             return nodeInstanceId;
-        } catch (TransactionCommitFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.error("Unable to write node with Iid {} to store {}.", nodeInstanceId, LogicalDatastoreType.CONFIGURATION);
             e.printStackTrace();
         }
@@ -127,8 +129,8 @@ public class LoopbackUtilsTest extends AbstractDataBrokerTest {
         WriteTransaction transaction = broker.newWriteOnlyTransaction();
         transaction.delete(LogicalDatastoreType.CONFIGURATION, nodeIid);
         try {
-            transaction.submit().checkedGet();
-        } catch (TransactionCommitFailedException e) {
+            transaction.commit().get();
+        } catch (InterruptedException | ExecutionException e) {
             LOG.error("Unable to remove node with Iid {} from store {}.", nodeIid, LogicalDatastoreType.CONFIGURATION);
         }
     }

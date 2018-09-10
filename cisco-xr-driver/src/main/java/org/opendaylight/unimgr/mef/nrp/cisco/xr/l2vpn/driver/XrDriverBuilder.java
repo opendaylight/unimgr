@@ -13,18 +13,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.MountPointService;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.MountPointService;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.SipHandler;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.AbstractL2vpnActivator;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnLocalConnectActivator;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnP2pConnectActivator;
-import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.SipHandler;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpConnectivityServiceAttrs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,12 +73,12 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
             }
 
             @Override
-            public void activate() throws TransactionCommitFailedException {
+            public void activate() {
                 handleEndpoints(activate);
             }
 
             @Override
-            public void deactivate() throws TransactionCommitFailedException {
+            public void deactivate() {
                 handleEndpoints(deactivate);
             }
 
@@ -132,7 +132,7 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
             BiConsumer<List<EndPoint>,AbstractL2vpnActivator> activate = (neighbors, activator) -> {
                 try {
                     activator.activate(neighbors, serviceId);
-                } catch (TransactionCommitFailedException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     LOG.error("Activation error occured: {}",e.getMessage());
                 }
             };
@@ -140,7 +140,7 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
             BiConsumer<List<EndPoint>,AbstractL2vpnActivator> deactivate = (neighbors, activator) -> {
                 try {
                     activator.deactivate(neighbors, serviceId);
-                } catch (TransactionCommitFailedException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     LOG.error("Deactivation error occured: {}",e.getMessage());
                 }
             };

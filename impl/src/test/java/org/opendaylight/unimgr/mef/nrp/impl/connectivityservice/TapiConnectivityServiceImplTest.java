@@ -9,14 +9,12 @@
 package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 
 import static org.junit.Assert.assertFalse;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-
-import com.google.common.util.concurrent.CheckedFuture;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,12 +25,11 @@ import java.util.stream.IntStream;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.mockito.Mockito;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
-import org.opendaylight.unimgr.mef.nrp.api.Constraints;
 import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
 import org.opendaylight.unimgr.mef.nrp.api.RequestDecomposer;
 import org.opendaylight.unimgr.mef.nrp.api.RequestValidator;
@@ -48,18 +45,19 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev18030
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.CreateConnectivityServiceInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.CreateConnectivityServiceOutput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.UpdateConnectivityServiceInput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.end.point.ServiceInterfacePointBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.create.connectivity.service.input.EndPoint;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.create.connectivity.service.input.EndPointBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
+import com.google.common.util.concurrent.FluentFuture;
+
 
 public class TapiConnectivityServiceImplTest {
-
 
     private ActivationDriver ad1;
     private ActivationDriver ad2;
     private ActivationDriver ad3;
-
 
     private Uuid uuid1 = new Uuid("uuid1");
     private Uuid uuid2 = new Uuid("uuid2");
@@ -95,7 +93,7 @@ public class TapiConnectivityServiceImplTest {
         connectivityService.setValidator(validator);
 
         ReadWriteTransaction tx = mock(ReadWriteTransaction.class);
-        when(tx.submit()).thenReturn(mock(CheckedFuture.class));
+        when(tx.commit()).thenReturn(mock(FluentFuture.class));
         broker = mock(DataBroker.class);
         when(broker.newReadWriteTransaction()).thenReturn(tx);
         when(broker.newWriteOnlyTransaction()).thenReturn(tx);
@@ -155,8 +153,7 @@ public class TapiConnectivityServiceImplTest {
 
     @Test
     public void failTwoDriversOneFailing()
-            throws ExecutionException, InterruptedException, ResourceActivatorException,
-                TransactionCommitFailedException {
+            throws ExecutionException, InterruptedException, ResourceActivatorException {
         //having
         CreateConnectivityServiceInput input = input(4);
 
@@ -181,13 +178,12 @@ public class TapiConnectivityServiceImplTest {
         verifyZeroInteractions(ad3);
     }
 
-    @SuppressWarnings({"unchecked", "checkstyle:emptyblock"})
     private void configureDecomposerAnswer(
             Function<List<org.opendaylight.unimgr.mef.nrp.api.EndPoint>, List<Subrequrest>> resp) {
         try {
-            when(decomposer.decompose(any(), any(Constraints.class)))
+            Mockito.when(decomposer.decompose(any(), any()))
                 .thenAnswer(a -> {
-                    List<org.opendaylight.unimgr.mef.nrp.api.EndPoint> eps = a.getArgumentAt(0, List.class);
+                    List<org.opendaylight.unimgr.mef.nrp.api.EndPoint> eps = a.getArgument(0);
                     eps.forEach(e -> e.setNepRef(TapiUtils.toSysNepRef(new Uuid("node-id"), new Uuid("nep-id"))));
                     return resp.apply(eps);
                 });
@@ -217,7 +213,9 @@ public class TapiConnectivityServiceImplTest {
         return new EndPointBuilder()
                 .setLocalId(id)
                 .setRole(PortRole.SYMMETRIC)
-//                .setServiceInterfacePoint()
+                .setServiceInterfacePoint(
+                        new ServiceInterfacePointBuilder()
+                        .setServiceInterfacePointId(new Uuid(id)).build())
         .build();
     }
 

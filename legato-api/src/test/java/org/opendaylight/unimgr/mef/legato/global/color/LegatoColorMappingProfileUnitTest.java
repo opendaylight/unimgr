@@ -9,25 +9,24 @@ package org.opendaylight.unimgr.mef.legato.global.color;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.legato.LegatoColorMappingProfileController;
 import org.opendaylight.unimgr.mef.legato.util.LegatoConstants;
 import org.opendaylight.unimgr.mef.legato.util.LegatoUtils;
@@ -37,11 +36,15 @@ import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.color.mapping.profiles.Profile;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.color.mapping.profiles.ProfileKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.google.common.util.concurrent.FluentFuture;
 
-@SuppressWarnings("deprecation")
+
 @RunWith(PowerMockRunner.class)
+@PrepareForTest(Optional.class)
 public class LegatoColorMappingProfileUnitTest {
 
     @Mock
@@ -50,7 +53,7 @@ public class LegatoColorMappingProfileUnitTest {
     private WriteTransaction transaction;
     @SuppressWarnings("rawtypes")
     @Mock
-    private CheckedFuture checkedFuture;
+    private FluentFuture checkedFuture;
 
     @Before
     public void setUp() throws Exception {
@@ -67,28 +70,28 @@ public class LegatoColorMappingProfileUnitTest {
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
         doNothing().when(transaction).merge(any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class), any(ColorMappingProfiles.class));
-        when(transaction.submit()).thenReturn(checkedFuture);
+        when(transaction.commit()).thenReturn(checkedFuture);
         LegatoUtils.addToOperationalDB(colorMappingProfiles, instanceIdentifier, dataBroker);
         verify(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                 any(ColorMappingProfiles.class));
-        verify(transaction).submit();
+        verify(transaction).commit();
     }
 
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testColMappingUpdateFromOperationalDB() throws ReadFailedException {
+    public void testColMappingUpdateFromOperationalDB() throws InterruptedException, ExecutionException {
         final InstanceIdentifier<Profile> profileID =
                 InstanceIdentifier.create(MefGlobal.class).child(ColorMappingProfiles.class)
                         .child(Profile.class, new ProfileKey(Constants.ONE));
-        ReadOnlyTransaction readTransaction = mock(ReadOnlyTransaction.class);
+        ReadTransaction readTransaction = mock(ReadTransaction.class);
         when(dataBroker.newReadOnlyTransaction()).thenReturn(readTransaction);
-        CheckedFuture<Optional<Profile>, ReadFailedException> proFuture = mock(CheckedFuture.class);
+        FluentFuture<Optional<Profile>> proFuture = mock(FluentFuture.class);
 
-        Optional<Profile> optProfile = mock(Optional.class);
+        Optional<Profile> optProfile = PowerMockito.mock(Optional.class);
         when(readTransaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
                 .thenReturn(proFuture);
-        when(proFuture.checkedGet()).thenReturn(optProfile);
+        when(proFuture.get()).thenReturn(optProfile);
 
         Optional<Profile> expectedOpt =
                 (Optional<Profile>) LegatoUtils.readProfile(LegatoConstants.CMP_PROFILES,
@@ -101,10 +104,10 @@ public class LegatoColorMappingProfileUnitTest {
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class));
-        when(transaction.submit()).thenReturn(checkedFuture);
+        when(transaction.commit()).thenReturn(checkedFuture);
         assertEquals(true, LegatoUtils.deleteFromOperationalDB(profileID, dataBroker));
         verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(transaction).submit();
+        verify(transaction).commit();
 
 
         final ColorMappingProfiles colorMappingProfiles = mock(ColorMappingProfiles.class);
@@ -114,11 +117,11 @@ public class LegatoColorMappingProfileUnitTest {
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction2);
         doNothing().when(transaction2).merge(any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class), any(ColorMappingProfiles.class));
-        when(transaction2.submit()).thenReturn(checkedFuture);
+        when(transaction2.commit()).thenReturn(checkedFuture);
         LegatoUtils.addToOperationalDB(colorMappingProfiles, instanceIdentifier, dataBroker);
         verify(transaction2).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                 any(ColorMappingProfiles.class));
-        verify(transaction2).submit();
+        verify(transaction2).commit();
     }
 
 
@@ -131,10 +134,10 @@ public class LegatoColorMappingProfileUnitTest {
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class));
-        when(transaction.submit()).thenReturn(checkedFuture);
+        when(transaction.commit()).thenReturn(checkedFuture);
         assertEquals(true, LegatoUtils.deleteFromOperationalDB(profileID, dataBroker));
         verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(transaction).submit();
+        verify(transaction).commit();
     }
 
 }

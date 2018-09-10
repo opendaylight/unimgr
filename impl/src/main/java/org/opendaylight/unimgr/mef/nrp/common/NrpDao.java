@@ -7,20 +7,19 @@
  */
 package org.opendaylight.unimgr.mef.nrp.common;
 
-import com.google.common.base.Optional;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.EndPoint1;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.EndPoint1Builder;
@@ -65,7 +64,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-
 /**
  * Nrp data access methods to simplify interaction with model.
  * @author bartosz.michalik@amartus.com
@@ -88,7 +86,7 @@ public class NrpDao  {
         this.rtx = tx;
     }
 
-    public NrpDao(ReadOnlyTransaction tx) {
+    public NrpDao(ReadTransaction tx) {
         this.rtx = tx;
         this.tx =  null;
     }
@@ -166,7 +164,7 @@ public class NrpDao  {
         InstanceIdentifier<OwnedNodeEdgePoint> nepIdent = node(nodeId).child(OwnedNodeEdgePoint.class,
                 new OwnedNodeEdgePointKey(new Uuid(nepId)));
         try {
-            Optional<OwnedNodeEdgePoint> opt = rtx.read(LogicalDatastoreType.OPERATIONAL, nepIdent).checkedGet();
+            Optional<OwnedNodeEdgePoint> opt = rtx.read(LogicalDatastoreType.OPERATIONAL, nepIdent).get();
             if (opt.isPresent()) {
                 tx.delete(LogicalDatastoreType.OPERATIONAL,nepIdent);
                 if (removeSips) {
@@ -175,8 +173,10 @@ public class NrpDao  {
                     removeSips(sips);
                 }
             }
-        } catch (ReadFailedException e) {
+        } catch (ExecutionException e) {
             LOG.error("Cannot read {} with id {}",OwnedNodeEdgePoint.class, nodeId);
+        } catch (InterruptedException e) {
+            LOG.error("Interrupted during read {} with id {}",OwnedNodeEdgePoint.class, nodeId);
         }
     }
 
@@ -200,7 +200,7 @@ public class NrpDao  {
         OwnedNodeEdgePoint nep = null;
         try {
             nep = readNep(ref);
-        } catch (ReadFailedException e) {
+        } catch (ReadFailedException | InterruptedException | ExecutionException e) {
             LOG.warn("Error while reading NEP", e);
         }
         if (nep == null) {
@@ -230,17 +230,18 @@ public class NrpDao  {
         return new ConnectionEndPointBuilder(ref).setConnectionEndPointId(cep.getUuid()).build();
     }
 
-    public OwnedNodeEdgePoint readNep(OwnedNodeEdgePointRef ref) throws ReadFailedException {
+    public OwnedNodeEdgePoint readNep(OwnedNodeEdgePointRef ref)
+            throws ReadFailedException, InterruptedException, ExecutionException {
 
         KeyedInstanceIdentifier<OwnedNodeEdgePoint, OwnedNodeEdgePointKey> nepKey = toPath.apply(ref);
 
-        return rtx.read(LogicalDatastoreType.OPERATIONAL, nepKey).checkedGet().orNull();
+        return rtx.read(LogicalDatastoreType.OPERATIONAL, nepKey).get().orElse(null);
     }
 
-    public OwnedNodeEdgePoint readNep(String nodeId, String nepId) throws ReadFailedException {
+    public OwnedNodeEdgePoint readNep(String nodeId, String nepId) throws InterruptedException, ExecutionException {
         KeyedInstanceIdentifier<OwnedNodeEdgePoint, OwnedNodeEdgePointKey> nepKey = node(nodeId)
                 .child(OwnedNodeEdgePoint.class, new OwnedNodeEdgePointKey(new Uuid(nepId)));
-        return rtx.read(LogicalDatastoreType.OPERATIONAL, nepKey).checkedGet().orNull();
+        return rtx.read(LogicalDatastoreType.OPERATIONAL, nepKey).get().orElse(null);
     }
 
     public boolean hasSip(String nepId) {
@@ -248,31 +249,31 @@ public class NrpDao  {
         try {
             return rtx.read(LogicalDatastoreType.OPERATIONAL,
                     ctx().child(ServiceInterfacePoint.class, new ServiceInterfacePointKey(universalId)))
-                    .checkedGet().isPresent();
-        } catch (ReadFailedException e) {
+                    .get().isPresent();
+        } catch (InterruptedException | ExecutionException e) {
             LOG.error("Cannot read sip with id {}", universalId.getValue());
         }
         return false;
     }
 
-    public boolean hasNep(String nodeId, String nepId) throws ReadFailedException {
+    public boolean hasNep(String nodeId, String nepId) throws InterruptedException, ExecutionException {
         return readNep(nodeId, nepId) != null;
     }
 
-    public Topology getTopology(String uuid) throws ReadFailedException {
-        Optional<Topology> topology = rtx.read(LogicalDatastoreType.OPERATIONAL, topo(uuid)).checkedGet();
-        return topology.orNull();
+    public Topology getTopology(String uuid) throws InterruptedException, ExecutionException  {
+        Optional<Topology> topology = rtx.read(LogicalDatastoreType.OPERATIONAL, topo(uuid)).get();
+        return topology.orElse(null);
     }
 
-    public Node getNode(String uuidTopo, String uuidNode) throws ReadFailedException {
+    public Node getNode(String uuidTopo, String uuidNode) throws InterruptedException, ExecutionException  {
         Optional<Node> topology = rtx.read(LogicalDatastoreType.OPERATIONAL,
-                node(new Uuid(uuidTopo), new Uuid(uuidNode))).checkedGet();
-        return topology.orNull();
+                node(new Uuid(uuidTopo), new Uuid(uuidNode))).get();
+        return topology.orElse(null);
     }
 
-    public Node getNode(Uuid uuidNode) throws ReadFailedException {
-        Optional<Node> topology = rtx.read(LogicalDatastoreType.OPERATIONAL, node(uuidNode)).checkedGet();
-        return topology.orNull();
+    public Node getNode(Uuid uuidNode) throws InterruptedException, ExecutionException  {
+        Optional<Node> topology = rtx.read(LogicalDatastoreType.OPERATIONAL, node(uuidNode)).get();
+        return topology.orElse(null);
     }
 
     public static InstanceIdentifier<Context> ctx() {
@@ -327,7 +328,7 @@ public class NrpDao  {
         verifyTx();
         if (removeSips) {
             try {
-                Optional<Node> opt = rtx.read(LogicalDatastoreType.OPERATIONAL, node(nodeId)).checkedGet();
+                Optional<Node> opt = rtx.read(LogicalDatastoreType.OPERATIONAL, node(nodeId)).get();
                 if (opt.isPresent()) {
                     List<OwnedNodeEdgePoint> neps = opt.get().getOwnedNodeEdgePoint();
                     if (neps != null) {
@@ -338,7 +339,7 @@ public class NrpDao  {
                         ));
                     }
                 }
-            } catch (ReadFailedException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 LOG.error("Cannot read node with id {}", nodeId);
             }
         }
@@ -366,9 +367,9 @@ public class NrpDao  {
         try {
             org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.Context1 connectivity = rtx
                     .read(LogicalDatastoreType.OPERATIONAL, CS_CTX)
-                    .checkedGet().orNull();
+                    .get().orElse(null);
             return connectivity == null ? null : connectivity.getConnectivityService();
-        } catch (ReadFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.warn("reading connectivity services failed", e);
             return null;
         }
@@ -395,9 +396,9 @@ public class NrpDao  {
         try {
             return rtx.read(LogicalDatastoreType.OPERATIONAL, CS_CTX
                     .child(ConnectivityService.class, new ConnectivityServiceKey(id)))
-                    .checkedGet().orNull();
+                    .get().orElse(null);
 
-        } catch (ReadFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.warn("reading connectivity service failed", e);
             return null;
         }
@@ -410,33 +411,33 @@ public class NrpDao  {
 
         try {
             return rtx.read(LogicalDatastoreType.OPERATIONAL, nepPath)
-                    .checkedGet().orNull();
+                    .get().orElse(null);
 
-        } catch (ReadFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.warn("reading NEP for ref " +  ref + " failed", e);
             return null;
         }
     }
 
-    public ServiceInterfacePoint getSip(String sipId) throws ReadFailedException {
+    public ServiceInterfacePoint getSip(String sipId) throws InterruptedException, ExecutionException  {
         KeyedInstanceIdentifier<ServiceInterfacePoint, ServiceInterfacePointKey> key = ctx()
                 .child(ServiceInterfacePoint.class, new ServiceInterfacePointKey(new Uuid(sipId)));
-        return rtx.read(LogicalDatastoreType.OPERATIONAL, key).checkedGet().orNull();
+        return rtx.read(LogicalDatastoreType.OPERATIONAL, key).get().orElse(null);
     }
 
     public Connection getConnection(Uuid connectionId) {
         try {
             return rtx.read(LogicalDatastoreType.OPERATIONAL, CS_CTX.child(Connection.class,
                     new ConnectionKey(connectionId)))
-                    .checkedGet().orNull();
+                    .get().orElse(null);
 
-        } catch (ReadFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.warn("reading connectivity service failed", e);
             return null;
         }
     }
 
-    public String getActivationDriverId(Uuid nodeUuid) throws ReadFailedException {
+    public String getActivationDriverId(Uuid nodeUuid) throws InterruptedException, ExecutionException  {
         return getNode(nodeUuid).augmentation(NodeAdiAugmentation.class).getActivationDriverId();
     }
 
@@ -464,7 +465,7 @@ public class NrpDao  {
 
     public ConnectivityService updateCsEndPoint(String serviceId,
             org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
-            .update.connectivity.service.input.EndPoint endPoint) throws TransactionCommitFailedException {
+            .update.connectivity.service.input.EndPoint endPoint) throws InterruptedException, ExecutionException {
         Objects.requireNonNull(endPoint);
         Objects.requireNonNull(serviceId);
         org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
@@ -483,9 +484,9 @@ public class NrpDao  {
         //XXX do we need to support name as well?
         ConnectivityService cs = getConnectivityService(serviceId);
         try {
-            tx.submit().checkedGet();
-        } catch (TransactionCommitFailedException e) {
-            LOG.warn("Problem with updatign connectivity service endpoint", e);
+            tx.commit().get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.warn("Problem with updating connectivity service endpoint", e);
             throw e;
         }
 

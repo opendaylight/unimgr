@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <mdsal.version>1.9.0-SNAPSHOT</mdsal.version>
+    <mdsal.version>2.7.0-SNAPSHOT</mdsal.version>
     <restconf.version>1.9.0-SNAPSHOT</restconf.version>
     <ovsdb.version>1.8.0-SNAPSHOT</ovsdb.version>
     <configfile.directory>etc/opendaylight/karaf</configfile.directory>

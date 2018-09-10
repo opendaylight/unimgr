@@ -19,10 +19,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
@@ -127,7 +125,7 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
     }
 
     private void removeConnectivity()
-            throws TransactionCommitFailedException, InterruptedException, ExecutionException {
+            throws InterruptedException, ExecutionException {
 
         ReadWriteTransaction tx = service.getBroker().newReadWriteTransaction();
         NrpDao nrpDao = new NrpDao(tx);
@@ -150,7 +148,7 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
             Optional<ActivationDriver> driver = Optional.empty();
             try {
                 driver = service.getDriverRepo().getDriver(nrpDao.getActivationDriverId(e.getKey()));
-            } catch (ReadFailedException e1) {
+            } catch (InterruptedException | ExecutionException e1) {
                 LOG.warn("Unable to get activationDriverId for node {}",e.getKey(),e1);
             }
             if (!driver.isPresent()) {

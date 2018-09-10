@@ -7,13 +7,12 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs.transaction;
 
-import com.google.common.base.Optional;
-
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
 import org.opendaylight.unimgr.mef.nrp.ovs.util.MdsalUtilsExt;
 import org.opendaylight.unimgr.mef.nrp.ovs.util.NullAwareDatastoreGetter;
@@ -27,6 +26,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * Performs reading transactions related to openflow topology

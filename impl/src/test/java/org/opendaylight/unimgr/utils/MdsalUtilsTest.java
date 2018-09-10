@@ -12,15 +12,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ch.qos.logback.core.Appender;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
+
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,10 +31,9 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
@@ -43,7 +44,7 @@ import org.slf4j.LoggerFactory;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({LogicalDatastoreType.class})
+@PrepareForTest({LogicalDatastoreType.class, MdsalUtils.class, Optional.class})
 public class MdsalUtilsTest {
 
     @Rule
@@ -65,16 +66,16 @@ public class MdsalUtilsTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testRead() throws ReadFailedException {
+    public void testRead() throws InterruptedException, ExecutionException {
         DataBroker dataBroker = mock(DataBroker.class);
         InstanceIdentifier<Node> nodeIid = PowerMockito.mock(InstanceIdentifier.class);
-        ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
+        ReadTransaction transaction = mock(ReadTransaction.class);
         when(dataBroker.newReadOnlyTransaction()).thenReturn(transaction);
-        Optional<Node> optionalDataObject = mock(Optional.class);
-        CheckedFuture<Optional<Node>, ReadFailedException> future = mock(CheckedFuture.class);
+        Optional<Node> optionalDataObject = PowerMockito.mock(Optional.class);
+        FluentFuture<Optional<Node>> future = mock(FluentFuture.class);
         Node nd = mock(Node.class);
         when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(future);
-        when(future.checkedGet()).thenReturn(optionalDataObject);
+        when(future.get()).thenReturn(optionalDataObject);
         when(optionalDataObject.isPresent()).thenReturn(true);
         when(optionalDataObject.get()).thenReturn(nd);
         Node expectedNode = MdsalUtils.read(dataBroker, LogicalDatastoreType.CONFIGURATION, nodeIid);
@@ -86,18 +87,18 @@ public class MdsalUtilsTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testReadOptionalPositive() throws ReadFailedException {
+    public void testReadOptionalPositive() throws InterruptedException, ExecutionException {
         //given
         DataBroker dataBroker = mock(DataBroker.class);
         InstanceIdentifier<Node> nodeIid = PowerMockito.mock(InstanceIdentifier.class);
-        ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
-        Optional<Node> optionalDataObject = mock(Optional.class);
-        CheckedFuture<Optional<Node>, ReadFailedException> future = mock(CheckedFuture.class);
+        ReadTransaction transaction = mock(ReadTransaction.class);
+        Optional<Node> optionalDataObject = PowerMockito.mock(Optional.class);
+        FluentFuture<Optional<Node>> future = mock(FluentFuture.class);
         Node exceptedNode = mock(Node.class);
 
         when(dataBroker.newReadOnlyTransaction()).thenReturn(transaction);
         when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(future);
-        when(future.checkedGet()).thenReturn(optionalDataObject);
+        when(future.get()).thenReturn(optionalDataObject);
         when(optionalDataObject.isPresent()).thenReturn(true);
         when(optionalDataObject.get()).thenReturn(exceptedNode);
 
@@ -117,17 +118,17 @@ public class MdsalUtilsTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testReadOptionalNegative() throws ReadFailedException {
+    public void testReadOptionalNegative() throws InterruptedException, ExecutionException {
         //given
         DataBroker dataBroker = mock(DataBroker.class);
         InstanceIdentifier<Node> nodeIid = PowerMockito.mock(InstanceIdentifier.class);
-        ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
-        Optional<Node> optionalDataObject = mock(Optional.class);
-        CheckedFuture<Optional<Node>, ReadFailedException> future = mock(CheckedFuture.class);
+        ReadTransaction transaction = mock(ReadTransaction.class);
+        Optional<Node> optionalDataObject = PowerMockito.mock(Optional.class);
+        FluentFuture<Optional<Node>> future = mock(FluentFuture.class);
 
         when(dataBroker.newReadOnlyTransaction()).thenReturn(transaction);
         when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(future);
-        when(future.checkedGet()).thenReturn(optionalDataObject);
+        when(future.get()).thenReturn(optionalDataObject);
         when(optionalDataObject.isPresent()).thenReturn(false);
 
         //when

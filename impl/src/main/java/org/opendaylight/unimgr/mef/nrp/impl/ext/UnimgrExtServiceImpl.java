@@ -8,7 +8,6 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl.ext;
 
-import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -17,13 +16,14 @@ import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
@@ -83,7 +83,7 @@ public class UnimgrExtServiceImpl implements UnimgrExtService {
                     .read(LogicalDatastoreType.OPERATIONAL, NrpDao.topo(TapiConstants.PRESTO_SYSTEM_TOPO)
                     .child(Node.class, new NodeKey(nodeId))
                     .child(OwnedNodeEdgePoint.class, new OwnedNodeEdgePointKey(nepId))
-            ).checkedGet();
+            ).get();
             if (!nep.isPresent()) {
                 return withError("NEP with id {0} for node {1} not found", nepId, nodeId);
             }
@@ -112,7 +112,7 @@ public class UnimgrExtServiceImpl implements UnimgrExtService {
                     .build()
 
             );
-            tx.submit().checkedGet();
+            tx.commit().get();
 
             return RpcResultBuilder.<AddSipOutput>success().build();
         });

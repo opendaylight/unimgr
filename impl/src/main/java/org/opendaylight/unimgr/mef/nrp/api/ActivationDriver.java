@@ -8,8 +8,8 @@
 package org.opendaylight.unimgr.mef.nrp.api;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceActivatorException;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpConnectivityServiceAttrs;
 
@@ -47,27 +47,30 @@ public interface ActivationDriver {
 
     /**
      * Performs the activation action.
-     * @throws TransactionCommitFailedException transaction commit failed
      * @throws ResourceActivatorException activation problem
+     * @throws ExecutionException transaction execution failed
+     * @throws InterruptedException transaction was interrupted
      */
-    void activate() throws TransactionCommitFailedException, ResourceActivatorException;
+    void activate() throws ResourceActivatorException, InterruptedException, ExecutionException;
 
     /**
      * Performs the update action.
-     * @throws TransactionCommitFailedException transaction commit failed
      * @throws ResourceActivatorException activation problem
+     * @throws ExecutionException transaction execution failed
+     * @throws InterruptedException transaction was interrupted
      */
-    default void update() throws TransactionCommitFailedException, ResourceActivatorException {
+    default void update() throws ResourceActivatorException, InterruptedException, ExecutionException {
         deactivate();
         activate();
     }
 
     /**
      * Performs the deactivation action.
-     * @throws TransactionCommitFailedException transaction commit failed
      * @throws ResourceActivatorException activation problem
+     * @throws ExecutionException transaction execution failed
+     * @throws InterruptedException transaction was interrupted
      */
-    void deactivate() throws TransactionCommitFailedException, ResourceActivatorException;
+    void deactivate() throws ResourceActivatorException, InterruptedException, ExecutionException;
 
 
     /**

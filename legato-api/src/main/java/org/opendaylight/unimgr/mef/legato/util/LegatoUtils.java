@@ -9,12 +9,13 @@ package org.opendaylight.unimgr.mef.legato.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.legato.dao.EVCDao;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.types.rev180321.PositiveInteger;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.carrier.ethernet.SubscriberServices;
@@ -55,8 +56,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 
 /**
  * @author santanu.de@xoriant.com
@@ -274,16 +274,29 @@ public class LegatoUtils {
             InstanceIdentifier<?> evcNode) {
         final ReadTransaction read = dataBroker.newReadOnlyTransaction();
         final InstanceIdentifier<Evc> evcId = evcNode.firstIdentifierOf(Evc.class);
-        final CheckedFuture<Optional<Evc>, ReadFailedException> linkFuture = read.read(store, evcId);
+        final FluentFuture<Optional<Evc>> linkFuture = read.read(store, evcId);
         try {
-            return linkFuture.checkedGet();
-        } catch (final ReadFailedException e) {
+            return linkFuture.get();
+        } catch (final InterruptedException | ExecutionException e) {
             LOG.error("Unable to read node with EVC Id {}, err: {} ", evcId, e);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
-    @SuppressWarnings("deprecation")
+    public static <T extends DataObject> Optional<T> readProfile(
+            DataBroker dataBroker, LogicalDatastoreType store, InstanceIdentifier<T> child, Class<T> c) {
+        final ReadTransaction read = dataBroker.newReadOnlyTransaction();
+
+        final InstanceIdentifier<T> profileId = child.firstIdentifierOf(c);
+        final FluentFuture<Optional<T>> profileFuture = read.read(store, profileId);
+        try {
+            return profileFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.error("Unable to read node ", e);
+            return Optional.empty();
+        }
+    }
+
     public static Optional<?> readProfile(String string, DataBroker dataBroker, LogicalDatastoreType store,
             InstanceIdentifier<?> child) {
         final ReadTransaction read = dataBroker.newReadOnlyTransaction();
@@ -293,62 +306,61 @@ public class LegatoUtils {
                 case LegatoConstants.SLS_PROFILES:
                     final InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.sls.profiles.Profile> profileId =
                             child.firstIdentifierOf(org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.sls.profiles.Profile.class);
-                    final CheckedFuture<Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.sls.profiles.Profile>, ReadFailedException> profileFuture =
+                    final FluentFuture<Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.sls.profiles.Profile>> profileFuture =
                             read.read(store, profileId);
-                    return profileFuture.checkedGet();
+                    return profileFuture.get();
 
                 case LegatoConstants.COS_PROFILES:
                     final InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.cos.profiles.Profile> cosProfileId =
                             child.firstIdentifierOf(org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.cos.profiles.Profile.class);
-                    final CheckedFuture<Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.cos.profiles.Profile>, ReadFailedException> cosProfileFuture =
+                    final FluentFuture<Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.cos.profiles.Profile>> cosProfileFuture =
                             read.read(store, cosProfileId);
-                    return cosProfileFuture.checkedGet();
+                    return cosProfileFuture.get();
 
                 case LegatoConstants.BWP_PROFILES:
                     final InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.bwp.flow.parameter.profiles.Profile> bwpProfileId =
                             child.firstIdentifierOf(org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.bwp.flow.parameter.profiles.Profile.class);
-                    final CheckedFuture<Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.bwp.flow.parameter.profiles.Profile>, ReadFailedException> bwpProfileFuture =
+                    final FluentFuture<Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.bwp.flow.parameter.profiles.Profile>> bwpProfileFuture =
                             read.read(store, bwpProfileId);
-                    return bwpProfileFuture.checkedGet();
+                    return bwpProfileFuture.get();
 
                 case LegatoConstants.L2CP_EEC_PROFILES:
                     final InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.l2cp.eec.profiles.Profile> l2cpEec_ProfileId =
                             child.firstIdentifierOf(org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.l2cp.eec.profiles.Profile.class);
-                    final CheckedFuture<Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.l2cp.eec.profiles.Profile>, ReadFailedException> l2cpEecProfileFuture =
+                    final FluentFuture<Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.l2cp.eec.profiles.Profile>> l2cpEecProfileFuture =
                             read.read(store, l2cpEec_ProfileId);
-                    return l2cpEecProfileFuture.checkedGet();
+                    return l2cpEecProfileFuture.get();
 
                 case LegatoConstants.L2CP_PEERING_PROFILES:
                     final InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.l2cp.peering.profiles.Profile> l2cpPeering_ProfileId =
                             child.firstIdentifierOf(org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.l2cp.peering.profiles.Profile.class);
-                    final CheckedFuture<Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.l2cp.peering.profiles.Profile>, ReadFailedException> l2cpPeeringProfileFuture =
+                    final FluentFuture<Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.l2cp.peering.profiles.Profile>> l2cpPeeringProfileFuture =
                             read.read(store, l2cpPeering_ProfileId);
-                    return l2cpPeeringProfileFuture.checkedGet();
+                    return l2cpPeeringProfileFuture.get();
 
                 case LegatoConstants.EEC_PROFILES:
                     final InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.eec.profiles.Profile> eecProfileId =
                             child.firstIdentifierOf(org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.eec.profiles.Profile.class);
-                    final CheckedFuture<Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.eec.profiles.Profile>, ReadFailedException> eecProfileFuture =
+                    final FluentFuture<Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.eec.profiles.Profile>> eecProfileFuture =
                             read.read(store, eecProfileId);
-                    return eecProfileFuture.checkedGet();
+                    return eecProfileFuture.get();
 
                 case LegatoConstants.CMP_PROFILES:
                     final InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.color.mapping.profiles.Profile> cmpProfileId =
                             child.firstIdentifierOf(org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.color.mapping.profiles.Profile.class);
-                    final CheckedFuture<Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.color.mapping.profiles.Profile>, ReadFailedException> cmpProfileFuture =
+                    final FluentFuture<Optional<org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.color.mapping.profiles.Profile>> cmpProfileFuture =
                             read.read(store, cmpProfileId);
-                    return cmpProfileFuture.checkedGet();
+                    return cmpProfileFuture.get();
 
                 default:
                     LOG.info("IN DEFAULT CASE :  NO MATCH");
             }
-        } catch (final ReadFailedException e) {
+        } catch (final InterruptedException | ExecutionException e) {
             LOG.error("Unable to read node ", e);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
-    @SuppressWarnings("deprecation")
     public static boolean deleteFromOperationalDB(InstanceIdentifier<?> nodeIdentifier,
             DataBroker dataBroker) {
 
@@ -359,15 +371,14 @@ public class LegatoUtils {
         transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIdentifier);
 
         try {
-            transaction.submit().checkedGet();
+            transaction.commit().get();
             result = true;
-        } catch (org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.error("Unable to remove node ", nodeIdentifier, e);
         }
         return result;
     }
 
-    @SuppressWarnings("deprecation")
     public static <T extends DataObject> void addToOperationalDB(T typeOfProfile,
             InstanceIdentifier<T> profilesTx, DataBroker dataBroker) {
         LOG.info("Received a request to add node {}", profilesTx);
@@ -376,14 +387,13 @@ public class LegatoUtils {
         transaction.merge(LogicalDatastoreType.OPERATIONAL, profilesTx, typeOfProfile);
 
         try {
-            transaction.submit().checkedGet();
-        } catch (org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException e) {
+            transaction.commit().get();
+        } catch (InterruptedException | ExecutionException e) {
             LOG.error("Unable to add node in OperationalDB(). Err: ", e);
         }
 
     }
 
-    @SuppressWarnings("deprecation")
     public static boolean updateEvcInOperationalDB(Evc evc,
             InstanceIdentifier<SubscriberServices> nodeIdentifier, DataBroker dataBroker) {
         LOG.info("Received a request to add node {}", nodeIdentifier);
@@ -398,9 +408,9 @@ public class LegatoUtils {
                 new SubscriberServicesBuilder().setEvc(evcList).build());
 
         try {
-            transaction.submit().checkedGet();
+            transaction.commit().get();
             result = true;
-        } catch (org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.error("Unable to add node in OperationalDB() ", nodeIdentifier, e);
         }
         return result;

@@ -7,17 +7,21 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator;
 
-import com.google.common.base.Optional;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.MountPointService;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort.toServicePort;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.MountPoint;
+import org.opendaylight.mdsal.binding.api.MountPointService;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.InterfaceHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.L2vpnHelper;
-import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.MountPointHelper;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceActivator;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.asr9k.policymgr.cfg.rev150518.PolicyManager;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceActive;
@@ -35,13 +39,18 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.Pseudowires;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.CiscoIosXrString;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.nrp.connectivity.service.end.point.attrs.NrpCarrierEthConnectivityEndPointResource;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.network.topology.topology.topology.types.TopologyNetconf;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
-import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort.toServicePort;
 
 
 /**
@@ -66,7 +75,7 @@ public abstract class AbstractL2vpnActivator implements ResourceActivator {
     }
 
     @Override
-    public void activate(List<EndPoint> endPoints, String serviceId) throws TransactionCommitFailedException {
+    public void activate(List<EndPoint> endPoints, String serviceId) throws InterruptedException, ExecutionException {
         String innerName = getInnerName(serviceId);
         String outerName = getOuterName(serviceId);
         ServicePort port = null;
@@ -95,7 +104,7 @@ public abstract class AbstractL2vpnActivator implements ResourceActivator {
     }
 
     @Override
-    public void deactivate(List<EndPoint> endPoints, String serviceId) throws TransactionCommitFailedException {
+    public void deactivate(List<EndPoint> endPoints, String serviceId) throws InterruptedException, ExecutionException {
         String innerName = getInnerName(serviceId);
         String outerName = getOuterName(serviceId);
         ServicePort port = toServicePort(endPoints.stream().findFirst().get(), NETCONF_TOPOLODY_NAME);
@@ -110,9 +119,9 @@ public abstract class AbstractL2vpnActivator implements ResourceActivator {
     protected void doActivate(String nodeName,
                               InterfaceConfigurations interfaceConfigurations,
                               L2vpn l2vpn,
-                              java.util.Optional<PolicyManager> qosConfig) throws TransactionCommitFailedException {
+                              java.util.Optional<PolicyManager> qosConfig) throws InterruptedException, ExecutionException {
 
-        Optional<DataBroker> optional = MountPointHelper.getDataBroker(mountService, nodeName);
+        Optional<DataBroker> optional = getMountPointDataBroker(mountService, nodeName);
         if (!optional.isPresent()) {
             LOG.error("Could not retrieve MountPoint for {}", nodeName);
             return;
@@ -121,14 +130,15 @@ public abstract class AbstractL2vpnActivator implements ResourceActivator {
         WriteTransaction transaction = optional.get().newWriteOnlyTransaction();
         transaction.merge(LogicalDatastoreType.CONFIGURATION, InterfaceHelper.getInterfaceConfigurationsId(), interfaceConfigurations);
         transaction.merge(LogicalDatastoreType.CONFIGURATION, L2vpnHelper.getL2vpnId(), l2vpn);
-        transaction.submit().checkedGet();
+        transaction.commit().get();
     }
 
     protected void doDeactivate(String nodeName,
                                 InstanceIdentifier<P2pXconnect> xconnectId,
-                                InstanceIdentifier<InterfaceConfiguration> interfaceConfigurationId) throws TransactionCommitFailedException {
+                                InstanceIdentifier<InterfaceConfiguration> interfaceConfigurationId)
+                                        throws InterruptedException, ExecutionException {
 
-        Optional<DataBroker> optional = MountPointHelper.getDataBroker(mountService, nodeName);
+        Optional<DataBroker> optional = getMountPointDataBroker(mountService, nodeName);
         if (!optional.isPresent()) {
             LOG.error("Could not retrieve MountPoint for {}", nodeName);
             return;
@@ -137,7 +147,7 @@ public abstract class AbstractL2vpnActivator implements ResourceActivator {
         WriteTransaction transaction = optional.get().newWriteOnlyTransaction();
         transaction.delete(LogicalDatastoreType.CONFIGURATION, xconnectId);
         transaction.delete(LogicalDatastoreType.CONFIGURATION, interfaceConfigurationId);
-        transaction.submit().checkedGet();
+        transaction.commit().get();
     }
 
     protected abstract java.util.Optional<PolicyManager> activateQos(String name, ServicePort port);
@@ -167,4 +177,28 @@ public abstract class AbstractL2vpnActivator implements ResourceActivator {
 
     protected abstract String getInnerName(String serviceId);
     protected abstract String getOuterName(String serviceId);
+
+    /**
+     * Find a node's NETCONF mount point and then retrieve its DataBroker.
+     * e.
+     * http://localhost:8080/restconf/config/network-topology:network-topology/
+     *        topology/topology-netconf/node/{nodeName}/yang-ext:mount/
+     */
+    protected Optional<DataBroker> getMountPointDataBroker(MountPointService mountService, String nodeName) {
+        NodeId nodeId = new NodeId(nodeName);
+
+        InstanceIdentifier<Node> nodeInstanceId = InstanceIdentifier.builder(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(new TopologyId(TopologyNetconf.QNAME.getLocalName())))
+                .child(Node.class, new NodeKey(nodeId))
+                .build();
+
+        final Optional<MountPoint> nodeOptional = mountService.getMountPoint(nodeInstanceId);
+
+        if (!nodeOptional.isPresent()) {
+            return Optional.empty();
+        }
+
+        MountPoint nodeMountPoint = nodeOptional.get();
+        return Optional.of(nodeMountPoint.getService(DataBroker.class).get());
+    }
 }

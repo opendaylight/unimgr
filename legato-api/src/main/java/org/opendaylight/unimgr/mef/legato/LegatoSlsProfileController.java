@@ -8,14 +8,13 @@
 
 package org.opendaylight.unimgr.mef.legato;
 
-import com.google.common.base.Optional;
-
 import java.util.Collections;
+import java.util.Optional;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.api.UnimgrDataTreeChangeListener;
 import org.opendaylight.unimgr.mef.legato.util.LegatoConstants;
 import org.opendaylight.unimgr.mef.legato.util.LegatoUtils;
@@ -57,7 +56,7 @@ public class LegatoSlsProfileController  extends UnimgrDataTreeChangeListener<Pr
         LOG.info("Initializing LegatoSlsProfileController:init() ");
 
         dataTreeChangeListenerRegistration = dataBroker.registerDataTreeChangeListener(
-                new DataTreeIdentifier<Profile>(LogicalDatastoreType.CONFIGURATION, PROFILE_IID), this);
+                DataTreeIdentifier.create(LogicalDatastoreType.CONFIGURATION, PROFILE_IID), this);
 
     }
 

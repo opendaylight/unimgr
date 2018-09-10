@@ -8,16 +8,18 @@
 
 package org.opendaylight.unimgr.utils;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 public class MdsalUtils {
 
@@ -30,6 +32,7 @@ public class MdsalUtils {
     /**
      * Read a specific datastore type and return a DataObject as a casted
      * class type Object.
+     * @param <D> Type of the data object
      * @param dataBroker The dataBroker instance to create transactions
      * @param store The store type to query
      * @param path The generic path to query
@@ -40,18 +43,18 @@ public class MdsalUtils {
             final LogicalDatastoreType store,
             final InstanceIdentifier<D> path)  {
         D result = null;
-        final ReadOnlyTransaction transaction = dataBroker.newReadOnlyTransaction();
+        final ReadTransaction transaction = dataBroker.newReadOnlyTransaction();
         Optional<D> optionalDataObject;
-        final CheckedFuture<Optional<D>, ReadFailedException> future = transaction.read(store, path);
+        final FluentFuture<Optional<D>> future = transaction.read(store, path);
         try {
-            optionalDataObject = future.checkedGet();
+            optionalDataObject = future.get();
             if (optionalDataObject.isPresent()) {
                 result = optionalDataObject.get();
             } else {
                 LOG.debug("{}: Failed to read {}",
                         Thread.currentThread().getStackTrace()[1], path);
             }
-        } catch (final ReadFailedException e) {
+        } catch (final InterruptedException | ExecutionException e) {
             LOG.warn("Failed to read {} ", path, e);
         }
         transaction.close();
@@ -60,6 +63,7 @@ public class MdsalUtils {
 
     /**
      * Read a specific datastore type and return a optional of DataObject.
+     * @param <D> Type of the data object
      * @param dataBroker The dataBroker instance to create transactions
      * @param store The store type to query
      * @param path The generic path to query
@@ -70,12 +74,12 @@ public class MdsalUtils {
             final LogicalDatastoreType store,
             final InstanceIdentifier<D> path) {
 
-        final ReadOnlyTransaction transaction = dataBroker.newReadOnlyTransaction();
-        Optional<D> optionalDataObject = Optional.absent();
-        final CheckedFuture<Optional<D>, ReadFailedException> future = transaction.read(store, path);
+        final ReadTransaction transaction = dataBroker.newReadOnlyTransaction();
+        Optional<D> optionalDataObject = Optional.empty();
+        final FluentFuture<Optional<D>> future = transaction.read(store, path);
         try {
-            optionalDataObject = future.checkedGet();
-        } catch (final ReadFailedException e) {
+            optionalDataObject = future.get();
+        } catch (final InterruptedException | ExecutionException e) {
             LOG.warn("Failed to read {} ", path, e);
         }
 

@@ -7,17 +7,17 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs.util;
 
-import com.google.common.collect.Sets;
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
 import org.opendaylight.unimgr.mef.nrp.ovs.exception.VlanPoolExhaustedException;
@@ -31,6 +31,8 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.to
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.NodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Sets;
 
 /**
  * Class responsible for generate Vlan ID or check if given Vlan ID is not used.
@@ -56,7 +58,7 @@ public class VlanUtils {
             if (node == null) {
                 throw new ResourceNotAvailableException(MessageFormat.format("Node {} not found", nodeId));
             }
-        } catch (ReadFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Node {} not found", nodeId);
             throw new ResourceNotAvailableException(MessageFormat.format("Node {} not found", nodeId));
         }
@@ -69,15 +71,19 @@ public class VlanUtils {
     /**
      * Method return vlan ID for service if stored in node property (service-vlan-map) or generate new one.
      * @param serviceName service name
+     * @throws ExecutionException transaction execution error
+     * @throws InterruptedException transaction interrupted
+     * @throws ResourceNotAvailableException missing resource
+     * @return Integer vlan id
      */
-    public Integer getVlanID(String serviceName) throws ResourceNotAvailableException {
+    public Integer getVlanID(String serviceName) throws ResourceNotAvailableException, InterruptedException, ExecutionException {
         Optional<ServiceVlanMap> o = node.augmentation(NodeSvmAugmentation.class).getServiceVlanMap().stream()
                 .filter(serviceVlanMap -> serviceVlanMap.getServiceId().equals(serviceName))
                 .findFirst();
         return o.isPresent() ? o.get().getVlanId().getValue().intValue() : generateVid(serviceName);
     }
 
-    private Integer generateVid(String serviceName) throws VlanPoolExhaustedException {
+    private Integer generateVid(String serviceName) throws VlanPoolExhaustedException, InterruptedException, ExecutionException {
         Set<Integer> difference = Sets.difference(POSSIBLE_VLANS, usedVlans);
         if (difference.isEmpty()) {
             LOG.warn(VLAN_POOL_EXHAUSTED_ERROR_MESSAGE);
@@ -86,7 +92,7 @@ public class VlanUtils {
         return updateNodeNewServiceVLAN(serviceName,difference.iterator().next());
     }
 
-    private Integer updateNodeNewServiceVLAN(String serviceName, Integer vlanId) {
+    private Integer updateNodeNewServiceVLAN(String serviceName, Integer vlanId) throws InterruptedException, ExecutionException {
         List<ServiceVlanMap> list = node.augmentation(NodeSvmAugmentation.class).getServiceVlanMap();
         list.add(new ServiceVlanMapBuilder()
                 .setServiceId(serviceName)
@@ -95,17 +101,17 @@ public class VlanUtils {
                 new NodeSvmAugmentationBuilder().setServiceVlanMap(list).build()).build();
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         new NrpDao(tx).updateNode(node);
-        tx.submit();
+        tx.commit().get();
         return vlanId;
     }
 
-    public void releaseServiceVlan(String serviceName) {
+    public void releaseServiceVlan(String serviceName) throws InterruptedException, ExecutionException {
         List<ServiceVlanMap> list = node.augmentation(NodeSvmAugmentation.class).getServiceVlanMap();
         list.removeIf(serviceVlanMap -> serviceVlanMap.getServiceId().equals(serviceName));
         node = new NodeBuilder(node).addAugmentation(NodeSvmAugmentation.class,
                 new NodeSvmAugmentationBuilder().setServiceVlanMap(list).build()).build();
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         new NrpDao(tx).updateNode(node);
-        tx.submit();
+        tx.commit().get();
     }
 }

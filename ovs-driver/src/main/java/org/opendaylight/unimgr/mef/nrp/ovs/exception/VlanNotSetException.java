@@ -15,6 +15,8 @@ import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
  * @author jakub.niezgoda@amartus.com
  */
 public class VlanNotSetException extends ResourceNotAvailableException {
+    private static final long serialVersionUID = -5851962350259552164L;
+
     public VlanNotSetException(String message) {
         super(message);
     }

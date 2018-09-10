@@ -17,8 +17,7 @@ import java.util.function.Consumer;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.impl.AbstractTestWithTopo;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.types.rev180321.NaturalNumber;
@@ -54,7 +53,7 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void addSip() throws InterruptedException, ExecutionException, ReadFailedException {
+    public void addSip() throws InterruptedException, ExecutionException {
 
         //having
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
@@ -73,7 +72,7 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
 
     @Test
     public void addSipFailBecauseItAlreadyExists()
-            throws InterruptedException, ExecutionException, ReadFailedException {
+            throws InterruptedException, ExecutionException {
 
         //having
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
@@ -87,7 +86,7 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
     }
 
     private void verifySipExists(String nepId, Consumer<ServiceInterfacePoint> verifySip)
-            throws ReadFailedException {
+            throws InterruptedException, ExecutionException {
 
         NrpDao nrpDao = new NrpDao(dataBroker.newReadOnlyTransaction());
         OwnedNodeEdgePoint nep = nrpDao.readNep(nodeId, nepId);
@@ -100,7 +99,7 @@ public class UnimgrExtServiceImplTest extends AbstractTestWithTopo {
         }
     }
 
-    private void verifySipExists(String nepId) throws ReadFailedException {
+    private void verifySipExists(String nepId) throws InterruptedException, ExecutionException {
         verifySipExists(nepId, null);
     }
 

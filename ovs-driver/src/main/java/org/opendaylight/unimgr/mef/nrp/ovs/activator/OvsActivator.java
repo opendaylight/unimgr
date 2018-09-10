@@ -10,11 +10,11 @@ package org.opendaylight.unimgr.mef.nrp.ovs.activator;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceActivator;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
@@ -49,10 +49,13 @@ public class OvsActivator implements ResourceActivator {
     /**
      * Set state for the driver for a (de)activation transaction.
      * @param endPoints list of endpoint to interconnect
+     * @throws ExecutionException transaction execution error
+     * @throws InterruptedException transaction interrupted
+     * @throws ResourceNotAvailableException missing resource
      */
     @Override
     public void activate(List<EndPoint> endPoints, String serviceName)
-            throws ResourceNotAvailableException, TransactionCommitFailedException {
+            throws ResourceNotAvailableException, InterruptedException, ExecutionException {
         OvsActivatorHelper.validateExternalVLANs(endPoints);
 
         VlanUtils vlanUtils = new VlanUtils(dataBroker, endPoints.iterator().next().getNepRef().getNodeId().getValue());
@@ -64,7 +67,7 @@ public class OvsActivator implements ResourceActivator {
     }
 
     private void activateEndpoint(EndPoint endPoint, String serviceName, VlanUtils vlanUtils)
-            throws ResourceNotAvailableException, TransactionCommitFailedException {
+            throws ResourceNotAvailableException, InterruptedException, ExecutionException {
         // Transaction - Get Open vSwitch node and its flow table
         String portName = OvsActivatorHelper.getPortName(endPoint.getEndpoint().getServiceInterfacePoint()
                 .getServiceInterfacePointId().getValue());
@@ -108,7 +111,7 @@ public class OvsActivator implements ResourceActivator {
 
     @Override
     public void deactivate(List<EndPoint> endPoints, String serviceName)
-            throws TransactionCommitFailedException, ResourceNotAvailableException {
+            throws InterruptedException, ExecutionException, ResourceNotAvailableException {
 
         for (EndPoint endPoint:endPoints) {
             deactivateEndpoint(endPoint, serviceName);
@@ -118,8 +121,8 @@ public class OvsActivator implements ResourceActivator {
 
     }
 
-    private void deactivateEndpoint(EndPoint endPoint, String serviceName)
-            throws ResourceNotAvailableException, TransactionCommitFailedException {
+    private void deactivateEndpoint(EndPoint endPoint, String serviceName) throws InterruptedException, ExecutionException, ResourceNotAvailableException
+             {
 
         // Transaction - Get Open vSwitch node and its flow table
         TopologyTransaction topologyTransaction = new TopologyTransaction(dataBroker);
@@ -148,7 +151,7 @@ public class OvsActivator implements ResourceActivator {
     }
 
     public void update(List<EndPoint> endPoints, String serviceName)
-            throws ResourceNotAvailableException, TransactionCommitFailedException {
+            throws ResourceNotAvailableException, InterruptedException, ExecutionException {
         OvsActivatorHelper.validateExternalVLANs(endPoints);
         for (EndPoint endPoint:endPoints) {
             updateEndpoint(endPoint, serviceName);
@@ -156,7 +159,7 @@ public class OvsActivator implements ResourceActivator {
     }
 
     private void updateEndpoint(EndPoint endPoint, String serviceName)
-            throws ResourceNotAvailableException, TransactionCommitFailedException {
+            throws ResourceNotAvailableException, InterruptedException, ExecutionException {
 
         TopologyTransaction topologyTransaction = new TopologyTransaction(dataBroker);
         OvsActivatorHelper ovsActivatorHelper = new OvsActivatorHelper(topologyTransaction, endPoint);

@@ -12,20 +12,19 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.MountPointService;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.mockito.Mockito;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.MountPoint;
+import org.opendaylight.mdsal.binding.api.MountPointService;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractConcurrentDataBrokerTest;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
-import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.MountPointHelper;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.L2vpn;
@@ -33,25 +32,19 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.P2pXconnect;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.attachment.circuits.AttachmentCircuit;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 
 /**
  * @author marek.ryznar@amartus.com
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(MountPointHelper.class)
-public class L2vpnLocalConnectionActivatorTest extends AbstractDataBrokerTest{
+public class L2vpnLocalConnectionActivatorTest extends AbstractConcurrentDataBrokerTest{
     private static final Logger LOG = LoggerFactory.getLogger(L2vpnLocalConnectionActivatorTest.class);
 
     private L2vpnLocalConnectActivator l2VpnLocalConnectActivator;
     private MountPointService mountService;
-    private Optional<DataBroker> optBroker;
     private String outerName;
     private String innerName;
     private String portNo1;
@@ -63,10 +56,12 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractDataBrokerTest{
     @Before
     public void setUp() {
         //given
-        DataBroker broker = getDataBroker();
-        optBroker = Optional.of(broker);
-        mountService = L2vpnTestUtils.getMockedMountPointService(optBroker);
-        l2VpnLocalConnectActivator = new L2vpnLocalConnectActivator(broker,mountService);
+        MountPoint mp = Mockito.mock(MountPoint.class);
+        Mockito.when(mp.getService(DataBroker.class)).thenReturn(Optional.of(getDataBroker()));
+        mountService = Mockito.mock(MountPointService.class);
+        Mockito.when(mountService.getMountPoint(Mockito.any())).thenReturn(Optional.of(mp));
+
+        l2VpnLocalConnectActivator = new L2vpnLocalConnectActivator(getDataBroker(),mountService);
 
         outerName = "local";
         innerName = "local";
@@ -81,13 +76,13 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractDataBrokerTest{
         activate();
 
         //then
-        ReadOnlyTransaction transaction = optBroker.get().newReadOnlyTransaction();
+        ReadTransaction transaction = getDataBroker().newReadOnlyTransaction();
 
         InstanceIdentifier<L2vpn> l2vpn = InstanceIdentifier.builder(L2vpn.class).build();
         InstanceIdentifier<InterfaceConfigurations> interfaceConfigurations = InstanceIdentifier.builder(InterfaceConfigurations.class).build();
 
-        CheckedFuture<Optional<L2vpn>, ReadFailedException> driverL2vpn = transaction.read(LogicalDatastoreType.CONFIGURATION, l2vpn);
-        CheckedFuture<Optional<InterfaceConfigurations>, ReadFailedException> driverInterfaceConfigurations = transaction.read(LogicalDatastoreType.CONFIGURATION, interfaceConfigurations);
+        FluentFuture<Optional<L2vpn>> driverL2vpn = transaction.read(LogicalDatastoreType.CONFIGURATION, l2vpn);
+        FluentFuture<Optional<InterfaceConfigurations>> driverInterfaceConfigurations = transaction.read(LogicalDatastoreType.CONFIGURATION, interfaceConfigurations);
 
         try {
             checkL2vpnTree(driverL2vpn);
@@ -100,13 +95,13 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractDataBrokerTest{
         deactivate();
 
         //then
-        L2vpnTestUtils.checkDeactivated(optBroker,portNo1);
+        L2vpnTestUtils.checkDeactivated(getDataBroker(), portNo1);
     }
 
     private void deactivate() {
         try {
             l2VpnLocalConnectActivator.deactivate(endPoints,serviceId);
-        } catch (TransactionCommitFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             fail("Error during deactivation : " + e.getMessage());
         }
     }
@@ -115,12 +110,12 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractDataBrokerTest{
         LOG.debug("activate L2VPN");
         try {
             l2VpnLocalConnectActivator.activate(endPoints,serviceId);
-        } catch (TransactionCommitFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             fail("Error during activation : " + e.getMessage());
         }
     }
 
-    private void checkL2vpnTree(CheckedFuture<Optional<L2vpn>, ReadFailedException> driverL2vpn) throws InterruptedException, ExecutionException {
+    private void checkL2vpnTree(FluentFuture<Optional<L2vpn>> driverL2vpn) throws InterruptedException, ExecutionException {
         if (driverL2vpn.get().isPresent()) {
             L2vpn l2vpn = driverL2vpn.get().get();
             L2vpnTestUtils.checkL2vpn(l2vpn);
@@ -146,7 +141,7 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractDataBrokerTest{
         }
     }
 
-    private void checkInterfaceConfigurationTree(CheckedFuture<Optional<InterfaceConfigurations>, ReadFailedException> driverInterfaceConfigurations) throws InterruptedException, ExecutionException{
+    private void checkInterfaceConfigurationTree(FluentFuture<Optional<InterfaceConfigurations>> driverInterfaceConfigurations) throws InterruptedException, ExecutionException{
         if (driverInterfaceConfigurations.get().isPresent()) {
             InterfaceConfigurations interfaceConfigurations = driverInterfaceConfigurations.get().get();
             L2vpnTestUtils.checkInterfaceConfigurations(interfaceConfigurations);

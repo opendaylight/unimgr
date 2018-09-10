@@ -15,8 +15,7 @@ import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.impl.AbstractTestWithTopo;
 import org.opendaylight.unimgr.mef.nrp.impl.topologytervice.TapiTopologyServiceImpl;
@@ -48,7 +47,7 @@ public class TapiTopologyServiceImplIntTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void getTopologies() throws TransactionCommitFailedException, ExecutionException, InterruptedException {
+    public void getTopologies() throws ExecutionException, InterruptedException {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
         tx.commit().get();
@@ -66,7 +65,7 @@ public class TapiTopologyServiceImplIntTest extends AbstractTestWithTopo {
 
     @Test
     public void getTopologyUnknown()
-            throws TransactionCommitFailedException, ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
         tx.commit().get();
@@ -82,7 +81,7 @@ public class TapiTopologyServiceImplIntTest extends AbstractTestWithTopo {
 
     @Test
     public void getTopologySystem()
-            throws TransactionCommitFailedException, ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
         tx.commit().get();
@@ -103,7 +102,7 @@ public class TapiTopologyServiceImplIntTest extends AbstractTestWithTopo {
 
     @Test
     public void getTopologyNode()
-            throws TransactionCommitFailedException, ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
         tx.commit().get();
@@ -122,7 +121,7 @@ public class TapiTopologyServiceImplIntTest extends AbstractTestWithTopo {
 
     @Test
     public void getTopologyNodeWrongTopology()
-            throws TransactionCommitFailedException, ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
         tx.commit().get();
@@ -139,7 +138,7 @@ public class TapiTopologyServiceImplIntTest extends AbstractTestWithTopo {
 
     @Test
     public void getLinkNotFound()
-            throws TransactionCommitFailedException, ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
         tx.commit().get();
@@ -154,7 +153,7 @@ public class TapiTopologyServiceImplIntTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void getLink() throws TransactionCommitFailedException, ExecutionException, InterruptedException {
+    public void getLink() throws ExecutionException, InterruptedException {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         String uuid2 = "uuid2";
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");

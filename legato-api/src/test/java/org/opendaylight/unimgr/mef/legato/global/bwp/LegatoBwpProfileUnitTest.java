@@ -9,27 +9,25 @@ package org.opendaylight.unimgr.mef.legato.global.bwp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.legato.LegatoBwpProfileController;
-import org.opendaylight.unimgr.mef.legato.util.LegatoConstants;
 import org.opendaylight.unimgr.mef.legato.util.LegatoUtils;
 import org.opendaylight.unimgr.mef.legato.utils.Constants;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.MefGlobal;
@@ -38,11 +36,15 @@ import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.global.rev171215.mef.global.bwp.flow.parameter.profiles.ProfileKey;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.types.rev171215.Identifier1024;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.google.common.util.concurrent.FluentFuture;
 
-@SuppressWarnings("deprecation")
+
 @RunWith(PowerMockRunner.class)
+@PrepareForTest(Optional.class)
 public class LegatoBwpProfileUnitTest {
 
     @Mock
@@ -51,7 +53,7 @@ public class LegatoBwpProfileUnitTest {
     private WriteTransaction transaction;
     @SuppressWarnings("rawtypes")
     @Mock
-    private CheckedFuture checkedFuture;
+    private FluentFuture checkedFuture;
 
     @Before
     public void setUp() throws Exception {
@@ -69,33 +71,32 @@ public class LegatoBwpProfileUnitTest {
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
         doNothing().when(transaction).merge(any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class), any(BwpFlowParameterProfiles.class));
-        when(transaction.submit()).thenReturn(checkedFuture);
+        when(transaction.commit()).thenReturn(checkedFuture);
         LegatoUtils.addToOperationalDB(profile, profilesTx, dataBroker);
         verify(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                 any(BwpFlowParameterProfiles.class));
-        verify(transaction).submit();
+        verify(transaction).commit();
     }
 
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testBwpUpdateFromOperationalDB() throws ReadFailedException {
+    public void testBwpUpdateFromOperationalDB() throws InterruptedException, ExecutionException {
 
         final InstanceIdentifier<Profile> profileID =
                 InstanceIdentifier.create(MefGlobal.class).child(BwpFlowParameterProfiles.class)
                         .child(Profile.class, new ProfileKey(new Identifier1024(Constants.ONE)));
 
-        ReadOnlyTransaction readTransaction = mock(ReadOnlyTransaction.class);
+        ReadTransaction readTransaction = mock(ReadTransaction.class);
         when(dataBroker.newReadOnlyTransaction()).thenReturn(readTransaction);
-        CheckedFuture<Optional<Profile>, ReadFailedException> nodeFuture =
-                mock(CheckedFuture.class);
-        Optional<Profile> optProfile = mock(Optional.class);
+        FluentFuture<Optional<Profile>> nodeFuture =
+                mock(FluentFuture.class);
+        Optional<Profile> optProfile = PowerMockito.mock(Optional.class);
         when(readTransaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
                 .thenReturn(nodeFuture);
-        when(nodeFuture.checkedGet()).thenReturn(optProfile);
+        when(nodeFuture.get()).thenReturn(optProfile);
         Optional<Profile> expectedOpt =
-                (Optional<Profile>) LegatoUtils.readProfile(LegatoConstants.BWP_PROFILES,
-                        dataBroker, LogicalDatastoreType.CONFIGURATION, profileID);
+                LegatoUtils.readProfile(dataBroker, LogicalDatastoreType.CONFIGURATION, profileID, Profile.class);
         verify(readTransaction).read(any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class));
         assertNotNull(expectedOpt);
@@ -104,10 +105,10 @@ public class LegatoBwpProfileUnitTest {
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class));
-        when(transaction.submit()).thenReturn(checkedFuture);
+        when(transaction.commit()).thenReturn(checkedFuture);
         assertEquals(true, LegatoUtils.deleteFromOperationalDB(profileID, dataBroker));
         verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(transaction).submit();
+        verify(transaction).commit();
 
         final BwpFlowParameterProfiles bwpProfile = mock(BwpFlowParameterProfiles.class);
 
@@ -117,11 +118,11 @@ public class LegatoBwpProfileUnitTest {
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction2);
         doNothing().when(transaction2).merge(any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class), any(BwpFlowParameterProfiles.class));
-        when(transaction2.submit()).thenReturn(checkedFuture);
+        when(transaction2.commit()).thenReturn(checkedFuture);
         LegatoUtils.addToOperationalDB(bwpProfile, profilesTx, dataBroker);
         verify(transaction2).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                 any(BwpFlowParameterProfiles.class));
-        verify(transaction2).submit();
+        verify(transaction2).commit();
     }
 
 
@@ -135,11 +136,9 @@ public class LegatoBwpProfileUnitTest {
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class));
-        when(transaction.submit()).thenReturn(checkedFuture);
+        when(transaction.commit()).thenReturn(checkedFuture);
         assertEquals(true, LegatoUtils.deleteFromOperationalDB(profileID, dataBroker));
         verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(transaction).submit();
+        verify(transaction).commit();
     }
-
-
 }

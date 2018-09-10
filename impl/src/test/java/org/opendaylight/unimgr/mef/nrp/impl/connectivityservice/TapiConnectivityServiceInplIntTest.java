@@ -11,9 +11,10 @@ package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,11 +36,10 @@ import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
 import org.opendaylight.unimgr.mef.nrp.api.RequestValidator;
@@ -65,6 +65,7 @@ import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.EndPoi
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpConnectivityServiceEndPointAttrs;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.nrp.connectivity.service.end.point.attrs.NrpCarrierEthConnectivityEndPointResource;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.nrp.connectivity.service.end.point.attrs.NrpCarrierEthConnectivityEndPointResourceBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Context;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.LocalClass;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.OperationalState;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.PortDirection;
@@ -164,7 +165,7 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         verify(ad1, times(1)).commit();
         verifyZeroInteractions(ad2);
 
-        ReadOnlyTransaction tx2 = dataBroker.newReadOnlyTransaction();
+        ReadTransaction tx2 = dataBroker.newReadOnlyTransaction();
 
         Context1 connCtx = tx2
                 .read(LogicalDatastoreType.OPERATIONAL, TapiConnectivityServiceImpl.CONNECTIVITY_CTX).get().get();
@@ -263,7 +264,7 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         verify(ad2, times(2)).activate();
         verify(ad2, times(2)).commit();
 
-        ReadOnlyTransaction tx2 = dataBroker.newReadOnlyTransaction();
+        ReadTransaction tx2 = dataBroker.newReadOnlyTransaction();
 
         Context1 connCtx = tx2
                 .read(LogicalDatastoreType.OPERATIONAL, TapiConnectivityServiceImpl.CONNECTIVITY_CTX).get().get();
@@ -287,7 +288,7 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
 
     @Test
     public void testServiceDeactivationWithSingleDriver() throws ExecutionException, InterruptedException,
-            TransactionCommitFailedException, ReadFailedException, ResourceActivatorException {
+            ReadFailedException, ResourceActivatorException {
         //having
 
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
@@ -305,15 +306,22 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
 
         //then
         assertTrue(result.isSuccessful());
-        ReadOnlyTransaction tx2 = dataBroker.newReadOnlyTransaction();
-        Context1 connCtx = tx2
-                .read(LogicalDatastoreType.OPERATIONAL, TapiConnectivityServiceImpl.CONNECTIVITY_CTX).get().get();
+
+        ReadTransaction rtx = dataBroker.newReadOnlyTransaction();
+        Optional<Context> opt =
+                rtx.read(LogicalDatastoreType.OPERATIONAL, NrpDao.ctx()).get();
+        Context c = opt.get();
+        Context1 connCtx = c.augmentation(Context1.class);
+
+        // Semantics changed to augmentation being removed along with last child?
+        assertNull(connCtx);
+//      assertEquals(0, connCtx.getConnection().size());
+//      assertEquals(0, connCtx.getConnectivityService().size());
+
         verify(ad1).deactivate();
         verify(ad1).commit();
-        assertEquals(0, connCtx.getConnection().size());
-        assertEquals(0, connCtx.getConnectivityService().size());
-        Node node1 = new NrpDao(tx2).getNode(TapiConstants.PRESTO_EXT_TOPO, TapiConstants.PRESTO_ABSTRACT_NODE);
-        Node node2 = new NrpDao(tx2).getNode(TapiConstants.PRESTO_SYSTEM_TOPO, uuid1);
+        Node node1 = new NrpDao(rtx).getNode(TapiConstants.PRESTO_EXT_TOPO, TapiConstants.PRESTO_ABSTRACT_NODE);
+        Node node2 = new NrpDao(rtx).getNode(TapiConstants.PRESTO_SYSTEM_TOPO, uuid1);
         long countEndPoints1 = node1.getOwnedNodeEdgePoint().stream()
                 .map(nep -> nep.augmentation(OwnedNodeEdgePoint1.class)).filter(Objects::nonNull)
                 .mapToLong(aug -> aug.getConnectionEndPoint().size()).sum();
@@ -359,7 +367,7 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
                     //
                 }
 
-            } catch (ReadFailedException _e) {
+            } catch (InterruptedException | ExecutionException _e) {
                 //
             }
         }
@@ -369,7 +377,7 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
     }
 
     @Test
-    public void testGetServiceList() throws TransactionCommitFailedException, InterruptedException, ExecutionException {
+    public void testGetServiceList() throws InterruptedException, ExecutionException {
         //having
 
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
@@ -424,7 +432,7 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
 
     @Test
     public void testGetServiceDetails()
-            throws InterruptedException, ExecutionException, TransactionCommitFailedException {
+            throws InterruptedException, ExecutionException {
         //having
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
@@ -495,7 +503,7 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
 
     @Test
     public void getGetConnectionDetailsByServiceName()
-            throws InterruptedException, ExecutionException, TransactionCommitFailedException {
+            throws InterruptedException, ExecutionException {
         //having
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, uuid1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
@@ -519,7 +527,7 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
 
 
     private void createConnectivityService()
-            throws TransactionCommitFailedException, InterruptedException, ExecutionException {
+            throws InterruptedException, ExecutionException {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         n(tx, new Uuid(uuid1), activationDriverId1, uuid1 + ":1", uuid1 + ":2", uuid1 + ":3");
         Connection system = c(tx, uuid1, uuid1 + ":1", uuid1 + ":2");

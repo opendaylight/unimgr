@@ -11,22 +11,21 @@ package org.opendaylight.unimgr.mef.nrp.impl;
 import static org.junit.Assert.fail;
 import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_SYSTEM_TOPO;
 
-import com.google.common.base.Optional;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.Before;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractConcurrentDataBrokerTest;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
@@ -74,8 +73,12 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.to
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.context.Topology;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.context.TopologyKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public abstract class AbstractTestWithTopo extends AbstractConcurrentDataBrokerTest {
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractTestWithTopo.class);
     protected static final InstanceIdentifier<Node> NRP_ABSTRACT_NODE_IID = InstanceIdentifier
             .create(Context.class)
             .augmentation(Context1.class)
@@ -247,13 +250,15 @@ public abstract class AbstractTestWithTopo extends AbstractConcurrentDataBrokerT
                 .setTerminationDirection(TerminationDirection.BIDIRECTIONAL)
                 .setLifecycleState(LifecycleState.INSTALLED)
                 .setOperationalState(OperationalState.ENABLED)
+                .setParentNodeEdgePoint(Collections.emptyList())
+                .setClientNodeEdgePoint(Collections.emptyList())
                 .build();
     }
 
     @SuppressWarnings("checkstyle:illegalcatch")
     protected Node getAbstractNode() {
 
-        try (ReadOnlyTransaction tx = dataBroker.newReadOnlyTransaction()) {
+        try (ReadTransaction tx = dataBroker.newReadOnlyTransaction()) {
             Optional<Node> opt =
                     tx.read(LogicalDatastoreType.OPERATIONAL,NRP_ABSTRACT_NODE_IID).get();
             if (opt.isPresent()) {
@@ -277,7 +282,7 @@ public abstract class AbstractTestWithTopo extends AbstractConcurrentDataBrokerT
                 return node;
             }
             try {
-                TimeUnit.MILLISECONDS.sleep(10);
+                TimeUnit.MILLISECONDS.sleep(50);
             } catch (InterruptedException e) {
             }
         }

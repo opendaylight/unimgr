@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.unimgr.mef.nrp.api.TapiConstants;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.impl.AbstractTestWithTopo;
@@ -40,7 +40,7 @@ public class TopologyDataHandlerTest extends AbstractTestWithTopo {
         topologyDataHandler.init();
 
         //then
-        ReadOnlyTransaction tx = dataBroker.newReadOnlyTransaction();
+        ReadTransaction tx = dataBroker.newReadOnlyTransaction();
         Topology t = new NrpDao(tx).getTopology(TapiConstants.PRESTO_SYSTEM_TOPO);
         assertNotNull(t.getNode());
         assertTrue(t.getNode().stream().allMatch(n -> n.augmentation(NodeAdiAugmentation.class).getActivationDriverId().equals(TemplateConstants.DRIVER_ID)));

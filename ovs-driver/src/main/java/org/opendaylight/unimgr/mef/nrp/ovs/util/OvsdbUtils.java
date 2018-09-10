@@ -7,8 +7,6 @@
  */
 package org.opendaylight.unimgr.mef.nrp.ovs.util;
 
-import com.google.common.util.concurrent.CheckedFuture;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -16,14 +14,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
-import org.opendaylight.ovsdb.utils.mdsal.utils.NotifyingDataChangeListener;
 import org.opendaylight.unimgr.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
@@ -55,6 +54,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.util.concurrent.FluentFuture;
 
 /**
  * Class responsible for managing OVSDB Nodes.
@@ -116,11 +117,11 @@ public class OvsdbUtils {
     private static void deleteQosFromConfigDatastore(DataBroker dataBroker, InstanceIdentifier<?> qosId) {
         WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
         tx.delete(LogicalDatastoreType.CONFIGURATION, qosId);
-        final CheckedFuture<Void, TransactionCommitFailedException> future = tx.submit();
+        final @NonNull FluentFuture<? extends @NonNull CommitInfo> future = tx.commit();
         try {
-            future.checkedGet();
+            future.get();
             LOG.info("Succesfully removed Qos entry from Config datastore: {}", qosId.toString());
-        } catch (final TransactionCommitFailedException e) {
+        } catch (final InterruptedException | ExecutionException e) {
             LOG.warn("Failed to remove Qos entry from Config datastore: {}", qosId.toString(), e);
         }
     }
@@ -129,11 +130,11 @@ public class OvsdbUtils {
     private static void deleteQueueFromConfigDatastore(DataBroker dataBroker, InstanceIdentifier<?> queueId) {
         WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
         tx.delete(LogicalDatastoreType.CONFIGURATION, queueId);
-        final CheckedFuture<Void, TransactionCommitFailedException> future = tx.submit();
+        final @NonNull FluentFuture<? extends @NonNull CommitInfo> future = tx.commit();
         try {
-            future.checkedGet();
+            future.get();
             LOG.info("Succesfully removed Qos Queue from Config datastore: {}", queueId.toString());
-        } catch (final TransactionCommitFailedException e) {
+        } catch (final InterruptedException | ExecutionException e) {
             LOG.warn("Failed to remove Qos Queue from Config datastore: {}", queueId.toString(), e);
         }
     }
@@ -142,12 +143,12 @@ public class OvsdbUtils {
                                                                           InstanceIdentifier<QosEntry> qosEntryId) {
         WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
         tx.delete(LogicalDatastoreType.CONFIGURATION, qosEntryId);
-        final CheckedFuture<Void, TransactionCommitFailedException> future = tx.submit();
+        final @NonNull FluentFuture<? extends @NonNull CommitInfo> future = tx.commit();
         try {
-            future.checkedGet();
+            future.get();
             LOG.info("Succesfully removed Termination Point Qos entry from  Config datastore: {}",
                     qosEntryId.toString());
-        } catch (final TransactionCommitFailedException e) {
+        } catch (final InterruptedException | ExecutionException e) {
             LOG.warn("Failed to remove Termination Point Qos entry from Config datastore: {}",
                     qosEntryId.toString(), e);
         }
@@ -170,11 +171,11 @@ public class OvsdbUtils {
             tx.merge(LogicalDatastoreType.CONFIGURATION, tpIid, tp, true);
 
 
-            final CheckedFuture<Void, TransactionCommitFailedException> future = tx.submit();
+            final @NonNull FluentFuture<? extends @NonNull CommitInfo> future = tx.commit();
             try {
-                future.checkedGet();
+                future.get();
                 LOG.info("Succesfully added Qos Uiid to termination point: {}", tp.getTpId().getValue());
-            } catch (final TransactionCommitFailedException e) {
+            } catch (final InterruptedException | ExecutionException e) {
                 LOG.warn("Failed to add Qos Uiid to termination point: {} ", tp.getTpId().getValue(), e);
             }
 
@@ -258,11 +259,11 @@ public class OvsdbUtils {
         WriteTransaction createQoSQueueTx = dataBroker.newWriteOnlyTransaction();
         createQoSQueueTx.merge(LogicalDatastoreType.CONFIGURATION, queueInstanceIdentifier, queue, true);
 
-        final CheckedFuture<Void, TransactionCommitFailedException> futureCreateQoSQueueTx = createQoSQueueTx.submit();
+        final FluentFuture<? extends CommitInfo> futureCreateQoSQueueTx = createQoSQueueTx.commit();
         try {
-            futureCreateQoSQueueTx.checkedGet();
+            futureCreateQoSQueueTx.get();
             LOG.info("Succesfully created QoS queue :{}", queueInstanceIdentifier);
-        } catch (final TransactionCommitFailedException e) {
+        } catch (final InterruptedException | ExecutionException e) {
             LOG.warn("Failed to create new QoS queue: {} ", queueInstanceIdentifier, e);
         }
 
@@ -291,11 +292,11 @@ public class OvsdbUtils {
         WriteTransaction createQosEntryTx = dataBroker.newWriteOnlyTransaction();
         createQosEntryTx.merge(LogicalDatastoreType.CONFIGURATION, qosInstanceIdentifier, qosEntry, true);
 
-        final CheckedFuture<Void, TransactionCommitFailedException> futureCreateQosEntryTx = createQosEntryTx.submit();
+        final @NonNull FluentFuture<? extends @NonNull CommitInfo> futureCreateQosEntryTx = createQosEntryTx.commit();
         try {
-            futureCreateQosEntryTx.checkedGet();
+            futureCreateQosEntryTx.get();
             LOG.info("Succesfully created QoS entry: {}", qosInstanceIdentifier);
-        } catch (final TransactionCommitFailedException e) {
+        } catch (final InterruptedException | ExecutionException e) {
             LOG.warn("Failed to create new QoS entry: {} ", qosInstanceIdentifier, e);
         }
 
