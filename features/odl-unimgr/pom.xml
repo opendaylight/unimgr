@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <controller.mdsal.version>1.8.0</controller.mdsal.version>
+    <controller.mdsal.version>1.8.1-SNAPSHOT</controller.mdsal.version>
   </properties>
 
   <build>

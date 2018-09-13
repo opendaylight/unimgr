@@ -19,11 +19,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <mdsal.version>1.8.0</mdsal.version>
-    <restconf.version>1.8.0</restconf.version>
-    <ovsdb.version>1.7.0</ovsdb.version>
+    <mdsal.version>1.8.1-SNAPSHOT</mdsal.version>
+    <restconf.version>1.8.1-SNAPSHOT</restconf.version>
+    <ovsdb.version>1.7.1-SNAPSHOT</ovsdb.version>
     <configfile.directory>etc/opendaylight/karaf</configfile.directory>
-    <openflowplugin.version>0.7.0</openflowplugin.version>
+    <openflowplugin.version>0.7.1-SNAPSHOT</openflowplugin.version>
   </properties>
 
   <dependencies>

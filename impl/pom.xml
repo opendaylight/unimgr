@@ -12,14 +12,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <parent>
         <groupId>org.opendaylight.mdsal</groupId>
         <artifactId>binding-parent</artifactId>
-        <version>0.13.0</version>
+        <version>0.13.1-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
     <properties>
-        <ovsdb.version>1.7.0</ovsdb.version>
-        <mdsal.version>1.8.0</mdsal.version>
-        <netconf.version>1.5.0</netconf.version>
+        <ovsdb.version>1.7.1-SNAPSHOT</ovsdb.version>
+        <mdsal.version>1.8.1-SNAPSHOT</mdsal.version>
+        <netconf.version>1.5.1-SNAPSHOT</netconf.version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>

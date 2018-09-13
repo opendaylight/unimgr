@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <restconf.version>1.8.0</restconf.version>
+    <restconf.version>1.8.1-SNAPSHOT</restconf.version>
   </properties>
 
   <dependencies>

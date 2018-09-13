@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.opendaylight.mdsal</groupId>
         <artifactId>binding-parent</artifactId>
-        <version>0.13.0</version>
+        <version>0.13.1-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
@@ -26,7 +26,7 @@
     <name>ODL :: unimgr :: ${project.artifactId}</name>
 
     <properties>
-        <mdsal.version>1.8.0</mdsal.version>
+        <mdsal.version>1.8.1-SNAPSHOT</mdsal.version>
     </properties>
 
     <dependencies>
