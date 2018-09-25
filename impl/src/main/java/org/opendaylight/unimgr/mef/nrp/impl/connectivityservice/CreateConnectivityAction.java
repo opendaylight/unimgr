@@ -9,11 +9,7 @@
 package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 
 import java.text.MessageFormat;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -49,6 +45,8 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev18030
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.cep.list.ConnectionEndPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.ConnectionEndPoint;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.RouteBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.end.point.ParentNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.end.point.ParentNodeEdgePointBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.Connection;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.ConnectionBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.ConnectionKey;
@@ -193,7 +191,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 .setLayerProtocolName(LayerProtocolName.ETH)
 
                 .setConnectionEndPoint(
-                        createSystemConnectionPoints(nrpDao, TapiUtils
+                        createConnectionPoints(nrpDao, TapiUtils
                                 .toNodeRef(s.getNodeUuid()), s.getEndpoints(), uniqueStamp))
                 .build())
             .collect(Collectors.toList());
@@ -205,7 +203,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 .setLayerProtocolName(LayerProtocolName.ETH)
 //                .setContainerNode(new Uuid(TapiConstants.PRESTO_ABSTRACT_NODE))
                 .setConnectionEndPoint(
-                        createSystemConnectionPoints(nrpDao, TapiUtils
+                        createConnectionPoints(nrpDao, TapiUtils
                                 .toNodeRef(new Uuid(TapiConstants.PRESTO_ABSTRACT_NODE)), endpoints, uniqueStamp))
                 .setRoute(Collections.singletonList(new RouteBuilder()
                         .setLocalId("route")
@@ -290,8 +288,8 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         return builder;
     }
 
-    private List<ConnectionEndPoint> createSystemConnectionPoints(NrpDao nrpDao, NodeRef ref,
-                                                                  List<EndPoint> eps, String uniqueStamp) {
+    private List<ConnectionEndPoint> createConnectionPoints(NrpDao nrpDao, NodeRef ref,
+                                                            List<EndPoint> eps, String uniqueStamp) {
 
         Optional<ConnectivityServiceEndPoint> defaultCsEp = eps.stream()
                 .filter(ep -> ep.getEndpoint() != null).map(EndPoint::getEndpoint).findFirst();
@@ -324,10 +322,14 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         List<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
                 .connection.ConnectionEndPoint> ceps = new LinkedList<>();
 
+        ParentNodeEdgePointBuilder pBuilder = new ParentNodeEdgePointBuilder(ref);
+
         for (EndPoint ep : eps) {
             ConnectionEndPointBuilder builder = new ConnectionEndPointBuilder(defaultVal);
             ConnectivityServiceEndPoint csp = ep.getEndpoint();
             OwnedNodeEdgePointRef nepRef = ep.getNepRef();
+            ParentNodeEdgePoint parentRef = pBuilder.setOwnedNodeEdgePointId(nepRef.getOwnedNodeEdgePointId()).build();
+            builder.setParentNodeEdgePoint(Arrays.asList(parentRef));
             cepRefBuilder.setOwnedNodeEdgePointId(nepRef.getOwnedNodeEdgePointId());
             cepRefBuilder.setConnectionEndPointId(new Uuid("cep:"
                     + nepRef.getOwnedNodeEdgePointId().getValue() + ":" + uniqueStamp));

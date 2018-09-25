@@ -271,8 +271,14 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         connCtx.getConnection().forEach(this::verifyConnection);
 
         assertEquals(1, connCtx.getConnectivityService().size());
-        assertFalse(connCtx.getConnectivityService().get(0).getEndPoint().isEmpty());
-        assertEquals("cs:" + servId, connCtx.getConnectivityService().get(0).getUuid().getValue());
+        ConnectivityService connectivityService = connCtx.getConnectivityService().get(0);
+
+        List<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.EndPoint>
+                eps = connectivityService.getEndPoint();
+
+        assertFalse(eps.isEmpty());
+
+        assertEquals("cs:" + servId, connectivityService.getUuid().getValue());
 
     }
 

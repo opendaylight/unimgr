@@ -19,7 +19,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <properties>
         <ovsdb.version>1.7.1-SNAPSHOT</ovsdb.version>
         <mdsal.version>1.8.1-SNAPSHOT</mdsal.version>
-        <netconf.version>1.5.1-SNAPSHOT</netconf.version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
@@ -68,8 +67,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         </plugins>
     </build>
 
-
-
     <dependencies>
 
         <dependency>
@@ -79,10 +76,16 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         </dependency>
 
         <dependency>
-            <groupId>org.opendaylight.netconf</groupId>
-            <artifactId>netconf-topology</artifactId>
-            <version>${netconf.version}</version>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-binding-api</artifactId>
+            <version>${mdsal.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.opendaylight.mdsal.model</groupId>
+            <artifactId>ietf-topology</artifactId>
+        </dependency>
+
 
         <!-- dependencies to use AbstractDataBrokerTest -->
         <dependency>

@@ -63,34 +63,6 @@
       <classifier>features</classifier>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>odl-ovsdb-southbound-impl-rest</artifactId>
-      <version>${ovsdb.version}</version>
-      <type>xml</type>
-      <classifier>features</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.openflowplugin.openflowjava</groupId>
-      <artifactId>odl-openflowjava-protocol</artifactId>
-      <version>${openflowplugin.version}</version>
-      <type>xml</type>
-      <classifier>features</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.openflowplugin</groupId>
-      <artifactId>odl-openflowplugin-flow-services-rest</artifactId>
-      <version>${openflowplugin.version}</version>
-      <type>xml</type>
-      <classifier>features</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.openflowplugin</groupId>
-      <artifactId>odl-openflowplugin-flow-services</artifactId>
-      <version>${openflowplugin.version}</version>
-      <type>xml</type>
-      <classifier>features</classifier>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.openflowplugin</groupId>
       <artifactId>odl-openflowplugin-southbound</artifactId>
       <version>${openflowplugin.version}</version>
