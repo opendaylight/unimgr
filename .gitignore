@@ -29,3 +29,8 @@ maven-eclipse.xml
 .checkstyle
 maven-metadata-local.xml
 \#*#
+
+# Sphinx documentation
+.tox/
+docs/_build/
+
