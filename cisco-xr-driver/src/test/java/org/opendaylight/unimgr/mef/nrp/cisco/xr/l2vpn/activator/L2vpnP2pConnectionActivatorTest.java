@@ -57,9 +57,9 @@ public class L2vpnP2pConnectionActivatorTest extends AbstractConcurrentDataBroke
         //given
         //given
         MountPoint mp = Mockito.mock(MountPoint.class);
-        Mockito.when(mp.getService(DataBroker.class)).thenReturn(com.google.common.base.Optional.of(getDataBroker()));
+        Mockito.when(mp.getService(DataBroker.class)).thenReturn(Optional.of(getDataBroker()));
         mountService = Mockito.mock(MountPointService.class);
-        Mockito.when(mountService.getMountPoint(Mockito.any())).thenReturn(com.google.common.base.Optional.of(mp));
+        Mockito.when(mountService.getMountPoint(Mockito.any())).thenReturn(Optional.of(mp));
         l2VpnP2PConnectActivator = new L2vpnP2pConnectActivator(getDataBroker(), mountService);
 
         mtu = Long.valueOf(1500);
