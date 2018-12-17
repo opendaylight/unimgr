@@ -6,16 +6,16 @@
     <parent>
         <groupId>org.opendaylight.mdsal</groupId>
         <artifactId>binding-parent</artifactId>
-        <version>0.13.1-SNAPSHOT</version>
+        <version>0.13.1</version>
         <relativePath/>
     </parent>
 
     <properties>
         <checkstyle.skip>true</checkstyle.skip>
         <powermock.version>1.6.4</powermock.version>
-        <openflow.version>0.7.1-SNAPSHOT</openflow.version>
-        <ovsdb.version>1.7.1-SNAPSHOT</ovsdb.version>
-        <mdsal.version>1.8.1-SNAPSHOT</mdsal.version>
+        <openflow.version>0.7.1</openflow.version>
+        <ovsdb.version>1.7.1</ovsdb.version>
+        <mdsal.version>1.8.1</mdsal.version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>

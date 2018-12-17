@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <netconf.version>1.5.1-SNAPSHOT</netconf.version>
+    <netconf.version>1.5.1</netconf.version>
   </properties>
 
   <dependencies>

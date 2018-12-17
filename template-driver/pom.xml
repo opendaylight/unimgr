@@ -14,12 +14,12 @@
     <parent>
         <groupId>org.opendaylight.mdsal</groupId>
         <artifactId>binding-parent</artifactId>
-        <version>0.13.1-SNAPSHOT</version>
+        <version>0.13.1</version>
         <relativePath/>
     </parent>
 
     <properties>
-        <mdsal.version>1.8.1-SNAPSHOT</mdsal.version>
+        <mdsal.version>1.8.1</mdsal.version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
