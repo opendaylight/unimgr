@@ -246,7 +246,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
             final NodeKey key = cn.key();
             try {
                 KeyedInstanceIdentifier<Node, NodeKey> id = mountIds.get(key);
-                Optional<MountPoint> mountPoint = mountService.getMountPoint(id).toJavaUtil();
+                Optional<MountPoint> mountPoint = mountService.getMountPoint(id);
                 if (mountPoint.isPresent()) {
                     DataBroker deviceBroker = mountPoint.get().getService(DataBroker.class).get();
                     LOG.debug(deviceBroker.toString());

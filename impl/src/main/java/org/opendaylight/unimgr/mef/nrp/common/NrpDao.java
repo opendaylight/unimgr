@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.opendaylight.mdsal.binding.api.ReadOperations;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -76,7 +77,7 @@ public class NrpDao  {
             .tapi.connectivity.rev180307.Context1.class);
 
     private final ReadWriteTransaction tx;
-    private final ReadTransaction rtx;
+    private final ReadOperations rtx;
 
     public NrpDao(ReadWriteTransaction tx) {
         if (tx == null) {

@@ -192,7 +192,7 @@ public abstract class AbstractL2vpnActivator implements ResourceActivator {
                 .child(Node.class, new NodeKey(nodeId))
                 .build();
 
-        final Optional<MountPoint> nodeOptional = mountService.getMountPoint(nodeInstanceId).toJavaUtil();
+        final Optional<MountPoint> nodeOptional = mountService.getMountPoint(nodeInstanceId);
 
         if (!nodeOptional.isPresent()) {
             return Optional.empty();

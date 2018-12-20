@@ -314,9 +314,9 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         Context1 connCtx = c.augmentation(Context1.class);
 
         // Semantics changed to augmentation being removed along with last child?
-//        assertNull(connCtx);
-      assertEquals(0, connCtx.getConnection().size());
-      assertEquals(0, connCtx.getConnectivityService().size());
+        assertNull(connCtx);
+//      assertEquals(0, connCtx.getConnection().size());
+//      assertEquals(0, connCtx.getConnectivityService().size());
 
         verify(ad1).deactivate();
         verify(ad1).commit();

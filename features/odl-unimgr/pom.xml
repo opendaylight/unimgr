@@ -3,11 +3,11 @@
   This program and the accompanying materials are made available under the 
   terms of the Eclipse Public License v1.0 which accompanies this distribution, 
   and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>single-feature-parent</artifactId>
-    <version>3.1.3</version>
+    <version>4.0.2</version>
     <relativePath/>
   </parent>
   <groupId>org.opendaylight.unimgr</groupId>
@@ -36,16 +36,25 @@
     </plugins>
   </build>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>mdsal-artifacts</artifactId>
+                <version>${controller.mdsal.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
   <dependencies>
-  <!-- 
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>odl-mdsal-broker</artifactId>
-      <version>${controller.mdsal.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
     </dependency>
-     -->
     <dependency>
       <groupId>org.opendaylight.unimgr</groupId>
       <artifactId>unimgr-impl</artifactId>
