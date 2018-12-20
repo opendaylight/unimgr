@@ -22,7 +22,7 @@
     <name>ODL :: unimgr :: ${project.artifactId}</name>
     <modelVersion>4.0.0</modelVersion>
     <properties>
-        <mdsal.model.version>3.0.1</mdsal.model.version>
+        <mdsal.model.version>3.0.2</mdsal.model.version>
     </properties>
 
     <dependencies>

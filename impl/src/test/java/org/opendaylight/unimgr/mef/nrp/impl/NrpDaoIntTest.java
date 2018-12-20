@@ -28,6 +28,8 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.OwnedNodeEdgePoint1;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.cep.list.ConnectionEndPoint;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.cep.list.ConnectionEndPointBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.end.point.ParentNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.end.point.ParentNodeEdgePointBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.Connection;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.OwnedNodeEdgePointRef;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.link.NodeEdgePointBuilder;
@@ -38,15 +40,25 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.to
 public class NrpDaoIntTest extends AbstractTestWithTopo {
 
     private String uuid1 = "uuid1";
+    private Uuid topologyId = new Uuid(TapiConstants.PRESTO_SYSTEM_TOPO);
 
     private OwnedNodeEdgePointRef toRef(String nodeId, String nepId) {
         return new NodeEdgePointBuilder()
-                .setTopologyId(new Uuid(TapiConstants.PRESTO_SYSTEM_TOPO))
+                .setTopologyId(topologyId)
                 .setNodeId(new Uuid(nodeId))
                 .setOwnedNodeEdgePointId(new Uuid(nepId))
                 .build();
     }
 
+    private ParentNodeEdgePoint parentNep(String nodeId, String nepId) {
+        ParentNodeEdgePoint parentNep = new ParentNodeEdgePointBuilder()
+        		.setTopologyId(topologyId)
+        		.setNodeId(new Uuid(nodeId))
+        		.setOwnedNodeEdgePointId(new Uuid(nepId))
+        		.build();
+        return parentNep;
+    }
+    
     @Test
     public void testAddCeps()
             throws ReadFailedException, InterruptedException, ExecutionException {
@@ -57,12 +69,12 @@ public class NrpDaoIntTest extends AbstractTestWithTopo {
         NrpDao nrpDao = new NrpDao(tx);
         OwnedNodeEdgePointRef nepRef = toRef(uuid1, uuid1 + ":1");
 
-
         ConnectionEndPointBuilder builder = new ConnectionEndPointBuilder()
                 .setConnectionPortDirection(PortDirection.BIDIRECTIONAL)
                 .setLayerProtocolName(LayerProtocolName.ETH)
                 .setClientNodeEdgePoint(Collections.emptyList())
-                .setParentNodeEdgePoint(Collections.emptyList());
+                .setParentNodeEdgePoint(Collections.singletonList(
+                		parentNep(uuid1, uuid1 + ":1")));
 
         ConnectionEndPoint cep1 = builder
                 .setUuid(new Uuid("c001:" + uuid1 + ":1"))
@@ -87,7 +99,7 @@ public class NrpDaoIntTest extends AbstractTestWithTopo {
 
         ConnectionEndPointBuilder builder = new ConnectionEndPointBuilder()
                 .setClientNodeEdgePoint(Collections.emptyList())
-                .setParentNodeEdgePoint(Collections.emptyList());
+                .setParentNodeEdgePoint(Collections.singletonList(parentNep(uuid1, uuid1 + ":1")));
 
         OwnedNodeEdgePointRef nepRef = toRef(uuid1, uuid1 + ":1");
 
