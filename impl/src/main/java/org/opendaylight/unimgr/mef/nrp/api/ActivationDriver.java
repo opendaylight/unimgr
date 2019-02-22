@@ -43,7 +43,7 @@ public interface ActivationDriver {
      * @param serviceId connectivity service id
      * @param context context
      */
-    void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context);
+    void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context, boolean isExclusive, String serviceType);
 
     /**
      * Performs the activation action.

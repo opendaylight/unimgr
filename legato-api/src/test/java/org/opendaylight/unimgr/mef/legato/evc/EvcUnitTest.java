@@ -111,7 +111,7 @@ public class EvcUnitTest {
 
         CosNameBuilder builder = new CosNameBuilder();
         builder.setName(new Identifier1024(Constants.COSNAME));
-        builder.withKey(new CosNameKey(new Identifier1024(Constants.COSNAME)));
+       // builder.setKey(new CosNameKey(new Identifier1024(Constants.COSNAME)));
 
         final List<CosName> cosNameList = new ArrayList<CosName>();
         cosNameList.add(builder.build());
@@ -120,7 +120,7 @@ public class EvcUnitTest {
         cosNamesBuilder.setCosName(cosNameList);
 
         final List<VlanIdType> vlanIdTypes = new ArrayList<>();
-        vlanIdTypes.add(new VlanIdType(Constants.VLAN_ID_TYPE));
+        vlanIdTypes.add(new VlanIdType(Integer.parseInt(Constants.VLAN_ID)));
 
         CeVlansBuilder ceVlansBuilder = new CeVlansBuilder();
         ceVlansBuilder.setCeVlan(vlanIdTypes);
@@ -137,7 +137,8 @@ public class EvcUnitTest {
         endPointList.add(endPointBuilder1.build());
         endPointList.add(endPointBuilder2.build());
 
-        evc = (Evc) new EvcBuilder().withKey(new EvcKey(new EvcIdType(Constants.EVC_ID_TYPE)))
+        //evc = (Evc) new EvcBuilder().setKey(new EvcKey(new EvcIdType(Constants.EVC_ID_TYPE)))
+        evc = (Evc) new EvcBuilder()
                 .setMaxFrameSize(new MaxFrameSizeType(Constants.MAXFRAME_SIZE_TYPE))
                 .setEvcId(new EvcIdType(Constants.EVC_ID_TYPE)).setSvcType(MefServiceType.Epl)
                 .setConnectionType(ConnectionType.PointToPoint).setCosNames(cosNamesBuilder.build())
@@ -163,7 +164,7 @@ public class EvcUnitTest {
             MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class,
                     Constants.CREATE_CONNECTIVITY_INPUT, DataBroker.class,
                     LogicalDatastoreType.class, InstanceIdentifier.class));
-            when(LegatoUtils.buildCreateConnectivityServiceInput(evcDao))
+            when(LegatoUtils.buildCreateConnectivityServiceInput(evcDao, Constants.VLAN_ID, evc.getEndPoints().getEndPoint()))
                             .thenReturn((CreateConnectivityServiceInput) objInputBuilder);
 
             final InstanceIdentifier<?> evcKey = InstanceIdentifier.create(MefServices.class)
@@ -215,7 +216,7 @@ public class EvcUnitTest {
             MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class,
                     Constants.UPDATE_CONNECTIVITY_INPUT, DataBroker.class,
                     LogicalDatastoreType.class, InstanceIdentifier.class));
-            when(LegatoUtils.buildUpdateConnectivityServiceInput(evcDao, evcDao.getUniList().get(0), Constants.UUID))
+            when(LegatoUtils.buildUpdateConnectivityServiceInput(evcDao, evcDao.getUniIdList().get(0), Constants.UUID))
                             .thenReturn((UpdateConnectivityServiceInput) objBuilder);
 
             final InstanceIdentifier<?> evcKey = InstanceIdentifier.create(MefServices.class)

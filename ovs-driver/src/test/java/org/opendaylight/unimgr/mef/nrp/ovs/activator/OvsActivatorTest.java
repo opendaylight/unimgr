@@ -49,6 +49,7 @@ import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpCon
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.nrp.connectivity.service.end.point.attrs.NrpCarrierEthConnectivityEndPointResource;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ConnectivityServiceEndPoint;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.end.point.ServiceInterfacePoint;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.OwnedNodeEdgePointRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
@@ -106,7 +107,7 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
 
         //when
         try {
-            ovsActivator.activate(endPoints,serviceId);
+            ovsActivator.activate(endPoints, serviceId, true, ServiceType.POINTTOPOINTCONNECTIVITY.getName());
         } catch (ResourceNotAvailableException e) {
             fail(e.getMessage());
         } catch (TransactionCommitFailedException e) {

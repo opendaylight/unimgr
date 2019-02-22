@@ -17,35 +17,7 @@
    		<argument ref="dataBroker" />
    		<property name="prestoConnectivityService" ref="prestoConnectivityService" />
    </bean>
-   
-   <bean id="mef-sls-profile" class="org.opendaylight.unimgr.mef.legato.LegatoSlsProfileController">
-       <argument ref="dataBroker" />
-   </bean>
 
-	<bean id="mef-cos-profile" class="org.opendaylight.unimgr.mef.legato.LegatoCosProfileController">
-       <argument ref="dataBroker" />
-   </bean>
-   
-   <bean id="mef-bwp-profile" class="org.opendaylight.unimgr.mef.legato.LegatoBwpProfileController">
-       <argument ref="dataBroker" />
-   </bean>
-   
-   <bean id="mef-l2cp-eec-profile" class="org.opendaylight.unimgr.mef.legato.LegatoL2cpEecController">
-       <argument ref="dataBroker" />
-   </bean>
-   
-    <bean id="mef-l2cp-peering-profile" class="org.opendaylight.unimgr.mef.legato.LegatoL2cpPeeringController">
-       <argument ref="dataBroker" />
-   </bean>
-   
-   <bean id="mef-eec-profile" class="org.opendaylight.unimgr.mef.legato.LegatoEecProfileController">
-       <argument ref="dataBroker" />
-   </bean>
-   
-   <bean id="mef-cmp-profile" class="org.opendaylight.unimgr.mef.legato.LegatoColorMappingProfileController">
-       <argument ref="dataBroker" />
-   </bean>
-   
 </blueprint>
 
 

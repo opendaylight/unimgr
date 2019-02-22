@@ -1,0 +1,14 @@
+L1 ifconfig L1-eth0 0
+L1 vconfig add L1-eth0 15 2> /dev/null
+L1 ifconfig L1-eth0.15 10.0.0.1
+
+L20 ifconfig L20-eth0 0
+L20 vconfig add L20-eth0 15 2> /dev/null
+L20 ifconfig L20-eth0.15 10.0.0.2
+
+R1 ifconfig R1-eth0 0
+R1 vconfig add R1-eth0 15 2> /dev/null
+R1 ifconfig R1-eth0.15 10.0.0.3
+
+
+

@@ -39,6 +39,8 @@ public class OvsDriver implements ActivationDriverBuilder {
         return new ActivationDriver() {
             List<EndPoint> endPoints;
             String serviceId;
+            String serviceType;
+            boolean isExclusive;
 
             @Override
             public void commit() {
@@ -51,14 +53,16 @@ public class OvsDriver implements ActivationDriverBuilder {
             }
 
             @Override
-            public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context) {
+            public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context, boolean isExclusive, String serviceType) {
                 this.endPoints = new ArrayList<>(endPoints);
                 this.serviceId = serviceId;
+                this.isExclusive = isExclusive;
+                this.serviceType = serviceType;
             }
 
             @Override
             public void activate() throws TransactionCommitFailedException, ResourceNotAvailableException {
-                activator.activate(endPoints,serviceId);
+                activator.activate(endPoints,serviceId, isExclusive, serviceType);
             }
 
             @Override

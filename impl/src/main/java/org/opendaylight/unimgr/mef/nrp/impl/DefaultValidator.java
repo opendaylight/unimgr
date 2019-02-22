@@ -8,15 +8,21 @@
 
 package org.opendaylight.unimgr.mef.nrp.impl;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.unimgr.mef.nrp.api.RequestValidator;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.LocalClass;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.PortRole;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.CreateConnectivityServiceInput;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.UpdateConnectivityServiceInput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.ConnectivityService;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.update.connectivity.service.input.EndPoint;
@@ -95,7 +101,7 @@ public class DefaultValidator implements RequestValidator {
 
         ValidationResult validationResult = new ValidationResult();
 
-        if (input.getEndPoint() == null || input.getEndPoint().isEmpty()) {
+        if(input.getEndPoint() == null || input.getEndPoint().isEmpty()) {
             validationResult.problem("No endpoints specified for a connectivity service");
         } else {
 
@@ -105,11 +111,45 @@ public class DefaultValidator implements RequestValidator {
                     .map(LocalClass::getLocalId)
                     .filter(s -> !allItems.add(s))
                     .findFirst();
-            firstDuplicate.ifPresent(s -> validationResult.problem("A duplicate endpoint id: " + s));
+            firstDuplicate
+                    .ifPresent(s -> validationResult.problem("A duplicate endpoint id: " + s));
+
+            // Validate based on e-tree service
+            if (input.getConnConstraint().getServiceType()
+                    .equals(ServiceType.ROOTEDMULTIPOINTCONNECTIVITY)) {
+
+                List<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.create.connectivity.service.input.EndPoint> getRoles =
+                        input.getEndPoint().stream().filter(e -> e.getRole() != null)
+                                .collect(Collectors.toCollection(
+                                        () -> new ArrayList<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.create.connectivity.service.input.EndPoint>()));
+                Optional<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.create.connectivity.service.input.EndPoint> isRootAvailable =
+                        null;
+
+                if (getRoles.size() >= 2) {
+
+                    isRootAvailable = getRoles.stream().filter(e -> e != null)
+                            .filter(e -> !e.getRole().equals(PortRole.LEAF)
+                                    && !e.getRole().equals(PortRole.ROOT))
+                            .findFirst();
+
+                    long i = getRoles.stream().filter(node -> node.getRole().equals(PortRole.ROOT))
+                            .count();
+
+                    if (isRootAvailable.isPresent()) {
+                        validationResult.problem(
+                                "Invalid request: Only root and leaf nodes are allowed for E-Tree. ");
+                    } else if (i == 0) {
+                        validationResult.problem(
+                                "Invalid request: Atleast one root is required for E-Tree. ");
+                    }
+                } else {
+                    isRootAvailable = getRoles.stream().findFirst();
+                    isRootAvailable.ifPresent(s -> validationResult.problem(
+                            "Invalid request: Atleast two nodes are required "));
+                }
+            }
         }
-
-
-
         return validationResult;
     }
+
 }

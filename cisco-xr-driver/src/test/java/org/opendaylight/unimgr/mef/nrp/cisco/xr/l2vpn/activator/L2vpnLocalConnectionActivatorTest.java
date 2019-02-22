@@ -114,7 +114,7 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractDataBrokerTest{
     private void activate() {
         LOG.debug("activate L2VPN");
         try {
-            l2VpnLocalConnectActivator.activate(endPoints,serviceId);
+            l2VpnLocalConnectActivator.activate(endPoints, serviceId, true, "");
         } catch (TransactionCommitFailedException e) {
             fail("Error during activation : " + e.getMessage());
         }

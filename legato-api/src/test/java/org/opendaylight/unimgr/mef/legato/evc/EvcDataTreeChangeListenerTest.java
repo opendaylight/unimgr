@@ -9,12 +9,11 @@
 package org.opendaylight.unimgr.mef.legato.evc;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
-
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.google.common.base.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -150,7 +149,7 @@ public class EvcDataTreeChangeListenerTest {
             }
         };
 
-            return modifiedEvc;
+        return modifiedEvc;
     }
 
 }

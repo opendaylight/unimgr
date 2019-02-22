@@ -22,6 +22,7 @@ public class Constants {
     public static final String COSNAME = "EVPL";
     public static final String UNI_ID1 = "sip:ovs-node:s1:s1-eth1";
     public static final String UNI_ID2 = "sip:ovs-node:s2:s2-eth1";
+    public static final String UNI_ID3 = "sip:ovs-node:s3:s3-eth1";
     public static final String UUID = "cs:162052f6bb1:73aaf0f5";
     public static final String READ_EVC = "readEvc";
     public static final String PARSE_NODES = "parseNodes";
@@ -36,7 +37,7 @@ public class Constants {
     public static final String CREATE_CON_SERVICE_AUGMENTATION = "buildCreateConServiceAugmentation";
     public static final String UPDATE_CON_SERVICE_AUGMENTATION = "buildUpdateConServiceAugmentation";
     public static final int MAXFRAME_SIZE_TYPE = 1522;
-    public static final int VLAN_ID_TYPE = 301;
     public static final String ONE = "1";
     public static final String EPL = "epl";
+    public static final String VLAN_ID = "301";
 }

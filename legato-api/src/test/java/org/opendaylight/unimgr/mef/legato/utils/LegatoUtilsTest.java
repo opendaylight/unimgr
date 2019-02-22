@@ -82,7 +82,6 @@ public class LegatoUtilsTest {
     private CheckedFuture checkedFuture;
     private static final EvcIdType EVC_NODE_ID = new EvcIdType("EVC1");
 
-
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(LegatoUtils.class, Mockito.CALLS_REAL_METHODS);
@@ -183,11 +182,11 @@ public class LegatoUtilsTest {
         when(LegatoUtils.parseNodes(evc)).thenReturn(evcDao);
         MemberModifier.suppress(
                 MemberMatcher.method(LegatoUtils.class, Constants.CREATE_CONNECTIVITY_INPUT));
-        when(LegatoUtils.buildCreateConnectivityServiceInput(evcDao))
+        when(LegatoUtils.buildCreateConnectivityServiceInput(evcDao, Constants.VLAN_ID, evc.getEndPoints().getEndPoint()))
                 .thenReturn(input);
         assertNotNull(input);
         assertEquals(input,
-                LegatoUtils.buildCreateConnectivityServiceInput(evcDao));
+                LegatoUtils.buildCreateConnectivityServiceInput(evcDao, Constants.VLAN_ID, evc.getEndPoints().getEndPoint()));
     }
 
 
@@ -236,10 +235,10 @@ public class LegatoUtilsTest {
         MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class,
                 Constants.NRP_CARRIER_ETH_CON_ENDPOINT_RESOURCE));
         when(LegatoUtils.buildNrpCarrierEthConnectivityEndPointResource(
-                String.valueOf(Constants.VLAN_ID_TYPE))).thenReturn(input);
+                String.valueOf(Constants.VLAN_ID))).thenReturn(input);
         assertNotNull(input);
         assertEquals(input, LegatoUtils.buildNrpCarrierEthConnectivityEndPointResource(
-                String.valueOf(Constants.VLAN_ID_TYPE)));
+                String.valueOf(Constants.VLAN_ID)));
     }
 
 
@@ -250,10 +249,10 @@ public class LegatoUtilsTest {
         MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class,
                 Constants.CREATE_ETH_CON_ENDPOINT_AUGMENTATION));
         when(LegatoUtils.buildCreateEthConnectivityEndPointAugmentation(
-                String.valueOf(Constants.VLAN_ID_TYPE))).thenReturn(createEndPoint);
+                String.valueOf(Constants.VLAN_ID))).thenReturn(createEndPoint);
         assertNotNull(createEndPoint);
         assertEquals(createEndPoint, LegatoUtils.buildCreateEthConnectivityEndPointAugmentation(
-                String.valueOf(Constants.VLAN_ID_TYPE)));
+                String.valueOf(Constants.VLAN_ID)));
     }
 
 
@@ -264,10 +263,10 @@ public class LegatoUtilsTest {
         MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class,
                 Constants.UPDATE_ETH_CON_ENDPOINT_AUGMENTATION));
         when(LegatoUtils.buildUpdateEthConnectivityEndPointAugmentation(
-                String.valueOf(Constants.VLAN_ID_TYPE))).thenReturn(updateEndPoint);
+                String.valueOf(Constants.VLAN_ID))).thenReturn(updateEndPoint);
         assertNotNull(updateEndPoint);
         assertEquals(updateEndPoint, LegatoUtils.buildUpdateEthConnectivityEndPointAugmentation(
-                String.valueOf(Constants.VLAN_ID_TYPE)));
+                String.valueOf(Constants.VLAN_ID)));
     }
 
 

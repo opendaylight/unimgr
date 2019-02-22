@@ -25,7 +25,7 @@ public interface ResourceActivator {
      * @throws ResourceActivatorException activation problem
      * @throws TransactionCommitFailedException transaction commit failed
      */
-    void activate(List<EndPoint> endPoints, String serviceName)
+    void activate(List<EndPoint> endPoints, String serviceName, boolean isExclusive, String serviceType)
             throws  ResourceActivatorException, TransactionCommitFailedException;
 
     /**
