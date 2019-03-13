@@ -14,19 +14,19 @@
     <parent>
         <groupId>org.opendaylight.mdsal</groupId>
         <artifactId>binding-parent</artifactId>
-        <version>0.13.1</version>
+        <version>0.13.2</version>
         <relativePath/>
     </parent>
 
     <properties>
-        <mdsal.version>1.8.1</mdsal.version>
+        <mdsal.version>1.8.2</mdsal.version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.opendaylight.unimgr</groupId>
     <artifactId>unimgr-template-driver</artifactId>
-    <version>0.4.1-SNAPSHOT</version>
+    <version>0.4.2-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <name>ODL :: unimgr :: ${project.artifactId}</name>

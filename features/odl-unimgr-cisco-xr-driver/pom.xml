@@ -7,19 +7,19 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>single-feature-parent</artifactId>
-    <version>3.1.3</version>
+    <version>3.1.5</version>
     <relativePath/>
   </parent>
   <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>odl-unimgr-cisco-xr-driver</artifactId>
-  <version>0.4.1-SNAPSHOT</version>
+  <version>0.4.2-SNAPSHOT</version>
   <packaging>feature</packaging>
 
   <name>ODL :: unimgr :: ${project.artifactId}</name>
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <netconf.version>1.5.1</netconf.version>
+    <netconf.version>1.5.2</netconf.version>
   </properties>
 
   <dependencies>
