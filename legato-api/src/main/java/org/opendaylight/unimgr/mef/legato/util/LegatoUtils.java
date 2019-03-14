@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-//import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -202,7 +201,7 @@ public class LegatoUtils {
 
         // if isExclusive == true i.e port bases service then set vlanId =0 to bypass given vlan tag
         if (isExclusive) {
-        	vlanId = "0";
+            vlanId = "0";
         }
 
         // build end points
@@ -298,6 +297,7 @@ public class LegatoUtils {
         String[] uniArr;
 
      //   if (StringUtils.isNotBlank(uniStr)) {
+        if (!uniStr.isEmpty()) {
             uniArr = uniStr.split("#");
             ServiceInterfacePoint sipRef = new ServiceInterfacePointBuilder()
                     .setServiceInterfacePointId(new Uuid(uniArr[0])).build();
@@ -305,7 +305,7 @@ public class LegatoUtils {
                     .setServiceInterfacePoint(sipRef).setDirection(PortDirection.BIDIRECTIONAL)
                     .setLayerProtocolName(layerProtocolName).addAugmentation(EndPoint7.class,
                             LegatoUtils.buildUpdateEthConnectivityEndPointAugmentation(uniArr[1]));
-    //   }
+       }
 
         uniArr = null;
 
@@ -511,5 +511,5 @@ public class LegatoUtils {
         }
         return result;
     }
-    
+
 }

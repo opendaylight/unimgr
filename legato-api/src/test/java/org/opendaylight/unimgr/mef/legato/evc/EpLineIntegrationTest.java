@@ -39,10 +39,12 @@ import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.legato.LegatoServiceController;
 import org.opendaylight.unimgr.mef.legato.dao.EVCDao;
 import org.opendaylight.unimgr.mef.legato.util.LegatoUtils;
 import org.opendaylight.unimgr.mef.legato.utils.Constants;
+import org.opendaylight.unimgr.mef.nrp.common.ResourceActivatorException;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.MefServices;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.CarrierEthernet;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.carrier.ethernet.SubscriberServices;
@@ -77,12 +79,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author OmS.awasthi@Xoriant.Com*
+ * @author Om.SAwasthi@Xoriant.Com
+ *
  */
 @SuppressWarnings("deprecation")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({InstanceIdentifier.class, LogicalDatastoreType.class, LegatoUtils.class})
-public class EvpTreeIntegrationTest {
+public class EpLineIntegrationTest {
 
     @Mock
     private LegatoServiceController legatoServiceController;
@@ -109,45 +112,43 @@ public class EvpTreeIntegrationTest {
     @Before
     public void setUp() throws Exception {
 
-        final List<VlanIdType> vlanList = new ArrayList<VlanIdType>();
-        vlanList.add(new VlanIdType(Constants.VLAN_ID));
+        final List<VlanIdType> vlanIdTypes = new ArrayList<>();
+        vlanIdTypes.add(new VlanIdType(301));
+
+        CeVlansBuilder ceVlansBuilder = new CeVlansBuilder();
+        ceVlansBuilder.setCeVlan(vlanIdTypes);
 
         final List<EndPoint> endPointList = new ArrayList<EndPoint>();
 
         endPointBuilder = new EndPointBuilder();
         endPointBuilder.setUniId(new Identifier45(Constants.UNI_ID1));
+        endPointBuilder.setCeVlans(ceVlansBuilder.build());
         endPointBuilder.setRole(EvcUniRoleType.Root);
-        endPointBuilder.setCeVlans((new CeVlansBuilder().setCeVlan(vlanList)).build());
         endPointList.add(endPointBuilder.build());
 
         endPointBuilder = new EndPointBuilder();
         endPointBuilder.setUniId(new Identifier45(Constants.UNI_ID2));
-        endPointBuilder.setRole(EvcUniRoleType.Leaf);
-        endPointBuilder.setCeVlans((new CeVlansBuilder().setCeVlan(vlanList)).build());
-        endPointList.add(endPointBuilder.build());
-
-        endPointBuilder = new EndPointBuilder();
-        endPointBuilder.setUniId(new Identifier45(Constants.UNI_ID3));
-        endPointBuilder.setRole(EvcUniRoleType.Leaf);
-        endPointBuilder.setCeVlans((new CeVlansBuilder().setCeVlan(vlanList)).build());
+        endPointBuilder.setCeVlans(ceVlansBuilder.build());
+        endPointBuilder.setRole(EvcUniRoleType.Root);
         endPointList.add(endPointBuilder.build());
 
         evc = (Evc) new EvcBuilder().setEvcId(new EvcIdType(Constants.EVC_ID_TYPE))
-                .setEndPoints(new EndPointsBuilder().setEndPoint(endPointList).build())
                 .setMaxFrameSize(new MaxFrameSizeType(Constants.MAXFRAME_SIZE_TYPE))
-                .setEvcId(new EvcIdType(Constants.EVC_ID_TYPE))
-                .setConnectionType(ConnectionType.RootedMultipoint)
-                .setSvcType(MefServiceType.Evptree).build();
+                .setEvcId(new EvcIdType(Constants.EVC_ID_TYPE)).setSvcType(MefServiceType.Epl)
+                .setConnectionType(ConnectionType.PointToPoint)
+                .setEndPoints(new EndPointsBuilder().setEndPoint(endPointList).build()).build();
 
         root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         when(mockAppender.getName()).thenReturn("MOCK");
         root.addAppender(mockAppender);
+
     }
 
-    @SuppressWarnings({"unchecked"})
-    @Test
-    public void testCreateService() throws ReadFailedException, InterruptedException, ExecutionException {
 
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testCreateService() throws InterruptedException, ExecutionException,
+            TransactionCommitFailedException, ResourceActivatorException {
         // having
         assertNotNull(evc);
         evcDao = LegatoUtils.parseNodes(evc);
@@ -156,8 +157,8 @@ public class EvpTreeIntegrationTest {
         PowerMockito.mockStatic(LegatoUtils.class, Mockito.CALLS_REAL_METHODS);
         when(LegatoUtils.parseNodes(evc)).thenReturn(evcDao);
 
-        assertEquals(ConnectionType.RootedMultipoint.getName(), evcDao.getConnectionType());
-        assertEquals(MefServiceType.Evptree.getName(), evcDao.getSvcType());
+        assertEquals(ConnectionType.PointToPoint.getName(), evcDao.getConnectionType());
+        assertEquals(MefServiceType.Epl.getName(), evcDao.getSvcType());
 
         CreateConnectivityServiceInput input = LegatoUtils.buildCreateConnectivityServiceInput(evcDao, String.valueOf(Constants.VLAN_ID), evc.getEndPoints().getEndPoint());
 
@@ -168,9 +169,9 @@ public class EvpTreeIntegrationTest {
         when(rpcResult.isSuccessful()).thenReturn(true);
         when(prestoConnectivityService.createConnectivityService(input)).thenReturn(future);
 
-        //when
+        // when
         Future<RpcResult<CreateConnectivityServiceOutput>> result = this.prestoConnectivityService.createConnectivityService(input);
-        //then
+        // then
         assertTrue(result.get().isSuccessful());
 
         final Optional<Evc> optEvc = mock(Optional.class);
@@ -189,29 +190,29 @@ public class EvpTreeIntegrationTest {
         assertEquals(true,LegatoUtils.updateEvcInOperationalDB(evc, instanceIdentifier, dataBroker));
         verify(transaction).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Evc.class));
         verify(transaction).submit();
+
     }
 
     @Test
     public void testcreateServiceBadInput() throws ReadFailedException, ExecutionException {
-        // having
+
         assertNotNull(evc);
         evcDao = LegatoUtils.parseNodes(evc);
-        evcDao.setSvcType(MefServiceType.Eptree.getName());
+        evcDao.setSvcType(MefServiceType.Evpl.getName());
 
         MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class, Constants.PARSE_NODES));
         PowerMockito.mockStatic(LegatoUtils.class, Mockito.CALLS_REAL_METHODS);
         when(LegatoUtils.parseNodes(evc)).thenReturn(evcDao);
 
         // then
-        assertEquals(ConnectionType.RootedMultipoint.getName(), evcDao.getConnectionType());
-        assertNotEquals(MefServiceType.Evptree.getName(), evcDao.getSvcType());
+        assertEquals(ConnectionType.PointToPoint.getName(), evcDao.getConnectionType());
+        assertNotEquals(MefServiceType.Epl.getName(), evcDao.getSvcType());
 
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testUpdateService() throws InterruptedException, ExecutionException, ReadFailedException {
-
+    public void testUpdateService() throws InterruptedException, ExecutionException, TransactionCommitFailedException, ResourceActivatorException {
         // having
         assertNotNull(evc);
         evcDao = LegatoUtils.parseNodes(evc);
@@ -220,8 +221,8 @@ public class EvpTreeIntegrationTest {
         PowerMockito.mockStatic(LegatoUtils.class, Mockito.CALLS_REAL_METHODS);
         when(LegatoUtils.parseNodes(evc)).thenReturn(evcDao);
 
-        assertEquals(ConnectionType.RootedMultipoint.getName(), evcDao.getConnectionType());
-        assertEquals(MefServiceType.Evptree.getName(), evcDao.getSvcType());
+        assertEquals(ConnectionType.PointToPoint.getName(), evcDao.getConnectionType());
+        assertEquals(MefServiceType.Epl.getName(), evcDao.getSvcType());
         DeleteConnectivityServiceInput deleteConnectivityServiceInput = new DeleteConnectivityServiceInputBuilder().setServiceIdOrName(Constants.UUID).build();
 
         final RpcResult<DeleteConnectivityServiceOutput> rpcResult = mock(RpcResult.class);
@@ -232,10 +233,10 @@ public class EvpTreeIntegrationTest {
         when(prestoConnectivityService.deleteConnectivityService(deleteConnectivityServiceInput)).thenReturn(future);
 
         // when
-        Future<RpcResult<DeleteConnectivityServiceOutput>> delResult = this.prestoConnectivityService.deleteConnectivityService(deleteConnectivityServiceInput);
+        Future<RpcResult<DeleteConnectivityServiceOutput>> result = this.prestoConnectivityService.deleteConnectivityService(deleteConnectivityServiceInput);
 
         // then
-        assertTrue(delResult.get().isSuccessful());
+        assertTrue(result.get().isSuccessful());
 
         this.testCreateService();
     }
@@ -243,26 +244,22 @@ public class EvpTreeIntegrationTest {
     @Test
     public void testUpdateServiceBadInput() throws InterruptedException, ExecutionException {
 
-        // having
         assertNotNull(evc);
         evcDao = LegatoUtils.parseNodes(evc);
-        evcDao.setSvcType(MefServiceType.Eptree.getName());
+        evcDao.setSvcType(MefServiceType.Evpl.getName());
 
         MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class, Constants.PARSE_NODES));
         PowerMockito.mockStatic(LegatoUtils.class, Mockito.CALLS_REAL_METHODS);
         when(LegatoUtils.parseNodes(evc)).thenReturn(evcDao);
 
         // then
-        assertEquals(ConnectionType.RootedMultipoint.getName(), evcDao.getConnectionType());
-        assertNotEquals(MefServiceType.Evptree.getName(), evcDao.getSvcType());
+        assertEquals(ConnectionType.PointToPoint.getName(), evcDao.getConnectionType());
+        assertNotEquals(MefServiceType.Epl.getName(), evcDao.getSvcType());
     }
-
-
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testDeleteService() throws InterruptedException, ExecutionException {
-
         // having
         DeleteConnectivityServiceInput input = new DeleteConnectivityServiceInputBuilder()
                 .setServiceIdOrName(Constants.UUID).build();
@@ -299,7 +296,6 @@ public class EvpTreeIntegrationTest {
                         .contains("Received a request to delete node");
             }
         }));
-
     }
 
     @Test

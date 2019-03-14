@@ -209,7 +209,7 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
                                     LegatoUtils.buildCreateConnectivityServiceInput(evcDao, vlanIdList.get(i), evc.getEndPoints().getEndPoint()),
                                     evcDao.getEvcId(), uuidList)) {
                             } else {
-                                // Safe option is to remove created connectivity services if one of them fails. 
+                                // Safe option is to remove created connectivity services if one of them fails.
                                 deleteConnection(evcDao.getEvcId());
                                 uuidList = null;
                                 break;
@@ -218,7 +218,7 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
 
                         if (uuidList != null && uuidList.size() > 0) {
                             EVC_UUID_MAP_LIST.put(evcDao.getEvcId(), uuidList);
-                            
+
                             Optional<Evc> optionalEvc = LegatoUtils.readEvc(
                                     dataBroker,
                                     LogicalDatastoreType.CONFIGURATION,
@@ -237,8 +237,8 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
                         }
                         LOG.info("EVC_UUID_MAP_LIST  " + EVC_UUID_MAP_LIST.toString());
                     } else {
-                        if(evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPL) || evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPLAN) || 
-                                evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPTREE)) {
+                        if (evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPL) || evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPLAN)
+                              || evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPTREE)) {
 
                             LegatoUtils.removeFlowFromConfigDatastore(
                                         InstanceIdentifier.create(MefServices.class)

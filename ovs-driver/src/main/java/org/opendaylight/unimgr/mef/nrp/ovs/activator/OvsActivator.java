@@ -32,6 +32,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
 
 /**
  * Ovs driver activator.
@@ -129,15 +130,23 @@ public class OvsActivator implements ResourceActivator {
     }
 
     @Override
-    public void deactivate(List<EndPoint> endPoints, String serviceName)
+    public void deactivate(List<EndPoint> endPoints, String serviceName, String serviceType)
             throws TransactionCommitFailedException, ResourceNotAvailableException {
+        boolean isExclusive = false;
 
         for (EndPoint endPoint:endPoints) {
             deactivateEndpoint(endPoint, serviceName);
         }
-        new VlanUtils(dataBroker, endPoints.iterator().next()
-                .getNepRef().getNodeId().getValue()).releaseServiceVlan(serviceName);
-
+        new VlanUtils(dataBroker, endPoints.iterator().next().getNepRef().getNodeId().getValue()).releaseServiceVlan(serviceName);
+        try {
+            isExclusive = new EtreeUtils().getServiceType(dataBroker, serviceName);
+            if (serviceType != null && serviceType.equals(ServiceType.ROOTEDMULTIPOINTCONNECTIVITY.getName()) && ! isExclusive) {
+                new EtreeUtils().releaseTreeServiceVlan(serviceName);
+            }
+        } catch (FailureResult e) {
+            LOG.error("Unable to find out service type result with serviceid { " + serviceName + " }", e);
+        }
+        
     }
 
     private void deactivateEndpoint(EndPoint endPoint, String serviceName)

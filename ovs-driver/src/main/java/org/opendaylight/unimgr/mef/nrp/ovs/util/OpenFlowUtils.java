@@ -579,7 +579,7 @@ public class OpenFlowUtils {
                                 outputActionOrder + outputPortIds.indexOf(outputPortId)))
                     .collect(Collectors.toList()));
 
-        FlowId flowId = new FlowId(getVlanFlowId(serviceName, inputPort, 0));
+        FlowId flowId = new FlowId(getVlanFlowId(serviceName, inputPort, internalVlanId));
         return new FlowBuilder().setId(flowId)
                     .withKey(new FlowKey(flowId))
                     .setTableId(FLOW_TABLE_ID)

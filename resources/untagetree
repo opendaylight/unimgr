@@ -2,8 +2,8 @@
 L1 vconfig rem L1-eth0.15 2> /dev/null
 L1 ifconfig L1-eth0 10.0.0.1
 
-L20 vconfig rem L20-eth0.15 2> /dev/null
-L20 ifconfig L20-eth0 10.0.0.2
+L2 vconfig rem L2-eth0.15 2> /dev/null
+L2 ifconfig L2-eth0 10.0.0.2
 
 R1 vconfig rem R1-eth0.15 2> /dev/null
 R1 ifconfig R1-eth0 10.0.0.3 

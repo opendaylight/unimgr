@@ -39,5 +39,5 @@ public class Constants {
     public static final int MAXFRAME_SIZE_TYPE = 1522;
     public static final String ONE = "1";
     public static final String EPL = "epl";
-    public static final String VLAN_ID = "301";
+    public static final int VLAN_ID = 301;
 }

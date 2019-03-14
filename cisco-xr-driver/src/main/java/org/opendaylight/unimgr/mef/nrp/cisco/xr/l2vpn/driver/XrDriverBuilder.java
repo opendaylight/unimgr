@@ -143,7 +143,7 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
 
             BiConsumer<List<EndPoint>,AbstractL2vpnActivator> deactivate = (neighbors, activator) -> {
                 try {
-                    activator.deactivate(neighbors, serviceId);
+                    activator.deactivate(neighbors, serviceId, serviceType);
                 } catch (TransactionCommitFailedException e) {
                     LOG.error("Deactivation error occured: {}",e.getMessage());
                 }

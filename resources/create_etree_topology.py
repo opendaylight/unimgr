@@ -37,26 +37,18 @@ class PocTopo( Topo ):
 		# Add hosts and switches
 		l1 = self.addHost( 'L1' )
 		
-		
-		l20 = self.addHost( 'L20' )
-		
+		l2 = self.addHost( 'L2' )
 
 		r1 = self.addHost( 'R1' )
 		
-
 		s1 = self.addSwitch( 's1' )
 		s2 = self.addSwitch( 's2' )
 		s3 = self.addSwitch( 's3' )
                 s4 = self.addSwitch( 's4' )
         # Add links
-		self.addLink( l1, s1 )
-		
-
-		self.addLink( l20, s3 )
-		
-
-		self.addLink( r1, s2 )
-		
+		self.addLink( r1, s1 )	
+		self.addLink( l1, s2 )
+		self.addLink( l2, s3 )
 
 		self.addLink( s1, s4 )
                 self.addLink( s2, s4 )
