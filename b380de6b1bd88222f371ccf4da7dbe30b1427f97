@@ -1,0 +1,584 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d56b4427_2d71de90",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/LegatoServiceController.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "All this logging should be LOG.trace(...) or just removed.",
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cad63376_f146a00c",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/LegatoServiceController.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Trailing whitespace",
+      "range": {
+        "startLine": 221,
+        "startChar": 0,
+        "endLine": 221,
+        "endChar": 28
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3fe1e2b3_e454cb30",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/dao/EVCDao.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "This should be a Map\u003cString, List\u003cString\u003e\u003e",
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb2ca158_ee88c21d",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/dao/EVCDao.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Map\u003cString, List\u003cString\u003e\u003e",
+      "range": {
+        "startLine": 70,
+        "startChar": 31,
+        "endLine": 70,
+        "endChar": 50
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28698cdf_215b7dab",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "remove commented code",
+      "range": {
+        "startLine": 17,
+        "startChar": 2,
+        "endLine": 17,
+        "endChar": 45
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "50b3f234_9fe89ee4",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Should be declared when first used (in for loop)",
+      "range": {
+        "startLine": 81,
+        "startChar": 21,
+        "endLine": 81,
+        "endChar": 31
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c1098f19_c3cb02f1",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Should be Map\u003cString, List\u003cString\u003e\u003e",
+      "range": {
+        "startLine": 82,
+        "startChar": 8,
+        "endLine": 82,
+        "endChar": 27
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0ba49be2_42ee1f9d",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Should be declared when first used (in for loop)",
+      "range": {
+        "startLine": 83,
+        "startChar": 8,
+        "endLine": 83,
+        "endChar": 21
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "98531c8a_47e3939d",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Declare at first use - after for loop",
+      "range": {
+        "startLine": 84,
+        "startChar": 21,
+        "endLine": 84,
+        "endChar": 27
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1974b049_e770da4f",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Declare at first use - just before switch.",
+      "range": {
+        "startLine": 171,
+        "startChar": 46,
+        "endLine": 171,
+        "endChar": 75
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff70d313_3c763372",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Declare at first use",
+      "range": {
+        "startLine": 173,
+        "startChar": 132,
+        "endLine": 173,
+        "endChar": 144
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d1059f2c_b77454fe",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Tab character should be spaces.\n\nYou can configure Eclipse to always use spaces and to remove trailing whitespace on save.",
+      "range": {
+        "startLine": 205,
+        "startChar": 8,
+        "endLine": 205,
+        "endChar": 9
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db965ef5_20a8db88",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Declare at first use - just before switch",
+      "range": {
+        "startLine": 223,
+        "startChar": 46,
+        "endLine": 223,
+        "endChar": 75
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d865da2e_5cc91f94",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Declare at first use, inside loop",
+      "range": {
+        "startLine": 273,
+        "startChar": 24,
+        "endLine": 273,
+        "endChar": 39
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce50cdcf_74af19e6",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Useless statement",
+      "range": {
+        "startLine": 289,
+        "startChar": 8,
+        "endLine": 289,
+        "endChar": 31
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7468c746_0728cce0",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Obsolete code should be removed. Is this defensive check needed? If so, then error handling is also needed.",
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "27a5b6aa_98401e8d",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Should move transaction declaration to just before first use (before if statement)",
+      "range": {
+        "startLine": 441,
+        "startChar": 31,
+        "endLine": 441,
+        "endChar": 42
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e11fa863_633694e1",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 474,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Could be declared inside for loop (as List\u003cString\u003e)",
+      "range": {
+        "startLine": 474,
+        "startChar": 8,
+        "endLine": 474,
+        "endChar": 37
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a710e06_e1917204",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 474,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Pointless allocation. Assignment in for loop replaces this.",
+      "range": {
+        "startLine": 474,
+        "startChar": 40,
+        "endLine": 474,
+        "endChar": 64
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "caa3c4a2_6062586b",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "With fixed EVCDao, don\u0027t need cast.",
+      "range": {
+        "startLine": 477,
+        "startChar": 26,
+        "endLine": 477,
+        "endChar": 45
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "038df376_a2913a38",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 514,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Trailing whitespace.",
+      "range": {
+        "startLine": 514,
+        "startChar": 0,
+        "endLine": 514,
+        "endChar": 4
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9f311464_2768c3e0",
+        "filename": "legato-api/src/main/resources/org/opendaylight/blueprint/legato-api-blueprint.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Tabs should be spaces",
+      "range": {
+        "startLine": 17,
+        "startChar": 3,
+        "endLine": 17,
+        "endChar": 5
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "767ea69a_27fd9749",
+        "filename": "ovs-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/ovs/activator/OvsActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "This logging should be removed or changed to LOG.trace",
+      "range": {
+        "startLine": 96,
+        "startChar": 12,
+        "endLine": 96,
+        "endChar": 20
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9905c592_c49b7e0b",
+        "filename": "ovs-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/ovs/activator/OvsActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "trailing whitespace",
+      "range": {
+        "startLine": 97,
+        "startChar": 40,
+        "endLine": 97,
+        "endChar": 41
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6507a408_586a34fe",
+        "filename": "ovs-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/ovs/activator/OvsActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Trailing whitespace",
+      "range": {
+        "startLine": 111,
+        "startChar": 0,
+        "endLine": 111,
+        "endChar": 12
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "129ea55b_a18746ea",
+        "filename": "template-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/template/driver/TemplateDriver.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-03-19T12:27:25Z",
+      "side": 1,
+      "message": "Trailing whitespace",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 16
+      },
+      "revId": "b380de6b1bd88222f371ccf4da7dbe30b1427f97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
