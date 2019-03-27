@@ -6,18 +6,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
-           odl:use-default-for-reference-types="true">
 
-   <reference id="dataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker" />
-  
-   <odl:rpc-service id="prestoConnectivityService" interface="org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.TapiConnectivityService" />
- 
-   <bean id="mef-services" class="org.opendaylight.unimgr.mef.legato.LegatoServiceController" destroy-method="close">
-   		<argument ref="dataBroker" />
-   		<property name="prestoConnectivityService" ref="prestoConnectivityService" />
-   </bean>
-
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0" 
+odl:use-default-for-reference-types="true">
+    <reference id="dataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker" />
+    <odl:rpc-service id="prestoConnectivityService" interface="org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.TapiConnectivityService" />
+    <bean id="mef-services" class="org.opendaylight.unimgr.mef.legato.LegatoServiceController" destroy-method="close">
+        <argument ref="dataBroker" />
+        <property name="prestoConnectivityService" ref="prestoConnectivityService" />
+    </bean>
 </blueprint>
-
-

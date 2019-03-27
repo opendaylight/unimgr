@@ -42,7 +42,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
+/*
  * @author santanu.de@xoriant.com
  */
 
@@ -75,7 +75,7 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
     }
 
     public void registerListener() {
-        LOG.info("Initializing LegatoServiceController:int() ");
+        LOG.trace("Initializing LegatoServiceController:int() ");
 
         assert prestoConnectivityService != null;
 
@@ -92,7 +92,7 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
 
     @Override
     public void add(DataTreeModification<Evc> newDataObject) {
-        LOG.info("  Node Added  " + newDataObject.getRootNode().getIdentifier());
+        LOG.info("  Node Added  {}", newDataObject.getRootNode().getIdentifier());
 
         Optional<Evc> optionalEvc =
                 LegatoUtils.readEvc(dataBroker, LogicalDatastoreType.CONFIGURATION, newDataObject
@@ -105,16 +105,14 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
 
     @Override
     public void remove(DataTreeModification<Evc> removedDataObject) {
-        LOG.info("  Node removed  "
-                + removedDataObject.getRootNode().getIdentifier());
+        LOG.trace("  Node removed {}", removedDataObject.getRootNode().getIdentifier());
 
         deleteNode(removedDataObject.getRootNode().getDataBefore());
     }
 
     @Override
     public void update(DataTreeModification<Evc> modifiedDataObject) {
-        LOG.info("  Node modified  "
-                + modifiedDataObject.getRootNode().getIdentifier());
+        LOG.trace("  Node modified {}", modifiedDataObject.getRootNode().getIdentifier());
         Optional<Evc> optionalEvc = LegatoUtils.readEvc(dataBroker,
                 LogicalDatastoreType.CONFIGURATION, modifiedDataObject
                         .getRootPath().getRootIdentifier());
@@ -126,78 +124,60 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
     }
 
     private void addNode(Evc evc) {
-        LOG.info(" inside addNode()");
+        LOG.trace(" inside addNode()");
 
-        try {
-            assert evc != null;
-            createConnection(evc);
+        assert evc != null;
+        createConnection(evc);
 
-        } catch (Exception ex) {
-            LOG.error(LegatoConstants.ERROR, ex);
-        }
-
-        LOG.info(" ********** END addNode() ****************** ");
-
+        LOG.trace(" ********** END addNode() ****************** ");
     }
 
     private void updateNode(Evc evc) {
-        LOG.info(" inside updateNode()");
+        LOG.trace(" inside updateNode()");
 
+        assert evc != null;
+        updateConnection(evc);
 
-        try {
-            assert evc != null;
-            updateConnection(evc);
-
-        } catch (Exception ex) {
-            LOG.error(LegatoConstants.ERROR, ex);
-        }
-
-        LOG.info(" ********** END updateNode() ****************** ");
+        LOG.trace(" ********** END updateNode() ****************** ");
 
     }
 
     private void deleteNode(Evc evc) {
-        LOG.info(" inside deleteNode()");
+        LOG.trace(" inside deleteNode()");
 
-        try {
-            assert evc != null;
-            deleteConnection(evc.getEvcId().getValue());
-        } catch (Exception ex) {
-            LOG.error(LegatoConstants.ERROR, ex);
-        }
+        assert evc != null;
+        deleteConnection(evc);
 
-        LOG.info(" ********** END deleteNode() ****************** ");
+        LOG.trace(" ********** END deleteNode() ****************** ");
     }
 
+    @SuppressWarnings("checkstyle:illegalcatch")
     private void createConnection(Evc evc) {
-        LOG.info("inside createConnection()");
+        LOG.trace("inside createConnection()");
 
         try {
             EVCDao evcDao =  LegatoUtils.parseNodes(evc);
-            LOG.info("========" + evcDao.getUniVlanIdList().toString());
+            LOG.trace("========" + evcDao.getUniVlanIdList().toString());
             assert evcDao != null
                     && evcDao.getUniIdList() != null && evcDao.getConnectionType() != null;
-            LOG.info(" connection-type :{}, svc-type :{}", evcDao.getConnectionType(), evcDao.getSvcType());
+            LOG.trace(" connection-type :{}, svc-type :{}", evcDao.getConnectionType(), evcDao.getSvcType());
 
             if (!evcDao.getSvcType().equalsIgnoreCase("other")) {
                 if ((evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EPL)
                         || evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPL))
                         && (!evcDao.getConnectionType().replace("-", "")
                                 .equalsIgnoreCase(LegatoConstants.POINTTOPOINT))) {
-                    LOG.info(
-                            "connection-type in payload should be point-to-point when svc-type is epl/evpl");
+                    LOG.trace("connection-type should be point-to-point when svc-type is epl/evpl");
                 } else if ((evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EPLAN)
                         || evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPLAN))
                         && (!evcDao.getConnectionType().replace("-", "")
                                 .equalsIgnoreCase(LegatoConstants.MULTIPOINTTOMULTIPOINT))) {
-                    LOG.info(
-                            "connection-type in payload should be multipoint-to-multipoint when svc-type is eplan/evplan");
+                    LOG.trace("connection-type should be multipoint-to-multipoint when svc-type is eplan/evplan");
                 } else if ((evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EPTREE)
                         || evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPTREE))
                         && (!evcDao.getConnectionType().replace("-", "")
                                 .equalsIgnoreCase(LegatoConstants.ROOTEDMULTIPOINT))) {
-                    LOG.info(
-                            "connection-type in payload should be rooted-multipoint when svc-type is eptree/evptree");
+                    LOG.trace("connection-type should be rooted-multipoint when svc-type is eptree/evptree");
                 } else {
                     assert evcDao.getUniVlanIdList() != null;
                     List<String> vlanIdList = LegatoUtils.validateVlanTag(evcDao);
@@ -206,11 +186,13 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
                         List<String> uuidList = new ArrayList<String>();
                         for (int i = 0; i < vlanIdList.size(); i++) {
                             if (callCreateConnectionService(
-                                    LegatoUtils.buildCreateConnectivityServiceInput(evcDao, vlanIdList.get(i), evc.getEndPoints().getEndPoint()),
+                                    LegatoUtils.buildCreateConnectivityServiceInput(evcDao, vlanIdList.get(i),
+                                        evc.getEndPoints().getEndPoint()),
                                     evcDao.getEvcId(), uuidList)) {
+                                LOG.trace("call callCreateConnectionService()");
                             } else {
                                 // Safe option is to remove created connectivity services if one of them fails.
-                                deleteConnection(evcDao.getEvcId());
+                                deleteConnection(evc);
                                 uuidList = null;
                                 break;
                             }
@@ -235,9 +217,10 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
                                         dataBroker);
                             }
                         }
-                        LOG.info("EVC_UUID_MAP_LIST  " + EVC_UUID_MAP_LIST.toString());
+                        LOG.trace("EVC_UUID_MAP_LIST  " + EVC_UUID_MAP_LIST.toString());
                     } else {
-                        if (evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPL) || evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPLAN)
+                        if (evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPL)
+                              || evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPLAN)
                               || evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPTREE)) {
 
                             LegatoUtils.removeFlowFromConfigDatastore(
@@ -248,14 +231,13 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
                                          new EvcKey(new EvcIdType(evcDao.getEvcId()))),
                                          dataBroker);
 
-                            LOG.error("Service Type : " + evcDao.getSvcType() + ", EVC ID : "
-                                    + evcDao.getEvcId()
-                                    + " Removed successfully from configuration datastore. ");
+                            LOG.error("Service Type : {}, EVC ID : {} is removed successfully "
+                                + "from configuration datastore.", evcDao.getSvcType() , evcDao.getEvcId());
                         }
                     }
                 }
             } else {
-                LOG.info("svc-type in payload should be epl, evpl, eplan, evplan, evptree");
+                LOG.trace("svc-type in payload should be epl, evpl, eplan, evplan, evptree");
             }
 
         } catch (Exception ex) {
@@ -264,53 +246,51 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
 
     }
 
+    @SuppressWarnings("checkstyle:illegalcatch")
     private void updateConnection(Evc evc) {
-        LOG.info("inside updateConnection()");
+        LOG.trace("inside updateConnection()");
 
         try {
             EVCDao evcDao = LegatoUtils.parseNodes(evc);
             assert evcDao != null && evcDao.getUniIdList() != null
                     && evcDao.getConnectionType() != null;
-            LOG.info(" connection-type :{}, svc-type :{} ", evcDao.getConnectionType(), evcDao.getSvcType());
+            LOG.trace(" connection-type :{}, svc-type :{} ", evcDao.getConnectionType(), evcDao.getSvcType());
 
             if (!evcDao.getSvcType().equalsIgnoreCase("other")) {
                 if ((evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EPL)
                         || evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPL))
                         && (!evcDao.getConnectionType().replace("-", "")
                                 .equalsIgnoreCase(LegatoConstants.POINTTOPOINT))) {
-                    LOG.info(
-                            "connection-type in payload should be point-to-point when svc-type is epl/evpl");
+                    LOG.trace("connection-type should be point-to-point when svc-type is epl/evpl");
                 } else if ((evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EPLAN)
                         || evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPLAN))
                         && (!evcDao.getConnectionType().replace("-", "")
                                 .equalsIgnoreCase(LegatoConstants.MULTIPOINTTOMULTIPOINT))) {
-                    LOG.info(
-                            "connection-type in payload should be multipoint-to-multipoint when svc-type is eplan/evplan");
+                    LOG.trace("connection-type should be multipoint-to-multipoint when svc-type is eplan/evplan");
                 } else if ((evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EPTREE)
                         || evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPTREE))
                         && (!evcDao.getConnectionType().replace("-", "")
                                 .equalsIgnoreCase(LegatoConstants.ROOTEDMULTIPOINT))) {
-                    LOG.info(
-                            "connection-type in payload should be rooted-multipoint when svc-type is eptree/evptree");
+                    LOG.trace("connection-type should be rooted-multipoint when svc-type is eptree/evptree");
                 } else {
                     if (EVC_UUID_MAP_LIST.containsKey(evcDao.getEvcId())) {
-                        LOG.info("Update UUID: {} of EVC Id: {} ",
+                        LOG.trace("Update UUID: {} of EVC Id: {} ",
                                 EVC_UUID_MAP_LIST.get(evcDao.getEvcId()), evcDao.getEvcId());
                         assert evcDao.getUniVlanIdList() != null;
                         List<String> vlanIdList = LegatoUtils.validateVlanTag(evcDao);
 
-                        LOG.info(" number of noOfVlan = " + vlanIdList.toString());
+                        LOG.trace(" number of noOfVlan = " + vlanIdList.toString());
                         if (vlanIdList.size() > 0) {
                             // delete existing EVC and create service
-                            deleteConnection(evcDao.getEvcId());
+                            deleteConnection(evc);
                             createConnection(evc);
                         }
                     } else {
-                        LOG.info("UUID does not exists for EVC Id : {}", evcDao.getEvcId());
+                        LOG.trace("UUID does not exists for EVC Id : {}", evcDao.getEvcId());
                     }
                 }
             } else {
-                LOG.info("svc-type in payload should be epl, evpl, eplan, evplan, eptree, evptree");
+                LOG.trace("svc-type in payload should be epl, evpl, eplan, evplan, eptree, evptree");
             }
         } catch (Exception ex) {
 
@@ -319,21 +299,22 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
 
     }
 
-    private void deleteConnection(String evcId) {
-        LOG.info(" inside deleteConnection()");
+    @SuppressWarnings("checkstyle:illegalcatch")
+    private void deleteConnection(Evc evc) {
+        LOG.trace(" inside deleteConnection()");
         try {
-
-            assert EVC_UUID_MAP_LIST != null;
+            assert evc != null && EVC_UUID_MAP_LIST != null;
+            String evcId = evc.getEvcId().getValue();
 
             if (EVC_UUID_MAP_LIST.containsKey(evcId)) {
-                LOG.info("Deleting UUID: {} of EVC Id: {} ",
+                LOG.trace("Deleting UUID: {} of EVC Id: {} ",
                         EVC_UUID_MAP_LIST.get(evcId), evcId);
 
                 for (String uuid : EVC_UUID_MAP_LIST.get(evcId)) {
                     // on successful deletion of service, remove respective element from EVC_UUID_MAP_LIST
                     if (callDeleteConnectionService(new DeleteConnectivityServiceInputBuilder()
                             .setServiceIdOrName(uuid).build())) {
-                        LOG.info("UUID {} is deleted successfully ", uuid);
+                        LOG.trace("UUID {} is deleted successfully ", uuid);
                     }
                 }
                 EVC_UUID_MAP_LIST.remove(evcId);
@@ -345,17 +326,17 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
                         .child(Evc.class, new EvcKey(new EvcIdType(evcId))), dataBroker);
 
             } else {
-                LOG.info("UUID does not exists for EVC Id : {}", evcId);
+                LOG.trace("UUID does not exists for EVC Id : {}", evcId);
             }
 
         } catch (Exception ex) {
             LOG.error(LegatoConstants.ERROR, ex);
         }
 
-        LOG.info(" ********** END deleteConnection() ****************** ");
+        LOG.trace(" ********** END deleteConnection() ****************** ");
     }
 
-
+    @SuppressWarnings("checkstyle:illegalcatch")
     private boolean callCreateConnectionService(
             CreateConnectivityServiceInput createConnServiceInput, String evcId, List<String> uuidList) {
         try {
@@ -363,9 +344,9 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
                     .createConnectivityService(createConnServiceInput);
 
             if (response.get().isSuccessful()) {
-                LOG.info("call Success = {}, response = {} ", response.get()
+                LOG.trace("call Success = {}, response = {} ", response.get()
                         .isSuccessful(), response.get().getResult());
-                LOG.info("evcId = {}, UUID = {} ", evcId, response.get()
+                LOG.trace("evcId = {}, UUID = {} ", evcId, response.get()
                         .getResult().getService().getUuid().getValue());
                 uuidList.add(response.get().getResult().getService()
                         .getUuid().getValue());
@@ -373,7 +354,7 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
                 return true;
 
             } else {
-                LOG.info("call Failure = {} >> {} ", response.get()
+                LOG.trace("call Failure = {} >> {} ", response.get()
                         .isSuccessful(), response.get().getErrors());
                 return false;
             }
@@ -383,6 +364,7 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
         }
     }
 
+    @SuppressWarnings("checkstyle:illegalcatch")
     private void callUpdateConnectionService(
             UpdateConnectivityServiceInput updateConnectivityServiceInput,
             String evcId) {
@@ -391,7 +373,7 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
                     .updateConnectivityService(updateConnectivityServiceInput);
 
             if (response.get().isSuccessful()) {
-                LOG.info("call Success = {}, response = {} ", response.get()
+                LOG.trace("call Success = {}, response = {} ", response.get()
                         .isSuccessful(), response.get().getResult());
 
                 Optional<Evc> optionalEvc = LegatoUtils.readEvc(
@@ -416,15 +398,15 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
                 }
 
             } else {
-                LOG.info("call Failure = {} >> {} ", response.get()
+                LOG.trace("call Failure = {} >> {} ", response.get()
                         .isSuccessful(), response.get().getErrors());
             }
         } catch (Exception ex) {
-
             LOG.error("Error in UpdateConnectivityServiceInput(). Err: ", ex);
         }
     }
 
+    @SuppressWarnings("checkstyle:illegalcatch")
     private boolean callDeleteConnectionService(
             DeleteConnectivityServiceInput deleteConnectivityServiceInput) {
         try {

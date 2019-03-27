@@ -75,10 +75,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-/**
+/*
  * @author Om.SAwasthi@Xoriant.Com
- *
  */
+
 @SuppressWarnings("deprecation")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({InstanceIdentifier.class, LogicalDatastoreType.class, LegatoUtils.class})
@@ -158,7 +158,8 @@ public class EpLanIntegrationTest {
         assertEquals(ConnectionType.MultipointToMultipoint.getName(), evcDao.getConnectionType());
         assertEquals(MefServiceType.Eplan.getName(), evcDao.getSvcType());
 
-        CreateConnectivityServiceInput input = LegatoUtils.buildCreateConnectivityServiceInput(evcDao, String.valueOf(Constants.VLAN_ID), evc.getEndPoints().getEndPoint());
+        CreateConnectivityServiceInput input = LegatoUtils.buildCreateConnectivityServiceInput(
+            evcDao, String.valueOf(Constants.VLAN_ID), evc.getEndPoints().getEndPoint());
 
         final RpcResult<CreateConnectivityServiceOutput> rpcResult = mock(RpcResult.class);
         final ListenableFuture<RpcResult<CreateConnectivityServiceOutput>> future = mock(ListenableFuture.class);
@@ -168,7 +169,8 @@ public class EpLanIntegrationTest {
         when(prestoConnectivityService.createConnectivityService(input)).thenReturn(future);
 
         //when
-        Future<RpcResult<CreateConnectivityServiceOutput>> result = this.prestoConnectivityService.createConnectivityService(input);
+        Future<RpcResult<CreateConnectivityServiceOutput>> result = this.prestoConnectivityService
+            .createConnectivityService(input);
         //then
         assertTrue(result.get().isSuccessful());
 
@@ -176,13 +178,17 @@ public class EpLanIntegrationTest {
         when(optEvc.isPresent()).thenReturn(true);
         when(optEvc.get()).thenReturn(evc);
 
-        MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class, Constants.READ_EVC, DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class));
+        MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class, Constants.READ_EVC, DataBroker.class,
+            LogicalDatastoreType.class, InstanceIdentifier.class));
 
-        final InstanceIdentifier<SubscriberServices> instanceIdentifier = InstanceIdentifier.builder(MefServices.class).child(CarrierEthernet.class).child(SubscriberServices.class).build();
+        final InstanceIdentifier<SubscriberServices> instanceIdentifier = InstanceIdentifier.builder(MefServices.class)
+            .child(CarrierEthernet.class).child(SubscriberServices.class).build();
 
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
-        when(LegatoUtils.readEvc(any(DataBroker.class), any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(optEvc);
-        doNothing().when(transaction).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Evc.class));
+        when(LegatoUtils.readEvc(any(DataBroker.class), any(LogicalDatastoreType.class),
+            any(InstanceIdentifier.class))).thenReturn(optEvc);
+        doNothing().when(transaction).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+            any(Evc.class));
         when(transaction.submit()).thenReturn(checkedFuture);
 
         assertEquals(true,LegatoUtils.updateEvcInOperationalDB(evc, instanceIdentifier, dataBroker));
@@ -222,7 +228,8 @@ public class EpLanIntegrationTest {
 
         assertEquals(ConnectionType.MultipointToMultipoint.getName(), evcDao.getConnectionType());
         assertEquals(MefServiceType.Eplan.getName(), evcDao.getSvcType());
-        DeleteConnectivityServiceInput deleteConnectivityServiceInput = new DeleteConnectivityServiceInputBuilder().setServiceIdOrName(Constants.UUID).build();
+        DeleteConnectivityServiceInput deleteConnectivityServiceInput = new DeleteConnectivityServiceInputBuilder()
+            .setServiceIdOrName(Constants.UUID).build();
 
         final RpcResult<DeleteConnectivityServiceOutput> rpcResult = mock(RpcResult.class);
         final ListenableFuture<RpcResult<DeleteConnectivityServiceOutput>> future = mock(ListenableFuture.class);
@@ -232,7 +239,8 @@ public class EpLanIntegrationTest {
         when(prestoConnectivityService.deleteConnectivityService(deleteConnectivityServiceInput)).thenReturn(future);
 
         // when
-        Future<RpcResult<DeleteConnectivityServiceOutput>> delResult = this.prestoConnectivityService.deleteConnectivityService(deleteConnectivityServiceInput);
+        Future<RpcResult<DeleteConnectivityServiceOutput>> delResult = this.prestoConnectivityService
+            .deleteConnectivityService(deleteConnectivityServiceInput);
 
         // then
         assertTrue(delResult.get().isSuccessful());
@@ -273,7 +281,8 @@ public class EpLanIntegrationTest {
         when(prestoConnectivityService.deleteConnectivityService(input)).thenReturn(future);
 
         // when
-        Future<RpcResult<DeleteConnectivityServiceOutput>> result = this.prestoConnectivityService.deleteConnectivityService(input);
+        Future<RpcResult<DeleteConnectivityServiceOutput>> result = this.prestoConnectivityService
+            .deleteConnectivityService(input);
 
         // then
         assertTrue(result.get().isSuccessful());
@@ -307,7 +316,8 @@ public class EpLanIntegrationTest {
         String uuid = "cs:162052f6bb1:73aaf0f6";
 
         // when
-        DeleteConnectivityServiceInput input = new DeleteConnectivityServiceInputBuilder().setServiceIdOrName(Constants.UUID).build();
+        DeleteConnectivityServiceInput input = new DeleteConnectivityServiceInputBuilder()
+            .setServiceIdOrName(Constants.UUID).build();
 
         // then
         assertNotEquals(uuid, input.getServiceIdOrName());

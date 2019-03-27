@@ -91,10 +91,9 @@ public class OvsActivator implements ResourceActivator {
         OvsActivatorHelper ovsActivatorHelper = new OvsActivatorHelper(topologyTransaction, endPoint);
         String openFlowPortName = ovsActivatorHelper.getOpenFlowPortName();
         long queueNumber = QUEUE_NUMBER_GENERATOR.getAndIncrement();
-        LOG.info("VLAN ID = {} ", ovsActivatorHelper.getCeVlanId().isPresent());
+        LOG.trace("VLAN ID = {} ", ovsActivatorHelper.getCeVlanId().isPresent());
 
         if(isExclusive && ! ovsActivatorHelper.getCeVlanId().isPresent()){
-            LOG.info( " NEW LOGIC here openFlowPortName {}" , openFlowPortName);
             // Port based E-tree service 
             if(serviceType != null && serviceType.equals(ServiceType.ROOTEDMULTIPOINTCONNECTIVITY.getName())) {
                 flowsToWrite.addAll(OpenFlowUtils.getEpTree(endPoint.getEndpoint().getRole().getName(), openFlowPortName, vlanUtils.getVlanID(serviceName), ovsActivatorHelper.getCeVlanId(),interswitchLinks, serviceName, queueNumber, rootCount, eTreeUtils, isExclusive));
@@ -103,13 +102,11 @@ public class OvsActivator implements ResourceActivator {
             }
         }
         else{
-            LOG.info( "EXISTING LOGIC");
             if(serviceType != null && serviceType.equals(ServiceType.ROOTEDMULTIPOINTCONNECTIVITY.getName())) {
                 flowsToWrite.addAll(OpenFlowUtils.getEvpTree(endPoint.getEndpoint().getRole().getName(), openFlowPortName, vlanUtils.getVlanID(serviceName), ovsActivatorHelper.getCeVlanId(),interswitchLinks, serviceName, queueNumber, rootCount, eTreeUtils));
             }else {
                 flowsToWrite.addAll(OpenFlowUtils.getVlanFlows(openFlowPortName, vlanUtils.getVlanID(serviceName), ovsActivatorHelper.getCeVlanId(),interswitchLinks, serviceName, queueNumber));
             }
-            
         }
 
         // Transaction - Add flows related to service to table and remove unnecessary flows

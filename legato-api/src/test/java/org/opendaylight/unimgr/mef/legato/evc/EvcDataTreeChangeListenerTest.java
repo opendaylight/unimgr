@@ -44,10 +44,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-/**
+/*
  * @author Arif.Hussain@Xoriant.Com
- *
  */
+
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(LegatoUtils.class)
 public class EvcDataTreeChangeListenerTest {
@@ -80,7 +80,8 @@ public class EvcDataTreeChangeListenerTest {
         collection.add(evc);
 
 
-        when(LegatoUtils.readEvc(any(DataBroker.class), any(LogicalDatastoreType.class), any())).thenReturn(Optional.absent());
+        when(LegatoUtils.readEvc(any(DataBroker.class), any(LogicalDatastoreType.class),
+            any())).thenReturn(Optional.absent());
 
         legatoServiceController.onDataTreeChanged(collection);
         verify(legatoServiceController, times(1)).add(any(DataTreeModification.class));
@@ -97,7 +98,8 @@ public class EvcDataTreeChangeListenerTest {
             }
 
             @Override
-            public <C extends Identifiable<K> & ChildOf<? super Evc>, K extends Identifier<C>> DataObjectModification<C> getModifiedChildListItem(
+            public <C extends Identifiable<K> & ChildOf<? super Evc>, K extends
+                Identifier<C>> DataObjectModification<C> getModifiedChildListItem(
                     Class<C> arg0, K arg1) {
                 // TODO Auto-generated method stub
                 return null;
@@ -152,7 +154,8 @@ public class EvcDataTreeChangeListenerTest {
         DataTreeModification<Evc> modifiedEvc = new DataTreeModification<Evc>() {
             @Override
             public DataTreeIdentifier<Evc> getRootPath() {
-                return new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, InstanceIdentifier.create(Evc.class));
+                return new DataTreeIdentifier<>(
+                    LogicalDatastoreType.CONFIGURATION, InstanceIdentifier.create(Evc.class));
             }
 
             @Override

@@ -61,7 +61,6 @@ public class TemplateDriver implements ActivationDriverBuilder {
                 this.endpoints = new ArrayList<>(endPoints);
                 this.isExlusive = isExlusive;
                 this.serviceType = serviceType;
-                
                 LOG.info("Driver initialized with: " + epsInfo());
             }
 

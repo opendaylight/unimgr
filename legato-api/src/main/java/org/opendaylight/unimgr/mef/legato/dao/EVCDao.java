@@ -9,7 +9,8 @@ package org.opendaylight.unimgr.mef.legato.dao;
 
 import java.util.List;
 import java.util.Map;
-/**
+
+/*
  * @author santanu.de@xoriant.com
  */
 
@@ -20,7 +21,7 @@ public class EVCDao {
     private String connectionType;
     private String svcType;
     private List<String> uniIdList;
-    private Map<String, Object> uniVlanIdList;
+    private Map<String, List<String>> uniVlanIdList;
 
 
     public String getEvcId() {
@@ -63,12 +64,12 @@ public class EVCDao {
         this.uniIdList = uniIdList;
     }
 
-    public Map<String, Object> getUniVlanIdList() {
+    public Map<String, List<String>> getUniVlanIdList() {
         return uniVlanIdList;
     }
 
-    public void setUniVlanList(Map<String, Object> uniVlanIdList) {
-        this.uniVlanIdList = uniVlanIdList;
+    public void setUniVlanList(Map<String, List<String>> inputUniVlanIdList) {
+        this.uniVlanIdList = inputUniVlanIdList;
     }
 
 }
