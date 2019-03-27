@@ -76,15 +76,15 @@ public final class LegatoUtils {
     private static final Logger LOG = LoggerFactory.getLogger(LegatoUtils.class);
 
     public static EVCDao parseNodes(Evc evc) {
+        assert evc != null;
+        assert evc.getEndPoints().getEndPoint() != null
+                && evc.getEndPoints().getEndPoint().size() > 0;
+
         List<String> uniIdList = new ArrayList<String>();
         List<String> vlanIdList;
         Map<String, List<String>> uniVlanList = new HashMap<String, List<String>>();
         String vlanId;
-        final EVCDao evcDao = new EVCDao();
 
-        assert evc != null;
-        assert evc.getEndPoints().getEndPoint() != null
-                && evc.getEndPoints().getEndPoint().size() > 0;
         for (EndPoint endPoint : evc.getEndPoints().getEndPoint()) {
             vlanId = "0";
             vlanIdList = new ArrayList<String>();
@@ -101,6 +101,7 @@ public final class LegatoUtils {
             uniIdList.add(endPoint.getUniId().getValue().toString());
         }
 
+        final EVCDao evcDao = new EVCDao();
         evcDao.setEvcId(evc.getEvcId().getValue());
         evcDao.setMaxFrameSize(
                 (evc.getMaxFrameSize().getValue() != null) ? evc.getMaxFrameSize().getValue() : 0);
@@ -167,8 +168,6 @@ public final class LegatoUtils {
     public static CreateConnectivityServiceInput buildCreateConnectivityServiceInput(EVCDao evcDao,
             String vlanId, List<EndPoint> endpoints) {
 
-        CreateConnectivityServiceInputBuilder createConnServiceInputBuilder =
-                new CreateConnectivityServiceInputBuilder();
         boolean isExclusive = false;
 
         // if svc-type = epl, eplan or eptree then set is_exclusive flag as true
@@ -177,6 +176,9 @@ public final class LegatoUtils {
                 || evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EPTREE)) {
             isExclusive = true;
         }
+
+        CreateConnectivityServiceInputBuilder createConnServiceInputBuilder =
+                new CreateConnectivityServiceInputBuilder();
 
         switch (evcDao.getConnectionType().replace("-", "").toUpperCase()) {
             case LegatoConstants.POINTTOPOINT:
@@ -217,15 +219,15 @@ public final class LegatoUtils {
             String uniStr, String uuid) {
         boolean isExclusive = false;
 
-        UpdateConnectivityServiceInputBuilder updateConnServiceInputBuilder =
-                new UpdateConnectivityServiceInputBuilder();
-
         // if svc-type = epl, eplan or eptree then set is_exclusive flag as true
         if (evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EPL)
                 || evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EPLAN)
                 || evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EPTREE)) {
             isExclusive = true;
         }
+
+        UpdateConnectivityServiceInputBuilder updateConnServiceInputBuilder =
+                new UpdateConnectivityServiceInputBuilder();
 
         switch (evcDao.getConnectionType().replace("-", "").toUpperCase()) {
             case LegatoConstants.POINTTOPOINT:
@@ -465,7 +467,6 @@ public final class LegatoUtils {
             InstanceIdentifier<SubscriberServices> nodeIdentifier, DataBroker dataBroker) {
         LOG.trace("Received a request to add node {}", nodeIdentifier);
         boolean result = false;
-        final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
 
         Optional<Evc> optionalEvc =
                 LegatoUtils.readEvc(dataBroker, LogicalDatastoreType.OPERATIONAL,
@@ -476,6 +477,7 @@ public final class LegatoUtils {
         List<Evc> evcList = new ArrayList<Evc>();
         evcList.add(evc);
 
+        final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
         // if EVC Id present in operational DB
         if (optionalEvc.isPresent()) {
             transaction.put(LogicalDatastoreType.OPERATIONAL, nodeIdentifier,
@@ -498,10 +500,10 @@ public final class LegatoUtils {
 
     public static List<String> validateVlanTag(EVCDao evcDao) {
         List<String> vlanIdList = new ArrayList<String>();
-        ArrayList<String> vlanTagList = new ArrayList<String>();
+        List<String> vlanTagList = new ArrayList<String>();
 
         for (String uniId : evcDao.getUniIdList()) {
-            vlanTagList = (ArrayList<String>) evcDao.getUniVlanIdList().get(uniId);
+            vlanTagList = evcDao.getUniVlanIdList().get(uniId);
             if (vlanIdList.size() == 0) {
                 vlanIdList = vlanTagList;
             } else if (vlanIdList.size() != vlanTagList.size()) {
