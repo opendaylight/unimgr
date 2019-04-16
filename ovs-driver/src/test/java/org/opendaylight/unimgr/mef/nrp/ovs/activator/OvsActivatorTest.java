@@ -77,7 +77,7 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
     private static final String nodeId = "ovs-node";
 
     private static final String interswitchName = "interswitch-openflow";
-    private static final String vlanName = "vlan-openflow";
+    private static final String vlanName = "vlan1-openflow";
     private static final String dropName = "default-DROP";
 
     List<String> of1InterwitchPorts = Arrays.asList("openflow:1:3", "openflow:1:4", "openflow:1:5");

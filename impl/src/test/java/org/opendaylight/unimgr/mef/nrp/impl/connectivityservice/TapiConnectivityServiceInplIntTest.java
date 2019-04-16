@@ -84,6 +84,7 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev18030
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.GetConnectivityServiceListInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.GetConnectivityServiceListOutput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.OwnedNodeEdgePoint1;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.UpdateConnectivityServiceInput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.ConnectionEndPoint;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.Connection;
@@ -91,6 +92,7 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev18030
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.ConnectivityServiceBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.ConnectivityServiceKey;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.end.point.ServiceInterfacePoint;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.create.connectivity.service.input.ConnConstraintBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.create.connectivity.service.input.EndPoint;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.create.connectivity.service.input.EndPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.topology.Node;
@@ -153,6 +155,9 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         //when
         CreateConnectivityServiceInput input = new CreateConnectivityServiceInputBuilder()
                 .setEndPoint(eps(uuid1 + ":1", uuid1 + ":2"))
+                .setConnConstraint(new ConnConstraintBuilder()
+                .setIsExclusive(true)
+                .setServiceType(ServiceType.POINTTOPOINTCONNECTIVITY).build())
                 .build();
 
         RpcResult<CreateConnectivityServiceOutput> result = this.connectivityService
@@ -250,8 +255,12 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         tx.commit().get();
 
         //when
+
         CreateConnectivityServiceInput input = new CreateConnectivityServiceInputBuilder()
                 .setEndPoint(eps(uuid1 + ":1", uuid3 + ":3"))
+                .setConnConstraint(new ConnConstraintBuilder()
+                .setIsExclusive(true)
+                .setServiceType(ServiceType.POINTTOPOINTCONNECTIVITY).build())
                 .build();
 
         RpcResult<CreateConnectivityServiceOutput> result = this.connectivityService
@@ -572,6 +581,8 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
                     ReadWriteTransaction tx, String csId, Connection connection) {
         ConnectivityService cs = new ConnectivityServiceBuilder()
                 .setUuid(new Uuid(csId))
+                .setIsExclusive(true)
+                .setServiceType(ServiceType.POINTTOPOINTCONNECTIVITY)
                 .setConnection(Collections.singletonList(connection.getUuid()))
                 .setEndPoint(toEps(connection.getConnectionEndPoint()))
                 .build();
