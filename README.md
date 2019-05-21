@@ -6,7 +6,6 @@ reference points to provide management of connectivity services across multi-ven
 devices. Currently supported devices are:
 
 * Cisco IOS-XR devices managed via Netconf
-* Cisco IOS-XE devices managed via CLI
 * Openflow switches managed via OVSDB
 
 Building unimgr
