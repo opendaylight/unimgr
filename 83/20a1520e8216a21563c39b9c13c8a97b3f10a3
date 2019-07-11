@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Bartosz Michalik <bartosz.michalik@amartus.com>
+Submitted-by: Donald Hunter <donaldh@cisco.com>
+Submitted-at: Thu, 11 Jul 2019 14:37:41 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/82877
+Project: unimgr
+Branch: refs/heads/stable/fluorine
