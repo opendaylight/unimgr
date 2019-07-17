@@ -66,7 +66,7 @@ public abstract class AbstractL2vpnActivator implements ResourceActivator {
     }
 
     @Override
-    public void activate(List<EndPoint> endPoints, String serviceId) throws TransactionCommitFailedException {
+    public void activate(List<EndPoint> endPoints, String serviceId, boolean isExclusive, String serviceType) throws TransactionCommitFailedException {
         String innerName = getInnerName(serviceId);
         String outerName = getOuterName(serviceId);
         ServicePort port = null;
@@ -95,7 +95,7 @@ public abstract class AbstractL2vpnActivator implements ResourceActivator {
     }
 
     @Override
-    public void deactivate(List<EndPoint> endPoints, String serviceId) throws TransactionCommitFailedException {
+    public void deactivate(List<EndPoint> endPoints, String serviceId, String serviceType) throws TransactionCommitFailedException {
         String innerName = getInnerName(serviceId);
         String outerName = getOuterName(serviceId);
         ServicePort port = toServicePort(endPoints.stream().findFirst().get(), NETCONF_TOPOLODY_NAME);
