@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "434c9b6c_89a1a7d9",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/mef/nrp/api/ActivationDriver.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-07-17T14:22:30Z",
+      "side": 1,
+      "message": "Should use ServiceType instead of String here and in all other usage.",
+      "revId": "3340a39566f4ff2a92e54c7c672eb1aa5fd5c0b4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
