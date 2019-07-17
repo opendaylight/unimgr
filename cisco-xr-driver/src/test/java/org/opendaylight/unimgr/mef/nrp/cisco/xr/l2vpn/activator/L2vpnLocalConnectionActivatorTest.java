@@ -32,6 +32,7 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.XconnectGroup;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.P2pXconnect;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.attachment.circuits.AttachmentCircuit;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -105,7 +106,7 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractDataBrokerTest{
 
     private void deactivate() {
         try {
-            l2VpnLocalConnectActivator.deactivate(endPoints,serviceId);
+            l2VpnLocalConnectActivator.deactivate(endPoints,serviceId, ServiceType.POINTTOPOINTCONNECTIVITY);
         } catch (TransactionCommitFailedException e) {
             fail("Error during deactivation : " + e.getMessage());
         }
@@ -114,7 +115,8 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractDataBrokerTest{
     private void activate() {
         LOG.debug("activate L2VPN");
         try {
-            l2VpnLocalConnectActivator.activate(endPoints,serviceId);
+            l2VpnLocalConnectActivator.activate(endPoints, serviceId, true, ServiceType.POINTTOPOINTCONNECTIVITY
+);
         } catch (TransactionCommitFailedException e) {
             fail("Error during activation : " + e.getMessage());
         }

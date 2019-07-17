@@ -1,0 +1,17 @@
+L1 ifconfig L1-eth0 0
+L1 vconfig rem L1-eth0.15 2> /dev/null
+L1 vconfig add L1-eth0 301 2> /dev/null
+L1 ifconfig L1-eth0.301 10.0.0.1
+
+L2 ifconfig L2-eth0 0
+L2 vconfig rem L2-eth0.15 2> /dev/null
+L2 vconfig add L2-eth0 301 2> /dev/null
+L2 ifconfig L2-eth0.301 10.0.0.2
+
+R1 ifconfig R1-eth0 0
+R1 vconfig rem R1-eth0.15 2> /dev/null
+R1 vconfig add R1-eth0 301 2> /dev/null
+R1 ifconfig R1-eth0.301 10.0.0.3
+
+
+

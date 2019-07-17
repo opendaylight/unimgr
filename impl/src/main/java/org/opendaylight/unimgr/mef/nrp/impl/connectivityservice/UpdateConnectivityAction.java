@@ -128,7 +128,7 @@ public class UpdateConnectivityAction implements Callable<RpcResult<UpdateConnec
 
                     endpoint.setNepRef(ownedNodeEdgePointRef);
 
-                    driver.get().initialize(Collections.singletonList(endpoint), serviceId, null);
+                    driver.get().initialize(Collections.singletonList(endpoint), serviceId, null, true, null);
                     tx.addDriver(driver.get());
                 } else {
                     LOG.warn("No driver information for node {}", node.getUuid());

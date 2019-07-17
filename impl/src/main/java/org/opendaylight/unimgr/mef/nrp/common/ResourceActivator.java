@@ -11,6 +11,7 @@ package org.opendaylight.unimgr.mef.nrp.common;
 import java.util.List;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 
 /**
  * Device facing SPI for activating or deactivating a fragment of an NRP
@@ -25,7 +26,7 @@ public interface ResourceActivator {
      * @throws ResourceActivatorException activation problem
      * @throws TransactionCommitFailedException transaction commit failed
      */
-    void activate(List<EndPoint> endPoints, String serviceName)
+    void activate(List<EndPoint> endPoints, String serviceName, boolean isExclusive, ServiceType serviceType)
             throws  ResourceActivatorException, TransactionCommitFailedException;
 
     /**
@@ -35,6 +36,6 @@ public interface ResourceActivator {
      * @throws ResourceActivatorException activation problem
      * @throws TransactionCommitFailedException transaction commit failed
      */
-    void deactivate(List<EndPoint> endPoints, String serviceName)
+    void deactivate(List<EndPoint> endPoints, String serviceName, ServiceType serviceType)
             throws TransactionCommitFailedException, ResourceActivatorException;
 }

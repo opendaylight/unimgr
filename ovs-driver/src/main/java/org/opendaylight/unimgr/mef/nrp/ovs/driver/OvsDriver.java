@@ -21,6 +21,7 @@ import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
 import org.opendaylight.unimgr.mef.nrp.ovs.activator.OvsActivator;
 import org.opendaylight.unimgr.mef.nrp.ovs.tapi.TopologyDataHandler;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpConnectivityServiceAttrs;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 
 /**
  * Ovs driver builder.
@@ -39,6 +40,8 @@ public class OvsDriver implements ActivationDriverBuilder {
         return new ActivationDriver() {
             List<EndPoint> endPoints;
             String serviceId;
+            ServiceType serviceType;
+            boolean isExclusive;
 
             @Override
             public void commit() {
@@ -51,14 +54,16 @@ public class OvsDriver implements ActivationDriverBuilder {
             }
 
             @Override
-            public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context) {
+            public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context, boolean isExclusive, ServiceType serviceType) {
                 this.endPoints = new ArrayList<>(endPoints);
                 this.serviceId = serviceId;
+                this.isExclusive = isExclusive;
+                this.serviceType = serviceType;
             }
 
             @Override
             public void activate() throws TransactionCommitFailedException, ResourceNotAvailableException {
-                activator.activate(endPoints,serviceId);
+                activator.activate(endPoints,serviceId, isExclusive, serviceType);
             }
 
             @Override
@@ -68,7 +73,7 @@ public class OvsDriver implements ActivationDriverBuilder {
 
             @Override
             public void deactivate() throws TransactionCommitFailedException, ResourceNotAvailableException {
-                activator.deactivate(endPoints,serviceId);
+                activator.deactivate(endPoints,serviceId, serviceType);
             }
 
             @Override

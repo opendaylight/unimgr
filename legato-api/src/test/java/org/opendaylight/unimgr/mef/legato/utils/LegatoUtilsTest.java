@@ -21,7 +21,6 @@ import com.google.common.util.concurrent.CheckedFuture;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -44,9 +43,20 @@ import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.M
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.CarrierEthernet;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.carrier.ethernet.SubscriberServices;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.carrier.ethernet.subscriber.services.Evc;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.carrier.ethernet.subscriber.services.EvcBuilder;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.carrier.ethernet.subscriber.services.EvcKey;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.carrier.ethernet.subscriber.services.evc.EndPointsBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.carrier.ethernet.subscriber.services.evc.end.points.EndPoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.carrier.ethernet.subscriber.services.evc.end.points.EndPointBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.carrier.ethernet.subscriber.services.evc.end.points.end.point.CeVlansBuilder;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.types.rev171215.ConnectionType;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.types.rev171215.EvcIdType;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.types.rev171215.EvcUniRoleType;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.types.rev171215.Identifier1024;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.types.rev171215.Identifier45;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.types.rev171215.MaxFrameSizeType;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.types.rev171215.MefServiceType;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.types.rev171215.VlanIdType;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.CreateConnectivityServiceInput1;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.EndPoint2;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.EndPoint7;
@@ -62,10 +72,10 @@ import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-/**
-* @author Arif.Hussain@Xoriant.Com
-*
-*/
+/*
+ * @author Arif.Hussain@Xoriant.Com
+ */
+
 @SuppressWarnings("deprecation")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({LogicalDatastoreType.class, LegatoUtils.class, InstanceIdentifier.class})
@@ -80,32 +90,69 @@ public class LegatoUtilsTest {
     @SuppressWarnings("rawtypes")
     @Mock
     private CheckedFuture checkedFuture;
+    private EndPointBuilder endPointBuilder;
+    private Evc evc;
+    private EVCDao evcDao;
     private static final EvcIdType EVC_NODE_ID = new EvcIdType("EVC1");
-
 
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(LegatoUtils.class, Mockito.CALLS_REAL_METHODS);
+
+        final List<VlanIdType> vlanIdTypes = new ArrayList<>();
+        vlanIdTypes.add(new VlanIdType(301));
+
+        CeVlansBuilder ceVlansBuilder = new CeVlansBuilder();
+        ceVlansBuilder.setCeVlan(vlanIdTypes);
+
+        final List<EndPoint> endPointList = new ArrayList<EndPoint>();
+        endPointBuilder = new EndPointBuilder();
+        endPointBuilder.setCeVlans(ceVlansBuilder.build());
+        endPointBuilder.setUniId(new Identifier45(Constants.UNI_ID1));
+        endPointBuilder.setRole(EvcUniRoleType.Root);
+
+        endPointList.add(endPointBuilder.build());
+        endPointBuilder = new EndPointBuilder();
+        endPointBuilder.setCeVlans(ceVlansBuilder.build());
+        endPointBuilder.setUniId(new Identifier45(Constants.UNI_ID2));
+        endPointBuilder.setRole(EvcUniRoleType.Leaf);
+
+        endPointList.add(endPointBuilder.build());
+        endPointBuilder = new EndPointBuilder();
+        endPointBuilder.setCeVlans(ceVlansBuilder.build());
+        endPointBuilder.setUniId(new Identifier45(Constants.UNI_ID3));
+        endPointBuilder.setRole(EvcUniRoleType.Leaf);
+        endPointList.add(endPointBuilder.build());
+
+        evc = (Evc) new EvcBuilder().setEvcId(new EvcIdType(Constants.EVC_ID_TYPE))
+                .setEndPoints(new EndPointsBuilder().setEndPoint(endPointList).build())
+                .setMaxFrameSize(new MaxFrameSizeType(Constants.MAXFRAME_SIZE_TYPE))
+                .setEvcId(new EvcIdType(Constants.EVC_ID_TYPE))
+                .setConnectionType(ConnectionType.MultipointToMultipoint)
+                .setSvcType(MefServiceType.Eplan).build();
     }
 
 
     @SuppressWarnings("unchecked")
     @Test
     public void testReadEvc() throws ReadFailedException {
-
+        // having
         final InstanceIdentifier<Evc> evcID = InstanceIdentifier.create(MefServices.class)
                 .child(CarrierEthernet.class).child(SubscriberServices.class)
                 .child(Evc.class, new EvcKey(new EvcIdType(EVC_NODE_ID)));
 
+        // when
         ReadOnlyTransaction readTransaction = mock(ReadOnlyTransaction.class);
         when(dataBroker.newReadOnlyTransaction()).thenReturn(readTransaction);
         CheckedFuture<Optional<Evc>, ReadFailedException> nodeFuture = mock(CheckedFuture.class);
+
         Optional<Evc> optNode = mock(Optional.class);
-        when(readTransaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
-                .thenReturn(nodeFuture);
+        when(readTransaction.read(any(LogicalDatastoreType.class),
+            any(InstanceIdentifier.class))).thenReturn(nodeFuture);
         when(nodeFuture.checkedGet()).thenReturn(optNode);
-        Optional<Evc> expectedOpt =
-                LegatoUtils.readEvc(dataBroker, LogicalDatastoreType.CONFIGURATION, evcID);
+
+        // then
+        Optional<Evc> expectedOpt = LegatoUtils.readEvc(dataBroker, LogicalDatastoreType.CONFIGURATION, evcID);
         verify(readTransaction).read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         assertNotNull(expectedOpt);
         assertEquals(expectedOpt, optNode);
@@ -115,21 +162,22 @@ public class LegatoUtilsTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testReadProfiles() throws ReadFailedException {
-
+        // having
         final InstanceIdentifier<Profile> profileID =
                 InstanceIdentifier.create(MefGlobal.class).child(SlsProfiles.class)
                         .child(Profile.class, new ProfileKey(new Identifier1024(Constants.ONE)));
-
+        // when
         ReadOnlyTransaction readTransaction = mock(ReadOnlyTransaction.class);
         when(dataBroker.newReadOnlyTransaction()).thenReturn(readTransaction);
-        CheckedFuture<Optional<Profile>, ReadFailedException> nodeFuture =
-                mock(CheckedFuture.class);
+        CheckedFuture<Optional<Profile>, ReadFailedException> nodeFuture = mock(CheckedFuture.class);
+
         Optional<Profile> optNode = mock(Optional.class);
-        when(readTransaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
-                .thenReturn(nodeFuture);
+        when(readTransaction.read(any(LogicalDatastoreType.class),
+            any(InstanceIdentifier.class))).thenReturn(nodeFuture);
         when(nodeFuture.checkedGet()).thenReturn(optNode);
-        Optional<Profile> expectedOpt =
-                (Optional<Profile>) LegatoUtils.readProfile(Constants.SLS_PROFILES,
+
+        // then
+        Optional<Profile> expectedOpt = (Optional<Profile>) LegatoUtils.readProfile(Constants.SLS_PROFILES,
                         dataBroker, LogicalDatastoreType.CONFIGURATION, profileID);
         verify(readTransaction).read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         assertNotNull(expectedOpt);
@@ -141,17 +189,20 @@ public class LegatoUtilsTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testAddToOperationalDB() {
+        // having
         final SlsProfiles slsProfile = mock(SlsProfiles.class);
-        final InstanceIdentifier<SlsProfiles> instanceIdentifier =
-                InstanceIdentifier.create(MefGlobal.class).child(SlsProfiles.class);
+        final InstanceIdentifier<SlsProfiles> instanceIdentifier = InstanceIdentifier
+            .create(MefGlobal.class).child(SlsProfiles.class);
 
+        // when
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
         doNothing().when(transaction).merge(any(LogicalDatastoreType.class),
-                any(InstanceIdentifier.class), any(Profile.class));
+            any(InstanceIdentifier.class), any(Profile.class));
         when(transaction.submit()).thenReturn(checkedFuture);
+
+        // then
         LegatoUtils.addToOperationalDB(slsProfile, instanceIdentifier, dataBroker);
-        verify(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
-                any(Profile.class));
+        verify(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Profile.class));
         verify(transaction).submit();
     }
 
@@ -159,14 +210,17 @@ public class LegatoUtilsTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testDeleteFromOperationalDB() {
+        // having
         final InstanceIdentifier<Evc> evcID = InstanceIdentifier.create(MefServices.class)
                 .child(CarrierEthernet.class).child(SubscriberServices.class)
                 .child(Evc.class, new EvcKey(new EvcIdType(EVC_NODE_ID)));
 
+        // when
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
-        doNothing().when(transaction).delete(any(LogicalDatastoreType.class),
-                any(InstanceIdentifier.class));
+        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         when(transaction.submit()).thenReturn(checkedFuture);
+
+        // then
         assertEquals(true, LegatoUtils.deleteFromOperationalDB(evcID, dataBroker));
         verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(transaction).submit();
@@ -175,131 +229,154 @@ public class LegatoUtilsTest {
 
     @Test
     public void testBuildCreateConnectivityServiceInput() {
-        final Evc evc = mock(Evc.class);
-        final CreateConnectivityServiceInput input = mock(CreateConnectivityServiceInput.class);
-        final EVCDao evcDao = mock(EVCDao.class);
+        // having
+        assertNotNull(evc);
+        evcDao = LegatoUtils.parseNodes(evc);
 
         MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class, Constants.PARSE_NODES));
         when(LegatoUtils.parseNodes(evc)).thenReturn(evcDao);
-        MemberModifier.suppress(
-                MemberMatcher.method(LegatoUtils.class, Constants.CREATE_CONNECTIVITY_INPUT));
-        when(LegatoUtils.buildCreateConnectivityServiceInput(evcDao))
-                .thenReturn(input);
-        assertNotNull(input);
-        assertEquals(input,
-                LegatoUtils.buildCreateConnectivityServiceInput(evcDao));
+
+        // when
+        CreateConnectivityServiceInput future = mock(CreateConnectivityServiceInput.class);
+
+        MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class, Constants.CREATE_CONNECTIVITY_INPUT));
+        when(LegatoUtils.buildCreateConnectivityServiceInput(evcDao,
+            String.valueOf(Constants.VLAN_ID), evc.getEndPoints().getEndPoint()))
+                        .thenReturn(future);
+        // then
+        assertNotNull(future);
+        assertEquals(future, LegatoUtils.buildCreateConnectivityServiceInput(evcDao,
+            String.valueOf(Constants.VLAN_ID), evc.getEndPoints().getEndPoint()));
     }
 
 
     @Test
     public void testBuildUpdateConnectivityServiceInput() {
-        final Evc evc = mock(Evc.class);
-        final UpdateConnectivityServiceInput input = mock(UpdateConnectivityServiceInput.class);
-        final EVCDao evcDao = mock(EVCDao.class);
+
+        // having
+        assertNotNull(evc);
+        evcDao = LegatoUtils.parseNodes(evc);
+
         MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class, Constants.PARSE_NODES));
         when(LegatoUtils.parseNodes(evc)).thenReturn(evcDao);
 
-        final List<String> uniList = new ArrayList<String>();
-        uniList.add(Constants.UNI_ID1);
-        uniList.add(Constants.UNI_ID2);
-        MemberModifier.suppress(
-                MemberMatcher.method(LegatoUtils.class, Constants.UPDATE_CONNECTIVITY_INPUT));
-        when(LegatoUtils.buildUpdateConnectivityServiceInput(evcDao, uniList.get(0), Constants.UUID)).thenReturn(input);
+        // when
+        final UpdateConnectivityServiceInput input = mock(UpdateConnectivityServiceInput.class);
+
+        MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class, Constants.UPDATE_CONNECTIVITY_INPUT));
+        when(LegatoUtils.buildUpdateConnectivityServiceInput(evcDao,
+            evcDao.getUniIdList().get(0), Constants.UUID)).thenReturn(input);
+
+        // then
         assertNotNull(input);
-        assertEquals(input, LegatoUtils.buildUpdateConnectivityServiceInput(evcDao, uniList.get(0),
-                Constants.UUID));
+        assertEquals(input, LegatoUtils.buildUpdateConnectivityServiceInput(evcDao,
+            evcDao.getUniIdList().get(0), Constants.UUID));
     }
 
 
     @Test
     public void testBuildNrpCarrierEthConnectivityResource() {
-
+        // having
         final NrpCarrierEthConnectivityResource nrpCarrierEthConnectivityResource =
-                mock(NrpCarrierEthConnectivityResource.class);
+            mock(NrpCarrierEthConnectivityResource.class);
 
-        MemberModifier.suppress(
-                MemberMatcher.method(LegatoUtils.class, Constants.NRP_CARRIER_ETH_CON_RESOURCE));
-        when(LegatoUtils.buildNrpCarrierEthConnectivityResource(
-                String.valueOf(Constants.MAXFRAME_SIZE_TYPE)))
-                        .thenReturn(nrpCarrierEthConnectivityResource);
+        // when
+        MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class, Constants.NRP_CARRIER_ETH_CON_RESOURCE));
+        when(LegatoUtils.buildNrpCarrierEthConnectivityResource(String.valueOf(Constants.MAXFRAME_SIZE_TYPE)))
+            .thenReturn(nrpCarrierEthConnectivityResource);
+
+        // then
         assertNotNull(nrpCarrierEthConnectivityResource);
-        assertEquals(nrpCarrierEthConnectivityResource,
-                LegatoUtils.buildNrpCarrierEthConnectivityResource(
+        assertEquals(nrpCarrierEthConnectivityResource, LegatoUtils.buildNrpCarrierEthConnectivityResource(
                         String.valueOf(Constants.MAXFRAME_SIZE_TYPE)));
     }
 
 
     @Test
     public void testBuildNrpCarrierEthConnectivityEndPointResource() {
-        final NrpCarrierEthConnectivityEndPointResource input =
-                mock(NrpCarrierEthConnectivityEndPointResource.class);
+        // having
+        final NrpCarrierEthConnectivityEndPointResource input = mock(NrpCarrierEthConnectivityEndPointResource.class);
+
+        // when
         MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class,
-                Constants.NRP_CARRIER_ETH_CON_ENDPOINT_RESOURCE));
+            Constants.NRP_CARRIER_ETH_CON_ENDPOINT_RESOURCE));
         when(LegatoUtils.buildNrpCarrierEthConnectivityEndPointResource(
-                String.valueOf(Constants.VLAN_ID_TYPE))).thenReturn(input);
+            String.valueOf(Constants.VLAN_ID))).thenReturn(input);
+
+        // then
         assertNotNull(input);
         assertEquals(input, LegatoUtils.buildNrpCarrierEthConnectivityEndPointResource(
-                String.valueOf(Constants.VLAN_ID_TYPE)));
+            String.valueOf(Constants.VLAN_ID)));
     }
 
 
     @Test
     public void testBuildCreateEthConnectivityEndPointAugmentation() {
+        // having
         final EndPoint2 createEndPoint = mock(EndPoint2.class);
 
+        // when
         MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class,
-                Constants.CREATE_ETH_CON_ENDPOINT_AUGMENTATION));
-        when(LegatoUtils.buildCreateEthConnectivityEndPointAugmentation(
-                String.valueOf(Constants.VLAN_ID_TYPE))).thenReturn(createEndPoint);
+            Constants.CREATE_ETH_CON_ENDPOINT_AUGMENTATION));
+        when(LegatoUtils.buildCreateEthConnectivityEndPointAugmentation(String.valueOf(Constants.VLAN_ID)))
+            .thenReturn(createEndPoint);
+
+        // then
         assertNotNull(createEndPoint);
         assertEquals(createEndPoint, LegatoUtils.buildCreateEthConnectivityEndPointAugmentation(
-                String.valueOf(Constants.VLAN_ID_TYPE)));
+            String.valueOf(Constants.VLAN_ID)));
     }
 
 
     @Test
     public void testBuildUpdateEthConnectivityEndPointAugmentation() {
+        // having
         final EndPoint7 updateEndPoint = mock(EndPoint7.class);
 
+        //when
         MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class,
-                Constants.UPDATE_ETH_CON_ENDPOINT_AUGMENTATION));
-        when(LegatoUtils.buildUpdateEthConnectivityEndPointAugmentation(
-                String.valueOf(Constants.VLAN_ID_TYPE))).thenReturn(updateEndPoint);
+            Constants.UPDATE_ETH_CON_ENDPOINT_AUGMENTATION));
+        when(LegatoUtils.buildUpdateEthConnectivityEndPointAugmentation(String.valueOf(Constants.VLAN_ID)))
+            .thenReturn(updateEndPoint);
+
+        // then
         assertNotNull(updateEndPoint);
         assertEquals(updateEndPoint, LegatoUtils.buildUpdateEthConnectivityEndPointAugmentation(
-                String.valueOf(Constants.VLAN_ID_TYPE)));
+            String.valueOf(Constants.VLAN_ID)));
     }
 
 
     @Test
     public void testBuildCreateConServiceAugmentation() {
-        final CreateConnectivityServiceInput1 createConServInput =
-                mock(CreateConnectivityServiceInput1.class);
+        // having
+        final CreateConnectivityServiceInput1 createConServInput = mock(CreateConnectivityServiceInput1.class);
 
-        MemberModifier.suppress(
-                MemberMatcher.method(LegatoUtils.class, Constants.CREATE_CON_SERVICE_AUGMENTATION));
-        when(LegatoUtils
-                .buildCreateConServiceAugmentation(String.valueOf(Constants.MAXFRAME_SIZE_TYPE)))
-                        .thenReturn(createConServInput);
+        // when
+        MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class, Constants.CREATE_CON_SERVICE_AUGMENTATION));
+        when(LegatoUtils.buildCreateConServiceAugmentation(String.valueOf(Constants.MAXFRAME_SIZE_TYPE)))
+            .thenReturn(createConServInput);
+
+        // then
         assertNotNull(createConServInput);
-        assertEquals(createConServInput, LegatoUtils
-                .buildCreateConServiceAugmentation(String.valueOf(Constants.MAXFRAME_SIZE_TYPE)));
+        assertEquals(createConServInput, LegatoUtils.buildCreateConServiceAugmentation(
+            String.valueOf(Constants.MAXFRAME_SIZE_TYPE)));
     }
 
 
     @Test
     public void testBuildUpdateConServiceAugmentation() {
-        final UpdateConnectivityServiceInput1 updateConServInput =
-                mock(UpdateConnectivityServiceInput1.class);
+        // having
+        final UpdateConnectivityServiceInput1 updateConServInput = mock(UpdateConnectivityServiceInput1.class);
 
-        MemberModifier.suppress(
-                MemberMatcher.method(LegatoUtils.class, Constants.UPDATE_CON_SERVICE_AUGMENTATION));
-        when(LegatoUtils
-                .buildUpdateConServiceAugmentation(String.valueOf(Constants.MAXFRAME_SIZE_TYPE)))
+        // when
+        MemberModifier.suppress(MemberMatcher.method(LegatoUtils.class, Constants.UPDATE_CON_SERVICE_AUGMENTATION));
+        when(LegatoUtils.buildUpdateConServiceAugmentation(String.valueOf(Constants.MAXFRAME_SIZE_TYPE)))
                         .thenReturn(updateConServInput);
+
+        // then
         assertNotNull(updateConServInput);
-        assertEquals(updateConServInput, LegatoUtils
-                .buildUpdateConServiceAugmentation(String.valueOf(Constants.MAXFRAME_SIZE_TYPE)));
+        assertEquals(updateConServInput, LegatoUtils.buildUpdateConServiceAugmentation(
+            String.valueOf(Constants.MAXFRAME_SIZE_TYPE)));
     }
 
 

@@ -20,15 +20,19 @@ import org.opendaylight.unimgr.mef.nrp.common.ResourceActivator;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceNotAvailableException;
 import org.opendaylight.unimgr.mef.nrp.ovs.transaction.TableTransaction;
 import org.opendaylight.unimgr.mef.nrp.ovs.transaction.TopologyTransaction;
+import org.opendaylight.unimgr.mef.nrp.ovs.util.EtreeUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.util.OpenFlowUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.util.OvsdbUtils;
 import org.opendaylight.unimgr.mef.nrp.ovs.util.VlanUtils;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.PortRole;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
 
 /**
  * Ovs driver activator.
@@ -51,19 +55,21 @@ public class OvsActivator implements ResourceActivator {
      * @param endPoints list of endpoint to interconnect
      */
     @Override
-    public void activate(List<EndPoint> endPoints, String serviceName)
+    public void activate(List<EndPoint> endPoints, String serviceName, boolean isExclusive, ServiceType serviceType)
             throws ResourceNotAvailableException, TransactionCommitFailedException {
         OvsActivatorHelper.validateExternalVLANs(endPoints);
 
         VlanUtils vlanUtils = new VlanUtils(dataBroker, endPoints.iterator().next().getNepRef().getNodeId().getValue());
+        EtreeUtils eTreeUtils = new EtreeUtils();
+        long rootCount = endPoints.stream().filter(node -> (node.getEndpoint().getRole()!=null  && node.getEndpoint().getRole().equals(PortRole.ROOT))).count();
 
         for (EndPoint endPoint:endPoints) {
-            activateEndpoint(endPoint, serviceName, vlanUtils);
+            activateEndpoint(endPoint, serviceName, vlanUtils, isExclusive, serviceType, rootCount, eTreeUtils);
         }
 
     }
 
-    private void activateEndpoint(EndPoint endPoint, String serviceName, VlanUtils vlanUtils)
+    private void activateEndpoint(EndPoint endPoint, String serviceName, VlanUtils vlanUtils, boolean isExclusive, ServiceType serviceType, long rootCount, EtreeUtils eTreeUtils)
             throws ResourceNotAvailableException, TransactionCommitFailedException {
         // Transaction - Get Open vSwitch node and its flow table
         String portName = OvsActivatorHelper.getPortName(endPoint.getEndpoint().getServiceInterfacePoint()
@@ -85,9 +91,23 @@ public class OvsActivator implements ResourceActivator {
         OvsActivatorHelper ovsActivatorHelper = new OvsActivatorHelper(topologyTransaction, endPoint);
         String openFlowPortName = ovsActivatorHelper.getOpenFlowPortName();
         long queueNumber = QUEUE_NUMBER_GENERATOR.getAndIncrement();
-        flowsToWrite.addAll(OpenFlowUtils
-                .getVlanFlows(openFlowPortName, vlanUtils.getVlanID(serviceName),
-                        ovsActivatorHelper.getCeVlanId(),interswitchLinks, serviceName, queueNumber));
+        LOG.trace("VLAN ID = {} ", ovsActivatorHelper.getCeVlanId().isPresent());
+
+        if(isExclusive && ! ovsActivatorHelper.getCeVlanId().isPresent()){
+            // Port based E-tree service 
+            if(serviceType != null && serviceType.equals(ServiceType.ROOTEDMULTIPOINTCONNECTIVITY)) {
+                flowsToWrite.addAll(OpenFlowUtils.getEpTree(endPoint.getEndpoint().getRole().getName(), openFlowPortName, vlanUtils.getVlanID(serviceName), ovsActivatorHelper.getCeVlanId(),interswitchLinks, serviceName, queueNumber, rootCount, eTreeUtils, isExclusive));
+            } else {
+                flowsToWrite.addAll(OpenFlowUtils.getFlows(openFlowPortName, interswitchLinks, serviceName, queueNumber));
+            }
+        }
+        else{
+            if(serviceType != null && serviceType.equals(ServiceType.ROOTEDMULTIPOINTCONNECTIVITY)) {
+                flowsToWrite.addAll(OpenFlowUtils.getEvpTree(endPoint.getEndpoint().getRole().getName(), openFlowPortName, vlanUtils.getVlanID(serviceName), ovsActivatorHelper.getCeVlanId(),interswitchLinks, serviceName, queueNumber, rootCount, eTreeUtils));
+            }else {
+                flowsToWrite.addAll(OpenFlowUtils.getVlanFlows(openFlowPortName, vlanUtils.getVlanID(serviceName), ovsActivatorHelper.getCeVlanId(),interswitchLinks, serviceName, queueNumber));
+            }
+        }
 
         // Transaction - Add flows related to service to table and remove unnecessary flows
         TableTransaction tableTransaction = new TableTransaction(dataBroker, node, table);
@@ -107,15 +127,23 @@ public class OvsActivator implements ResourceActivator {
     }
 
     @Override
-    public void deactivate(List<EndPoint> endPoints, String serviceName)
+    public void deactivate(List<EndPoint> endPoints, String serviceName, ServiceType serviceType)
             throws TransactionCommitFailedException, ResourceNotAvailableException {
+        boolean isExclusive = false;
 
         for (EndPoint endPoint:endPoints) {
             deactivateEndpoint(endPoint, serviceName);
         }
-        new VlanUtils(dataBroker, endPoints.iterator().next()
-                .getNepRef().getNodeId().getValue()).releaseServiceVlan(serviceName);
-
+        new VlanUtils(dataBroker, endPoints.iterator().next().getNepRef().getNodeId().getValue()).releaseServiceVlan(serviceName);
+        try {
+            isExclusive = new EtreeUtils().getServiceType(dataBroker, serviceName);
+            if (serviceType != null && serviceType.equals(ServiceType.ROOTEDMULTIPOINTCONNECTIVITY) && ! isExclusive) {
+                new EtreeUtils().releaseTreeServiceVlan(serviceName);
+            }
+        } catch (FailureResult e) {
+            LOG.error("Unable to find out service type result with serviceid { " + serviceName + " }", e);
+        }
+        
     }
 
     private void deactivateEndpoint(EndPoint endPoint, String serviceName)

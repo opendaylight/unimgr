@@ -20,6 +20,7 @@ import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceActivatorException;
 import org.opendaylight.unimgr.mef.nrp.template.TemplateConstants;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpConnectivityServiceAttrs;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +43,8 @@ public class TemplateDriver implements ActivationDriverBuilder {
 
             public List<EndPoint> endpoints;
             public String serviceId;
+            public boolean isExlusive;
+            public ServiceType serviceType;
 
             @Override
             public void commit() {
@@ -54,10 +57,11 @@ public class TemplateDriver implements ActivationDriverBuilder {
             }
 
             @Override
-            public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context) {
+            public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context, boolean isExlusive, ServiceType serviceType) {
                 this.serviceId = serviceId;
                 this.endpoints = new ArrayList<>(endPoints);
-
+                this.isExlusive = isExlusive;
+                this.serviceType = serviceType;
                 LOG.info("Driver initialized with: " + epsInfo());
             }
 

@@ -34,6 +34,7 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev18030
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.DeleteConnectivityServiceInput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.DeleteConnectivityServiceOutput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.DeleteConnectivityServiceOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.Route;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.Connection;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.ConnectivityService;
@@ -101,7 +102,7 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
         Service response = new ServiceBuilder(cs).build();
 
         try {
-            ActivationTransaction tx = prepareTransaction(data,nrpDao);
+            ActivationTransaction tx = prepareTransaction(data, nrpDao, cs.getServiceType());
 
             if (tx != null) {
                 ActivationTransaction.Result txResult = tx.deactivate();
@@ -143,7 +144,7 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
         tx.commit().get();
     }
 
-    private ActivationTransaction prepareTransaction(Map<Uuid, LinkedList<EndPoint>> data, NrpDao nrpDao) {
+    private ActivationTransaction prepareTransaction(Map<Uuid, LinkedList<EndPoint>> data, NrpDao nrpDao, ServiceType serviceType) {
         assert data != null;
         ActivationTransaction tx = new ActivationTransaction();
         data.entrySet().stream().map(e -> {
@@ -157,7 +158,7 @@ public class DeleteConnectivityAction implements Callable<RpcResult<DeleteConnec
                 throw new IllegalStateException(MessageFormat
                         .format("driver {} cannot be created", e.getKey()));
             }
-            driver.get().initialize(e.getValue(), serviceId.getValue(), null);
+            driver.get().initialize(e.getValue(), serviceId.getValue(), null, false, serviceType);
             LOG.debug("driver {} added to deactivation transaction", driver.get());
             return driver.get();
         }).forEach(tx::addDriver);

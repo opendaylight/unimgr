@@ -1,0 +1,11 @@
+h1 vconfig rem h1-eth0.301 2> /dev/null
+h1 vconfig rem h1-eth0.305 2> /dev/null
+h1 ifconfig h1-eth0 10.0.0.1
+
+h2 vconfig rem h2-eth0.301 2> /dev/null
+h2 vconfig rem h2-eth0.305 2> /dev/null
+h2 ifconfig h2-eth0 10.0.0.2
+
+h3 vconfig rem h3-eth0.301 2> /dev/null
+h3 vconfig rem h3-eth0.305 2> /dev/null
+h3 ifconfig h3-eth0 10.0.0.3 

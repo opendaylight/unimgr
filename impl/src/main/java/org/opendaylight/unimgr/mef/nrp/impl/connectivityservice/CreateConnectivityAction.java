@@ -9,7 +9,12 @@
 package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -42,6 +47,7 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev18030
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.CreateConnectivityServiceInput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.CreateConnectivityServiceOutput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.CreateConnectivityServiceOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.cep.list.ConnectionEndPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.ConnectionEndPoint;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.RouteBuilder;
@@ -111,7 +117,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
             String uniqueStamp = service.getServiceIdPool().getServiceId();
             LOG.debug("connectivity service passed validation, request = {}", input);
 
-            ActivationTransaction tx = prepareTransaction(toCsId(uniqueStamp));
+            ActivationTransaction tx = prepareTransaction(toCsId(uniqueStamp), input.getConnConstraint().isIsExclusive(), input.getConnConstraint().getServiceType());
             if (tx != null) {
                 ActivationTransaction.Result txResult = tx.activate();
                 if (txResult.isSuccessful()) {
@@ -139,7 +145,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         }
     }
 
-    private ActivationTransaction prepareTransaction(String serviceId) throws FailureResult {
+    private ActivationTransaction prepareTransaction(String serviceId, boolean isExclusive, ServiceType serviceType) throws FailureResult {
         LOG.debug("decompose request");
         decomposedRequest = service.getDecomposer().decompose(endpoints, null);
 
@@ -158,7 +164,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 throw new IllegalStateException(MessageFormat
                         .format("driver {} cannot be created", s.getNodeUuid()));
             }
-            driver.get().initialize(s.getEndpoints(), serviceId, null);
+            driver.get().initialize(s.getEndpoints(), serviceId, null, isExclusive, serviceType);
             LOG.debug("driver {} added to activation transaction", driver.get());
             return driver.get();
         }).forEach(tx::addDriver);
@@ -266,7 +272,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 .setServiceInterfacePoint(ep.getEndpoint().getServiceInterfacePoint())
                 .setDirection(PortDirection.BIDIRECTIONAL)
                 .setLayerProtocolName(LayerProtocolName.ETH)
-                .setRole(PortRole.SYMMETRIC)
+                .setRole(ep.getEndpoint().getRole())
                 .addAugmentation(EndPoint1.class, new EndPoint1Builder(ep.getAttrs()).build())
                 .build();
 
@@ -283,7 +289,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 .setOperationalState(csep.getOperationalState())
                 .setLayerProtocolName(csep.getLayerProtocolName())
                 .setLifecycleState(csep.getLifecycleState())
-                .setConnectionPortRole(PortRole.SYMMETRIC)
+                .setConnectionPortRole(csep.getRole())
                 .setConnectionPortDirection(csep.getDirection());
         return builder;
     }
