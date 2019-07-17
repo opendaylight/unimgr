@@ -111,7 +111,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
             String uniqueStamp = service.getServiceIdPool().getServiceId();
             LOG.debug("connectivity service passed validation, request = {}", input);
 
-            ActivationTransaction tx = prepareTransaction(toCsId(uniqueStamp));
+            ActivationTransaction tx = prepareTransaction(toCsId(uniqueStamp), input.getConnConstraint().isIsExclusive(), input.getConnConstraint().getServiceType().getName());
             if (tx != null) {
                 ActivationTransaction.Result txResult = tx.activate();
                 if (txResult.isSuccessful()) {
@@ -139,7 +139,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         }
     }
 
-    private ActivationTransaction prepareTransaction(String serviceId) throws FailureResult {
+    private ActivationTransaction prepareTransaction(String serviceId, boolean isExclusive, String serviceType) throws FailureResult {
         LOG.debug("decompose request");
         decomposedRequest = service.getDecomposer().decompose(endpoints, null);
 
@@ -158,7 +158,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 throw new IllegalStateException(MessageFormat
                         .format("driver {} cannot be created", s.getNodeUuid()));
             }
-            driver.get().initialize(s.getEndpoints(), serviceId, null);
+            driver.get().initialize(s.getEndpoints(), serviceId, null, isExclusive, serviceType);
             LOG.debug("driver {} added to activation transaction", driver.get());
             return driver.get();
         }).forEach(tx::addDriver);
@@ -266,7 +266,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 .setServiceInterfacePoint(ep.getEndpoint().getServiceInterfacePoint())
                 .setDirection(PortDirection.BIDIRECTIONAL)
                 .setLayerProtocolName(LayerProtocolName.ETH)
-                .setRole(PortRole.SYMMETRIC)
+                .setRole(ep.getEndpoint().getRole())
                 .addAugmentation(EndPoint1.class, new EndPoint1Builder(ep.getAttrs()).build())
                 .build();
 
@@ -283,7 +283,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 .setOperationalState(csep.getOperationalState())
                 .setLayerProtocolName(csep.getLayerProtocolName())
                 .setLifecycleState(csep.getLifecycleState())
-                .setConnectionPortRole(PortRole.SYMMETRIC)
+                .setConnectionPortRole(csep.getRole())
                 .setConnectionPortDirection(csep.getDirection());
         return builder;
     }

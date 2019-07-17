@@ -52,6 +52,8 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
             List<Map.Entry<EndPoint,EndPoint>> bridgeActivatedPairs = null;
             List<EndPoint> endPoints;
             String serviceId;
+            String serviceType;
+            boolean isExclusive;
 
             @Override
             public void commit() {
@@ -64,9 +66,11 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
             }
 
             @Override
-            public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context) {
+            public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context, boolean isExclusive, String serviceType) {
                 this.endPoints = new ArrayList<>(endPoints);
                 this.serviceId = serviceId;
+                this.isExclusive = isExclusive;
+                this.serviceType = serviceType;
 
                 localActivator = new L2vpnLocalConnectActivator(dataBroker,mountPointService);
                 p2pActivator = new L2vpnP2pConnectActivator(dataBroker,mountPointService);
@@ -131,7 +135,7 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
 
             BiConsumer<List<EndPoint>,AbstractL2vpnActivator> activate = (neighbors, activator) -> {
                 try {
-                    activator.activate(neighbors, serviceId);
+                    activator.activate(neighbors, serviceId, isExclusive, serviceType);
                 } catch (TransactionCommitFailedException e) {
                     LOG.error("Activation error occured: {}",e.getMessage());
                 }
@@ -139,7 +143,7 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
 
             BiConsumer<List<EndPoint>,AbstractL2vpnActivator> deactivate = (neighbors, activator) -> {
                 try {
-                    activator.deactivate(neighbors, serviceId);
+                    activator.deactivate(neighbors, serviceId, serviceType);
                 } catch (TransactionCommitFailedException e) {
                     LOG.error("Deactivation error occured: {}",e.getMessage());
                 }

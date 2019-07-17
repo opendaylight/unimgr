@@ -8,24 +8,34 @@
 
 package org.opendaylight.unimgr.mef.legato.evc;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-
-import com.google.common.base.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.binding.api.*;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.legato.LegatoServiceController;
 import org.opendaylight.unimgr.mef.legato.util.LegatoUtils;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.carrier.ethernet.subscriber.services.Evc;
-import org.opendaylight.yangtools.yang.binding.*;
+import org.opendaylight.yangtools.yang.binding.Augmentation;
+import org.opendaylight.yangtools.yang.binding.ChildOf;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.Identifiable;
+import org.opendaylight.yangtools.yang.binding.Identifier;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -33,10 +43,11 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
+
+/*
  * @author Arif.Hussain@Xoriant.Com
- *
  */
+
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(LegatoUtils.class)
 public class EvcDataTreeChangeListenerTest {
@@ -69,7 +80,8 @@ public class EvcDataTreeChangeListenerTest {
         collection.add(evc);
 
 
-        when(LegatoUtils.readEvc(any(DataBroker.class), any(LogicalDatastoreType.class), any())).thenReturn(Optional.absent());
+        when(LegatoUtils.readEvc(any(DataBroker.class), any(LogicalDatastoreType.class),
+            any())).thenReturn(Optional.absent());
 
         legatoServiceController.onDataTreeChanged(collection);
         verify(legatoServiceController, times(1)).add(any(DataTreeModification.class));
@@ -86,7 +98,8 @@ public class EvcDataTreeChangeListenerTest {
             }
 
             @Override
-            public <C extends Identifiable<K> & ChildOf<? super Evc>, K extends Identifier<C>> DataObjectModification<C> getModifiedChildListItem(
+            public <C extends Identifiable<K> & ChildOf<? super Evc>, K extends
+                Identifier<C>> DataObjectModification<C> getModifiedChildListItem(
                     Class<C> arg0, K arg1) {
                 // TODO Auto-generated method stub
                 return null;
@@ -141,7 +154,8 @@ public class EvcDataTreeChangeListenerTest {
         DataTreeModification<Evc> modifiedEvc = new DataTreeModification<Evc>() {
             @Override
             public DataTreeIdentifier<Evc> getRootPath() {
-                return new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, InstanceIdentifier.create(Evc.class));
+                return new DataTreeIdentifier<>(
+                    LogicalDatastoreType.CONFIGURATION, InstanceIdentifier.create(Evc.class));
             }
 
             @Override
@@ -150,7 +164,7 @@ public class EvcDataTreeChangeListenerTest {
             }
         };
 
-            return modifiedEvc;
+        return modifiedEvc;
     }
 
 }

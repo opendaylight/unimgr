@@ -35,4 +35,15 @@ class MatchUtils {
                            .setVlanMatch(vlanMatchBuilder.build())
                            .build();
     }
+
+    static Match createWithoutVlanMatch(String port) {
+        MatchBuilder matchBuilder = new MatchBuilder();
+       // VlanIdBuilder vlanIdBuilder = new VlanIdBuilder().setVlanIdPresent(true).setVlanId(new VlanId(vlanID));
+       // VlanMatchBuilder vlanMatchBuilder = new VlanMatchBuilder().setVlanId(vlanIdBuilder.build());
+
+        return matchBuilder.setInPort(new NodeConnectorId(port))
+                           //.setVlanMatch(vlanMatchBuilder.build())
+                           .build();
+    }
+
 }
