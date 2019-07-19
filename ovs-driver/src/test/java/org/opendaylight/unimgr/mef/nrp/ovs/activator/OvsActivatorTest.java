@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
@@ -101,7 +100,6 @@ public class OvsActivatorTest extends AbstractDataBrokerTest{
         new TopologyDataHandler(dataBroker, topologyManager).init();
     }
 
-    @Ignore
     @Test
     public void testActivate() {
         //given
