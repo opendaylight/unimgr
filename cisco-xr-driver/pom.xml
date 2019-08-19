@@ -17,7 +17,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     </parent>
 
     <properties>
-        <checkstyle.skip>true</checkstyle.skip>
+        <checkstyle.skip>false</checkstyle.skip>
         <powermock.version>1.6.4</powermock.version>
         <mdsal.version>1.8.2</mdsal.version>
     </properties>

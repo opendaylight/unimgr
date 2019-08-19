@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Cisco Systems Inc and others.  All rights reserved.
+ * Copyright (c) 2019 Xoriant Corporation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -20,43 +20,38 @@ import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.FixedServiceNaming;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.BandwidthProfileHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.LoopbackUtils;
-import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.AttachmentCircuitHelper;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.BridgeDomainAttachmentCircuitHelper;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.BridgeDomainHelper;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.BridgeDomainPseudowireHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.L2vpnHelper;
-import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.PseudowireHelper;
-import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.XConnectHelper;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.PolicyManager;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.L2vpn;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.XconnectGroups;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.XconnectGroup;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.P2pXconnect;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.AttachmentCircuits;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.Pseudowires;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.BridgeDomainGroups;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.bridge.domain.groups.BridgeDomainGroup;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.bridge.domain.groups.bridge.domain.group.bridge.domains.BridgeDomain;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.bridge.domain.groups.bridge.domain.group.bridge.domains.bridge.domain.BdAttachmentCircuits;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.bridge.domain.groups.bridge.domain.group.bridge.domains.bridge.domain.BdPseudowires;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-
 /**
- * Activator of VPLS-based L2 VPN using cross connect connection on IOS-XR devices.
- *
- * @author krzysztof.bijakowski@amartus.com
+ * @author arif.hussain@xoriant.com
  */
-public class L2vpnP2pConnectActivator extends AbstractL2vpnActivator {
+public class L2vpnBridgeDomainActivator extends AbstractL2vpnBridgeDomainActivator {
 
     private final FixedServiceNaming namingProvider;
 
-    public L2vpnP2pConnectActivator(DataBroker dataBroker, MountPointService mountService) {
+    public L2vpnBridgeDomainActivator(DataBroker dataBroker, MountPointService mountService) {
         super(dataBroker, mountService);
         namingProvider = new FixedServiceNaming();
     }
 
     @Override
     protected Optional<PolicyManager> activateQos(String name, ServicePort port) {
-        return new BandwidthProfileHelper(port)
-                .addPolicyMap(name, INGRESS, UNI)
-                .addPolicyMap(name, EGRESS, UNI)
-                .build();
+        return new BandwidthProfileHelper(port).addPolicyMap(name, INGRESS, UNI)
+                .addPolicyMap(name, EGRESS, UNI).build();
     }
 
     @Override
@@ -70,10 +65,10 @@ public class L2vpnP2pConnectActivator extends AbstractL2vpnActivator {
     }
 
     @Override
-    protected InterfaceConfigurations activateInterface(ServicePort port, ServicePort neighbor,
+    protected InterfaceConfigurations activateInterface(ServicePort portA, ServicePort portZ,
             long mtu, boolean isExclusive) {
 
-        return new InterfaceActivator().activate(port, neighbor, mtu, isExclusive);
+        return new InterfaceActivator().activate(portA, portZ, mtu, isExclusive);
     }
 
     @Override
@@ -85,46 +80,44 @@ public class L2vpnP2pConnectActivator extends AbstractL2vpnActivator {
     }
 
     @Override
-    protected InterfaceConfigurations createSubInterface(ServicePort port, ServicePort neighbor,
+    protected InterfaceConfigurations createSubInterface(ServicePort portA, ServicePort portZ,
             long mtu) {
 
-        return new InterfaceActivator().buildSubInterface(port, neighbor, mtu);
+        return new InterfaceActivator().buildSubInterface(portA, portZ, mtu);
     }
 
     @Override
-    protected Pseudowires activatePseudowire(ServicePort neighbor) {
+    protected BdPseudowires activateBdPseudowire(ServicePort neighbor) {
 
-        return new PseudowireHelper()
-                .addPseudowire(LoopbackUtils.getIpv4Address(neighbor, dataBroker)).build();
+        return new BridgeDomainPseudowireHelper()
+                .addBdPseudowire(LoopbackUtils.getIpv4Address(neighbor, dataBroker)).build();
     }
 
     @Override
-    protected XconnectGroups activateXConnect(String outerName, String innerName, ServicePort port,
-            ServicePort portZ, Pseudowires pseudowires, boolean isExclusive) {
+    protected BridgeDomainGroups activateBridgeDomain(String outerName, String innerName,
+            ServicePort port, ServicePort neighbor, BdPseudowires bdPseudowires,
+            boolean isExclusive) {
 
-        AttachmentCircuits attachmentCircuits = new AttachmentCircuitHelper()
-                .addPort(port, isExclusive)
-                .build();
-
-           XconnectGroup xconnectGroup = new XConnectHelper()
-                .appendXConnect(innerName, attachmentCircuits, pseudowires)
+        BdAttachmentCircuits bdattachmentCircuits = new BridgeDomainAttachmentCircuitHelper().addPort(port, isExclusive).build();
+        BridgeDomainGroup bridgeDomainGroup = new BridgeDomainHelper()
+                .appendBridgeDomain(innerName, bdattachmentCircuits, bdPseudowires)
                 .build(outerName);
 
-           return XConnectHelper.createXConnectGroups(xconnectGroup);
+        return BridgeDomainHelper.createBridgeDomainGroups(bridgeDomainGroup);
     }
 
     @Override
-    protected L2vpn activateL2Vpn(XconnectGroups xconnectGroups) {
+    protected L2vpn activateL2Vpn(BridgeDomainGroups bridgeDomainGroups) {
 
-        return L2vpnHelper.build(xconnectGroups);
+        return L2vpnHelper.build(bridgeDomainGroups);
     }
 
     @Override
-    protected void doActivate(String nodeName, InterfaceConfigurations interfaceConfigurations,
+    protected void doActivate(String node, InterfaceConfigurations interfaceConfigurations,
             L2vpn l2vpn, MountPointService mountService2, Optional<PolicyManager> qosConfig)
             throws TransactionCommitFailedException {
 
-        new TransactionActivator().activate(nodeName, interfaceConfigurations, l2vpn, mountService, qosConfig);
+        new TransactionActivator().activate(node, interfaceConfigurations, l2vpn, mountService2, qosConfig);
     }
 
     @Override
@@ -135,12 +128,13 @@ public class L2vpnP2pConnectActivator extends AbstractL2vpnActivator {
     }
 
     @Override
-    protected void doDeactivate(ServicePort port, InstanceIdentifier<P2pXconnect> xconnectId,
+    protected void doDeactivate(ServicePort port, InstanceIdentifier<BridgeDomain> bridgeDomainId,
             InstanceIdentifier<InterfaceConfiguration> interfaceConfigurationId,
-            boolean isExclusive, EndPoint endPoint, MountPointService mountService2,
-            List<String> dvls, List<Uuid> inls) throws TransactionCommitFailedException {
+            boolean isExclusive, EndPoint endPoint, List<String> dvls2, List<Uuid> inls2)
+            throws TransactionCommitFailedException {
 
-        new TransactionActivator().deactivate(port, xconnectId, interfaceConfigurationId, isExclusive, endPoint, mountService, dvls, inls);
+        new TransactionActivator().deactivate(port, bridgeDomainId, interfaceConfigurationId,
+                isExclusive, endPoint, mountService, dvls2, inls2);
     }
 
 }
