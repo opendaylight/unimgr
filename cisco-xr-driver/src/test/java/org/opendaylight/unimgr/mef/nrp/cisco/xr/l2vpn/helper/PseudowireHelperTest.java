@@ -7,18 +7,16 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.List;
+
 import org.junit.Test;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.Pseudowires;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.pseudowires.Pseudowire;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.pseudowires.pseudowire.Neighbor;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.pseudowires.pseudowire.pseudowire.content.MplsStaticLabels;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.CiscoIosXrString;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4AddressNoZone;
-
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * @author krzysztof.bijakowski@amartus.com
@@ -28,12 +26,11 @@ public class PseudowireHelperTest {
     @Test
     public void testBuild() {
         //given
-        Long pseudowireId = 2000L;
+        Long pseudowireId = PseudowireHelper.generatePseudowireId();
         Ipv4AddressNoZone neighborAddress = new Ipv4AddressNoZone("1.2.3.4");
 
         //when
-        Pseudowires actual = new PseudowireHelper(pseudowireId).addPseudowire(neighborAddress).build();
-
+        Pseudowires actual = new PseudowireHelper().addPseudowire(neighborAddress).build();
         //then
         assertNotNull(actual);
 
@@ -53,11 +50,5 @@ public class PseudowireHelperTest {
         Neighbor actualNeighbor = actualNeighborList.get(0);
         assertNotNull(actualNeighbor);
         assertEquals(neighborAddress, actualNeighbor.getNeighbor());
-        assertEquals(new CiscoIosXrString("static"), actualNeighbor.getXmlClass());
-
-        MplsStaticLabels actualMplsStaticLabels = actualNeighbor.getMplsStaticLabels();
-        assertNotNull(actualMplsStaticLabels);
-        assertEquals(pseudowireId, actualMplsStaticLabels.getLocalStaticLabel().getValue());
-        assertEquals(pseudowireId, actualMplsStaticLabels.getRemoteStaticLabel().getValue());
     }
 }

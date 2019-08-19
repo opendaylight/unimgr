@@ -49,10 +49,10 @@ public class XConnectHelperTest {
     @Test
     public void testCreateXConnectGroupsMultiple() {
         //given
-        List<XconnectGroup>xconnectGroupList = new LinkedList<>();
+        List<XconnectGroup> xconnectGroupList = new LinkedList<>();
         xconnectGroupList.add(Mockito.mock(XconnectGroup.class));
         xconnectGroupList.add(Mockito.mock(XconnectGroup.class));
-        
+
         //when
         XconnectGroups xconnectGroups = XConnectHelper.createXConnectGroups(xconnectGroupList);
 

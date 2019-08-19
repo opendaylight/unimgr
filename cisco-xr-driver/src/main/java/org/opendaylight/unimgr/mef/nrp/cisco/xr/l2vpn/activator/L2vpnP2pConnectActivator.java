@@ -59,12 +59,24 @@ public class L2vpnP2pConnectActivator extends AbstractL2vpnActivator {
     }
 
     @Override
-    public InterfaceConfigurations activateInterface(ServicePort port, ServicePort neighbor, long mtu) {
+    public InterfaceConfigurations activateInterface(ServicePort port, ServicePort neighbor, long mtu, boolean isExclusive) {
         String interfraceName = port.getInterfaceName();
         Mtus mtus = new MtuUtils().generateMtus(mtu, new CiscoIosXrString(interfraceName));
+        // Enable L2Trasportation for port basesd service
+        boolean setL2Transport = (isExclusive) ? true : false;
 
         return new InterfaceHelper()
-            .addInterface(port, Optional.of(mtus), true)
+            .addInterface(port, Optional.of(mtus), setL2Transport)
+            .build();
+    }
+
+    @Override
+        public InterfaceConfigurations createSubInterface(ServicePort port, ServicePort neighbor, long mtu) {
+            String mtuOwnerName = "sub_vlan";
+            Mtus mtus = new MtuUtils().generateMtus(mtu, new CiscoIosXrString(mtuOwnerName));
+
+            return new InterfaceHelper()
+            .addSubInterface(port, Optional.of(mtus))
             .build();
     }
 
@@ -76,9 +88,9 @@ public class L2vpnP2pConnectActivator extends AbstractL2vpnActivator {
     }
 
     @Override
-    public XconnectGroups activateXConnect(String outerName, String innerName, ServicePort port, ServicePort neighbor, Pseudowires pseudowires) {
+    public XconnectGroups activateXConnect(String outerName, String innerName, ServicePort port, ServicePort neighbor, Pseudowires pseudowires, boolean isExclusive) {
         AttachmentCircuits attachmentCircuits = new AttachmentCircuitHelper()
-             .addPort(port)
+             .addPort(port, isExclusive)
              .build();
 
         XconnectGroup xconnectGroup = new XConnectHelper()
@@ -95,12 +107,13 @@ public class L2vpnP2pConnectActivator extends AbstractL2vpnActivator {
 
     @Override
     protected String getInnerName(String serviceId) {
-        return namingProvider.getInnerName(replaceForbidenCharacters(serviceId));
+
+         return replaceForbidenCharacters(serviceId);
     }
 
     @Override
     protected String getOuterName(String serviceId) {
-        return namingProvider.getOuterName(replaceForbidenCharacters(serviceId));
+        return replaceForbidenCharacters(serviceId);
     }
 
     /**
