@@ -67,7 +67,7 @@ public class NodeTestUtils {
         if (withNetconfCapabilities) {
             netconfCapabilityList = Arrays.asList(createAvailableCapability(NetconfConstants.CAPABILITY_IOX_L2VPN),
                     createAvailableCapability(NetconfConstants.CAPABILITY_IOX_IFMGR),
-                            createAvailableCapability(NetconfConstants.CAPABILITY_IOX_ASR9K_POLICYMGR));
+                            createAvailableCapability(NetconfConstants.CAPABILITY_IOX_INFRA_POLICYMGR));
         }
 
         AvailableCapabilities availableCapabilities = Mockito.mock(AvailableCapabilities.class);

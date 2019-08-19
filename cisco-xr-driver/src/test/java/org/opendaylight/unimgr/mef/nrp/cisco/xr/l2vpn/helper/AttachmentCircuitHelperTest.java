@@ -41,7 +41,7 @@ public class AttachmentCircuitHelperTest {
         PowerMockito.when(InterfaceHelper.getInterfaceName(port)).thenReturn(interfaceName);
 
         //when
-        AttachmentCircuits actual = new AttachmentCircuitHelper().addPort(port).build();
+        AttachmentCircuits actual = new AttachmentCircuitHelper().addPort(port, true).build();
 
         //then
         List<AttachmentCircuit> actualAttachmentCircuitList = actual.getAttachmentCircuit();

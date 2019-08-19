@@ -7,9 +7,10 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.common;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import java.util.stream.Collectors;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.SipHandler;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev180321.carrier.eth.connectivity.end.point.resource.EgressBwpFlow;
@@ -106,6 +107,28 @@ public class ServicePort {
     private static int getVlan(EndPoint endPoint) {
         return endPoint.getAttrs().getNrpCarrierEthConnectivityEndPointResource()
                 .getCeVlanIdListAndUntag().getVlanId().get(0).getVlanId().getValue().intValue();
+    }
+
+    public static boolean isSameDevice(EndPoint endPoint, List<String> ls) {
+        Uuid sip = endPoint.getEndpoint().getServiceInterfacePoint().getServiceInterfacePointId(); //sip:ciscoD1:GigabitEthernet0/0/0/1
+        NodeId nodeId = new NodeId(SipHandler.getDeviceName(sip));
+
+        if (ls.size() == 0) {
+            ls.add(nodeId.getValue());
+        } else if (ls.size() > 0) {
+            List<String> listWithoutDuplicates =
+                    ls.stream().distinct().collect(Collectors.toList());
+
+            java.util.Optional<String> preset = listWithoutDuplicates.stream()
+                    .filter(x -> x.equals(nodeId.getValue())).findFirst();
+
+            if (preset.isPresent()) {
+                return true;
+            }
+            ls.add(nodeId.getValue());
+        }
+
+        return false;
     }
 
     public String getInterfaceName() {
