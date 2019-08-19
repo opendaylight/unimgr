@@ -31,10 +31,10 @@ public class AttachmentCircuitHelper {
         attachmentCircuits = new LinkedList<>();
     }
 
-    public AttachmentCircuitHelper addPort(ServicePort port) {
+    public AttachmentCircuitHelper addPort(ServicePort port, boolean isExclusive) {
         attachmentCircuits.add(
             new AttachmentCircuitBuilder()
-                .setName(InterfaceHelper.getInterfaceName(port))
+                .setName((isExclusive) ? InterfaceHelper.getInterfaceName(port) : InterfaceHelper.getSubInterfaceName(port))
                 .setEnable(Boolean.TRUE)
                 .build()
         );

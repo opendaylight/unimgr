@@ -20,15 +20,15 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.po
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.policy.map.rule.policy.map.rule.Police;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.policy.map.rule.policy.map.rule.PoliceBuilder;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.policy.map.rule.policy.map.rule.police.*;
-
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.rev180321.BwpFlow;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class BandwidthProfileHelper {
@@ -92,19 +92,19 @@ public class BandwidthProfileHelper {
     }
 
     public BandwidthProfileHelper addPolicyMap(String fcName, BandwidthProfileComposition.BwpDirection direction, BandwidthProfileComposition.BwpApplicability applicability) {
-        if(BandwidthProfileComposition.BwpApplicability.UNI == applicability) {
+        if (BandwidthProfileComposition.BwpApplicability.UNI == applicability) {
 
             BwpFlow bwp = null;
 
-            if(direction == BandwidthProfileComposition.BwpDirection.INGRESS) {
+            if (direction == BandwidthProfileComposition.BwpDirection.INGRESS) {
                 bwp = port.getIngressBwpFlow();
             }
 
-            if(direction == BandwidthProfileComposition.BwpDirection.EGRESS) {
+            if (direction == BandwidthProfileComposition.BwpDirection.EGRESS) {
                 bwp = port.getEgressBwpFlow();
             }
 
-            if(bwp == null) return this;
+            if (bwp == null) return this;
 
             PolicyMapRule rule = new PolicyMapRuleBuilder()
                     .setClassName(CLASS_DEFAULT)

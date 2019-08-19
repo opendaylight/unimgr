@@ -36,6 +36,6 @@ public interface ResourceActivator {
      * @throws ResourceActivatorException activation problem
      * @throws TransactionCommitFailedException transaction commit failed
      */
-    void deactivate(List<EndPoint> endPoints, String serviceName, ServiceType serviceType)
+    void deactivate(List<EndPoint> endPoints, String serviceName, boolean isExclusive, ServiceType serviceType)
             throws TransactionCommitFailedException, ResourceActivatorException;
 }

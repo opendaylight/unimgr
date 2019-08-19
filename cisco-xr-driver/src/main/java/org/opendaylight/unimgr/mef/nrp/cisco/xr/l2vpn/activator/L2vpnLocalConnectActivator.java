@@ -8,6 +8,10 @@
 
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator;
 
+import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.BandwidthProfileComposition.BwpApplicability.UNI;
+import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.BandwidthProfileComposition.BwpDirection.EGRESS;
+import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.BandwidthProfileComposition.BwpDirection.INGRESS;
+import java.util.Optional;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
@@ -25,20 +29,12 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.AttachmentCircuits;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.Pseudowires;
 
-import java.util.Optional;
-
-import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.BandwidthProfileComposition.BwpApplicability.UNI;
-import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.BandwidthProfileComposition.BwpDirection.EGRESS;
-import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.BandwidthProfileComposition.BwpDirection.INGRESS;
-
 /**
  * Activator of VPLS-based L2 VPN using bridge connection on IOS-XR devices
  *
  * @author krzysztof.bijakowski@amartus.com
  */
 public class L2vpnLocalConnectActivator extends AbstractL2vpnActivator {
-
-    private static final String GROUP_NAME = "local";
 
     public L2vpnLocalConnectActivator(DataBroker dataBroker, MountPointService mountService) {
         super(dataBroker, mountService);
@@ -53,11 +49,21 @@ public class L2vpnLocalConnectActivator extends AbstractL2vpnActivator {
     }
 
     @Override
-    protected InterfaceConfigurations activateInterface(ServicePort port, ServicePort neighbor, long mtu) {
+    protected InterfaceConfigurations activateInterface(ServicePort port, ServicePort neighbor, long mtu, boolean isExclusive) {
+        boolean setL2Transport = (isExclusive) ? true : false;
+
         return new InterfaceHelper()
-            .addInterface(port, Optional.empty(), true)
-            .addInterface(neighbor, Optional.empty(), true)
+            .addInterface(port, Optional.empty(), setL2Transport)
+            .addInterface(neighbor, Optional.empty(), setL2Transport)
             .build();
+    }
+
+
+    @Override
+    public InterfaceConfigurations createSubInterface(ServicePort port, ServicePort neighbor, long mtu) {
+          return new InterfaceHelper()
+                .addSubInterface(port, Optional.empty())
+                .build();
     }
 
     @Override
@@ -66,10 +72,10 @@ public class L2vpnLocalConnectActivator extends AbstractL2vpnActivator {
     }
 
     @Override
-    protected XconnectGroups activateXConnect(String outerName, String innerName, ServicePort portA, ServicePort portZ, Pseudowires pseudowires) {
+    protected XconnectGroups activateXConnect(String outerName, String innerName, ServicePort portA, ServicePort portZ, Pseudowires pseudowires, boolean isExclusive) {
         AttachmentCircuits attachmentCircuits = new AttachmentCircuitHelper()
-            .addPort(portA)
-            .addPort(portZ)
+            .addPort(portA, isExclusive)
+            .addPort(portZ, isExclusive)
             .build();
 
         XconnectGroup xconnectGroup = new XConnectHelper()
@@ -86,11 +92,22 @@ public class L2vpnLocalConnectActivator extends AbstractL2vpnActivator {
 
     @Override
     protected String getInnerName(String serviceId) {
-        return GROUP_NAME;
+        return replaceForbidenCharacters(serviceId);
     }
 
     @Override
     protected String getOuterName(String serviceId) {
-        return GROUP_NAME;
+        return replaceForbidenCharacters(serviceId);
+    }
+
+    /**
+     * ASR 9000 can't accept colon in xconnect group name, so it have to be replaced with underscore.
+     * If any other restriction will be found, this is a good place to change serviceId name.
+     *
+     * @param serviceId old service id
+     * @return new service id
+     */
+    private String replaceForbidenCharacters(String serviceId) {
+        return serviceId.replace(":","_");
     }
 }
