@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc5b79bf_9a4fec6b",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/common/util/CommonUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-08-21T13:59:19Z",
+      "side": 1,
+      "message": "Classes called things like \"CommonUtils\" are an indicator that the code could be better structured. The constant is unrelated to the static methods so belongs elsewhere. The semantics of the static methods is vague and would be better as private/protected methods where they are used.",
+      "revId": "9ae4a27be08d1ee4275b7f48dcc001866b803eeb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dea94de4_8d22c507",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/common/util/CommonUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-08-21T13:59:19Z",
+      "side": 1,
+      "message": "This would be better in NetconfConstants class",
+      "revId": "9ae4a27be08d1ee4275b7f48dcc001866b803eeb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d4329639_a7a89896",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/common/util/CommonUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-08-21T13:59:19Z",
+      "side": 1,
+      "message": "Seems to only be used by AbstractL2vpn*Activator classes so should be in a common base class or in a helper class in the same package.",
+      "revId": "9ae4a27be08d1ee4275b7f48dcc001866b803eeb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7b6a80a9_ca19860c",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/common/util/CommonUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-08-21T13:59:19Z",
+      "side": 1,
+      "message": "Only used in AbstractL2vpnBridgeDomainActivator so should be a private/protected method of that class.",
+      "revId": "9ae4a27be08d1ee4275b7f48dcc001866b803eeb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "868dabaa_460d05a4",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/activator/AbstractL2vpnBridgeDomainActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-08-21T13:59:19Z",
+      "side": 1,
+      "message": "This class shares a lot of duplicate code with AbstractL2vpnActivator which suggests that there should be a new common base class or some other refactoring. Some of the duplicate code could be moved to delegate classes. For example, interface activation/deactivation could be moved to an InterfaceActivator which gets used by both AbstractL2vpn*Activator classes.",
+      "revId": "9ae4a27be08d1ee4275b7f48dcc001866b803eeb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
