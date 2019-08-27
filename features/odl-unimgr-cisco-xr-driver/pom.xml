@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>single-feature-parent</artifactId>
-    <version>4.0.2</version>
+    <version>4.0.10</version>
     <relativePath/>
   </parent>
   <groupId>org.opendaylight.unimgr</groupId>
@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <netconf.version>1.6.0-SNAPSHOT</netconf.version>
+    <netconf.version>1.6.1</netconf.version>
   </properties>
 
   <dependencies>

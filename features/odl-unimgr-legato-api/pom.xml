@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>single-feature-parent</artifactId>
-        <version>4.0.2</version>
+        <version>4.0.10</version>
         <relativePath />
     </parent>
     <groupId>org.opendaylight.unimgr</groupId>
@@ -21,9 +21,6 @@
     <packaging>feature</packaging>
     <name>ODL :: unimgr :: ${project.artifactId}</name>
     <modelVersion>4.0.0</modelVersion>
-    <properties>
-        <mdsal.model.version>3.0.2</mdsal.model.version>
-    </properties>
 
     <dependencies>
         <dependency>
