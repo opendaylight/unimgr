@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>single-feature-parent</artifactId>
-    <version>4.0.2</version>
+    <version>4.0.10</version>
     <relativePath/>
   </parent>
   <groupId>org.opendaylight.unimgr</groupId>
@@ -19,11 +19,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <mdsal.version>3.0.2</mdsal.version>
-    <restconf.version>1.9.0-SNAPSHOT</restconf.version>
-    <ovsdb.version>1.8.0-SNAPSHOT</ovsdb.version>
+    <restconf.version>1.9.1</restconf.version>
+    <ovsdb.version>1.8.1</ovsdb.version>
     <configfile.directory>etc/opendaylight/karaf</configfile.directory>
-    <openflowplugin.version>0.8.0-SNAPSHOT</openflowplugin.version>
+    <openflowplugin.version>0.8.1</openflowplugin.version>
   </properties>
 
   <dependencies>

@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>single-feature-parent</artifactId>
-    <version>4.0.2</version>
+    <version>4.0.10</version>
     <relativePath/>
   </parent>
   <groupId>org.opendaylight.unimgr</groupId>
@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <restconf.version>1.9.0-SNAPSHOT</restconf.version>
+    <restconf.version>1.9.1</restconf.version>
   </properties>
 
   <dependencies>
@@ -33,6 +33,13 @@
     <dependency>
       <groupId>org.opendaylight.netconf</groupId>
       <artifactId>odl-restconf</artifactId>
+      <version>${restconf.version}</version>
+      <type>xml</type>
+      <classifier>features</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.netconf</groupId>
+      <artifactId>odl-mdsal-apidocs</artifactId>
       <version>${restconf.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
