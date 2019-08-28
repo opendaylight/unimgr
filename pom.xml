@@ -58,6 +58,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <modules>
         <module>legato-api</module>
         <module>nrp-api</module>
+        <module>bgp-api</module>
         <module>impl</module>
         <module>cisco-xr-driver</module>
         <module>ovs-driver</module>
