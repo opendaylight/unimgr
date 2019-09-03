@@ -9,6 +9,7 @@
 package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,9 +47,12 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev18030
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.CreateConnectivityServiceInput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.CreateConnectivityServiceOutput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.CreateConnectivityServiceOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.cep.list.ConnectionEndPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.ConnectionEndPoint;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.RouteBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.end.point.ParentNodeEdgePoint;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connection.end.point.ParentNodeEdgePointBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.Connection;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.ConnectionBuilder;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.context.ConnectionKey;
@@ -114,7 +118,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
             String uniqueStamp = service.getServiceIdPool().getServiceId();
             LOG.debug("connectivity service passed validation, request = {}", input);
 
-            ActivationTransaction tx = prepareTransaction(toCsId(uniqueStamp));
+            ActivationTransaction tx = prepareTransaction(toCsId(uniqueStamp), input.getConnConstraint().isIsExclusive(), input.getConnConstraint().getServiceType());
             if (tx != null) {
                 ActivationTransaction.Result txResult = tx.activate();
                 if (txResult.isSuccessful()) {
@@ -142,7 +146,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         }
     }
 
-    private ActivationTransaction prepareTransaction(String serviceId) throws FailureResult {
+    private ActivationTransaction prepareTransaction(String serviceId, boolean isExclusive, ServiceType serviceType) throws FailureResult {
         LOG.debug("decompose request");
         decomposedRequest = service.getDecomposer().decompose(endpoints, null);
 
@@ -162,7 +166,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 throw new IllegalStateException(MessageFormat
                         .format("driver {} cannot be created", s.getNodeUuid()));
             }
-            driver.get().initialize(s.getEndpoints(), serviceId, null);
+            driver.get().initialize(s.getEndpoints(), serviceId, null, isExclusive, serviceType);
             LOG.debug("driver {} added to activation transaction", driver.get());
             return driver.get();
         }).forEach(tx::addDriver);
@@ -195,7 +199,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 .setLayerProtocolName(LayerProtocolName.ETH)
 
                 .setConnectionEndPoint(
-                        createSystemConnectionPoints(nrpDao, TapiUtils
+                        createConnectionPoints(nrpDao, TapiUtils
                                 .toNodeRef(s.getNodeUuid()), s.getEndpoints(), uniqueStamp))
                 .build())
             .collect(Collectors.toList());
@@ -207,7 +211,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 .setLayerProtocolName(LayerProtocolName.ETH)
 //                .setContainerNode(new Uuid(TapiConstants.PRESTO_ABSTRACT_NODE))
                 .setConnectionEndPoint(
-                        createSystemConnectionPoints(nrpDao, TapiUtils
+                        createConnectionPoints(nrpDao, TapiUtils
                                 .toNodeRef(new Uuid(TapiConstants.PRESTO_ABSTRACT_NODE)), endpoints, uniqueStamp))
                 .setRoute(Collections.singletonList(new RouteBuilder()
                         .setLocalId("route")
@@ -267,7 +271,7 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 .setServiceInterfacePoint(ep.getEndpoint().getServiceInterfacePoint())
                 .setDirection(PortDirection.BIDIRECTIONAL)
                 .setLayerProtocolName(LayerProtocolName.ETH)
-                .setRole(PortRole.SYMMETRIC)
+                .setRole(ep.getEndpoint().getRole())
                 .addAugmentation(EndPoint1.class, new EndPoint1Builder(ep.getAttrs()).build())
                 .build();
 
@@ -286,13 +290,13 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
                 .setOperationalState(csep.getOperationalState())
                 .setLayerProtocolName(csep.getLayerProtocolName())
                 .setLifecycleState(csep.getLifecycleState())
-                .setConnectionPortRole(PortRole.SYMMETRIC)
+                .setConnectionPortRole(csep.getRole())
                 .setConnectionPortDirection(csep.getDirection());
         return builder;
     }
 
-    private List<ConnectionEndPoint> createSystemConnectionPoints(NrpDao nrpDao, NodeRef ref,
-                                                                  List<EndPoint> eps, String uniqueStamp) {
+    private List<ConnectionEndPoint> createConnectionPoints(NrpDao nrpDao, NodeRef ref,
+                                                            List<EndPoint> eps, String uniqueStamp) {
 
         Optional<ConnectivityServiceEndPoint> defaultCsEp = eps.stream()
                 .filter(ep -> ep.getEndpoint() != null).map(EndPoint::getEndpoint).findFirst();
@@ -325,10 +329,14 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         List<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
                 .connection.ConnectionEndPoint> ceps = new LinkedList<>();
 
+        ParentNodeEdgePointBuilder pBuilder = new ParentNodeEdgePointBuilder(ref);
+
         for (EndPoint ep : eps) {
             ConnectionEndPointBuilder builder = new ConnectionEndPointBuilder(defaultVal);
             ConnectivityServiceEndPoint csp = ep.getEndpoint();
             OwnedNodeEdgePointRef nepRef = ep.getNepRef();
+            ParentNodeEdgePoint parentRef = pBuilder.setOwnedNodeEdgePointId(nepRef.getOwnedNodeEdgePointId()).build();
+            builder.setParentNodeEdgePoint(Arrays.asList(parentRef));
             cepRefBuilder.setOwnedNodeEdgePointId(nepRef.getOwnedNodeEdgePointId());
             cepRefBuilder.setConnectionEndPointId(new Uuid("cep:"
                     + nepRef.getOwnedNodeEdgePointId().getValue() + ":" + uniqueStamp));

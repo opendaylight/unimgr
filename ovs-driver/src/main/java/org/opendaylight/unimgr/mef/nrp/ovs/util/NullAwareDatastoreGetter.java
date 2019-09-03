@@ -33,11 +33,6 @@ public class NullAwareDatastoreGetter<T> {
         this.dataOptional = dataOptional;
     }
 
-    //TODO temporary, remove after java.util.Optional and com.google.common.base.Optional unification in ODL core
-    public NullAwareDatastoreGetter(com.google.common.base.Optional<T> dataOptional) {
-        this.dataOptional = dataOptional.isPresent() ? Optional.ofNullable(dataOptional.get()) : Optional.empty();
-    }
-
     public <R extends ChildOf<? super T>> NullAwareDatastoreGetter<R> collect(Function<T, Supplier<R>> function) {
         logDataOptionalStatus(function);
 

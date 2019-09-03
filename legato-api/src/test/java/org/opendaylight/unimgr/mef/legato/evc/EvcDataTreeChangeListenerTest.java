@@ -7,6 +7,8 @@
  */
 
 package org.opendaylight.unimgr.mef.legato.evc;
+
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -45,10 +47,11 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
+
+/*
  * @author Arif.Hussain@Xoriant.Com
- *
  */
+
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(LegatoUtils.class)
 public class EvcDataTreeChangeListenerTest {
@@ -98,7 +101,8 @@ public class EvcDataTreeChangeListenerTest {
             }
 
             @Override
-            public <C extends Identifiable<K> & ChildOf<? super Evc>, K extends Identifier<C>> DataObjectModification<C> getModifiedChildListItem(
+            public <C extends Identifiable<K> & ChildOf<? super Evc>, K extends
+                Identifier<C>> DataObjectModification<C> getModifiedChildListItem(
                     Class<C> arg0, K arg1) {
                 // TODO Auto-generated method stub
                 return null;
@@ -190,7 +194,7 @@ public class EvcDataTreeChangeListenerTest {
             }
         };
 
-            return modifiedEvc;
+        return modifiedEvc;
     }
 
 }

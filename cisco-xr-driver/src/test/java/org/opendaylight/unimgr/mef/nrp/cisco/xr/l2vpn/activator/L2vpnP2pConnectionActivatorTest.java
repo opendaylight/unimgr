@@ -33,6 +33,7 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.pseudowires.Pseudowire;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.pseudowires.pseudowire.Neighbor;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.pseudowires.pseudowire.pseudowire.content.MplsStaticLabels;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import com.google.common.util.concurrent.FluentFuture;
@@ -70,7 +71,7 @@ public class L2vpnP2pConnectionActivatorTest extends AbstractConcurrentDataBroke
     public void testActivateAndDeactivate() {
         //when
         try {
-            l2VpnP2PConnectActivator.activate(endPoints,serviceId);
+            l2VpnP2PConnectActivator.activate(endPoints, serviceId, true, ServiceType.POINTTOPOINTCONNECTIVITY);
         } catch (InterruptedException | ExecutionException e) {
             fail("Error during activation : " + e.getMessage());
         }
@@ -101,7 +102,7 @@ public class L2vpnP2pConnectionActivatorTest extends AbstractConcurrentDataBroke
     private void deactivate() {
         //when
         try {
-            l2VpnP2PConnectActivator.deactivate(endPoints,serviceId);
+            l2VpnP2PConnectActivator.deactivate(endPoints,serviceId, ServiceType.POINTTOPOINTCONNECTIVITY);
         } catch (InterruptedException | ExecutionException e) {
             fail("Error during deactivation : " + e.getMessage());
         }

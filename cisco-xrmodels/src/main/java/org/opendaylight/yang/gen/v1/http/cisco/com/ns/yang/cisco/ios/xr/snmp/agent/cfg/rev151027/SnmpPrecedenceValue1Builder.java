@@ -1,5 +1,6 @@
 package org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.snmp.agent.cfg.rev151027;
-
+import java.lang.String;
+import java.lang.UnsupportedOperationException;
 
 /**
  * The purpose of generated class in src/main/java for Union types is to create new instances of unions from a string representation.
@@ -11,9 +12,12 @@ package org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.snmp.ag
  *
  */
 public class SnmpPrecedenceValue1Builder {
+    private SnmpPrecedenceValue1Builder() {
+        //Exists only to defeat instantiation.
+    }
 
-    public static SnmpPrecedenceValue1 getDefaultInstance(java.lang.String defaultValue) {
-        throw new java.lang.UnsupportedOperationException("Not yet implemented");
+    public static SnmpPrecedenceValue1 getDefaultInstance(String defaultValue) {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
 }

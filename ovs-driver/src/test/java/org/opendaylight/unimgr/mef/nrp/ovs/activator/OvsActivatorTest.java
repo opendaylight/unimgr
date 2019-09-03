@@ -50,6 +50,7 @@ import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpCon
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.nrp.connectivity.service.end.point.attrs.NrpCarrierEthConnectivityEndPointResource;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ConnectivityServiceEndPoint;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.end.point.ServiceInterfacePoint;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.topology.rev180307.OwnedNodeEdgePointRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
@@ -79,7 +80,7 @@ public class OvsActivatorTest extends AbstractConcurrentDataBrokerTest {
     private static final String nodeId = "ovs-node";
 
     private static final String interswitchName = "interswitch-openflow";
-    private static final String vlanName = "vlan-openflow";
+    private static final String vlanName = "vlan1-openflow";
     private static final String dropName = "default-DROP";
 
     List<String> of1InterwitchPorts = Arrays.asList("openflow:1:3", "openflow:1:4", "openflow:1:5");
@@ -108,7 +109,7 @@ public class OvsActivatorTest extends AbstractConcurrentDataBrokerTest {
 
         //when
         try {
-            ovsActivator.activate(endPoints,serviceId);
+            ovsActivator.activate(endPoints, serviceId, true, ServiceType.POINTTOPOINTCONNECTIVITY);
         } catch (ResourceNotAvailableException | InterruptedException | ExecutionException e) {
             fail(e.getMessage());
         }
@@ -121,7 +122,7 @@ public class OvsActivatorTest extends AbstractConcurrentDataBrokerTest {
 
         //when
         try {
-            ovsActivator.deactivate(endPoints, serviceId);
+            ovsActivator.deactivate(endPoints, serviceId, ServiceType.POINTTOPOINTCONNECTIVITY);
         } catch (ResourceNotAvailableException | InterruptedException | ExecutionException e) {
             fail(e.getMessage());
         }

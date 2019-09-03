@@ -8,8 +8,8 @@
 
 package org.opendaylight.unimgr.utils;
 
-import com.google.common.base.Optional;
 
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 import org.opendaylight.mdsal.binding.api.DataBroker;

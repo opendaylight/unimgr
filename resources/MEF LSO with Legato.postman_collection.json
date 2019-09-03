@@ -1,311 +1,491 @@
 {
-	"variables": [],
-	"info": {
-		"name": "MEF LSO with Legato",
-		"_postman_id": "3acdc59d-3477-5fe5-66e6-388e2ea773db",
-		"description": "",
-		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
-	},
-	"item": [
+	"id": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7",
+	"name": "MEF LSO with Legato",
+	"description": "",
+	"order": [
+		"d3ece99f-9a6f-294a-b334-9cd52e4539f8",
+		"35ba5643-dbba-bde3-030b-a0264d08c0b3",
+		"76715d27-331a-26b2-0b9a-fe13f906ce15",
+		"8f82b9b3-9e2d-0922-bba8-d4966348a1f9",
+		"b99ccfc0-15c9-824d-1f9f-cb7f88f1887a",
+		"9c64daa4-636b-480c-2398-c244da8872ad",
+		"38204090-64a6-970e-114d-37f9ffc6ecfd",
+		"fb9684fe-407b-3ba2-9860-e9c28ec8e1eb",
+		"077caa45-c44d-49fa-a633-531e7ec8087a",
+		"17a247fa-39ec-5d6f-e608-370d95c27fb2",
+		"1e13d8ec-0e5c-6120-3cc7-009a75b298d6",
+		"3f83f5e1-9139-30d1-8e86-db5df27da5d7",
+		"e1565740-4cf4-c225-0523-21c1529537aa",
+		"16ae3ac6-f710-0ec2-06be-427b6d12149e",
+		"e2649316-9827-88bd-ae66-2cbb42b845ec"
+	],
+	"folders": [],
+	"folders_order": [],
+	"timestamp": 0,
+	"owner": 0,
+	"public": false,
+	"requests": [
 		{
-			"name": "Step 0 Init - add OVSDB Node",
-			"request": {
-				"url": "{{host}}/restconf/config/network-topology:network-topology/topology/ovsdb:1/",
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					},
-					{
-						"key": "Authorization",
-						"value": "Basic YWRtaW46YWRtaW4=",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"node\": [\n        {\n            \"node-id\": \"odl\",\n            \"connection-info\": {\n              \"remote-ip\": \"{{mininet_ip_address}}\",\n              \"remote-port\": 6640\n            }\n        }\n    ]\n}"
+			"id": "077caa45-c44d-49fa-a633-531e7ec8087a",
+			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
 				},
-				"description": ""
-			},
-			"response": []
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46YWRtaW4=",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{host}}/restconf/config/mef-legato-services:mef-services/carrier-ethernet/subscriber-services/evc/{{evc_id}}",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1563785297469,
+			"name": "Step 2F - Create Ethernet Virtual Private Tree (EVPTREE) service",
+			"description": "Create Ethernet Virtual Private Tree (EVPTREE) service ",
+			"collectionId": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7",
+			"responses": [],
+			"rawModeData": "{\n    \"mef-legato-services:evc\": [\n      {\n        \"mef-legato-services:evc-id\": \"{{evc_id}}\",\n        \"mef-legato-services:cos-names\": {\n          \"mef-legato-services:cos-name\": [\n            {\n              \"mef-legato-services:name\": \"EVPTREE\"\n            }\n          ]\n        },\n        \"mef-legato-services:end-points\": {\n          \"mef-legato-services:end-point\": [\n            {\n              \"mef-legato-services:uni-id\": \"{{sip1_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            },\n\t\t\t{\n              \"mef-legato-services:uni-id\": \"{{sip2_uuid}}\",\n              \"mef-legato-services:role\": \"leaf\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            },\n             {\n              \"mef-legato-services:uni-id\": \"{{sip3_uuid}}\",\n              \"mef-legato-services:role\": \"leaf\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            }\n          ]\n        },\n        \"mef-legato-services:carrier-ethernet-sls\": {\n          \"mef-legato-services:sls-id\": \"SLSID1\",\n          \"mef-legato-services:start-time\": \"9372-84-27T31:46:58Z\",\n          \"mef-legato-services:cos-entries\": {\n            \"mef-legato-services:cos-entry\": [\n              {\n                \"mef-legato-services:cos-name\": \"Krypton\",\n                \"mef-legato-services:pm-entries\": {\n                  \"mef-legato-services:pm-entry\": [\n                    {\n                      \"mef-legato-services:pm-entry-id\": \"68\",\n                      \"mef-legato-services:sets-of-end-point-pairs\": {\n                        \"mef-legato-services:set-of-end-point-pairs\": [\n                          {\n                            \"mef-legato-services:index\": \"0\",\n                            \"sls-uni-exclusions\": {\n                              \"mef-legato-services:end-point-pair\": [\n                                {\n                                  \"mef-legato-services:end-point1\": \"1\",\n                                  \"mef-legato-services:end-point2\": \"2\"\n                                }\n                              ]\n                            }\n                          }\n                        ]\n                      },\n                      \"mef-legato-services:end-point-pairs\": {\n                        \"sls-uni-exclusions\": {\n                          \"mef-legato-services:end-point-pair\": [\n                            {\n                              \"mef-legato-services:end-point1\": \"1\",\n                              \"mef-legato-services:end-point2\": \"2\"\n                            }\n                          ]\n                        }\n                      }\n                    }\n                  ]\n                }\n              }\n            ]\n          }\n        },\n        \"mef-legato-services:connection-type\": \"rooted-multipoint\",\n        \"mef-legato-services:admin-state\": \"true\",\n        \"mef-legato-services:user-label\": \"U4\",\n        \"mef-legato-services:max-frame-size\": \"1522\",\n        \"mef-legato-services:max-num-of-evc-end-point\": \"2\",\n        \"mef-legato-services:ce-vlan-id-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-pcp-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-dei-preservation\": \"false\",\n        \"mef-legato-services:unicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:multicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:broadcast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:svc-type\": \"evptree\"\n      }\n    ]  \n}  \n"
 		},
 		{
-			"name": "Step 1 change statistics manager mode - disable",
-			"request": {
-				"url": "{{host}}/restconf/operations/statistics-manager-control:change-statistics-work-mode",
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					},
-					{
-						"key": "Authorization",
-						"value": "Basic YWRtaW46YWRtaW4=",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"input\": {\n    \"mode\": \"FULLY_DISABLED\"\n  }\n}"
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "Step 1a - get Tapi Topology - mef:presto-nrp-topology",
-			"request": {
-				"url": "{{host}}/restconf/operational/tapi-common:context/tapi-topology:topology/mef:presto-nrp-topology",
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Basic YWRtaW46YWRtaW4=",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "Step 2 - Create POINT to POINT EVC using PUT method",
-			"request": {
-				"url": "{{host}}/restconf/config/mef-legato-services:mef-services/carrier-ethernet/subscriber-services/evc/{{evc_id}}",
-				"method": "PUT",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					},
-					{
-						"key": "Authorization",
-						"value": "Basic YWRtaW46YWRtaW4=",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"mef-legato-services:evc\": [\n      {\n        \"mef-legato-services:evc-id\": \"{{evc_id}}\",\n        \"mef-legato-services:cos-names\": {\n          \"mef-legato-services:cos-name\": [\n            {\n              \"mef-legato-services:name\": \"EVPL\"\n            }\n          ]\n        },\n        \"mef-legato-services:end-points\": {\n          \"mef-legato-services:end-point\": [\n            {\n              \"mef-legato-services:uni-id\": \"{{sip1_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            },\n\t\t\t{\n              \"mef-legato-services:uni-id\": \"{{sip2_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            }\n          ]\n        },\n        \"mef-legato-services:carrier-ethernet-sls\": {\n          \"mef-legato-services:sls-id\": \"SLSID1\",\n          \"mef-legato-services:start-time\": \"9372-84-27T31:46:58Z\",\n          \"mef-legato-services:cos-entries\": {\n            \"mef-legato-services:cos-entry\": [\n              {\n                \"mef-legato-services:cos-name\": \"Krypton\",\n                \"mef-legato-services:pm-entries\": {\n                  \"mef-legato-services:pm-entry\": [\n                    {\n                      \"mef-legato-services:pm-entry-id\": \"68\",\n                      \"mef-legato-services:sets-of-end-point-pairs\": {\n                        \"mef-legato-services:set-of-end-point-pairs\": [\n                          {\n                            \"mef-legato-services:index\": \"0\",\n                            \"sls-uni-exclusions\": {\n                              \"mef-legato-services:end-point-pair\": [\n                                {\n                                  \"mef-legato-services:end-point1\": \"1\",\n                                  \"mef-legato-services:end-point2\": \"2\"\n                                }\n                              ]\n                            }\n                          }\n                        ]\n                      },\n                      \"mef-legato-services:end-point-pairs\": {\n                        \"sls-uni-exclusions\": {\n                          \"mef-legato-services:end-point-pair\": [\n                            {\n                              \"mef-legato-services:end-point1\": \"1\",\n                              \"mef-legato-services:end-point2\": \"2\"\n                            }\n                          ]\n                        }\n                      }\n                    }\n                  ]\n                }\n              }\n            ]\n          }\n        },\n        \"mef-legato-services:connection-type\": \"point-to-point\",\n        \"mef-legato-services:admin-state\": \"true\",\n        \"mef-legato-services:user-label\": \"U4\",\n        \"mef-legato-services:max-frame-size\": \"1522\",\n        \"mef-legato-services:max-num-of-evc-end-point\": \"2\",\n        \"mef-legato-services:ce-vlan-id-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-pcp-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-dei-preservation\": \"false\",\n        \"mef-legato-services:unicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:multicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:broadcast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:svc-type\": \"epl\"\n      }\n    ]  \n}  \n"
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "Step 2 - Create MULTIPOINT to MULTIPOINT EVC using PUT method",
-			"request": {
-				"url": "{{host}}/restconf/config/mef-legato-services:mef-services/carrier-ethernet/subscriber-services/evc/{{evc_id}}",
-				"method": "PUT",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					},
-					{
-						"key": "Authorization",
-						"value": "Basic YWRtaW46YWRtaW4=",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"mef-legato-services:evc\": [\n      {\n        \"mef-legato-services:evc-id\": \"{{evc_id}}\",\n        \"mef-legato-services:cos-names\": {\n          \"mef-legato-services:cos-name\": [\n            {\n              \"mef-legato-services:name\": \"EVPL\"\n            }\n          ]\n        },\n        \"mef-legato-services:end-points\": {\n          \"mef-legato-services:end-point\": [\n            {\n              \"mef-legato-services:uni-id\": \"{{sip1_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            },\n\t\t\t{\n              \"mef-legato-services:uni-id\": \"{{sip2_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            },\n             {\n              \"mef-legato-services:uni-id\": \"{{sip3_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            }\n          ]\n        },\n        \"mef-legato-services:carrier-ethernet-sls\": {\n          \"mef-legato-services:sls-id\": \"SLSID1\",\n          \"mef-legato-services:start-time\": \"9372-84-27T31:46:58Z\",\n          \"mef-legato-services:cos-entries\": {\n            \"mef-legato-services:cos-entry\": [\n              {\n                \"mef-legato-services:cos-name\": \"Krypton\",\n                \"mef-legato-services:pm-entries\": {\n                  \"mef-legato-services:pm-entry\": [\n                    {\n                      \"mef-legato-services:pm-entry-id\": \"68\",\n                      \"mef-legato-services:sets-of-end-point-pairs\": {\n                        \"mef-legato-services:set-of-end-point-pairs\": [\n                          {\n                            \"mef-legato-services:index\": \"0\",\n                            \"sls-uni-exclusions\": {\n                              \"mef-legato-services:end-point-pair\": [\n                                {\n                                  \"mef-legato-services:end-point1\": \"1\",\n                                  \"mef-legato-services:end-point2\": \"2\"\n                                }\n                              ]\n                            }\n                          }\n                        ]\n                      },\n                      \"mef-legato-services:end-point-pairs\": {\n                        \"sls-uni-exclusions\": {\n                          \"mef-legato-services:end-point-pair\": [\n                            {\n                              \"mef-legato-services:end-point1\": \"1\",\n                              \"mef-legato-services:end-point2\": \"2\"\n                            }\n                          ]\n                        }\n                      }\n                    }\n                  ]\n                }\n              }\n            ]\n          }\n        },\n        \"mef-legato-services:connection-type\": \"multipoint-to-multipoint\",\n        \"mef-legato-services:admin-state\": \"true\",\n        \"mef-legato-services:user-label\": \"U4\",\n        \"mef-legato-services:max-frame-size\": \"1522\",\n        \"mef-legato-services:max-num-of-evc-end-point\": \"2\",\n        \"mef-legato-services:ce-vlan-id-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-pcp-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-dei-preservation\": \"false\",\n        \"mef-legato-services:unicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:multicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:broadcast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:svc-type\": \"eplan\"\n      }\n    ]  \n}  \n"
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "Step 2 - Create POINT to POINT EVC using POST  method",
-			"request": {
-				"url": "{{host}}/restconf/config/mef-legato-services:mef-services/carrier-ethernet/subscriber-services",
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					},
-					{
-						"key": "Authorization",
-						"value": "Basic YWRtaW46YWRtaW4=",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"mef-legato-services:evc\": [\n      {\n        \"mef-legato-services:evc-id\": \"{{evc_id}}\",\n        \"mef-legato-services:cos-names\": {\n          \"mef-legato-services:cos-name\": [\n            {\n              \"mef-legato-services:name\": \"EVPL\"\n            }\n          ]\n        },\n        \"mef-legato-services:end-points\": {\n          \"mef-legato-services:end-point\": [\n            {\n              \"mef-legato-services:uni-id\": \"{{sip1_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            },\n\t\t\t{\n              \"mef-legato-services:uni-id\": \"{{sip2_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            }\n          ]\n        },\n        \"mef-legato-services:carrier-ethernet-sls\": {\n          \"mef-legato-services:sls-id\": \"SLSID1\",\n          \"mef-legato-services:start-time\": \"9372-84-27T31:46:58Z\",\n          \"mef-legato-services:cos-entries\": {\n            \"mef-legato-services:cos-entry\": [\n              {\n                \"mef-legato-services:cos-name\": \"Krypton\",\n                \"mef-legato-services:pm-entries\": {\n                  \"mef-legato-services:pm-entry\": [\n                    {\n                      \"mef-legato-services:pm-entry-id\": \"68\",\n                      \"mef-legato-services:sets-of-end-point-pairs\": {\n                        \"mef-legato-services:set-of-end-point-pairs\": [\n                          {\n                            \"mef-legato-services:index\": \"0\",\n                            \"sls-uni-exclusions\": {\n                              \"mef-legato-services:end-point-pair\": [\n                                {\n                                  \"mef-legato-services:end-point1\": \"1\",\n                                  \"mef-legato-services:end-point2\": \"2\"\n                                }\n                              ]\n                            }\n                          }\n                        ]\n                      },\n                      \"mef-legato-services:end-point-pairs\": {\n                        \"sls-uni-exclusions\": {\n                          \"mef-legato-services:end-point-pair\": [\n                            {\n                              \"mef-legato-services:end-point1\": \"1\",\n                              \"mef-legato-services:end-point2\": \"2\"\n                            }\n                          ]\n                        }\n                      }\n                    }\n                  ]\n                }\n              }\n            ]\n          }\n        },\n        \"mef-legato-services:connection-type\": \"point-to-point\",\n        \"mef-legato-services:admin-state\": \"true\",\n        \"mef-legato-services:user-label\": \"U4\",\n        \"mef-legato-services:max-frame-size\": \"1522\",\n        \"mef-legato-services:max-num-of-evc-end-point\": \"2\",\n        \"mef-legato-services:ce-vlan-id-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-pcp-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-dei-preservation\": \"false\",\n        \"mef-legato-services:unicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:multicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:broadcast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:svc-type\": \"epl\"\n      }\n    ]  \n}  \n"
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "Step 3 A - Get connnectivity service list - Presto",
-			"request": {
-				"url": "{{host}}/restconf/operations/tapi-connectivity:get-connectivity-service-list",
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					},
-					{
-						"key": "Authorization",
-						"value": "Basic YWRtaW46YWRtaW4=",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "Step 3 B - Get list of EVC - Config API",
-			"request": {
-				"url": "{{host}}/restconf/config/mef-legato-services:mef-services/carrier-ethernet/subscriber-services/",
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					},
-					{
-						"key": "Authorization",
-						"value": "Basic YWRtaW46YWRtaW4=",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "Step 3 C - Get list of EVC - Operational API",
-			"request": {
-				"url": "{{host}}/restconf/operational/mef-legato-services:mef-services",
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					},
-					{
-						"key": "Authorization",
-						"value": "Basic YWRtaW46YWRtaW4=",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "Step 4 - Delete EVC",
-			"request": {
-				"url": "{{host}}/restconf/config/mef-legato-services:mef-services/carrier-ethernet/subscriber-services/evc/{{evc_id}}",
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					},
-					{
-						"key": "Authorization",
-						"value": "Basic YWRtaW46YWRtaW4=",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
+			"id": "16ae3ac6-f710-0ec2-06be-427b6d12149e",
 			"name": "del OVSDB Node",
-			"request": {
-				"url": "{{host}}/restconf/config/network-topology:network-topology/topology/ovsdb%3A1/node/odl",
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					},
-					{
-						"key": "Authorization",
-						"value": "Basic YWRtaW46YWRtaW4=",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
+			"description": "",
+			"collectionId": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7",
+			"method": "DELETE",
+			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=",
+			"dataMode": "raw",
+			"data": [],
+			"rawModeData": "",
+			"url": "{{host}}/restconf/config/network-topology:network-topology/topology/ovsdb%3A1/node/odl",
+			"responses": [],
+			"pathVariableData": [],
+			"queryParams": [],
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": ""
 				},
-				"description": ""
-			},
-			"response": []
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46YWRtaW4=",
+					"description": ""
+				}
+			],
+			"collection_id": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7"
 		},
 		{
-			"name": "Init - get OVSDB Node",
-			"request": {
-				"url": "{{host}}/restconf/config/network-topology:network-topology",
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					},
-					{
-						"key": "Authorization",
-						"value": "Basic YWRtaW46YWRtaW4=",
-						"description": ""
-					},
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"node\": [\n        {\n            \"node-id\": \"odl\",\n            \"connection-info\": {\n              \"remote-ip\": \"127.0.0.1\",\n              \"remote-port\": 6640\n            }\n        }\n    ]\n}"
+			"id": "17a247fa-39ec-5d6f-e608-370d95c27fb2",
+			"name": "Step 3 A - Get connnectivity service list - Presto",
+			"description": "",
+			"collectionId": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7",
+			"method": "POST",
+			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=",
+			"dataMode": "raw",
+			"data": [],
+			"rawModeData": "",
+			"url": "{{host}}/restconf/operations/tapi-connectivity:get-connectivity-service-list",
+			"responses": [],
+			"pathVariableData": [],
+			"queryParams": [],
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": ""
 				},
-				"description": ""
-			},
-			"response": []
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46YWRtaW4=",
+					"description": ""
+				}
+			],
+			"collection_id": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7"
+		},
+		{
+			"id": "1e13d8ec-0e5c-6120-3cc7-009a75b298d6",
+			"name": "Step 3 B - Get list of EVC - Config API",
+			"description": "",
+			"collectionId": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7",
+			"method": "GET",
+			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=",
+			"dataMode": "raw",
+			"data": [],
+			"rawModeData": "",
+			"url": "{{host}}/restconf/config/mef-legato-services:mef-services/carrier-ethernet/subscriber-services/",
+			"responses": [],
+			"pathVariableData": [],
+			"queryParams": [],
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": ""
+				},
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46YWRtaW4=",
+					"description": ""
+				}
+			],
+			"collection_id": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7"
+		},
+		{
+			"id": "35ba5643-dbba-bde3-030b-a0264d08c0b3",
+			"name": "Step 1 change statistics manager mode - disable",
+			"description": "",
+			"collectionId": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7",
+			"method": "POST",
+			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=",
+			"dataMode": "raw",
+			"data": [],
+			"rawModeData": "{\n  \"input\": {\n    \"mode\": \"FULLY_DISABLED\"\n  }\n}",
+			"url": "{{host}}/restconf/operations/statistics-manager-control:change-statistics-work-mode",
+			"responses": [],
+			"pathVariableData": [],
+			"queryParams": [],
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": ""
+				},
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46YWRtaW4=",
+					"description": ""
+				}
+			],
+			"collection_id": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7"
+		},
+		{
+			"id": "38204090-64a6-970e-114d-37f9ffc6ecfd",
+			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				},
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46YWRtaW4=",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{host}}/restconf/config/mef-legato-services:mef-services/carrier-ethernet/subscriber-services/evc/{{evc_id}}",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1563779414626,
+			"name": "Step 2D - Create Ethernet Virtual Private LAN (EVPLAN) Service",
+			"description": "Create Ethernet Vritual Private LAN (EVPLAN) Service",
+			"collectionId": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7",
+			"responses": [],
+			"rawModeData": "{\n    \"mef-legato-services:evc\": [\n      {\n        \"mef-legato-services:evc-id\": \"{{evc_id}}\",\n        \"mef-legato-services:cos-names\": {\n          \"mef-legato-services:cos-name\": [\n            {\n              \"mef-legato-services:name\": \"EVPLAN\"\n            }\n          ]\n        },\n        \"mef-legato-services:end-points\": {\n          \"mef-legato-services:end-point\": [\n            {\n              \"mef-legato-services:uni-id\": \"{{sip1_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            },\n\t\t\t{\n              \"mef-legato-services:uni-id\": \"{{sip2_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            },\n             {\n              \"mef-legato-services:uni-id\": \"{{sip3_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            }\n          ]\n        },\n        \"mef-legato-services:carrier-ethernet-sls\": {\n          \"mef-legato-services:sls-id\": \"SLSID1\",\n          \"mef-legato-services:start-time\": \"9372-84-27T31:46:58Z\",\n          \"mef-legato-services:cos-entries\": {\n            \"mef-legato-services:cos-entry\": [\n              {\n                \"mef-legato-services:cos-name\": \"Krypton\",\n                \"mef-legato-services:pm-entries\": {\n                  \"mef-legato-services:pm-entry\": [\n                    {\n                      \"mef-legato-services:pm-entry-id\": \"68\",\n                      \"mef-legato-services:sets-of-end-point-pairs\": {\n                        \"mef-legato-services:set-of-end-point-pairs\": [\n                          {\n                            \"mef-legato-services:index\": \"0\",\n                            \"sls-uni-exclusions\": {\n                              \"mef-legato-services:end-point-pair\": [\n                                {\n                                  \"mef-legato-services:end-point1\": \"1\",\n                                  \"mef-legato-services:end-point2\": \"2\"\n                                }\n                              ]\n                            }\n                          }\n                        ]\n                      },\n                      \"mef-legato-services:end-point-pairs\": {\n                        \"sls-uni-exclusions\": {\n                          \"mef-legato-services:end-point-pair\": [\n                            {\n                              \"mef-legato-services:end-point1\": \"1\",\n                              \"mef-legato-services:end-point2\": \"2\"\n                            }\n                          ]\n                        }\n                      }\n                    }\n                  ]\n                }\n              }\n            ]\n          }\n        },\n        \"mef-legato-services:connection-type\": \"multipoint-to-multipoint\",\n        \"mef-legato-services:admin-state\": \"true\",\n        \"mef-legato-services:user-label\": \"U4\",\n        \"mef-legato-services:max-frame-size\": \"1522\",\n        \"mef-legato-services:max-num-of-evc-end-point\": \"2\",\n        \"mef-legato-services:ce-vlan-id-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-pcp-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-dei-preservation\": \"false\",\n        \"mef-legato-services:unicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:multicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:broadcast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:svc-type\": \"evplan\"\n      }\n    ]  \n}  \n"
+		},
+		{
+			"id": "3f83f5e1-9139-30d1-8e86-db5df27da5d7",
+			"name": "Step 3 C - Get list of EVC - Operational API",
+			"description": "",
+			"collectionId": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7",
+			"method": "GET",
+			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=",
+			"dataMode": "raw",
+			"data": [],
+			"rawModeData": "",
+			"url": "{{host}}/restconf/operational/mef-legato-services:mef-services",
+			"responses": [],
+			"pathVariableData": [],
+			"queryParams": [],
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": ""
+				},
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46YWRtaW4=",
+					"description": ""
+				}
+			],
+			"collection_id": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7"
+		},
+		{
+			"id": "76715d27-331a-26b2-0b9a-fe13f906ce15",
+			"name": "Step 1a - get Tapi Topology - mef:presto-nrp-topology",
+			"description": "",
+			"collectionId": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7",
+			"method": "GET",
+			"headers": "Authorization: Basic YWRtaW46YWRtaW4=",
+			"dataMode": "raw",
+			"data": [],
+			"rawModeData": "",
+			"url": "{{host}}/restconf/operational/tapi-common:context/tapi-topology:topology/mef:presto-nrp-topology",
+			"responses": [],
+			"pathVariableData": [],
+			"queryParams": [],
+			"headerData": [
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46YWRtaW4=",
+					"description": ""
+				}
+			],
+			"collection_id": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7"
+		},
+		{
+			"id": "8f82b9b3-9e2d-0922-bba8-d4966348a1f9",
+			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				},
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46YWRtaW4=",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{host}}/restconf/config/mef-legato-services:mef-services/carrier-ethernet/subscriber-services/evc/{{evc_id}}",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1563777773885,
+			"name": "Step 2A - Create Ethernet Private Line (EPL) Service",
+			"description": "Create Ethernet Private Line (EPL) Service",
+			"collectionId": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7",
+			"responses": [],
+			"rawModeData": "{\n    \"mef-legato-services:evc\": [\n      {\n        \"mef-legato-services:evc-id\": \"{{evc_id}}\",\n        \"mef-legato-services:cos-names\": {\n          \"mef-legato-services:cos-name\": [\n            {\n              \"mef-legato-services:name\": \"EPL\"\n            }\n          ]\n        },\n        \"mef-legato-services:end-points\": {\n          \"mef-legato-services:end-point\": [\n            {\n              \"mef-legato-services:uni-id\": \"{{sip1_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            },\n\t\t\t{\n              \"mef-legato-services:uni-id\": \"{{sip2_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            }\n          ]\n        },\n        \"mef-legato-services:carrier-ethernet-sls\": {\n          \"mef-legato-services:sls-id\": \"SLSID1\",\n          \"mef-legato-services:start-time\": \"9372-84-27T31:46:58Z\",\n          \"mef-legato-services:cos-entries\": {\n            \"mef-legato-services:cos-entry\": [\n              {\n                \"mef-legato-services:cos-name\": \"Krypton\",\n                \"mef-legato-services:pm-entries\": {\n                  \"mef-legato-services:pm-entry\": [\n                    {\n                      \"mef-legato-services:pm-entry-id\": \"68\",\n                      \"mef-legato-services:sets-of-end-point-pairs\": {\n                        \"mef-legato-services:set-of-end-point-pairs\": [\n                          {\n                            \"mef-legato-services:index\": \"0\",\n                            \"sls-uni-exclusions\": {\n                              \"mef-legato-services:end-point-pair\": [\n                                {\n                                  \"mef-legato-services:end-point1\": \"1\",\n                                  \"mef-legato-services:end-point2\": \"2\"\n                                }\n                              ]\n                            }\n                          }\n                        ]\n                      },\n                      \"mef-legato-services:end-point-pairs\": {\n                        \"sls-uni-exclusions\": {\n                          \"mef-legato-services:end-point-pair\": [\n                            {\n                              \"mef-legato-services:end-point1\": \"1\",\n                              \"mef-legato-services:end-point2\": \"2\"\n                            }\n                          ]\n                        }\n                      }\n                    }\n                  ]\n                }\n              }\n            ]\n          }\n        },\n        \"mef-legato-services:connection-type\": \"point-to-point\",\n        \"mef-legato-services:admin-state\": \"true\",\n        \"mef-legato-services:user-label\": \"U4\",\n        \"mef-legato-services:max-frame-size\": \"1522\",\n        \"mef-legato-services:max-num-of-evc-end-point\": \"2\",\n        \"mef-legato-services:ce-vlan-id-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-pcp-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-dei-preservation\": \"false\",\n        \"mef-legato-services:unicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:multicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:broadcast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:svc-type\": \"epl\"\n      }\n    ]  \n}  \n"
+		},
+		{
+			"id": "9c64daa4-636b-480c-2398-c244da8872ad",
+			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				},
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46YWRtaW4=",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{host}}/restconf/config/mef-legato-services:mef-services/carrier-ethernet/subscriber-services/evc/{{evc_id}}",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1563778411189,
+			"name": "Step 2C - Create Ethernet Private LAN (EPLAN) Service",
+			"description": "Create Ethernet Private LAN (EPLAN) Service",
+			"collectionId": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7",
+			"responses": [],
+			"rawModeData": "{\n    \"mef-legato-services:evc\": [\n      {\n        \"mef-legato-services:evc-id\": \"{{evc_id}}\",\n        \"mef-legato-services:cos-names\": {\n          \"mef-legato-services:cos-name\": [\n            {\n              \"mef-legato-services:name\": \"EPLAN\"\n            }\n          ]\n        },\n        \"mef-legato-services:end-points\": {\n          \"mef-legato-services:end-point\": [\n            {\n              \"mef-legato-services:uni-id\": \"{{sip1_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            },\n\t\t\t{\n              \"mef-legato-services:uni-id\": \"{{sip2_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            },\n             {\n              \"mef-legato-services:uni-id\": \"{{sip3_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            }\n          ]\n        },\n        \"mef-legato-services:carrier-ethernet-sls\": {\n          \"mef-legato-services:sls-id\": \"SLSID1\",\n          \"mef-legato-services:start-time\": \"9372-84-27T31:46:58Z\",\n          \"mef-legato-services:cos-entries\": {\n            \"mef-legato-services:cos-entry\": [\n              {\n                \"mef-legato-services:cos-name\": \"Krypton\",\n                \"mef-legato-services:pm-entries\": {\n                  \"mef-legato-services:pm-entry\": [\n                    {\n                      \"mef-legato-services:pm-entry-id\": \"68\",\n                      \"mef-legato-services:sets-of-end-point-pairs\": {\n                        \"mef-legato-services:set-of-end-point-pairs\": [\n                          {\n                            \"mef-legato-services:index\": \"0\",\n                            \"sls-uni-exclusions\": {\n                              \"mef-legato-services:end-point-pair\": [\n                                {\n                                  \"mef-legato-services:end-point1\": \"1\",\n                                  \"mef-legato-services:end-point2\": \"2\"\n                                }\n                              ]\n                            }\n                          }\n                        ]\n                      },\n                      \"mef-legato-services:end-point-pairs\": {\n                        \"sls-uni-exclusions\": {\n                          \"mef-legato-services:end-point-pair\": [\n                            {\n                              \"mef-legato-services:end-point1\": \"1\",\n                              \"mef-legato-services:end-point2\": \"2\"\n                            }\n                          ]\n                        }\n                      }\n                    }\n                  ]\n                }\n              }\n            ]\n          }\n        },\n        \"mef-legato-services:connection-type\": \"multipoint-to-multipoint\",\n        \"mef-legato-services:admin-state\": \"true\",\n        \"mef-legato-services:user-label\": \"U4\",\n        \"mef-legato-services:max-frame-size\": \"1522\",\n        \"mef-legato-services:max-num-of-evc-end-point\": \"2\",\n        \"mef-legato-services:ce-vlan-id-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-pcp-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-dei-preservation\": \"false\",\n        \"mef-legato-services:unicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:multicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:broadcast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:svc-type\": \"eplan\"\n      }\n    ]  \n}  \n"
+		},
+		{
+			"id": "b99ccfc0-15c9-824d-1f9f-cb7f88f1887a",
+			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				},
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46YWRtaW4=",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{host}}/restconf/config/mef-legato-services:mef-services/carrier-ethernet/subscriber-services/evc/{{evc_id}}",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1563777998371,
+			"name": "Step 2B - Create Ethernet Virtual Private Line (EVPL) Service",
+			"description": "Create Ethernet Virtual Private Line (EVPL) Service",
+			"collectionId": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7",
+			"responses": [],
+			"rawModeData": "{\n    \"mef-legato-services:evc\": [\n      {\n        \"mef-legato-services:evc-id\": \"{{evc_id}}\",\n        \"mef-legato-services:cos-names\": {\n          \"mef-legato-services:cos-name\": [\n            {\n              \"mef-legato-services:name\": \"EVPL\"\n            }\n          ]\n        },\n        \"mef-legato-services:end-points\": {\n          \"mef-legato-services:end-point\": [\n            {\n              \"mef-legato-services:uni-id\": \"{{sip1_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            },\n\t\t\t{\n              \"mef-legato-services:uni-id\": \"{{sip2_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            }\n          ]\n        },\n        \"mef-legato-services:carrier-ethernet-sls\": {\n          \"mef-legato-services:sls-id\": \"SLSID1\",\n          \"mef-legato-services:start-time\": \"9372-84-27T31:46:58Z\",\n          \"mef-legato-services:cos-entries\": {\n            \"mef-legato-services:cos-entry\": [\n              {\n                \"mef-legato-services:cos-name\": \"Krypton\",\n                \"mef-legato-services:pm-entries\": {\n                  \"mef-legato-services:pm-entry\": [\n                    {\n                      \"mef-legato-services:pm-entry-id\": \"68\",\n                      \"mef-legato-services:sets-of-end-point-pairs\": {\n                        \"mef-legato-services:set-of-end-point-pairs\": [\n                          {\n                            \"mef-legato-services:index\": \"0\",\n                            \"sls-uni-exclusions\": {\n                              \"mef-legato-services:end-point-pair\": [\n                                {\n                                  \"mef-legato-services:end-point1\": \"1\",\n                                  \"mef-legato-services:end-point2\": \"2\"\n                                }\n                              ]\n                            }\n                          }\n                        ]\n                      },\n                      \"mef-legato-services:end-point-pairs\": {\n                        \"sls-uni-exclusions\": {\n                          \"mef-legato-services:end-point-pair\": [\n                            {\n                              \"mef-legato-services:end-point1\": \"1\",\n                              \"mef-legato-services:end-point2\": \"2\"\n                            }\n                          ]\n                        }\n                      }\n                    }\n                  ]\n                }\n              }\n            ]\n          }\n        },\n        \"mef-legato-services:connection-type\": \"point-to-point\",\n        \"mef-legato-services:admin-state\": \"true\",\n        \"mef-legato-services:user-label\": \"U4\",\n        \"mef-legato-services:max-frame-size\": \"1522\",\n        \"mef-legato-services:max-num-of-evc-end-point\": \"2\",\n        \"mef-legato-services:ce-vlan-id-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-pcp-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-dei-preservation\": \"false\",\n        \"mef-legato-services:unicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:multicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:broadcast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:svc-type\": \"evpl\"\n      }\n    ]  \n}  \n"
+		},
+		{
+			"id": "d3ece99f-9a6f-294a-b334-9cd52e4539f8",
+			"name": "Step 0 Init - add OVSDB Node",
+			"description": "",
+			"collectionId": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7",
+			"method": "POST",
+			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=",
+			"dataMode": "raw",
+			"data": [],
+			"rawModeData": "{\n    \"node\": [\n        {\n            \"node-id\": \"odl\",\n            \"connection-info\": {\n              \"remote-ip\": \"{{mininet_ip_address}}\",\n              \"remote-port\": 6640\n            }\n        }\n    ]\n}",
+			"url": "{{host}}/restconf/config/network-topology:network-topology/topology/ovsdb:1/",
+			"responses": [],
+			"pathVariableData": [],
+			"queryParams": [],
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": ""
+				},
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46YWRtaW4=",
+					"description": ""
+				}
+			],
+			"collection_id": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7"
+		},
+		{
+			"id": "e1565740-4cf4-c225-0523-21c1529537aa",
+			"name": "Step 4 - Delete EVC",
+			"description": "",
+			"collectionId": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7",
+			"method": "DELETE",
+			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=",
+			"dataMode": "raw",
+			"data": [],
+			"rawModeData": "",
+			"url": "{{host}}/restconf/config/mef-legato-services:mef-services/carrier-ethernet/subscriber-services/evc/{{evc_id}}",
+			"responses": [],
+			"pathVariableData": [],
+			"queryParams": [],
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": ""
+				},
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46YWRtaW4=",
+					"description": ""
+				}
+			],
+			"collection_id": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7"
+		},
+		{
+			"id": "e2649316-9827-88bd-ae66-2cbb42b845ec",
+			"name": "Init - get OVSDB Node",
+			"description": "",
+			"collectionId": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7",
+			"method": "GET",
+			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json",
+			"dataMode": "raw",
+			"data": [],
+			"rawModeData": "{\n    \"node\": [\n        {\n            \"node-id\": \"odl\",\n            \"connection-info\": {\n              \"remote-ip\": \"127.0.0.1\",\n              \"remote-port\": 6640\n            }\n        }\n    ]\n}",
+			"url": "{{host}}/restconf/config/network-topology:network-topology",
+			"responses": [],
+			"pathVariableData": [],
+			"queryParams": [],
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": ""
+				},
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46YWRtaW4=",
+					"description": ""
+				},
+				{
+					"key": "Accept",
+					"value": "application/json",
+					"description": ""
+				}
+			],
+			"collection_id": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7"
+		},
+		{
+			"id": "fb9684fe-407b-3ba2-9860-e9c28ec8e1eb",
+			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				},
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46YWRtaW4=",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{host}}/restconf/config/mef-legato-services:mef-services/carrier-ethernet/subscriber-services/evc/{{evc_id}}",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1563779507394,
+			"name": "Step 2E - Create Ethernet Private Tree (EPTREE) service ",
+			"description": "Create Ethernet Private Tree (EPTREE) service ",
+			"collectionId": "2a09e07a-31b1-2d00-58ca-97f6e6c30aa7",
+			"responses": [],
+			"rawModeData": "{\n    \"mef-legato-services:evc\": [\n      {\n        \"mef-legato-services:evc-id\": \"{{evc_id}}\",\n        \"mef-legato-services:cos-names\": {\n          \"mef-legato-services:cos-name\": [\n            {\n              \"mef-legato-services:name\": \"EPTREE\"\n            }\n          ]\n        },\n        \"mef-legato-services:end-points\": {\n          \"mef-legato-services:end-point\": [\n            {\n              \"mef-legato-services:uni-id\": \"{{sip1_uuid}}\",\n              \"mef-legato-services:role\": \"root\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            },\n\t\t\t{\n              \"mef-legato-services:uni-id\": \"{{sip2_uuid}}\",\n              \"mef-legato-services:role\": \"leaf\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            },\n             {\n              \"mef-legato-services:uni-id\": \"{{sip3_uuid}}\",\n              \"mef-legato-services:role\": \"leaf\",\n              \"mef-legato-services:admin-state\": \"true\",\n              \"mef-legato-services:color-identifier\": \"COLID1\",\n              \"mef-legato-services:cos-identifier\": \"COSID1\",\n              \"mef-legato-services:eec-identifier\": \"EECID1\",\n              \"mef-legato-services:source-mac-address-limit\": \"1\",\n              \"mef-legato-services:source-mac-address-limit-time-interval\": \"1\",\n              \"mef-legato-services:test-meg-enabled\": \"false\",\n              \"mef-legato-services:user-label\": \"admin\",\n              \"mef-legato-services:subscriber-meg-mip-enabled\": \"false\",\n              \"mef-legato-services:ce-vlans\": {\n                \"mef-legato-services:ce-vlan\": [\n                \t\t\"301\"\n            \t]\n              },\n              \"ingress-bwp-per-cos\": {\n                \"mef-legato-services:bwp-flow-per-cos\": [\n                  {\n                    \"mef-legato-services:cos-name\": \"Neon\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              },\n              \"egress-bwp-per-eec\": {\n                \"mef-legato-services:bwp-flow-per-eec\": [\n                  {\n                    \"mef-legato-services:eec-name\": \"EEC-Krypton\",\n                    \"envelope-id\": \"Rank 0\",\n                    \"rank\": \"0\"\n                  }\n                ]\n              }\n            }\n          ]\n        },\n        \"mef-legato-services:carrier-ethernet-sls\": {\n          \"mef-legato-services:sls-id\": \"SLSID1\",\n          \"mef-legato-services:start-time\": \"9372-84-27T31:46:58Z\",\n          \"mef-legato-services:cos-entries\": {\n            \"mef-legato-services:cos-entry\": [\n              {\n                \"mef-legato-services:cos-name\": \"Krypton\",\n                \"mef-legato-services:pm-entries\": {\n                  \"mef-legato-services:pm-entry\": [\n                    {\n                      \"mef-legato-services:pm-entry-id\": \"68\",\n                      \"mef-legato-services:sets-of-end-point-pairs\": {\n                        \"mef-legato-services:set-of-end-point-pairs\": [\n                          {\n                            \"mef-legato-services:index\": \"0\",\n                            \"sls-uni-exclusions\": {\n                              \"mef-legato-services:end-point-pair\": [\n                                {\n                                  \"mef-legato-services:end-point1\": \"1\",\n                                  \"mef-legato-services:end-point2\": \"2\"\n                                }\n                              ]\n                            }\n                          }\n                        ]\n                      },\n                      \"mef-legato-services:end-point-pairs\": {\n                        \"sls-uni-exclusions\": {\n                          \"mef-legato-services:end-point-pair\": [\n                            {\n                              \"mef-legato-services:end-point1\": \"1\",\n                              \"mef-legato-services:end-point2\": \"2\"\n                            }\n                          ]\n                        }\n                      }\n                    }\n                  ]\n                }\n              }\n            ]\n          }\n        },\n        \"mef-legato-services:connection-type\": \"rooted-multipoint\",\n        \"mef-legato-services:admin-state\": \"true\",\n        \"mef-legato-services:user-label\": \"U4\",\n        \"mef-legato-services:max-frame-size\": \"1522\",\n        \"mef-legato-services:max-num-of-evc-end-point\": \"2\",\n        \"mef-legato-services:ce-vlan-id-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-pcp-preservation\": \"false\",\n        \"mef-legato-services:ce-vlan-dei-preservation\": \"false\",\n        \"mef-legato-services:unicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:multicast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:broadcast-frame-delivery\": \"unconditional\",\n        \"mef-legato-services:svc-type\": \"eptree\"\n      }\n    ]  \n}  \n"
 		}
 	]
 }

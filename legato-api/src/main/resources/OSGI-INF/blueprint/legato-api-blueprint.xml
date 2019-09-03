@@ -2,13 +2,14 @@
 <!--
  * Copyright (c) 2018 Xoriant Corporation and others. All rights reserved.
  *
-  * This program and the accompanying materials are made available under the
+ * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
-           odl:use-default-for-reference-types="true">
-
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" 
+    xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0" 
+    odl:use-default-for-reference-types="true">
+ 
    <reference id="dataBroker" interface="org.opendaylight.mdsal.binding.api.DataBroker" />
   
    <odl:rpc-service id="prestoConnectivityService" interface="org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.TapiConnectivityService" />
@@ -17,35 +18,5 @@
    		<argument ref="dataBroker" />
    		<property name="prestoConnectivityService" ref="prestoConnectivityService" />
    </bean>
-   
-   <bean id="mef-sls-profile" class="org.opendaylight.unimgr.mef.legato.LegatoSlsProfileController">
-       <argument ref="dataBroker" />
-   </bean>
 
-	<bean id="mef-cos-profile" class="org.opendaylight.unimgr.mef.legato.LegatoCosProfileController">
-       <argument ref="dataBroker" />
-   </bean>
-   
-   <bean id="mef-bwp-profile" class="org.opendaylight.unimgr.mef.legato.LegatoBwpProfileController">
-       <argument ref="dataBroker" />
-   </bean>
-   
-   <bean id="mef-l2cp-eec-profile" class="org.opendaylight.unimgr.mef.legato.LegatoL2cpEecController">
-       <argument ref="dataBroker" />
-   </bean>
-   
-    <bean id="mef-l2cp-peering-profile" class="org.opendaylight.unimgr.mef.legato.LegatoL2cpPeeringController">
-       <argument ref="dataBroker" />
-   </bean>
-   
-   <bean id="mef-eec-profile" class="org.opendaylight.unimgr.mef.legato.LegatoEecProfileController">
-       <argument ref="dataBroker" />
-   </bean>
-   
-   <bean id="mef-cmp-profile" class="org.opendaylight.unimgr.mef.legato.LegatoColorMappingProfileController">
-       <argument ref="dataBroker" />
-   </bean>
-   
 </blueprint>
-
-

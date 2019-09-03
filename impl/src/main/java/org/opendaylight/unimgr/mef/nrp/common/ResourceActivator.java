@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 
 /**
  * Device facing SPI for activating or deactivating a fragment of an NRP
@@ -27,7 +28,7 @@ public interface ResourceActivator {
      * @throws ExecutionException transaction execution failed
      * @throws InterruptedException transaction was interrupted
      */
-    void activate(List<EndPoint> endPoints, String serviceName)
+    void activate(List<EndPoint> endPoints, String serviceName, boolean isExclusive, ServiceType serviceType)
             throws  ResourceActivatorException, InterruptedException, ExecutionException;
 
     /**
@@ -38,6 +39,6 @@ public interface ResourceActivator {
      * @throws ExecutionException transaction execution failed
      * @throws InterruptedException transaction was interrupted
      */
-    void deactivate(List<EndPoint> endPoints, String serviceName)
+    void deactivate(List<EndPoint> endPoints, String serviceName, ServiceType serviceType)
             throws ResourceActivatorException, InterruptedException, ExecutionException;
 }
