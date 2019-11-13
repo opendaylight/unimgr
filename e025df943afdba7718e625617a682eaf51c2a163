@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_2eceee5a",
+        "filename": "it/src/test/java/org/opendaylight/unimgr/it/UnimgrIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "need not be reinitialized as it is already done once in setUp..can use the class variable dataBroker instead",
+      "range": {
+        "startLine": 163,
+        "startChar": 8,
+        "endLine": 163,
+        "endChar": 78
+      },
+      "revId": "e025df943afdba7718e625617a682eaf51c2a163",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_4ef8927c",
+        "filename": "it/src/test/java/org/opendaylight/unimgr/it/UnimgrIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "can reuse getUniIid(String nodeId) instead",
+      "range": {
+        "startLine": 178,
+        "startChar": 8,
+        "endLine": 183,
+        "endChar": 48
+      },
+      "revId": "e025df943afdba7718e625617a682eaf51c2a163",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_ee87e60d",
+        "filename": "it/src/test/java/org/opendaylight/unimgr/it/UnimgrIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 440,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "please reuse the method: createUniNode(String macAddress, String ipAddress)\nit was created to be used while creating an Evc",
+      "range": {
+        "startLine": 413,
+        "startChar": 4,
+        "endLine": 440,
+        "endChar": 5
+      },
+      "revId": "e025df943afdba7718e625617a682eaf51c2a163",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
