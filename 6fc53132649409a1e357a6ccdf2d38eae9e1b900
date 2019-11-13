@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_7e4b91b0",
+        "filename": "it/src/test/java/org/opendaylight/unimgr/it/UnimgrIT.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-01-20T22:58:01Z",
+      "side": 1,
+      "message": "this can be remove",
+      "range": {
+        "startLine": 91,
+        "startChar": 8,
+        "endLine": 91,
+        "endChar": 54
+      },
+      "revId": "6fc53132649409a1e357a6ccdf2d38eae9e1b900",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
