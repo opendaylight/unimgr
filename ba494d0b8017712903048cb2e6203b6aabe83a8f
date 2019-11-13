@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_6398a36a",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/commands/UniRemoveCommand.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Could you please pick the changes to remove Qos and Queues on UNI delete from this patch?\n\nhttps://git.opendaylight.org/gerrit/#/c/34943/",
+      "revId": "ba494d0b8017712903048cb2e6203b6aabe83a8f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
