@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "9a3d3df0_8acfaa55",
+        "filename": "impl/pom.xml",
+        "patchSetId": 11
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Just FYI - There was some incompatibility between JDK 8 + PowerMock + Mockito . https://git.opendaylight.org/gerrit/#/c/35210 set powermock version to 1.6.4 in odlparent.",
+      "range": {
+        "startLine": 20,
+        "startChar": 21,
+        "endLine": 20,
+        "endChar": 26
+      },
+      "revId": "a2333f12f2c5f9036e924c7b8b20c85874991791",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_6ae506db",
         "filename": "impl/src/main/java/org/opendaylight/unimgr/command/EvcUpdateCommand.java",
         "patchSetId": 11
@@ -14,6 +37,29 @@
       "side": 1,
       "message": "ok",
       "parentUuid": "9a3d3df0_2aa3feb2",
+      "range": {
+        "startLine": 220,
+        "startChar": 30,
+        "endLine": 220,
+        "endChar": 35
+      },
+      "revId": "a2333f12f2c5f9036e924c7b8b20c85874991791",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_2aa3feb2",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/command/EvcUpdateCommand.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "typo? should be - Unable to retrieve",
       "range": {
         "startLine": 220,
         "startChar": 30,
@@ -50,6 +96,29 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_eaaab66f",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/utils/OvsdbUtils.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 913,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "why is it being read from configuration? shouldn\u0027t it be null if operational datastore doesn\u0027t have it?",
+      "range": {
+        "startLine": 913,
+        "startChar": 55,
+        "endLine": 913,
+        "endChar": 65
+      },
+      "revId": "a2333f12f2c5f9036e924c7b8b20c85874991791",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_6afce672",
         "filename": "impl/src/test/java/org/opendaylight/unimgr/command/DataTreeModificationHelper.java",
         "patchSetId": 11
@@ -74,6 +143,52 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_caa7f2a5",
+        "filename": "impl/src/test/java/org/opendaylight/unimgr/command/DataTreeModificationHelper.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "whitespace",
+      "range": {
+        "startLine": 36,
+        "startChar": 110,
+        "endLine": 36,
+        "endChar": 111
+      },
+      "revId": "a2333f12f2c5f9036e924c7b8b20c85874991791",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_6aaea682",
+        "filename": "impl/src/test/java/org/opendaylight/unimgr/impl/EvcDataTreeChangeListenerTest.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "remove tab",
+      "range": {
+        "startLine": 121,
+        "startChar": 11,
+        "endLine": 121,
+        "endChar": 12
+      },
+      "revId": "a2333f12f2c5f9036e924c7b8b20c85874991791",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_4a012269",
         "filename": "impl/src/test/java/org/opendaylight/unimgr/impl/UniDataTreeChangeListenerTest.java",
         "patchSetId": 11
@@ -86,6 +201,29 @@
       "side": 1,
       "message": "ok",
       "parentUuid": "9a3d3df0_0abd5ab7",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 122,
+        "endChar": 12
+      },
+      "revId": "a2333f12f2c5f9036e924c7b8b20c85874991791",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_0abd5ab7",
+        "filename": "impl/src/test/java/org/opendaylight/unimgr/impl/UniDataTreeChangeListenerTest.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "plz remove this",
       "range": {
         "startLine": 122,
         "startChar": 0,
