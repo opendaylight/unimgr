@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_384bf35a",
+        "filename": "features/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "You will need to replace tabs with spaces and remove trailing whitespace.",
+      "revId": "51e4b2b58093e54c73828bd51f38a8a3fdbc061e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_78744b9c",
+        "filename": "features/src/main/features/features.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "Tabs -\u003e spaces\ntrailing whitespace",
+      "revId": "51e4b2b58093e54c73828bd51f38a8a3fdbc061e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_58798792",
+        "filename": "netvirt/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "tabs -\u003e spaces\ntrailing whitespace",
+      "revId": "51e4b2b58093e54c73828bd51f38a8a3fdbc061e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_f867bbe8",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/nrp/netvirt/EvcListener.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "There is some trailing whitespace on otherwise empty lines.",
+      "revId": "51e4b2b58093e54c73828bd51f38a8a3fdbc061e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_d8e3d703",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/nrp/netvirt/NetvirtUtils.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "I don\u0027t think we should use MDSALUtil. It hides the async behaviour of the data broker and there is no meaningful error handling.\n\nUsers of NetvirtUtils are not able to write robust code. It needs to be written with error handling in mind, returning Future or Optional results.",
+      "revId": "51e4b2b58093e54c73828bd51f38a8a3fdbc061e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_d892b79e",
+        "filename": "netvirt/src/main/resources/org/opendaylight/blueprint/netvirt-driver.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "This file needs a copyright message.\ntabs -\u003e spaces",
+      "revId": "51e4b2b58093e54c73828bd51f38a8a3fdbc061e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_188d4f7c",
+        "filename": "netvirt/src/test/java/org/opendaylight/unimgr/netvirt/UnimgrNetvirtTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "Where are the tests?",
+      "revId": "51e4b2b58093e54c73828bd51f38a8a3fdbc061e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
