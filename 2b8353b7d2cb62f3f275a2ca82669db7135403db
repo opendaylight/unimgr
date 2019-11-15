@@ -1,0 +1,1246 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_9bf3260a",
+        "filename": "cisco-xr-driver/src/main/java/org/mef/nrp/cisco/xr/CiscoXRDriverProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "this should be hold at the class level to be closed in the close() method",
+      "range": {
+        "startLine": 19,
+        "startChar": 54,
+        "endLine": 19,
+        "endChar": 64
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_1bb9d62e",
+        "filename": "cisco-xr-driver/src/main/java/org/mef/nrp/cisco/xr/L2vpnBridgeActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "duplicated code",
+      "range": {
+        "startLine": 197,
+        "startChar": 0,
+        "endLine": 212,
+        "endChar": 5
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_bbab8ad5",
+        "filename": "cisco-xr-driver/src/main/java/org/mef/nrp/cisco/xr/L2vpnBridgeDriverBuilder.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "tabs",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 1
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_7baa92d5",
+        "filename": "cisco-xr-driver/src/main/java/org/mef/nrp/cisco/xr/L2vpnXconnectActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "seems to be duplicated code, see\nhttps://git.opendaylight.org/gerrit/#/c/39355/2/impl/src/main/java/org/mef/nrp/impl/EdgeAssureActivator.java\n\nyou could move this to a utility bundle",
+      "range": {
+        "startLine": 249,
+        "startChar": 0,
+        "endLine": 264,
+        "endChar": 5
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_3ba01af4",
+        "filename": "cisco-xr-driver/src/main/java/org/mef/nrp/cisco/xr/L2vpnXconnectDriverBuilder.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_fb5ea211",
+        "filename": "cisco-xr-driver/src/main/java/org/mef/nrp/cisco/xr/L2vpnXconnectDriverBuilder.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "final",
+      "range": {
+        "startLine": 24,
+        "startChar": 12,
+        "endLine": 24,
+        "endChar": 18
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_ccd96285",
+        "filename": "cisco-xr-driver/src/main/java/org/mef/nrp/cisco/xr/L2vpnXconnectDriverBuilder.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T22:40:26Z",
+      "side": 1,
+      "message": "Correct, my bad. I misread and thought it was the constructor",
+      "parentUuid": "da5c1566_d6c61549",
+      "range": {
+        "startLine": 24,
+        "startChar": 12,
+        "endLine": 24,
+        "endChar": 18
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_5b9b4ec9",
+        "filename": "cisco-xr-driver/src/main/java/org/mef/nrp/cisco/xr/L2vpnXconnectDriverBuilder.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "final",
+      "range": {
+        "startLine": 25,
+        "startChar": 12,
+        "endLine": 25,
+        "endChar": 18
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_7b73b2b1",
+        "filename": "cisco-xrmodels/.gitignore",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "use root gitignore instead",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 12
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_9b6e86c8",
+        "filename": "cisco-xrmodels/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "missing copyright",
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_5b74ee9b",
+        "filename": "cisco-xrmodels/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "use project groupId",
+      "range": {
+        "startLine": 12,
+        "startChar": 12,
+        "endLine": 12,
+        "endChar": 23
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_3b793a94",
+        "filename": "cisco-xrmodels/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "use project version",
+      "range": {
+        "startLine": 14,
+        "startChar": 10,
+        "endLine": 14,
+        "endChar": 16
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_fb47c249",
+        "filename": "cli/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "this should be provided by the parent",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 15
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_db40fe37",
+        "filename": "edgeassure-1000/.gitignore",
+        "patchSetId": 2
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "evil add ? :)\n\nI think this should go in the root gitignore don\u0027t need to add another one",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 5,
+        "endChar": 8
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_9b57a602",
+        "filename": "edgeassure-1000/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "keep current project groupId",
+      "range": {
+        "startLine": 12,
+        "startChar": 10,
+        "endLine": 12,
+        "endChar": 32
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_7b5c5226",
+        "filename": "edgeassure-1000/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "use current project version",
+      "range": {
+        "startLine": 14,
+        "startChar": 10,
+        "endLine": 14,
+        "endChar": 16
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_db391eda",
+        "filename": "edgeassure-1000/src/main/yang/iana-if-type@2014-05-08.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "use the one provided by mdsal https://github.com/opendaylight/mdsal/tree/master/model/iana/iana-if-type",
+      "range": {
+        "startLine": 1,
+        "startChar": 11,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_7b2572aa",
+        "filename": "edgeassure-1000/src/main/yang/ietf-inet-types.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "use the one provided by mdsal https://github.com/opendaylight/mdsal/tree/master/model/ietf/ietf-inet-types",
+      "range": {
+        "startLine": 1,
+        "startChar": 8,
+        "endLine": 1,
+        "endChar": 22
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_9b20469d",
+        "filename": "edgeassure-1000/src/main/yang/ietf-interfaces@2014-05-08.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "use the one provided by mdsal https://github.com/opendaylight/mdsal/tree/master/model/ietf/ietf-interfaces",
+      "range": {
+        "startLine": 1,
+        "startChar": 7,
+        "endLine": 1,
+        "endChar": 22
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_3b2bfa83",
+        "filename": "edgeassure-1000/src/main/yang/ietf-yang-types.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "use the one provided by mdsal: https://github.com/opendaylight/mdsal/tree/master/model/ietf/ietf-yang-types",
+      "range": {
+        "startLine": 1,
+        "startChar": 7,
+        "endLine": 1,
+        "endChar": 22
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_1806fc20",
+        "filename": "features/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "why would we skip tests?",
+      "range": {
+        "startLine": 33,
+        "startChar": 4,
+        "endLine": 33,
+        "endChar": 31
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_1b1d5667",
+        "filename": "features/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "we should keep project groupId",
+      "range": {
+        "startLine": 154,
+        "startChar": 15,
+        "endLine": 154,
+        "endChar": 25
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_7b0e1236",
+        "filename": "features/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "we should stick to the project.version",
+      "range": {
+        "startLine": 156,
+        "startChar": 15,
+        "endLine": 156,
+        "endChar": 20
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_fb19827a",
+        "filename": "features/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "same here",
+      "range": {
+        "startLine": 159,
+        "startChar": 16,
+        "endLine": 159,
+        "endChar": 35
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_db12be57",
+        "filename": "features/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "same here",
+      "range": {
+        "startLine": 161,
+        "startChar": 15,
+        "endLine": 161,
+        "endChar": 20
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_9b09662f",
+        "filename": "features/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "oops - white space",
+      "range": {
+        "startLine": 164,
+        "startChar": 0,
+        "endLine": 164,
+        "endChar": 2
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_78173852",
+        "filename": "impl/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "I believe this is inherited by the parent",
+      "range": {
+        "startLine": 21,
+        "startChar": 8,
+        "endLine": 21,
+        "endChar": 52
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_182f1ca3",
+        "filename": "impl/src/main/java/org/mef/nrp/impl/ActivationDriverAmbiguousException.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "add javadoc",
+      "range": {
+        "startLine": 14,
+        "startChar": 31,
+        "endLine": 14,
+        "endChar": 32
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_b821d0b6",
+        "filename": "impl/src/main/java/org/mef/nrp/impl/ActivationDriverNotFoundException.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "please add javadoc",
+      "range": {
+        "startLine": 14,
+        "startChar": 13,
+        "endLine": 14,
+        "endChar": 46
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_d82484c8",
+        "filename": "impl/src/main/java/org/mef/nrp/impl/ActivationDriverRepoService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "please add javadoc",
+      "range": {
+        "startLine": 15,
+        "startChar": 14,
+        "endLine": 17,
+        "endChar": 18
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_7840d856",
+        "filename": "impl/src/main/java/org/mef/nrp/impl/ActivationDriverRepoServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "please format correct, spaces around the \u003d\u003d and inline { after the if declaration",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 9
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_7849f88a",
+        "filename": "impl/src/main/java/org/mef/nrp/impl/EdgeAssureActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "please remove tabs",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 2
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_d85da44a",
+        "filename": "impl/src/main/java/org/mef/nrp/impl/EdgeAssureActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "getMountPointDataBroker would be less confusing (I think) this is just a suggestion though",
+      "range": {
+        "startLine": 93,
+        "startChar": 26,
+        "endLine": 93,
+        "endChar": 30
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_9844cc75",
+        "filename": "impl/src/main/java/org/mef/nrp/impl/FixedServiceNaming.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "would it make sense to held those in some constants?",
+      "range": {
+        "startLine": 15,
+        "startChar": 16,
+        "endLine": 15,
+        "endChar": 21
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_384f8094",
+        "filename": "impl/src/main/java/org/mef/nrp/impl/ForwardingConstructHelper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "oops - tabs",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 5
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_1881dc8f",
+        "filename": "impl/src/main/java/org/mef/nrp/impl/ResourceActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "add javadoc as those are APIs",
+      "range": {
+        "startLine": 15,
+        "startChar": 21,
+        "endLine": 17,
+        "endChar": 22
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_b87390e6",
+        "filename": "impl/src/main/java/org/mef/nrp/impl/ServiceNaming.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "add javadoc as those are APIs",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 42
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_b8ac3037",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/FCRouteChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "adding some content in the log regarding the newDataObject could definitely help while debuging",
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_18aa7c19",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/FCRouteChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "likewise",
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_f8a6a852",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/FCRouteChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "likewise",
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_5863541a",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/FCRouteChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "useless",
+      "range": {
+        "startLine": 99,
+        "startChar": 23,
+        "endLine": 99,
+        "endChar": 40
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_386820f5",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/FCRouteChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "this could be a static final var to avoid re-creating it",
+      "range": {
+        "startLine": 104,
+        "startChar": 49,
+        "endLine": 106,
+        "endChar": 46
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_f8e1889b",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/FcRouteActivatorService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "final",
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_78ed788b",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/FcRouteActivatorService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "check not null either with a Preconditions or with an annotation in the method param",
+      "range": {
+        "startLine": 42,
+        "startChar": 40,
+        "endLine": 42,
+        "endChar": 45
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_d801243b",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/FcRouteActivatorService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "likewise",
+      "range": {
+        "startLine": 53,
+        "startChar": 40,
+        "endLine": 53,
+        "endChar": 45
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_b8fef036",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/FcRouteActivatorService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "likewise",
+      "range": {
+        "startLine": 64,
+        "startChar": 34,
+        "endLine": 64,
+        "endChar": 38
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_18fc3c3e",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/FcRouteActivatorService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "extra space",
+      "range": {
+        "startLine": 69,
+        "startChar": 62,
+        "endLine": 69,
+        "endChar": 63
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_389ae014",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/FcRouteActivatorService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "please log the exception as well.\n\nalso, it\u0027s missing a param, I can see two {} but only one param",
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_989fac03",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/FcRouteActivatorService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "likewise",
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_98b68c89",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/FcRouteActivatorService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "please log exception",
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_8ccf6ab0",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/FcRouteActivatorService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T22:40:26Z",
+      "side": 1,
+      "message": "I hear you... although this will add issues in sonar... but ok I guess",
+      "parentUuid": "da5c1566_2c345edd",
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_78bbb872",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/FcRouteActivatorService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "likewise",
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_78d618c7",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/UnimgrProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "keep the serviceRegistration to unregister the service in the #close() method, to avoid leaking service in the OSGi container",
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_b8d710bf",
+        "filename": "impl/src/main/java/org/opendaylight/unimgr/impl/UnimgrProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "it seems this could be done directly in the constructor, avoid the setActivationDriverRepoService method.",
+      "range": {
+        "startLine": 164,
+        "startChar": 8,
+        "endLine": 164,
+        "endChar": 88
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_98d16cd0",
+        "filename": "karaf/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "this isn\u0027t required/needed here as the version is inherited by the parent.",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 40
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_38cca035",
+        "filename": "pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T12:33:01Z",
+      "side": 1,
+      "message": "does this change the way compilation is done?\n\nI believe with this we would have to specify a profile in the mvn clean install command, right?\n\nAlthough I can see activeByDefault true for the 3 profiles, which indicates that no profile is required for building.\n\nCould you shed a bit of light here, explaining the reason for such modularity?",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 77,
+        "endChar": 13
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_8c73eab0",
+        "filename": "pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-01T22:40:26Z",
+      "side": 1,
+      "message": "Alright, thanks for the clarification",
+      "parentUuid": "da5c1566_7b40d256",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 77,
+        "endChar": 13
+      },
+      "revId": "2b8353b7d2cb62f3f275a2ca82669db7135403db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
