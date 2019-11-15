@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_8bb63d89",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/activator/L2vpnActivator.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 6260
+      },
+      "writtenOn": "2016-08-02T10:20:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_0b1d0d67",
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_eb19b17a",
         "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/activator/L2vpnActivator.java",
         "patchSetId": 7
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_2b68c9f4",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/activator/L2vpnActivator.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 6260
+      },
+      "writtenOn": "2016-08-02T10:20:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_eb19b17a",
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_2b79e993",
         "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/AttachmentCircuitHelper.java",
         "patchSetId": 7
@@ -47,6 +83,24 @@
       "writtenOn": "2016-08-02T07:59:27Z",
       "side": 1,
       "message": "configure -\u003e addPort",
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_4b88a522",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/AttachmentCircuitHelper.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 6260
+      },
+      "writtenOn": "2016-08-02T10:20:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_2b79e993",
       "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -76,6 +130,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_6b876110",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/AttachmentCircuitHelper.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 6260
+      },
+      "writtenOn": "2016-08-02T10:20:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_cb6795e9",
+      "range": {
+        "startLine": 45,
+        "startChar": 30,
+        "endLine": 45,
+        "endChar": 51
+      },
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_cbae75e7",
         "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/PseudowireHelper.java",
         "patchSetId": 7
@@ -87,6 +165,24 @@
       "writtenOn": "2016-08-02T07:59:27Z",
       "side": 1,
       "message": "refactor name like with other helpers ??",
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_4b79c5fb",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/PseudowireHelper.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 6260
+      },
+      "writtenOn": "2016-08-02T10:20:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_cbae75e7",
       "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -110,6 +206,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_2b7e09e5",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/PseudowireHelper.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 6260
+      },
+      "writtenOn": "2016-08-02T10:20:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_2b872963",
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_ab3df9bd",
         "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/XConnectHelper.java",
         "patchSetId": 7
@@ -121,6 +235,24 @@
       "writtenOn": "2016-08-02T07:59:27Z",
       "side": 1,
       "message": "Collections.singletonList",
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_8b991d71",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/XConnectHelper.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 6260
+      },
+      "writtenOn": "2016-08-02T10:20:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_ab3df9bd",
       "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -144,6 +276,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_6b9e4158",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/XConnectHelper.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 6260
+      },
+      "writtenOn": "2016-08-02T10:20:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_2b528913",
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_6b5c8126",
         "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/XConnectHelper.java",
         "patchSetId": 7
@@ -155,6 +305,24 @@
       "writtenOn": "2016-08-02T07:59:27Z",
       "side": 1,
       "message": "build instead of getXconnectGroup",
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_0bad0d89",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/XConnectHelper.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 6260
+      },
+      "writtenOn": "2016-08-02T10:20:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_6b5c8126",
       "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
