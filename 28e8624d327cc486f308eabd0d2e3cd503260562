@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_3f02a63e",
+        "filename": "impl/src/main/resources/org/opendaylight/blueprint/unimgr.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "Should change id to fcListener or remove the id and use anon bean.",
+      "range": {
+        "startLine": 25,
+        "startChar": 14,
+        "endLine": 25,
+        "endChar": 29
+      },
+      "revId": "28e8624d327cc486f308eabd0d2e3cd503260562",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
