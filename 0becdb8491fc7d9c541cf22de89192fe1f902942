@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_c63ad535",
+        "filename": "features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "Postponing until the blueprint / IT issue is resolved",
+      "parentUuid": "da5c1566_d3173950",
+      "range": {
+        "startLine": 123,
+        "startChar": 0,
+        "endLine": 129,
+        "endChar": 17
+      },
+      "revId": "0becdb8491fc7d9c541cf22de89192fe1f902942",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_330cb542",
         "filename": "features/src/main/features/features.xml",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-06-03T15:18:08Z",
       "side": 1,
       "message": "this hsould be removed",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 138
+      },
+      "revId": "0becdb8491fc7d9c541cf22de89192fe1f902942",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_a604017f",
+        "filename": "features/src/main/features/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "Postponing until the blueprint / IT issue is resolved",
+      "parentUuid": "da5c1566_330cb542",
       "range": {
         "startLine": 37,
         "startChar": 0,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_e6e719e3",
+        "filename": "impl/src/main/java/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/unimgr/impl/rev160525/UnimgrModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "Postponing until the blueprint / IT issue is resolved",
+      "parentUuid": "da5c1566_d340d958",
+      "revId": "0becdb8491fc7d9c541cf22de89192fe1f902942",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_3325d5c2",
         "filename": "impl/src/main/java/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/unimgr/impl/rev160525/UnimgrModuleFactory.java",
         "patchSetId": 1
@@ -76,6 +142,24 @@
       "writtenOn": "2016-06-03T15:13:47Z",
       "side": 1,
       "message": "this can be remove completely",
+      "revId": "0becdb8491fc7d9c541cf22de89192fe1f902942",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_c6ec95ca",
+        "filename": "impl/src/main/java/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/unimgr/impl/rev160525/UnimgrModuleFactory.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "Postponing until the blueprint / IT issue is resolved",
+      "parentUuid": "da5c1566_3325d5c2",
       "revId": "0becdb8491fc7d9c541cf22de89192fe1f902942",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -99,6 +183,24 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_26d111fc",
+        "filename": "impl/src/main/resources/OSGI-INF/blueprint/unimgr.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_132251b9",
+      "revId": "0becdb8491fc7d9c541cf22de89192fe1f902942",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_732f4da2",
         "filename": "impl/src/main/yang/unimgr-impl.yang",
         "patchSetId": 1
@@ -110,6 +212,24 @@
       "writtenOn": "2016-06-03T15:13:47Z",
       "side": 1,
       "message": "this could be removed completely as it only server for config-system wiring",
+      "revId": "0becdb8491fc7d9c541cf22de89192fe1f902942",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_e6355947",
+        "filename": "impl/src/main/yang/unimgr-impl.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "Postponing until the blueprint / IT issue is resolved",
+      "parentUuid": "da5c1566_732f4da2",
       "revId": "0becdb8491fc7d9c541cf22de89192fe1f902942",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
