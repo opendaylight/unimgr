@@ -26,6 +26,29 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_75039fb8",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/nrp/netvirt/EvcListener.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "DataChangeListener is deprecated. New code should use DataTreeChangeListener",
+      "range": {
+        "startLine": 14,
+        "startChar": 54,
+        "endLine": 14,
+        "endChar": 72
+      },
+      "revId": "c841c8bafb28f479ac6f6abb696d9c75c6e000a3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_cbe2c79e",
         "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/nrp/netvirt/NetvirtUtils.java",
         "patchSetId": 10
@@ -38,6 +61,23 @@
       "side": 1,
       "message": "I added async methods.",
       "parentUuid": "9a561d44_55001baa",
+      "revId": "c841c8bafb28f479ac6f6abb696d9c75c6e000a3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_55001baa",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/nrp/netvirt/NetvirtUtils.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "I don\u0027t think we should use MDSALUtil. It hides the async behaviour of the data broker and there is no meaningful error handling so users of NetvirtUtils are not able to write robust code. It needs to be written with error handling in mind, returning Future or Optional results.",
       "revId": "c841c8bafb28f479ac6f6abb696d9c75c6e000a3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -62,6 +102,23 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_953113a5",
+        "filename": "netvirt/src/main/resources/org/opendaylight/blueprint/netvirt-driver.xml",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "This file needs a copyright message.",
+      "revId": "c841c8bafb28f479ac6f6abb696d9c75c6e000a3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_0bf4bf59",
         "filename": "netvirt/src/test/java/org/opendaylight/unimgr/netvirt/UnimgrNetvirtTest.java",
         "patchSetId": 10
@@ -74,6 +131,23 @@
       "side": 1,
       "message": "I removed the file, tests will be written later.",
       "parentUuid": "9a561d44_b52c174c",
+      "revId": "c841c8bafb28f479ac6f6abb696d9c75c6e000a3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_b52c174c",
+        "filename": "netvirt/src/test/java/org/opendaylight/unimgr/netvirt/UnimgrNetvirtTest.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "Where are the tests?",
       "revId": "c841c8bafb28f479ac6f6abb696d9c75c6e000a3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
