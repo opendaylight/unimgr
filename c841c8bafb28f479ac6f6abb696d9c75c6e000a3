@@ -1,0 +1,82 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_ebe50ba9",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/nrp/netvirt/EvcListener.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 6071
+      },
+      "writtenOn": "2016-07-06T15:26:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a561d44_75039fb8",
+      "range": {
+        "startLine": 14,
+        "startChar": 54,
+        "endLine": 14,
+        "endChar": 72
+      },
+      "revId": "c841c8bafb28f479ac6f6abb696d9c75c6e000a3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_cbe2c79e",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/nrp/netvirt/NetvirtUtils.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 6071
+      },
+      "writtenOn": "2016-07-06T15:26:05Z",
+      "side": 1,
+      "message": "I added async methods.",
+      "parentUuid": "9a561d44_55001baa",
+      "revId": "c841c8bafb28f479ac6f6abb696d9c75c6e000a3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_2bef0389",
+        "filename": "netvirt/src/main/resources/org/opendaylight/blueprint/netvirt-driver.xml",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 6071
+      },
+      "writtenOn": "2016-07-06T15:26:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a561d44_953113a5",
+      "revId": "c841c8bafb28f479ac6f6abb696d9c75c6e000a3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_0bf4bf59",
+        "filename": "netvirt/src/test/java/org/opendaylight/unimgr/netvirt/UnimgrNetvirtTest.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 6071
+      },
+      "writtenOn": "2016-07-06T15:26:05Z",
+      "side": 1,
+      "message": "I removed the file, tests will be written later.",
+      "parentUuid": "9a561d44_b52c174c",
+      "revId": "c841c8bafb28f479ac6f6abb696d9c75c6e000a3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
