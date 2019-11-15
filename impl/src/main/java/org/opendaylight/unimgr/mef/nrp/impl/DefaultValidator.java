@@ -102,7 +102,7 @@ public class DefaultValidator implements RequestValidator {
 
         ValidationResult validationResult = new ValidationResult();
 
-        if(input.getEndPoint() == null || input.getEndPoint().isEmpty()) {
+        if (input.getEndPoint() == null || input.getEndPoint().isEmpty()) {
             validationResult.problem("No endpoints specified for a connectivity service");
         } else {
 

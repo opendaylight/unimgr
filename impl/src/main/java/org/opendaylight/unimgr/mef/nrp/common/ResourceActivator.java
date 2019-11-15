@@ -29,7 +29,7 @@ public interface ResourceActivator {
      * @throws InterruptedException transaction was interrupted
      */
     void activate(List<EndPoint> endPoints, String serviceName, boolean isExclusive, ServiceType serviceType)
-            throws  ResourceActivatorException, InterruptedException, ExecutionException;
+            throws ResourceActivatorException, InterruptedException, ExecutionException;
 
     /**
      * Deactivate connectivity between the provided endpoints.
@@ -39,6 +39,6 @@ public interface ResourceActivator {
      * @throws ExecutionException transaction execution failed
      * @throws InterruptedException transaction was interrupted
      */
-    void deactivate(List<EndPoint> endPoints, String serviceName, ServiceType serviceType)
+    void deactivate(List<EndPoint> endPoints, String serviceName, boolean isExclusive, ServiceType serviceType)
             throws ResourceActivatorException, InterruptedException, ExecutionException;
 }

@@ -73,7 +73,7 @@ public class OvsDriver implements ActivationDriverBuilder {
 
             @Override
             public void deactivate() throws ResourceNotAvailableException, InterruptedException, ExecutionException {
-                activator.deactivate(endPoints, serviceId, serviceType);
+                activator.deactivate(endPoints, serviceId, isExclusive, serviceType);
             }
 
             @Override

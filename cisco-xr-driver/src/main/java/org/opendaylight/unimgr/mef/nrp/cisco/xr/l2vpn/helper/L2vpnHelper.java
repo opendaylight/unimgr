@@ -11,6 +11,7 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.L2vpnBuilder;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.Database;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.DatabaseBuilder;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.BridgeDomainGroups;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.XconnectGroups;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -29,6 +30,16 @@ public class L2vpnHelper {
     public static L2vpn build(XconnectGroups xconnectGroups) {
         Database database = new DatabaseBuilder()
             .setXconnectGroups(xconnectGroups)
+            .build();
+
+        return new L2vpnBuilder()
+            .setDatabase(database)
+            .build();
+    }
+
+    public static L2vpn build(BridgeDomainGroups bridgeDomainGroups) {
+        Database database = new DatabaseBuilder()
+            .setBridgeDomainGroups(bridgeDomainGroups)
             .build();
 
         return new L2vpnBuilder()

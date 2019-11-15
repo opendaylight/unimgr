@@ -38,6 +38,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.google.common.util.concurrent.FluentFuture;
 
+
 /**
  * @author bartosz.michalik@amartus.com
  */

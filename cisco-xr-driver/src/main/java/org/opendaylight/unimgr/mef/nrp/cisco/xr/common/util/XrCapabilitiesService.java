@@ -30,7 +30,7 @@ public class XrCapabilitiesService extends CapabilitiesService {
         NETCONF_CISCO_IOX_IFMGR((dbBroker, node) ->
                 checkForNetconfCapability(node,NetconfConstants.CAPABILITY_IOX_IFMGR)),
         NETCONF_CISCO_IOX_POLICYMGR((dbBroker, node) ->
-                checkForNetconfCapability(node,NetconfConstants.CAPABILITY_IOX_ASR9K_POLICYMGR));
+                checkForNetconfCapability(node,NetconfConstants.CAPABILITY_IOX_INFRA_POLICYMGR));
 
         private BiFunction<DataBroker, Node, Boolean> condition;
 

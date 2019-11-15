@@ -64,10 +64,10 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractConcurrentDataBro
 
         l2VpnLocalConnectActivator = new L2vpnLocalConnectActivator(getDataBroker(),mountService);
 
-        outerName = "local";
-        innerName = "local";
-        portNo1 = "80";
-        portNo2 = "8080";
+        outerName = "serviceId";
+        innerName = "serviceId";
+        portNo1 = "8080";
+        portNo2 = "8081";
         endPoints = L2vpnTestUtils.mockEndpoints(deviceName,deviceName,portNo1,portNo2);
     }
 
@@ -96,13 +96,13 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractConcurrentDataBro
         deactivate();
 
         //then
-        L2vpnTestUtils.checkDeactivated(getDataBroker(), portNo1);
+        L2vpnTestUtils.checkDeactivated(getDataBroker(), portNo2);
     }
 
     private void deactivate() {
         try {
-            l2VpnLocalConnectActivator.deactivate(endPoints,serviceId, ServiceType.POINTTOPOINTCONNECTIVITY);
-        } catch (InterruptedException | ExecutionException e) {
+            l2VpnLocalConnectActivator.deactivate(endPoints,serviceId, true, ServiceType.POINTTOPOINTCONNECTIVITY);
+        } catch ( InterruptedException | ExecutionException e) {
             fail("Error during deactivation : " + e.getMessage());
         }
     }
@@ -110,7 +110,7 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractConcurrentDataBro
     private void activate() {
         LOG.debug("activate L2VPN");
         try {
-            l2VpnLocalConnectActivator.activate(endPoints, serviceId, true, ServiceType.POINTTOPOINTCONNECTIVITY);
+            l2VpnLocalConnectActivator.activate(endPoints,serviceId, true, ServiceType.POINTTOPOINTCONNECTIVITY);
         } catch (InterruptedException | ExecutionException e) {
             fail("Error during activation : " + e.getMessage());
         }

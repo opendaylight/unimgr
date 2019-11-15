@@ -118,17 +118,15 @@ public class OvsActivatorTest extends AbstractConcurrentDataBrokerTest {
         Nodes nodes = readOpenFLowTopology(dataBroker);
         Node odlNode = OvsdbUtils.getOdlNode(dataBroker);
         checkTable(nodes,activated);
-        System.out.println("Before deactivation: "+ nodes.toString());
 
         //when
         try {
-            ovsActivator.deactivate(endPoints, serviceId, ServiceType.POINTTOPOINTCONNECTIVITY);
+            ovsActivator.deactivate(endPoints, serviceId, true, ServiceType.POINTTOPOINTCONNECTIVITY);
         } catch (ResourceNotAvailableException | InterruptedException | ExecutionException e) {
             fail(e.getMessage());
         }
         nodes = readOpenFLowTopology(dataBroker);
         checkTable(nodes,deactivated);
-        System.out.println("After deactivation: "+ nodes.toString());
     }
 
     BiConsumer<Table,List<String>> activated = (table,interswitchPorts) -> {
