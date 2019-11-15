@@ -16,6 +16,24 @@
       "revId": "8af57798953b0abb198f6f21d8b949e385e8d2c3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_01aca99f",
+        "filename": "cli/src/main/java/org/opendaylight/unimgr/cli/UniAddShellCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "Eclipse organise-imports puts a blank line between each import group - java, org, com, etc.\n\nOpendaylight checkstyle is happy with it. I guess it just looks odd here because there is a single java.xxx import.",
+      "parentUuid": "da5c1566_dea45059",
+      "revId": "8af57798953b0abb198f6f21d8b949e385e8d2c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
