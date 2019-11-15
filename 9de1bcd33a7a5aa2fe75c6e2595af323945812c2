@@ -1,0 +1,163 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_0b1d0d67",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/activator/L2vpnActivator.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 2531
+      },
+      "writtenOn": "2016-08-02T07:59:27Z",
+      "side": 1,
+      "message": "I would keep L2vpn* in hierarchy rather than unrelated. We might also consider to resign from some of the composition constructs and replace them with methods overloading.",
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_eb19b17a",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/activator/L2vpnActivator.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 2531
+      },
+      "writtenOn": "2016-08-02T07:59:27Z",
+      "side": 1,
+      "message": "no need to be public",
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_2b79e993",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/AttachmentCircuitHelper.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 2531
+      },
+      "writtenOn": "2016-08-02T07:59:27Z",
+      "side": 1,
+      "message": "configure -\u003e addPort",
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_cb6795e9",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/AttachmentCircuitHelper.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 2531
+      },
+      "writtenOn": "2016-08-02T07:59:27Z",
+      "side": 1,
+      "message": "getAttachmentCircuits -\u003e build",
+      "range": {
+        "startLine": 45,
+        "startChar": 30,
+        "endLine": 45,
+        "endChar": 51
+      },
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_cbae75e7",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/PseudowireHelper.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 2531
+      },
+      "writtenOn": "2016-08-02T07:59:27Z",
+      "side": 1,
+      "message": "refactor name like with other helpers ??",
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_2b872963",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/PseudowireHelper.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 2531
+      },
+      "writtenOn": "2016-08-02T07:59:27Z",
+      "side": 1,
+      "message": "how many PW do you build with this method ?",
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_ab3df9bd",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/XConnectHelper.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 2531
+      },
+      "writtenOn": "2016-08-02T07:59:27Z",
+      "side": 1,
+      "message": "Collections.singletonList",
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_2b528913",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/XConnectHelper.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 2531
+      },
+      "writtenOn": "2016-08-02T07:59:27Z",
+      "side": 1,
+      "message": "appendXConnect instead of configure ??",
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_6b5c8126",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/l2vpn/helper/XConnectHelper.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 2531
+      },
+      "writtenOn": "2016-08-02T07:59:27Z",
+      "side": 1,
+      "message": "build instead of getXconnectGroup",
+      "revId": "9de1bcd33a7a5aa2fe75c6e2595af323945812c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
