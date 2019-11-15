@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_af5dffeb",
+        "filename": "features/pom.xml",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "Need to remove trailing whitespace.\n\nNeed to convert tabs to spaces.",
+      "revId": "2c42ba28dbeae290c28cd280800c0f58bdbfbb13",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_0f722b7c",
+        "filename": "features/src/main/features/features.xml",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "Need to convert tabs to spaces and remove trailing whitespace",
+      "revId": "2c42ba28dbeae290c28cd280800c0f58bdbfbb13",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_2f69ef8b",
+        "filename": "netvirt/pom.xml",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "Again tabs -\u003e spaces and trailing whitespace",
+      "revId": "2c42ba28dbeae290c28cd280800c0f58bdbfbb13",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_8f059bc4",
+        "filename": "netvirt/src/main/java/org/opendaylight/unimgr/mef/nrp/netvirt/EvcListener.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2019-11-15T21:49:53Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace",
+      "revId": "2c42ba28dbeae290c28cd280800c0f58bdbfbb13",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
