@@ -285,8 +285,8 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         Objects.requireNonNull(csep);
 
         builder
-               .setParentNodeEdgePoint(Collections.emptyList())
-               .setClientNodeEdgePoint(Collections.emptyList())
+               //.setParentNodeEdgePoint(Collections.emptyList())
+               //.setClientNodeEdgePoint(Collections.emptyList())
                 .setOperationalState(csep.getOperationalState())
                 .setLayerProtocolName(csep.getLayerProtocolName())
                 .setLifecycleState(csep.getLifecycleState())
