@@ -60,7 +60,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <module>nrp-api</module>
         <module>impl</module>
         <module>cisco-xr-driver</module>
-        <module>ovs-driver</module>
         <module>template-driver</module>
         <module>karaf</module>
         <module>features</module>

@@ -26,7 +26,6 @@
     <module>odl-unimgr</module>
     <module>odl-unimgr-rest</module>
     <module>odl-unimgr-cisco-xr-driver</module>
-    <module>odl-unimgr-ovs-driver</module>
     <module>odl-unimgr-template-driver</module>
     <module>odl-unimgr-legato-api</module>
   </modules>
