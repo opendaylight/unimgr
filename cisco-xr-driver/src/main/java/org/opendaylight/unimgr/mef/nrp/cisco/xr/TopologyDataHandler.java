@@ -259,7 +259,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
                         tps = ports(tx)
                           .filter(i -> {
                             boolean shutdown =
-                                    i != null && i.isShutdown() != null && i.isShutdown();
+                                    i != null && i.getShutdown() != null;
                             return !shutdown;
                         }).filter(isNep::test).map(i -> {
                             InterfaceConfigurationKey ikey = i.key();

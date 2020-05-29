@@ -14,6 +14,7 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.AttachmentCircuitsBuilder;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.attachment.circuits.AttachmentCircuit;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.attachment.circuits.AttachmentCircuitBuilder;
+import org.opendaylight.yangtools.yang.common.Empty;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -35,7 +36,7 @@ public class AttachmentCircuitHelper {
         attachmentCircuits.add(
             new AttachmentCircuitBuilder()
                 .setName((isExclusive) ? InterfaceHelper.getInterfaceName(port) : InterfaceHelper.getSubInterfaceName(port))
-                .setEnable(Boolean.TRUE)
+                .setEnable(Empty.getInstance())
                 .build()
         );
 
