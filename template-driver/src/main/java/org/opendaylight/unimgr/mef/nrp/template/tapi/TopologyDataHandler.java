@@ -149,14 +149,14 @@ public class TopologyDataHandler {
         switch (type) {
             case enni:
                 sipBuilder.setNrpCarrierEthEnniNResource(new NrpCarrierEthEnniNResourceBuilder()
-                    .setMaxFrameSize(new NaturalNumber(new Long(1024)))
+                    .setMaxFrameSize(new NaturalNumber(Long.valueOf(1024)))
                     .build()
 
                 );
                 break;
             case uni:
                 sipBuilder.setNrpCarrierEthUniNResource(new NrpCarrierEthUniNResourceBuilder()
-                        .setMaxFrameSize(new NaturalNumber(new Long(1024)))
+                        .setMaxFrameSize(new NaturalNumber(Long.valueOf(1024)))
                         .build()
 
                 );
@@ -164,7 +164,7 @@ public class TopologyDataHandler {
             case inni:
             default:
                 sipBuilder.setNrpCarrierEthInniNResource(new NrpCarrierEthInniNResourceBuilder()
-                        .setMaxFrameSize(new NaturalNumber(new Long(1024)))
+                        .setMaxFrameSize(new NaturalNumber(Long.valueOf(1024)))
                         .build()
 
                 );

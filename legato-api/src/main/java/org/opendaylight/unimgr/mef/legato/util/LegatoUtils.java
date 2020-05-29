@@ -60,6 +60,7 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev18030
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.create.connectivity.service.input.EndPointBuilder;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.Uint16;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,7 +107,7 @@ public final class LegatoUtils {
         final EVCDao evcDao = new EVCDao();
         evcDao.setEvcId(evc.getEvcId().getValue());
         evcDao.setMaxFrameSize(
-                (evc.getMaxFrameSize().getValue() != null) ? evc.getMaxFrameSize().getValue() : 0);
+                (evc.getMaxFrameSize().getValue() != null) ? evc.getMaxFrameSize().getValue() : Uint16.ZERO);
         evcDao.setConnectionType(
                 (evc.getConnectionType().getName() != null) ? evc.getConnectionType().getName()
                         : "");
