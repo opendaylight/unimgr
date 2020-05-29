@@ -12,6 +12,7 @@ import static org.junit.Assert.fail;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -146,13 +147,15 @@ public class L2vpnP2pConnectionActivatorTest extends AbstractConcurrentDataBroke
             L2vpnTestUtils.checkInterfaceConfigurations(interfaceConfigurations);
 
             List<InterfaceConfiguration> interfaceConfigurationList = interfaceConfigurations.getInterfaceConfiguration();
-            interfaceConfigurationList.sort(
+            List<InterfaceConfiguration> sorted = interfaceConfigurationList.stream()
+                    .sorted(
                     (InterfaceConfiguration ic1, InterfaceConfiguration ic2)
-                            -> ic1.getInterfaceName().getValue().compareTo(ic2.getInterfaceName().getValue()));
+                            -> ic1.getInterfaceName().getValue().compareTo(ic2.getInterfaceName().getValue()))
+                    .collect(Collectors.toList());
 
-            L2vpnTestUtils.checkInterfaceConfiguration(interfaceConfigurationList.get(0),portNo1,false);
+            L2vpnTestUtils.checkInterfaceConfiguration(sorted.get(0),portNo1,false);
 
-            Mtu mtu1 = interfaceConfigurationList.get(0).getMtus().getMtu().get(0);
+            Mtu mtu1 = sorted.get(0).getMtus().getMtu().get(0);
             L2vpnTestUtils.checkMtu(mtu1,mtu);
         } else {
             fail("InterfaceConfigurations was not found.");

@@ -202,7 +202,7 @@ public class NrpDao  {
         try {
             nep = readNep(ref);
         } catch (ReadFailedException | InterruptedException | ExecutionException e) {
-            LOG.warn("Error while reading NEP", e);
+            LOG.warn("Error while reading NEP: {}", e.getMessage());
         }
         if (nep == null) {
             throw new IllegalArgumentException("Cannot find NEP for " + ref);
@@ -217,13 +217,15 @@ public class NrpDao  {
             builder = new OwnedNodeEdgePoint1Builder(aug);
         }
 
+        List<ConnectionEndPoint> newCepList = new LinkedList<ConnectionEndPoint>();
         List<ConnectionEndPoint> cepList = builder.getConnectionEndPoint();
-        if (cepList == null) {
-            cepList = new LinkedList<>();
+        if (cepList != null) {
+            newCepList.addAll(cepList);
         }
 
-        cepList.add(cep);
-        builder.setConnectionEndPoint(cepList);
+        newCepList.add(cep);
+        builder.setConnectionEndPoint(newCepList);
+
 
         nep = new OwnedNodeEdgePointBuilder(nep).addAugmentation(OwnedNodeEdgePoint1.class, builder.build()).build();
         tx.merge(LogicalDatastoreType.OPERATIONAL, toPath.apply(ref), nep);
@@ -252,7 +254,7 @@ public class NrpDao  {
                     ctx().child(ServiceInterfacePoint.class, new ServiceInterfacePointKey(universalId)))
                     .get().isPresent();
         } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Cannot read sip with id {}", universalId.getValue());
+            LOG.error("Cannot read sip with id {}: {}", universalId.getValue(), e.getMessage());
         }
         return false;
     }
@@ -341,7 +343,7 @@ public class NrpDao  {
                     }
                 }
             } catch (InterruptedException | ExecutionException e) {
-                LOG.error("Cannot read node with id {}", nodeId);
+                LOG.error("Cannot read node with id {}: {}", nodeId, e.getMessage());
             }
         }
         assert tx != null;
@@ -371,7 +373,7 @@ public class NrpDao  {
                     .get().orElse(null);
             return connectivity == null ? null : connectivity.getConnectivityService();
         } catch (InterruptedException | ExecutionException e) {
-            LOG.warn("reading connectivity services failed", e);
+            LOG.warn("reading connectivity services failed: {}", e.getMessage());
             return null;
         }
     }
@@ -400,7 +402,7 @@ public class NrpDao  {
                     .get().orElse(null);
 
         } catch (InterruptedException | ExecutionException e) {
-            LOG.warn("reading connectivity service failed", e);
+            LOG.warn("Reading connectivity service failed: {}", e.getMessage());
             return null;
         }
     }
@@ -415,7 +417,7 @@ public class NrpDao  {
                     .get().orElse(null);
 
         } catch (InterruptedException | ExecutionException e) {
-            LOG.warn("reading NEP for ref " +  ref + " failed", e);
+            LOG.warn("Reading NEP for ref {} failed: {}", ref, e.getMessage());
             return null;
         }
     }
@@ -433,7 +435,7 @@ public class NrpDao  {
                     .get().orElse(null);
 
         } catch (InterruptedException | ExecutionException e) {
-            LOG.warn("reading connectivity service failed", e);
+            LOG.warn("Reading connectivity service failed: {}", e.getMessage());
             return null;
         }
     }
@@ -487,7 +489,7 @@ public class NrpDao  {
         try {
             tx.commit().get();
         } catch (InterruptedException | ExecutionException e) {
-            LOG.warn("Problem with updating connectivity service endpoint", e);
+            LOG.warn("Problem with updating connectivity service endpoint: {}", e.getMessage());
             throw e;
         }
 

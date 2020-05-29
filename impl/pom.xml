@@ -12,19 +12,20 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <parent>
         <groupId>org.opendaylight.mdsal</groupId>
         <artifactId>binding-parent</artifactId>
-        <version>3.0.8</version>
+        <version>5.0.10</version>
         <relativePath/>
     </parent>
 
     <properties>
-      <mdsal.version>3.0.8</mdsal.version>
-      <powermock.version>2.0.0-beta.5</powermock.version>
+      <mdsal.version>5.0.10</mdsal.version>
+      <odlparent.checkstyle.enforce>false</odlparent.checkstyle.enforce>
+      <odlparent.spotbugs.enforce>false</odlparent.spotbugs.enforce>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.opendaylight.unimgr</groupId>
     <artifactId>unimgr-impl</artifactId>
-    <version>0.5.0-SNAPSHOT</version>
+    <version>0.6.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <!-- <name> formatting is used by autorelse to parse and notify projects on
          build failure. Please do not modify this unless you have a good reason. -->
@@ -35,19 +36,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
-                <version>1.9.1</version>
+                <version>1.11.1</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-api-mockito2</artifactId>
-                <version>${powermock.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>2.10.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -93,6 +84,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <dependencies>
 
         <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.opendaylight.unimgr</groupId>
             <artifactId>unimgr-nrp-tapi-api</artifactId>
             <version>${project.version}</version>
@@ -132,31 +129,26 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-core</artifactId>
-            <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
-            <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito2</artifactId>
-            <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-support</artifactId>
-            <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-reflect</artifactId>
-            <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
     <dependency>
@@ -166,10 +158,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

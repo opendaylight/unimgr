@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.CiscoIosXrString;
+import org.opendaylight.yangtools.yang.common.Uint32;
 
 
 /**
@@ -45,7 +46,7 @@ public class MtuUtils {
 
     private static Mtu generateMtu(long mtuValue, CiscoIosXrString owner) {
         return new MtuBuilder()
-            .setMtu(mtuValue)
+            .setMtu(Uint32.valueOf(mtuValue))
             .setOwner(owner)
             .build();
     }

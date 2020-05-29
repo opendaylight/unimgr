@@ -7,16 +7,17 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util;
 
-import org.junit.Test;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.Mtus;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.mtus.Mtu;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.CiscoIosXrString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.Mtus;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.mtus.Mtu;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.CiscoIosXrString;
+import org.opendaylight.yangtools.yang.common.Uint32;
 
 /**
  * @author krzysztof.bijakowski@amartus.com
@@ -39,7 +40,7 @@ public class MtuUtilsTest {
         assertEquals(actualMtuList.size(), 1);
 
         Mtu actualMtu = actualMtuList.get(0);
-        assertEquals(mtuValue, actualMtu.getMtu());
+        assertEquals(Uint32.valueOf(mtuValue), actualMtu.getMtu());
         assertEquals(owner, actualMtu.getOwner());
     }
 
@@ -62,11 +63,11 @@ public class MtuUtilsTest {
         assertEquals(actualMtuList.size(), 2);
 
         Mtu actualMtu = actualMtuList.get(0);
-        assertEquals(mtuValues.get(0), actualMtu.getMtu());
+        assertEquals(Uint32.valueOf(mtuValues.get(0)), actualMtu.getMtu());
         assertEquals(owner, actualMtu.getOwner());
 
         actualMtu = actualMtuList.get(1);
-        assertEquals(mtuValues.get(1), actualMtu.getMtu());
+        assertEquals(Uint32.valueOf(mtuValues.get(1)), actualMtu.getMtu());
         assertEquals(owner, actualMtu.getOwner());
     }
 }

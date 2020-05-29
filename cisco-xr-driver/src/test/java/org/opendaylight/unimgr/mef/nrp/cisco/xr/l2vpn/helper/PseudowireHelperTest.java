@@ -17,6 +17,7 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.pseudowires.Pseudowire;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.pseudowires.pseudowire.Neighbor;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4AddressNoZone;
+import org.opendaylight.yangtools.yang.common.Uint32;
 
 /**
  * @author krzysztof.bijakowski@amartus.com
@@ -26,7 +27,7 @@ public class PseudowireHelperTest {
     @Test
     public void testBuild() {
         //given
-        Long pseudowireId = PseudowireHelper.generatePseudowireId();
+        Uint32 pseudowireId = Uint32.valueOf(PseudowireHelper.generatePseudowireId());
         Ipv4AddressNoZone neighborAddress = new Ipv4AddressNoZone("1.2.3.4");
 
         //when

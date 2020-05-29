@@ -140,7 +140,7 @@ public class InterfaceHelperTest {
         InterfaceConfiguration3 l2Configuration = actualInterfaceConfiguration.augmentation(InterfaceConfiguration3.class);
         assertNotNull(l2Configuration);
         assertNotNull(l2Configuration.getL2Transport());
-        assertTrue(l2Configuration.getL2Transport().isEnabled());
+        assertNotNull(l2Configuration.getL2Transport().getEnabled());
     }
 
     @Test

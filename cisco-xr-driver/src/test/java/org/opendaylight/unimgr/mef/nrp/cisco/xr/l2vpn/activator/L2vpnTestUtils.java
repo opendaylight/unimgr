@@ -8,7 +8,6 @@
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -78,7 +77,7 @@ public class L2vpnTestUtils {
     }
 
     public static void checkAttachmentCircuit(AttachmentCircuit attachmentCircuit, String port) {
-        assertTrue(attachmentCircuit.isEnable());
+        assertNotNull(attachmentCircuit.getEnable());
         assertEquals(port,attachmentCircuit.getName().getValue());
     }
 
@@ -109,7 +108,7 @@ public class L2vpnTestUtils {
         assertNotNull(interfaceConfiguration.getActive());
         assertNotNull(interfaceConfiguration.getInterfaceModeNonPhysical());
         assertEquals(portNo,interfaceConfiguration.getInterfaceName().getValue());
-        assertNull(interfaceConfiguration.isShutdown());
+        assertNull(interfaceConfiguration.getShutdown());
         if (mtu) {
             assertNotNull(interfaceConfiguration.getMtus());
             assertNotNull(interfaceConfiguration.getMtus().getMtu());
@@ -117,7 +116,7 @@ public class L2vpnTestUtils {
     }
 
     public static void checkMtu(Mtu mtu, Long mtuValue) {
-        assertEquals(mtuValue,mtu.getMtu());
+        assertEquals(mtuValue.longValue(),mtu.getMtu().longValue());
         assertNotNull(mtu.getOwner());
     }
 

@@ -13,7 +13,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,7 +52,7 @@ import org.slf4j.LoggerFactory;
  */
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(LegatoUtils.class)
+@PrepareForTest({LegatoUtils.class})
 public class EvcDataTreeChangeListenerTest {
 
     private LegatoServiceController legatoServiceController;
@@ -64,10 +63,6 @@ public class EvcDataTreeChangeListenerTest {
     @Before
     public void setUp() throws Exception {
         legatoServiceController = mock(LegatoServiceController.class, Mockito.CALLS_REAL_METHODS);
-
-        PowerMockito.mockStatic(LegatoUtils.class);
-
-
     }
 
     @SuppressWarnings("unchecked")
@@ -83,8 +78,10 @@ public class EvcDataTreeChangeListenerTest {
         evc = getDataTree(ModificationType.SUBTREE_MODIFIED, mock(Evc.class), mock(Evc.class));
         collection.add(evc);
 
-
-        when(LegatoUtils.readEvc(any(DataBroker.class), any(LogicalDatastoreType.class), any())).thenReturn(Optional.empty());
+        PowerMockito.stub(
+                PowerMockito.method(LegatoUtils.class,
+                        "readEvc", DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class))
+        .toReturn(Optional.empty());
 
         legatoServiceController.onDataTreeChanged(collection);
         verify(legatoServiceController, times(1)).add(any(DataTreeModification.class));

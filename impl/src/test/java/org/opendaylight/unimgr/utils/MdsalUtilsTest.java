@@ -17,17 +17,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ch.qos.logback.core.Appender;
-
-import com.google.common.util.concurrent.FluentFuture;
-
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -39,29 +33,26 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.google.common.util.concurrent.FluentFuture;
+
+import ch.qos.logback.core.Appender;
 
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({LogicalDatastoreType.class, MdsalUtils.class, Optional.class})
 public class MdsalUtilsTest {
 
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
+//    @Rule
+//    public final ExpectedException exception = ExpectedException.none();
+
     @SuppressWarnings("rawtypes")
     @Mock private Appender mockAppender;
 
-    @SuppressWarnings("unchecked")
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(MdsalUtils.class, Mockito.CALLS_REAL_METHODS);
         PowerMockito.mockStatic(LogicalDatastoreType.class);
-        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger)
-                LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        // Check logger messages
-        when(mockAppender.getName()).thenReturn("MOCK");
-        root.addAppender(mockAppender);
     }
 
     @SuppressWarnings("unchecked")

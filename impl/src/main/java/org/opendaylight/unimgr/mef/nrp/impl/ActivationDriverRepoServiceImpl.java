@@ -54,8 +54,8 @@ public class ActivationDriverRepoServiceImpl implements ActivationDriverRepoServ
         ActivationDriverBuilder builder = builders.stream()
                 .filter(db -> db.getActivationDriverId().equals(activationDriverId))
                 .findFirst().orElseThrow(() ->
-                        new ActivationDriverNotFoundException(MessageFormat
-                                .format("No driver with id {0} registered", activationDriverId)));
+                new ActivationDriverNotFoundException(MessageFormat
+                        .format("No driver with id {0} registered", activationDriverId)));
         return builder.driverFor(new ActivationDriverBuilder.BuilderContext());
 
     }

@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -27,9 +26,7 @@ import java.util.concurrent.Future;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
@@ -64,25 +61,17 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev18030
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.api.support.membermodification.MemberMatcher;
-import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
-
-import ch.qos.logback.classic.spi.LoggingEvent;
-import ch.qos.logback.core.Appender;
 
 
 /*
  * @author Om.SAwasthi@Xoriant.Com
  */
 
-@SuppressWarnings("deprecation")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({LegatoUtils.class})
 public class EpLanIntegrationTest {
@@ -90,9 +79,7 @@ public class EpLanIntegrationTest {
     private TapiConnectivityService prestoConnectivityService;
     @Mock
     private DataBroker dataBroker;
-    @SuppressWarnings("rawtypes")
-    @Mock
-    private Appender mockAppender;
+
     @Mock
     private WriteTransaction transaction;
     @Mock
@@ -103,9 +90,7 @@ public class EpLanIntegrationTest {
     private EndPointBuilder endPointBuilder;
     private Evc evc;
     private EVCDao evcDao;
-    private ch.qos.logback.classic.Logger root;
 
-    @SuppressWarnings("unchecked")
     @Before
     public void setUp() throws Exception {
 
@@ -140,10 +125,6 @@ public class EpLanIntegrationTest {
                 .setEvcId(new EvcIdType(Constants.EVC_ID_TYPE))
                 .setConnectionType(ConnectionType.MultipointToMultipoint)
                 .setSvcType(MefServiceType.Eplan).build();
-
-        root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        when(mockAppender.getName()).thenReturn("MOCK");
-        root.addAppender(mockAppender);
     }
 
     @SuppressWarnings({"unchecked"})
@@ -259,7 +240,7 @@ public class EpLanIntegrationTest {
         assertNotEquals(MefServiceType.Eplan.getName(), evcDao.getSvcType());
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked"})
     @Test
     public void testDeleteService() throws InterruptedException, ExecutionException {
 
@@ -293,13 +274,13 @@ public class EpLanIntegrationTest {
 
         verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(transaction).commit();
-        verify(mockAppender).doAppend(argThat(new ArgumentMatcher() {
-            @Override
-            public boolean matches(final Object argument) {
-                return ((LoggingEvent) argument).getFormattedMessage()
-                        .contains("Received a request to delete node");
-            }
-        }));
+//        verify(mockAppender).doAppend(argThat(new ArgumentMatcher() {
+//            @Override
+//            public boolean matches(final Object argument) {
+//                return ((LoggingEvent) argument).getFormattedMessage()
+//                        .contains("Received a request to delete node");
+//            }
+//        }));
 
     }
 

@@ -14,6 +14,7 @@ import static org.junit.Assert.fail;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -131,12 +132,14 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractConcurrentDataBro
             assertNotNull(attachmentCircuits);
             assertEquals(2, attachmentCircuits.size());
 
-            attachmentCircuits.sort(
+            List<AttachmentCircuit> sorted = attachmentCircuits.stream()
+                .sorted(
                     (AttachmentCircuit ac1, AttachmentCircuit ac2)
-                            -> ac1.getName().getValue().compareTo(ac2.getName().getValue()));
+                            -> ac1.getName().getValue().compareTo(ac2.getName().getValue()))
+                .collect(Collectors.toList());
 
-            L2vpnTestUtils.checkAttachmentCircuit(attachmentCircuits.get(0), portNo1);
-            L2vpnTestUtils.checkAttachmentCircuit(attachmentCircuits.get(1), portNo2);
+            L2vpnTestUtils.checkAttachmentCircuit(sorted.get(0), portNo1);
+            L2vpnTestUtils.checkAttachmentCircuit(sorted.get(1), portNo2);
         } else {
             fail("L2vpn was not found.");
         }
@@ -148,12 +151,14 @@ public class L2vpnLocalConnectionActivatorTest extends AbstractConcurrentDataBro
             L2vpnTestUtils.checkInterfaceConfigurations(interfaceConfigurations);
 
             List<InterfaceConfiguration> interfaceConfigurationList = interfaceConfigurations.getInterfaceConfiguration();
-            interfaceConfigurationList.sort(
+            List<InterfaceConfiguration> sorted = interfaceConfigurationList.stream()
+                .sorted(
                     (InterfaceConfiguration ic1, InterfaceConfiguration ic2)
-                            -> ic1.getInterfaceName().getValue().compareTo(ic2.getInterfaceName().getValue()));
+                            -> ic1.getInterfaceName().getValue().compareTo(ic2.getInterfaceName().getValue()))
+                .collect(Collectors.toList());
 
-            L2vpnTestUtils.checkInterfaceConfiguration(interfaceConfigurationList.get(0),portNo1,false);
-            L2vpnTestUtils.checkInterfaceConfiguration(interfaceConfigurationList.get(1),portNo2,false);
+            L2vpnTestUtils.checkInterfaceConfiguration(sorted.get(0),portNo1,false);
+            L2vpnTestUtils.checkInterfaceConfiguration(sorted.get(1),portNo2,false);
         } else {
             fail("InterfaceConfigurations was not found.");
         }
