@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b5eefb73_4849e4ba",
+        "filename": "cisco-xr-driver/src/main/java/org/opendaylight/unimgr/mef/nrp/cisco/xr/TopologyDataHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-05-29T13:15:17Z",
+      "side": 1,
+      "message": "might be simplified down to:\n\ni \u003d\u003d null || i.getShutdown() \u003d\u003d null",
+      "range": {
+        "startLine": 263,
+        "startChar": 35,
+        "endLine": 263,
+        "endChar": 44
+      },
+      "revId": "2c558ca38a3dfc5ede9eb2195ea061a5a7cf7243",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
