@@ -7,19 +7,19 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>single-feature-parent</artifactId>
-    <version>4.0.10</version>
+    <version>6.0.6</version>
     <relativePath/>
   </parent>
   <groupId>org.opendaylight.unimgr</groupId>
   <artifactId>odl-unimgr-rest</artifactId>
-  <version>0.5.0-SNAPSHOT</version>
+  <version>0.6.0-SNAPSHOT</version>
   <packaging>feature</packaging>
 
   <name>ODL :: unimgr :: ${project.artifactId}</name>
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <restconf.version>1.9.1</restconf.version>
+    <restconf.version>1.11.1</restconf.version>
   </properties>
 
   <dependencies>

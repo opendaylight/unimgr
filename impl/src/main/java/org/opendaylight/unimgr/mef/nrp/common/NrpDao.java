@@ -217,13 +217,15 @@ public class NrpDao  {
             builder = new OwnedNodeEdgePoint1Builder(aug);
         }
 
+        List<ConnectionEndPoint> newCepList = new LinkedList<ConnectionEndPoint>();
         List<ConnectionEndPoint> cepList = builder.getConnectionEndPoint();
-        if (cepList == null) {
-            cepList = new LinkedList<>();
+        if (cepList != null) {
+            newCepList.addAll(cepList);
         }
 
-        cepList.add(cep);
-        builder.setConnectionEndPoint(cepList);
+        newCepList.add(cep);
+        builder.setConnectionEndPoint(newCepList);
+
 
         nep = new OwnedNodeEdgePointBuilder(nep).addAugmentation(OwnedNodeEdgePoint1.class, builder.build()).build();
         tx.merge(LogicalDatastoreType.OPERATIONAL, toPath.apply(ref), nep);
