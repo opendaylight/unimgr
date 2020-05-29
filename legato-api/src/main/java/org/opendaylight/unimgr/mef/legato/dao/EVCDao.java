@@ -10,6 +10,8 @@ package org.opendaylight.unimgr.mef.legato.dao;
 import java.util.List;
 import java.util.Map;
 
+import org.opendaylight.yangtools.yang.common.Uint16;
+
 /*
  * @author santanu.de@xoriant.com
  */
@@ -17,7 +19,7 @@ import java.util.Map;
 public class EVCDao {
 
     private String evcId;
-    private Integer maxFrameSize;
+    private Uint16 maxFrameSize;
     private String connectionType;
     private String svcType;
     private List<String> uniIdList;
@@ -32,11 +34,11 @@ public class EVCDao {
         this.evcId = evcId;
     }
 
-    public Integer getMaxFrameSize() {
+    public Uint16 getMaxFrameSize() {
         return maxFrameSize;
     }
 
-    public void setMaxFrameSize(Integer maxFrameSize) {
+    public void setMaxFrameSize(Uint16 maxFrameSize) {
         this.maxFrameSize = maxFrameSize;
     }
 

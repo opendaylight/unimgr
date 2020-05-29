@@ -102,7 +102,7 @@ public class L2vpnBridgeDomainActivatorTest {
 
         InterfaceConfigurations interfaceConfigruaton =
                 l2vpnBridgeDomainActivator.activateInterface(port, neighbor, 2000, false);
-        interfaceConfigruaton.getImplementedInterface();
+        interfaceConfigruaton.implementedInterface();
         List<InterfaceConfiguration> list = interfaceConfigruaton.getInterfaceConfiguration();
         InterfaceConfiguration interfaceConfiguration = list.get(0);
         assertEquals("act", interfaceConfiguration.getActive().getValue());
