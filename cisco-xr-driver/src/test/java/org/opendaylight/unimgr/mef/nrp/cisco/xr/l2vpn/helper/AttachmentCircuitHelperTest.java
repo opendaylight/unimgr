@@ -51,6 +51,6 @@ public class AttachmentCircuitHelperTest {
         AttachmentCircuit actualAttachmentCircuit = actualAttachmentCircuitList.get(0);
         assertNotNull(actualAttachmentCircuit);
         assertEquals(interfaceName, actualAttachmentCircuit.getName());
-        assertTrue(actualAttachmentCircuit.isEnable());
+        assertNotNull(actualAttachmentCircuit.getEnable());
     }
 }

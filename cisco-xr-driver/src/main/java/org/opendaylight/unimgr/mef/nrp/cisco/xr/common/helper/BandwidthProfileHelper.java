@@ -21,6 +21,8 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.po
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.policy.map.rule.policy.map.rule.PoliceBuilder;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.policy.map.rule.policy.map.rule.police.*;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.rev180321.BwpFlow;
+import org.opendaylight.yangtools.yang.common.Empty;
+import org.opendaylight.yangtools.yang.common.Uint32;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,25 +70,29 @@ public class BandwidthProfileHelper {
 
         return new PoliceBuilder()
                 // CIR configuration
-                .setRate(new RateBuilder().setUnits(new RateUnits("bps")).setValue(cir).build())
+                .setRate(new RateBuilder().setUnits(
+                        new RateUnits("bps")).setValue(Uint32.valueOf(cir)).build())
 
                 // CBS configuration
-                .setBurst(new BurstBuilder().setUnits(new ThresholdUnits("bytes")).setValue(cbs).build())
+                .setBurst(new BurstBuilder().setUnits(
+                        new ThresholdUnits("bytes")).setValue(Uint32.valueOf(cbs)).build())
 
                 // PIR configuration
-                .setPeakRate(new PeakRateBuilder().setUnits(new RateUnits("bps")).setValue(pir).build())
+                .setPeakRate(new PeakRateBuilder().setUnits(
+                        new RateUnits("bps")).setValue(Uint32.valueOf(pir)).build())
 
                 // PBS configuration
-                .setPeakBurst(new PeakBurstBuilder().setUnits(new ThresholdUnits("bytes")).setValue(pbs).build())
+                .setPeakBurst(new PeakBurstBuilder().setUnits(
+                        new ThresholdUnits("bytes")).setValue(Uint32.valueOf(pbs)).build())
 
                 // GREEN-marked frames action configuration
-                .setConformAction(new ConformActionBuilder().setTransmit(true).build())
+                .setConformAction(new ConformActionBuilder().setTransmit(Empty.getInstance()).build())
 
                 // YELLOW-marked frames action configuration
-                .setViolateAction(new ViolateActionBuilder().setTransmit(true).build())
+                .setViolateAction(new ViolateActionBuilder().setTransmit(Empty.getInstance()).build())
 
                 // RED-marked frames action configuration
-                .setExceedAction(new ExceedActionBuilder().setDrop(true).build())
+                .setExceedAction(new ExceedActionBuilder().setDrop(Empty.getInstance()).build())
 
                 .build();
     }
