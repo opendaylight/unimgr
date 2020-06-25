@@ -7,14 +7,15 @@
  */
 package org.opendaylight.unimgr.mef.legato.util;
 
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
@@ -64,13 +65,14 @@ import org.opendaylight.yangtools.yang.common.Uint16;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.FluentFuture;
 
 /*
  * @author santanu.de@xoriant.com
  */
 
 public final class LegatoUtils {
+
+    private static Locale locale = Locale.ROOT;
 
     private LegatoUtils() {
         throw new IllegalStateException("Legato utils class");
@@ -100,8 +102,8 @@ public final class LegatoUtils {
             } else {
                 vlanIdList.add(vlanId);
             }
-            uniVlanList.put(endPoint.getUniId().getValue().toString(), vlanIdList);
-            uniIdList.add(endPoint.getUniId().getValue().toString());
+            uniVlanList.put(endPoint.getUniId().getValue(), vlanIdList);
+            uniIdList.add(endPoint.getUniId().getValue());
         }
 
         final EVCDao evcDao = new EVCDao();
@@ -183,7 +185,7 @@ public final class LegatoUtils {
         CreateConnectivityServiceInputBuilder createConnServiceInputBuilder =
                 new CreateConnectivityServiceInputBuilder();
 
-        switch (evcDao.getConnectionType().replace("-", "").toUpperCase()) {
+        switch (evcDao.getConnectionType().replace("-", "").toUpperCase(locale)) {
             case LegatoConstants.POINTTOPOINT:
                 createConnServiceInputBuilder.setConnConstraint(new ConnConstraintBuilder()
                         .setServiceLevel(LegatoConstants.BEST_EFFORT).setIsExclusive(isExclusive)
@@ -232,7 +234,7 @@ public final class LegatoUtils {
         UpdateConnectivityServiceInputBuilder updateConnServiceInputBuilder =
                 new UpdateConnectivityServiceInputBuilder();
 
-        switch (evcDao.getConnectionType().replace("-", "").toUpperCase()) {
+        switch (evcDao.getConnectionType().replace("-", "").toUpperCase(locale)) {
             case LegatoConstants.POINTTOPOINT:
                 updateConnServiceInputBuilder.setConnConstraint(
                         new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
@@ -295,7 +297,6 @@ public final class LegatoUtils {
 
             endpointList.add(endPointBuilder.build());
         }
-        endPointBuilder = null;
 
         return endpointList;
     }
@@ -318,9 +319,6 @@ public final class LegatoUtils {
                     .setLayerProtocolName(layerProtocolName).addAugmentation(EndPoint7.class,
                             LegatoUtils.buildUpdateEthConnectivityEndPointAugmentation(uniArr[1]));
         }
-
-        uniArr = null;
-
         return endPointBuilder.build();
     }
 
@@ -332,16 +330,16 @@ public final class LegatoUtils {
             final FluentFuture<Optional<Evc>> linkFuture = read.read(store, evcId);
             return linkFuture.get();
         } catch (final InterruptedException | ExecutionException e) {
-            LOG.error("Unable to read node with EVC Id {}, err: {} ", evcId, e);
+            LOG.error("Unable to read node with EVC Id {}, err: ", evcId, e);
         }
         return Optional.empty();
     }
 
     public static <T extends DataObject> Optional<T> readProfile(
-            DataBroker dataBroker, LogicalDatastoreType store, InstanceIdentifier<T> child, Class<T> c) {
+            DataBroker dataBroker, LogicalDatastoreType store, InstanceIdentifier<T> child, Class<T> className) {
         final ReadTransaction read = dataBroker.newReadOnlyTransaction();
 
-        final InstanceIdentifier<T> profileId = child.firstIdentifierOf(c);
+        final InstanceIdentifier<T> profileId = child.firstIdentifierOf(className);
         final FluentFuture<Optional<T>> profileFuture = read.read(store, profileId);
         try {
             return profileFuture.get();
@@ -351,6 +349,7 @@ public final class LegatoUtils {
         }
     }
 
+    @SuppressWarnings("checkstyle:lineLength")
     public static Optional<?> readProfile(String string, DataBroker dataBroker, LogicalDatastoreType store,
             InstanceIdentifier<?> child) {
         final ReadTransaction read = dataBroker.newReadOnlyTransaction();
@@ -428,7 +427,7 @@ public final class LegatoUtils {
             transaction.commit().get();
             result = true;
         } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Unable to remove node ", nodeIdentifier, e);
+            LOG.error("Unable to remove node {} ", nodeIdentifier, e);
         }
         return result;
     }
@@ -476,7 +475,7 @@ public final class LegatoUtils {
             transaction.commit().get();
             result = true;
         } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Unable to update node in OperationalDB() ", nodeIdentifier, e);
+            LOG.error("Unable to update node {} in OperationalDB() ", nodeIdentifier, e);
         }
         return result;
 
@@ -485,7 +484,7 @@ public final class LegatoUtils {
 
     public static List<String> validateVlanTag(EVCDao evcDao) {
         List<String> vlanIdList = new ArrayList<String>();
-        List<String> vlanTagList = new ArrayList<String>();
+        List<String> vlanTagList;
 
         for (String uniId : evcDao.getUniIdList()) {
             vlanTagList = evcDao.getUniVlanIdList().get(uniId);
@@ -497,8 +496,6 @@ public final class LegatoUtils {
             } else if (!vlanIdList.equals(vlanTagList)) {
                 LOG.error("All end points should have same vlan tags");
                 vlanIdList = new ArrayList<String>();
-
-                return vlanIdList;
             }
         }
         if (Collections.frequency(vlanIdList, "0") == vlanIdList.size()) {
@@ -511,7 +508,7 @@ public final class LegatoUtils {
     public static boolean removeFlowFromConfigDatastore(InstanceIdentifier<?> nodeIdentifier,
             DataBroker dataBroker) {
 
-        LOG.trace("Removing EVC from CONFIGURATION datastore ", nodeIdentifier);
+        LOG.trace("Removing EVC from CONFIGURATION datastore {} ", nodeIdentifier);
         boolean result = false;
 
         final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
@@ -521,7 +518,7 @@ public final class LegatoUtils {
             transaction.commit().get();
             result = true;
         } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Unable to remove evc from CONFIGURATION datastore  ", nodeIdentifier, e);
+            LOG.error("Unable to remove evc {} from CONFIGURATION datastore  ", nodeIdentifier, e);
         }
         return result;
     }

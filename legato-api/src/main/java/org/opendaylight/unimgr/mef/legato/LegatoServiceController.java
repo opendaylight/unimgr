@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Future;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
@@ -33,9 +32,8 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev18030
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.CreateConnectivityServiceOutput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.DeleteConnectivityServiceInput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.DeleteConnectivityServiceInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.DeleteConnectivityServiceOutput;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.TapiConnectivityService;
-import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.UpdateConnectivityServiceInput;
-import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.UpdateConnectivityServiceOutput;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -157,7 +155,7 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
 
         try {
             EVCDao evcDao =  LegatoUtils.parseNodes(evc);
-            LOG.trace("========" + evcDao.getUniVlanIdList().toString());
+            LOG.trace(" UniVlanIdList = {} ", evcDao.getUniVlanIdList().toString());
             assert evcDao != null
                     && evcDao.getUniIdList() != null && evcDao.getConnectionType() != null;
             LOG.trace(" connection-type :{}, svc-type :{}", evcDao.getConnectionType(), evcDao.getSvcType());
@@ -217,7 +215,7 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
                                         dataBroker);
                             }
                         }
-                        LOG.trace("EVC_UUID_MAP_LIST  " + EVC_UUID_MAP_LIST.toString());
+                        LOG.trace("EVC_UUID_MAP_LIST {} ", EVC_UUID_MAP_LIST.toString());
                     } else {
                         if (evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPL)
                               || evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EVPLAN)
@@ -240,7 +238,7 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
                 LOG.trace("svc-type in payload should be epl, evpl, eplan, evplan, evptree");
             }
 
-        } catch (Exception ex) {
+        } catch (RuntimeException ex) {
             LOG.error("Error in createConnection(). Err: ", ex);
         }
 
@@ -279,7 +277,7 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
                         assert evcDao.getUniVlanIdList() != null;
                         List<String> vlanIdList = LegatoUtils.validateVlanTag(evcDao);
 
-                        LOG.trace(" number of noOfVlan = " + vlanIdList.toString());
+                        LOG.trace(" number of noOfVlan {} ", vlanIdList.toString());
                         if (vlanIdList.size() > 0) {
                             // delete existing EVC and create service
                             deleteConnection(evc);
@@ -292,7 +290,7 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
             } else {
                 LOG.trace("svc-type in payload should be epl, evpl, eplan, evplan, eptree, evptree");
             }
-        } catch (Exception ex) {
+        } catch (RuntimeException ex) {
 
             LOG.error("Error in updateConnection(). Err: ", ex);
         }
@@ -365,58 +363,19 @@ public class LegatoServiceController extends UnimgrDataTreeChangeListener<Evc> {
     }
 
     @SuppressWarnings("checkstyle:illegalcatch")
-    private void callUpdateConnectionService(
-            UpdateConnectivityServiceInput updateConnectivityServiceInput,
-            String evcId) {
-        try {
-            Future<RpcResult<UpdateConnectivityServiceOutput>> response = this.prestoConnectivityService
-                    .updateConnectivityService(updateConnectivityServiceInput);
-
-            if (response.get().isSuccessful()) {
-                LOG.trace("call Success = {}, response = {} ", response.get()
-                        .isSuccessful(), response.get().getResult());
-
-                Optional<Evc> optionalEvc = LegatoUtils.readEvc(
-                        dataBroker,
-                        LogicalDatastoreType.CONFIGURATION,
-                        InstanceIdentifier
-                                .create(MefServices.class)
-                                .child(CarrierEthernet.class)
-                                .child(SubscriberServices.class)
-                                .child(Evc.class,
-                                        new EvcKey(new EvcIdType(evcId))));
-
-                // update EVC Node in OPERATIONAL DB
-                if (optionalEvc.isPresent()) {
-                    LegatoUtils.deleteFromOperationalDB(InstanceIdentifier
-                            .create(MefServices.class)
-                            .child(CarrierEthernet.class)
-                            .child(SubscriberServices.class)
-                            .child(Evc.class, new EvcKey(new EvcIdType(evcId))), dataBroker);
-
-                    LegatoUtils.updateEvcInOperationalDB(optionalEvc.get(), EVC_IID_OPERATIONAL,  dataBroker);
-                }
-
-            } else {
-                LOG.trace("call Failure = {} >> {} ", response.get()
-                        .isSuccessful(), response.get().getErrors());
-            }
-        } catch (Exception ex) {
-            LOG.error("Error in UpdateConnectivityServiceInput(). Err: ", ex);
-        }
-    }
-
-    @SuppressWarnings("checkstyle:illegalcatch")
     private boolean callDeleteConnectionService(
             DeleteConnectivityServiceInput deleteConnectivityServiceInput) {
         try {
-            this.prestoConnectivityService
+            Future<RpcResult<DeleteConnectivityServiceOutput>> response = this.prestoConnectivityService
                     .deleteConnectivityService(deleteConnectivityServiceInput);
-            return true;
-
+            if (response.get().isSuccessful()) {
+                LOG.trace("delete call Success = {}, response = {} ", response.get()
+                        .isSuccessful(), response.get().getResult());
+                return true;
+            }
         } catch (Exception ex) {
             LOG.error("Fail to call callDeleteConnectionService(). Err: ", ex);
-            return false;
         }
+        return false;
     }
 }

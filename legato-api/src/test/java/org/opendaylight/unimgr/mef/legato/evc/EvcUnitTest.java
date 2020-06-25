@@ -17,12 +17,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,9 +70,6 @@ import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.google.common.util.concurrent.FluentFuture;
-import com.google.common.util.concurrent.ListenableFuture;
-
 
 /*
  * @author Arif.Hussain@Xoriant.Com
@@ -85,7 +83,6 @@ public class EvcUnitTest {
     @Mock  private DataBroker dataBroker;
     @SuppressWarnings("rawtypes")
     @Mock  private FluentFuture checkedFuture;
-
     @Mock  private WriteTransaction transaction;
     @Mock  private ReadTransaction readTxn ;
     private EndPointBuilder endPointBuilder;
@@ -126,6 +123,7 @@ public class EvcUnitTest {
                 .setEvcId(new EvcIdType(Constants.EVC_ID_TYPE)).setSvcType(MefServiceType.Epl)
                 .setConnectionType(ConnectionType.PointToPoint).setCosNames(cosNamesBuilder.build())
                 .setEndPoints(new EndPointsBuilder().setEndPoint(endPointList).build()).build();
+
     }
 
     @SuppressWarnings("unchecked")
@@ -146,7 +144,7 @@ public class EvcUnitTest {
 
         PowerMockito.stub(PowerMockito.method(
                 LegatoUtils.class, "buildCreateConnectivityServiceInput", EVCDao.class, String.class, List.class))
-        .toReturn(future);
+            .toReturn(future);
 
         // then
         final Optional<Evc> optEvc = mock(Optional.class);
@@ -162,12 +160,14 @@ public class EvcUnitTest {
         PowerMockito.stub(
                 PowerMockito.method(LegatoUtils.class,
                         "readEvc", DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class))
-        .toReturn(optEvc);
+            .toReturn(optEvc);
 
         when(transaction.commit()).thenReturn(checkedFuture);
 
         assertEquals(true, LegatoUtils.updateEvcInOperationalDB(evc, instanceIdentifier, dataBroker));
-        verify(transaction).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(SubscriberServices.class));
+        verify(transaction).put(any(LogicalDatastoreType.class),
+                any(InstanceIdentifier.class),
+                any(SubscriberServices.class));
         verify(transaction).commit();
     }
 
@@ -237,7 +237,6 @@ public class EvcUnitTest {
 
         verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(transaction).commit();
-
     }
 
 }

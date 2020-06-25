@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,7 +80,7 @@ public class EvcDataTreeChangeListenerTest {
         PowerMockito.stub(
                 PowerMockito.method(LegatoUtils.class,
                         "readEvc", DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class))
-        .toReturn(Optional.empty());
+            .toReturn(Optional.empty());
 
         legatoServiceController.onDataTreeChanged(collection);
         verify(legatoServiceController, times(1)).add(any(DataTreeModification.class));
@@ -90,11 +89,27 @@ public class EvcDataTreeChangeListenerTest {
     }
 
 
+    @SuppressWarnings("checkstyle:lineLength")
     private DataTreeModification<Evc> getDataTree(final ModificationType modificationType, Evc before, Evc after) {
         final DataObjectModification<Evc> evcDataObjModification = new DataObjectModification<Evc>() {
+
             @Override
             public Collection<DataObjectModification<? extends DataObject>> getModifiedChildren() {
                 return Collections.emptyList();
+            }
+
+            @Override
+            public <C extends ChildOf<? super Evc>> Collection<DataObjectModification<C>> getModifiedChildren(
+                    Class<C> childType) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public <H extends ChoiceIn<? super Evc> & DataObject, C extends ChildOf<? super H>> Collection<DataObjectModification<C>> getModifiedChildren(
+                    Class<H> caseType, Class<C> childType) {
+                // TODO Auto-generated method stub
+                return null;
             }
 
             @Override
@@ -106,7 +121,21 @@ public class EvcDataTreeChangeListenerTest {
             }
 
             @Override
+            public <H extends ChoiceIn<? super Evc> & DataObject, C extends Identifiable<K> & ChildOf<? super H>, K extends Identifier<C>> DataObjectModification<C> getModifiedChildListItem(
+                    Class<H> caseType, Class<C> listItem, K listKey) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
             public <C extends ChildOf<? super Evc>> DataObjectModification<C> getModifiedChildContainer(Class<C> arg0) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public <H extends ChoiceIn<? super Evc> & DataObject, C extends ChildOf<? super H>> DataObjectModification<C> getModifiedChildContainer(
+                    Class<H> caseType, Class<C> child) {
                 // TODO Auto-generated method stub
                 return null;
             }
@@ -148,34 +177,6 @@ public class EvcDataTreeChangeListenerTest {
             @Override
             public Evc getDataAfter() {
                 return after;
-            }
-
-            @Override
-            public <C extends ChildOf<? super Evc>> Collection<DataObjectModification<C>> getModifiedChildren(
-                    Class<C> childType) {
-                // TODO Auto-generated method stub
-                return null;
-            }
-
-            @Override
-            public <H extends ChoiceIn<? super Evc> & DataObject, C extends ChildOf<? super H>> Collection<DataObjectModification<C>> getModifiedChildren(
-                    Class<H> caseType, Class<C> childType) {
-                // TODO Auto-generated method stub
-                return null;
-            }
-
-            @Override
-            public <H extends ChoiceIn<? super Evc> & DataObject, C extends ChildOf<? super H>> DataObjectModification<C> getModifiedChildContainer(
-                    Class<H> caseType, Class<C> child) {
-                // TODO Auto-generated method stub
-                return null;
-            }
-
-            @Override
-            public <H extends ChoiceIn<? super Evc> & DataObject, C extends Identifiable<K> & ChildOf<? super H>, K extends Identifier<C>> DataObjectModification<C> getModifiedChildListItem(
-                    Class<H> caseType, Class<C> listItem, K listKey) {
-                // TODO Auto-generated method stub
-                return null;
             }
         };
 

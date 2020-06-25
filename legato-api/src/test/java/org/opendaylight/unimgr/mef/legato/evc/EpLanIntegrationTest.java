@@ -17,12 +17,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,9 +65,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.google.common.util.concurrent.FluentFuture;
-import com.google.common.util.concurrent.ListenableFuture;
-
 
 /*
  * @author Om.SAwasthi@Xoriant.Com
@@ -79,7 +77,6 @@ public class EpLanIntegrationTest {
     private TapiConnectivityService prestoConnectivityService;
     @Mock
     private DataBroker dataBroker;
-
     @Mock
     private WriteTransaction transaction;
     @Mock
@@ -125,6 +122,7 @@ public class EpLanIntegrationTest {
                 .setEvcId(new EvcIdType(Constants.EVC_ID_TYPE))
                 .setConnectionType(ConnectionType.MultipointToMultipoint)
                 .setSvcType(MefServiceType.Eplan).build();
+
     }
 
     @SuppressWarnings({"unchecked"})
@@ -168,12 +166,14 @@ public class EpLanIntegrationTest {
         PowerMockito.stub(
                 PowerMockito.method(LegatoUtils.class,
                         "readEvc", DataBroker.class, LogicalDatastoreType.class, InstanceIdentifier.class))
-        .toReturn(optEvc);
+            .toReturn(optEvc);
 
         when(transaction.commit()).thenReturn(fluentFuture);
 
         assertEquals(true,LegatoUtils.updateEvcInOperationalDB(evc, instanceIdentifier, dataBroker));
-        verify(transaction).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(SubscriberServices.class));
+        verify(transaction).put(any(LogicalDatastoreType.class),
+                any(InstanceIdentifier.class),
+                any(SubscriberServices.class));
         verify(transaction).commit();
     }
 
@@ -274,14 +274,6 @@ public class EpLanIntegrationTest {
 
         verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(transaction).commit();
-//        verify(mockAppender).doAppend(argThat(new ArgumentMatcher() {
-//            @Override
-//            public boolean matches(final Object argument) {
-//                return ((LoggingEvent) argument).getFormattedMessage()
-//                        .contains("Received a request to delete node");
-//            }
-//        }));
-
     }
 
     @Test
