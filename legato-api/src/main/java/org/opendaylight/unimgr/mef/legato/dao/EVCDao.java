@@ -9,7 +9,6 @@ package org.opendaylight.unimgr.mef.legato.dao;
 
 import java.util.List;
 import java.util.Map;
-
 import org.opendaylight.yangtools.yang.common.Uint16;
 
 /*
