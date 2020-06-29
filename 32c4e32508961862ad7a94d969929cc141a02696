@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "37cbc909_a2a3f948",
+        "filename": "legato-api/src/main/java/org/opendaylight/unimgr/mef/legato/util/LegatoUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 7822
+      },
+      "writtenOn": "2020-06-29T13:24:06Z",
+      "side": 1,
+      "message": "I don\u0027t think we need a static for the locale, since it is a constant already.\nCan just use Locale.ROOT inline. It conveys the intent better, and doesn\u0027t \nsuggest that locale could change.\n\nI tested the change just to be sure it didn\u0027t introduce a new checkstyle error, so\nI will go ahead and update the commit.",
+      "revId": "32c4e32508961862ad7a94d969929cc141a02696",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
