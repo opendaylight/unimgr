@@ -8,7 +8,6 @@
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util;
 
 import java.util.Optional;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
@@ -26,13 +25,17 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
+/*
  * Tools designated to support operations on loopback interfaces data
  *
  * @author krzysztof.bijakowski@amartus.com
  * @author marek.ryznar@amartus.com [modifications]
  */
-public class LoopbackUtils {
+public final class LoopbackUtils {
+
+    private LoopbackUtils() {
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(LoopbackUtils.class);
 
     private static final String DEFAULT_LOOPBACK = "127.0.0.1";
@@ -42,7 +45,10 @@ public class LoopbackUtils {
         String loopback = null;
         NodeId nodeId = port.getNode();
         TopologyId topologyId = port.getTopology();
-        Optional<Node> nodeOpt = MdsalUtils.readOptional(dataBroker, LogicalDatastoreType.CONFIGURATION, getNodeIid(nodeId,topologyId));
+        Optional<Node> nodeOpt = MdsalUtils.readOptional(
+                                                        dataBroker,
+                                                        LogicalDatastoreType.CONFIGURATION,
+                                                        getNodeIid(nodeId,topologyId));
 
         if (nodeOpt.isPresent()) {
             LoopbackAugmentation la = nodeOpt.get().augmentation(LoopbackAugmentation.class);

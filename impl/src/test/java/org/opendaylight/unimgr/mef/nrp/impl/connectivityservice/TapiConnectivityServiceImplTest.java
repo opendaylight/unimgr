@@ -16,13 +16,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -51,8 +51,6 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev18030
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.create.connectivity.service.input.EndPoint;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.create.connectivity.service.input.EndPointBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-
-import com.google.common.util.concurrent.FluentFuture;
 
 
 public class TapiConnectivityServiceImplTest {
@@ -106,18 +104,24 @@ public class TapiConnectivityServiceImplTest {
 
 
     @Test
-    public void emptyInputTest() throws Exception {
+    public void emptyInputTest() {
         //having
         CreateConnectivityServiceInput empty = new CreateConnectivityServiceInputBuilder()
                 .build();
         //when
-        RpcResult<CreateConnectivityServiceOutput> result =
-                this.connectivityService.createConnectivityService(empty).get();
-        //then
-        assertFalse(result.isSuccessful());
-        verifyZeroInteractions(ad1);
-        verifyZeroInteractions(ad2);
-        verifyZeroInteractions(ad3);
+        RpcResult<CreateConnectivityServiceOutput> result;
+        try {
+            result = this.connectivityService.createConnectivityService(empty).get();
+            //then
+            assertFalse(result.isSuccessful());
+            verifyZeroInteractions(ad1);
+            verifyZeroInteractions(ad2);
+            verifyZeroInteractions(ad3);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+        } catch (ExecutionException e) {
+            // TODO Auto-generated catch block
+        }
     }
 
     @Test
@@ -137,25 +141,30 @@ public class TapiConnectivityServiceImplTest {
     }
 
     @Test
-    public void withLocalIds() throws Exception {
+    public void withLocalIds() {
         //having
         CreateConnectivityServiceInput input = input("a", "a", "b");
         connectivityService.setValidator(new DefaultValidator(broker));
 
         //when
-        RpcResult<CreateConnectivityServiceOutput> result =
-                this.connectivityService.createConnectivityService(input).get();
-        //then
-        assertFalse(result.isSuccessful());
-        verifyZeroInteractions(ad1);
-        verifyZeroInteractions(ad2);
-        verifyZeroInteractions(ad3);
+        RpcResult<CreateConnectivityServiceOutput> result;
+        try {
+            result = this.connectivityService.createConnectivityService(input).get();
+            //then
+            assertFalse(result.isSuccessful());
+            verifyZeroInteractions(ad1);
+            verifyZeroInteractions(ad2);
+            verifyZeroInteractions(ad3);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+        } catch (ExecutionException e) {
+            // TODO Auto-generated catch block
+        }
     }
 
 
     @Test
-    public void failTwoDriversOneFailing()
-            throws ExecutionException, InterruptedException, ResourceActivatorException {
+    public void failTwoDriversOneFailing() {
         //having
         CreateConnectivityServiceInput input = input(4);
 
@@ -166,20 +175,29 @@ public class TapiConnectivityServiceImplTest {
             return Arrays.asList(s1, s2);
         });
 
-        doThrow(new ResourceActivatorException()).when(ad2).activate();
-
-        //when
-        RpcResult<CreateConnectivityServiceOutput> result =
+        try {
+            doThrow(new ResourceActivatorException()).when(ad2).activate();
+            //when
+            RpcResult<CreateConnectivityServiceOutput> result =
                 this.connectivityService.createConnectivityService(input).get();
-        //then
-        assertFalse(result.isSuccessful());
-        verify(ad1).activate();
-        verify(ad2).activate();
-        verify(ad1).rollback();
-        verify(ad2).rollback();
-        verifyZeroInteractions(ad3);
+            //then
+            assertFalse(result.isSuccessful());
+            verify(ad1).activate();
+            verify(ad2).activate();
+            verify(ad1).rollback();
+            verify(ad2).rollback();
+            verifyZeroInteractions(ad3);
+        } catch (ResourceActivatorException e) {
+            // TODO Auto-generated catch block
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+        } catch (ExecutionException e) {
+            // TODO Auto-generated catch block
+        }
+
     }
 
+    @SuppressWarnings("checkstyle:emptyBlock")
     private void configureDecomposerAnswer(
             Function<List<org.opendaylight.unimgr.mef.nrp.api.EndPoint>, List<Subrequrest>> resp) {
         try {

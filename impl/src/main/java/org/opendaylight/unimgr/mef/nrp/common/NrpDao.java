@@ -15,7 +15,6 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
 import org.opendaylight.mdsal.binding.api.ReadOperations;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;

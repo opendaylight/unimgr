@@ -14,7 +14,6 @@ import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.BandwidthPr
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.MountPointService;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
@@ -38,7 +37,7 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-/**
+/*
  * @author arif.hussain@xoriant.com
  */
 public class L2vpnBridgeDomainActivator extends AbstractL2vpnBridgeDomainActivator {
@@ -74,11 +73,8 @@ public class L2vpnBridgeDomainActivator extends AbstractL2vpnBridgeDomainActivat
     }
 
     @Override
-    protected void createSubInterface(String nodeName,
-            InterfaceConfigurations subInterfaceConfigurations, MountPointService mountService2)
-                    throws InterruptedException, ExecutionException
-             {
-
+    protected void createSubInterface(String nodeName, InterfaceConfigurations subInterfaceConfigurations,
+             MountPointService mountService2) throws InterruptedException, ExecutionException {
         new TransactionActivator().activateSubInterface(nodeName, subInterfaceConfigurations, mountService2);
     }
 
@@ -101,7 +97,8 @@ public class L2vpnBridgeDomainActivator extends AbstractL2vpnBridgeDomainActivat
             ServicePort port, ServicePort neighbor, BdPseudowires bdPseudowires,
             boolean isExclusive) {
 
-        BdAttachmentCircuits bdattachmentCircuits = new BridgeDomainAttachmentCircuitHelper().addPort(port, isExclusive).build();
+        BdAttachmentCircuits bdattachmentCircuits =
+                                new BridgeDomainAttachmentCircuitHelper().addPort(port, isExclusive).build();
         BridgeDomainGroup bridgeDomainGroup = new BridgeDomainHelper()
                 .appendBridgeDomain(innerName, bdattachmentCircuits, bdPseudowires)
                 .build(outerName);

@@ -9,8 +9,8 @@ package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.concurrent.ExecutionException;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,9 +35,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.FluentFuture;
 
-/**
+/*
  * @author marek.ryznar@amartus.com
  */
 public class LoopbackUtilsTest extends AbstractConcurrentDataBrokerTest {
@@ -119,8 +118,8 @@ public class LoopbackUtilsTest extends AbstractConcurrentDataBrokerTest {
             future.get();
             return nodeInstanceId;
         } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Unable to write node with Iid {} to store {}.", nodeInstanceId, LogicalDatastoreType.CONFIGURATION);
-            e.printStackTrace();
+            LOG.error("Unable to write node with Iid {} to store {}.",
+                    nodeInstanceId, LogicalDatastoreType.CONFIGURATION);
         }
         return null;
     }

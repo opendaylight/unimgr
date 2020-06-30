@@ -19,8 +19,8 @@
     </parent>
 
     <properties>
-      <odlparent.checkstyle.enforce>false</odlparent.checkstyle.enforce>
-      <odlparent.spotbugs.enforce>false</odlparent.spotbugs.enforce>
+      <odlparent.checkstyle.enforce>true</odlparent.checkstyle.enforce>
+      <odlparent.spotbugs.enforce>true</odlparent.spotbugs.enforce>
         <mdsal.version>5.0.10</mdsal.version>
     </properties>
 

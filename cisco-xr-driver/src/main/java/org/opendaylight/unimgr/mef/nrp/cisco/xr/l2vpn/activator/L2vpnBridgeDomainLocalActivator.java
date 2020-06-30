@@ -14,7 +14,6 @@ import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.BandwidthPr
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.MountPointService;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
@@ -37,7 +36,7 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-/**
+/*
  * @author arif.hussain@xoriant.com
  */
 public class L2vpnBridgeDomainLocalActivator extends AbstractL2vpnBridgeDomainActivator {
@@ -141,7 +140,15 @@ public class L2vpnBridgeDomainLocalActivator extends AbstractL2vpnBridgeDomainAc
             boolean isExclusive, EndPoint endPoint, List<String> dvls2, List<Uuid> inls2)
                     throws InterruptedException, ExecutionException {
 
-        new TransactionActivator().deactivate(port, bridgeDomainId, interfaceConfigurationId, isExclusive, endPoint, mountService, dvls2, inls2);
+        new TransactionActivator().deactivate(
+                                            port,
+                                            bridgeDomainId,
+                                            interfaceConfigurationId,
+                                            isExclusive,
+                                            endPoint,
+                                            mountService,
+                                            dvls2,
+                                            inls2);
     }
 
 

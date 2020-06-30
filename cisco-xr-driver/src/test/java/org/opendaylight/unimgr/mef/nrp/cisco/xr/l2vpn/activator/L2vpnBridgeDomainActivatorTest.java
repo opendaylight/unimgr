@@ -10,7 +10,7 @@ package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
-
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -34,9 +34,7 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev18030
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.end.point.ServiceInterfacePoint;
 import org.powermock.api.mockito.PowerMockito;
 
-import org.junit.Assert;
-
-/**
+/*
  * @author Om.SAwasthi@Xoriant.Com
  *
  */
@@ -46,8 +44,8 @@ public class L2vpnBridgeDomainActivatorTest {
     private DataBroker dataBroker;
     @Mock
     private MountPointService mountService;
-    private static final String uuid1 = "sip:ciscoD1:GigabitEthernet0/0/0/1";
-    private static final String uuid2 = "sip:ciscoD2:GigabitEthernet0/0/0/1";
+    private static final String UUID1 = "sip:ciscoD1:GigabitEthernet0/0/0/1";
+    private static final String UUID2 = "sip:ciscoD2:GigabitEthernet0/0/0/1";
     private static final String NETCONF_TOPOLODY_NAME = "topology-netconf";
     private EndPoint ep1;
     private EndPoint ep2;
@@ -58,15 +56,17 @@ public class L2vpnBridgeDomainActivatorTest {
     @Before
     public void setUp() throws Exception {
         ConnectivityServiceEndPoint cep =
-                new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.EndPointBuilder()
+                new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+                .connectivity.service.EndPointBuilder()
                         .setServiceInterfacePoint(
-                                TapiUtils.toSipRef(new Uuid(uuid1), ServiceInterfacePoint.class))
+                                TapiUtils.toSipRef(new Uuid(UUID1), ServiceInterfacePoint.class))
                         .setDirection(PortDirection.BIDIRECTIONAL).build();
         ep1 = new EndPoint(cep, null);
         ConnectivityServiceEndPoint cep1 =
-                new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.EndPointBuilder()
+                new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+                .connectivity.service.EndPointBuilder()
                         .setServiceInterfacePoint(
-                                TapiUtils.toSipRef(new Uuid(uuid2), ServiceInterfacePoint.class))
+                                TapiUtils.toSipRef(new Uuid(UUID2), ServiceInterfacePoint.class))
                         .setDirection(PortDirection.BIDIRECTIONAL).build();
         ep2 = new EndPoint(cep1, null);
         port = ServicePort.toServicePort(ep1, NETCONF_TOPOLODY_NAME);
@@ -110,7 +110,7 @@ public class L2vpnBridgeDomainActivatorTest {
 
     @Test
     public void createSubInterfaceTest() {
-        port.setVlanId(301l);
+        port.setVlanId(301L);
         InterfaceConfigurations interfaceConfiguration =
                 l2vpnBridgeDomainActivator.createSubInterface(port, neighbor, 2000);
         Assert.assertNotNull(interfaceConfiguration);

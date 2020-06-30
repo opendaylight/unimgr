@@ -10,7 +10,6 @@ package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceActive;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
@@ -35,7 +34,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.Uint32;
 
-/**
+/*
  * Helper, designated to support interface configuration
  *
  * @author krzysztof.bijakowski@amartus.com
@@ -77,10 +76,6 @@ public class InterfaceHelper {
         return addInterface(getInterfaceName(port), mtus, setL2Transport);
     }
 
-    public InterfaceHelper addSubInterface(ServicePort port, Optional<Mtus> mtus) {
-         return addSubInterface(getSubInterfaceName(port), mtus, port);
-     }
-
     public InterfaceHelper addInterface(InterfaceName name, Optional<Mtus> mtus, boolean setL2Transport) {
         InterfaceConfigurationBuilder configurationBuilder = new InterfaceConfigurationBuilder();
 
@@ -100,6 +95,10 @@ public class InterfaceHelper {
         return this;
     }
 
+    public InterfaceHelper addSubInterface(ServicePort port, Optional<Mtus> mtus) {
+        return addSubInterface(getSubInterfaceName(port), mtus, port);
+    }
+
     public InterfaceHelper addSubInterface(InterfaceName name, Optional<Mtus> mtus, ServicePort port) {
         InterfaceConfigurationBuilder configurationBuilder = new InterfaceConfigurationBuilder();
 
@@ -110,11 +109,11 @@ public class InterfaceHelper {
             .setDescription("Create sub interface through ODL")
             .setInterfaceModeNonPhysical(InterfaceModeEnum.L2Transport);
             // set ethernet service
-            setEthernetService(configurationBuilder, port);
+        setEthernetService(configurationBuilder, port);
 
-            if (mtus.isPresent()) {
-                configurationBuilder.setMtus(mtus.get());
-            }
+        if (mtus.isPresent()) {
+            configurationBuilder.setMtus(mtus.get());
+        }
         configurations.add(configurationBuilder.build());
 
         return this;
@@ -122,9 +121,9 @@ public class InterfaceHelper {
 
     private void setEthernetService(InterfaceConfigurationBuilder configurationBuilder, ServicePort port) {
         Encapsulation encapsulation = new EncapsulationBuilder()
-           .setOuterRange1Low(new VlanTagOrAny(Uint32.valueOf(port.getVlanId())))
-           .setOuterTagType(Match.MatchDot1q)
-           .build();
+            .setOuterRange1Low(new VlanTagOrAny(Uint32.valueOf(port.getVlanId())))
+            .setOuterTagType(Match.MatchDot1q)
+            .build();
 
         InterfaceConfiguration2 augmentation = new InterfaceConfiguration2Builder()
                 .setEthernetService(new EthernetServiceBuilder()
@@ -133,7 +132,7 @@ public class InterfaceHelper {
                 )
                 .build();
 
-          configurationBuilder.addAugmentation(InterfaceConfiguration2.class, augmentation);
+        configurationBuilder.addAugmentation(InterfaceConfiguration2.class, augmentation);
     }
 
     public InterfaceConfigurations build() {

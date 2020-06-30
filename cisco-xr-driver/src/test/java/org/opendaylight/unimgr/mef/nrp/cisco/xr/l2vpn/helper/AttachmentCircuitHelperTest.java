@@ -7,7 +7,10 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -20,11 +23,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.List;
 
-import static org.junit.Assert.*;
-
-/**
+/*
  * @author krzysztof.bijakowski@amartus.com
  */
 @RunWith(PowerMockRunner.class)
