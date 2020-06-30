@@ -12,12 +12,11 @@ import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_CTX;
 import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_EXT_TOPO;
 import static org.opendaylight.unimgr.mef.nrp.api.TapiConstants.PRESTO_SYSTEM_TOPO;
 
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
-import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.TopologyManager;
@@ -36,7 +35,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.FluentFuture;
 
 /**
  * NrpInitializer is responsible for initial TAPI context related entities creation.

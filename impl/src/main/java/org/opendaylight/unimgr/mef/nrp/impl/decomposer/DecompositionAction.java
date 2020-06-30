@@ -22,7 +22,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
@@ -205,7 +204,7 @@ class DecompositionAction {
 
             return graph;
         } catch (InterruptedException | ExecutionException e) {
-            throw new FailureResult("Cannot read {0} topology - {1}", TapiConstants.PRESTO_SYSTEM_TOPO, e.getMessage());
+            throw new FailureResult("Cannot read {0} topology - {1}", TapiConstants.PRESTO_SYSTEM_TOPO, e);
         }
     }
 

@@ -7,6 +7,12 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import java.util.List;
+import java.util.Optional;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
@@ -20,12 +26,8 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.InterfaceName;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 
-import java.util.List;
-import java.util.Optional;
 
-import static org.junit.Assert.*;
-
-/**
+/*
  * @author krzysztof.bijakowski@amartus.com
  */
 public class InterfaceHelperTest {
@@ -137,7 +139,8 @@ public class InterfaceHelperTest {
         assertEquals(mtuValue, actualMtu.getMtu().longValue());
         assertEquals(owner, actualMtu.getOwner());
 
-        InterfaceConfiguration3 l2Configuration = actualInterfaceConfiguration.augmentation(InterfaceConfiguration3.class);
+        InterfaceConfiguration3 l2Configuration =
+                actualInterfaceConfiguration.augmentation(InterfaceConfiguration3.class);
         assertNotNull(l2Configuration);
         assertNotNull(l2Configuration.getL2Transport());
         assertNotNull(l2Configuration.getL2Transport().getEnabled());

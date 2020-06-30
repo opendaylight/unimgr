@@ -23,7 +23,7 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.bridge.domain.groups.bridge.domain.group.bridge.domains.bridge.domain.BdPseudowires;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.CiscoIosXrString;
 
-/**
+/*
  * @author arif.hussain@xoriant.com
  */
 public class BridgeDomainHelper {
@@ -45,7 +45,10 @@ public class BridgeDomainHelper {
         return new BridgeDomainGroupsBuilder().setBridgeDomainGroup(bridgeDomainGroups).build();
     }
 
-    public BridgeDomainHelper appendBridgeDomain(String name, BdAttachmentCircuits bdattachmentCircuits, BdPseudowires bdpseudowires) {
+    public BridgeDomainHelper appendBridgeDomain(
+                                                String name,
+                                                BdAttachmentCircuits bdattachmentCircuits,
+                                                BdPseudowires bdpseudowires) {
         BridgeDomain bridgeDomain = new BridgeDomainBuilder()
             .setName(new CiscoIosXrString(name))
             .setBdAttachmentCircuits(bdattachmentCircuits)

@@ -7,6 +7,11 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.PolicyManager;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.PolicyManagerBuilder;
@@ -19,16 +24,16 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.po
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.policy.map.rule.PolicyMapRuleBuilder;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.policy.map.rule.policy.map.rule.Police;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.policy.map.rule.policy.map.rule.PoliceBuilder;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.policy.map.rule.policy.map.rule.police.*;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.policy.map.rule.policy.map.rule.police.BurstBuilder;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.policy.map.rule.policy.map.rule.police.ConformActionBuilder;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.policy.map.rule.policy.map.rule.police.ExceedActionBuilder;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.policy.map.rule.policy.map.rule.police.PeakBurstBuilder;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.policy.map.rule.policy.map.rule.police.PeakRateBuilder;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.policy.map.rule.policy.map.rule.police.RateBuilder;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.policy.map.rule.policy.map.rule.police.ViolateActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.common.rev180321.BwpFlow;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.Uint32;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,13 +49,16 @@ public class BandwidthProfileHelper {
 
     private static class PolicyMapNameGenerator {
 
-        static String generate(String fcName, BandwidthProfileComposition.BwpDirection direction, BandwidthProfileComposition.BwpApplicability applicability) {
+        static String generate(
+                            String fcName,
+                            BandwidthProfileComposition.BwpDirection direction,
+                            BandwidthProfileComposition.BwpApplicability applicability) {
             //TODO naming convention
-            return fcName +
-                    SEPARATOR +
-                    direction.name().toLowerCase() +
-                    SEPARATOR +
-                    applicability.name().toLowerCase();
+            return fcName
+                    + SEPARATOR
+                    + direction.name().toLowerCase(Locale.ROOT)
+                    + SEPARATOR
+                    + applicability.name().toLowerCase(Locale.ROOT);
         }
     }
 
@@ -97,7 +105,10 @@ public class BandwidthProfileHelper {
                 .build();
     }
 
-    public BandwidthProfileHelper addPolicyMap(String fcName, BandwidthProfileComposition.BwpDirection direction, BandwidthProfileComposition.BwpApplicability applicability) {
+    public BandwidthProfileHelper addPolicyMap(
+                                             String fcName,
+                                             BandwidthProfileComposition.BwpDirection direction,
+                                             BandwidthProfileComposition.BwpApplicability applicability) {
         if (BandwidthProfileComposition.BwpApplicability.UNI == applicability) {
 
             BwpFlow bwp = null;
@@ -110,7 +121,9 @@ public class BandwidthProfileHelper {
                 bwp = port.getEgressBwpFlow();
             }
 
-            if (bwp == null) return this;
+            if (bwp == null) {
+                return this;
+            }
 
             PolicyMapRule rule = new PolicyMapRuleBuilder()
                     .setClassName(CLASS_DEFAULT)

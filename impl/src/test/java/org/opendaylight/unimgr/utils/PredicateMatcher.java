@@ -8,7 +8,6 @@
 package org.opendaylight.unimgr.utils;
 
 import java.util.function.Predicate;
-
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 

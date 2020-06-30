@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
@@ -50,7 +49,8 @@ public final class ActivationDriverMocks {
     public static final class Builder {
         HashMap<String , ActivationDriver> drivers = new HashMap<>();
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public Builder add(String id, ActivationDriver driver) {
             drivers.put(id, driver);

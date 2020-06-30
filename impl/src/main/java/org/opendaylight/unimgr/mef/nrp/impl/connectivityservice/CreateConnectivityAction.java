@@ -20,7 +20,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
-
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
@@ -118,7 +117,10 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
             String uniqueStamp = service.getServiceIdPool().getServiceId();
             LOG.debug("connectivity service passed validation, request = {}", input);
 
-            ActivationTransaction tx = prepareTransaction(toCsId(uniqueStamp), input.getConnConstraint().isIsExclusive(), input.getConnConstraint().getServiceType());
+            ActivationTransaction tx = prepareTransaction(
+                                                       toCsId(uniqueStamp),
+                                                       input.getConnConstraint().isIsExclusive(),
+                                                       input.getConnConstraint().getServiceType());
             if (tx != null) {
                 ActivationTransaction.Result txResult = tx.activate();
                 if (txResult.isSuccessful()) {
@@ -146,7 +148,10 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         }
     }
 
-    private ActivationTransaction prepareTransaction(String serviceId, boolean isExclusive, ServiceType serviceType) throws FailureResult {
+    private ActivationTransaction prepareTransaction(
+                                                    String serviceId,
+                                                    boolean isExclusive,
+                                                    ServiceType serviceType) throws FailureResult {
         LOG.debug("decompose request");
         decomposedRequest = service.getDecomposer().decompose(endpoints, null);
 
@@ -329,17 +334,19 @@ class CreateConnectivityAction implements Callable<RpcResult<CreateConnectivityS
         List<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
                 .connection.ConnectionEndPoint> ceps = new LinkedList<>();
 
-        ParentNodeEdgePointBuilder pBuilder = new ParentNodeEdgePointBuilder(ref);
+        ParentNodeEdgePointBuilder parentNodeBuilder = new ParentNodeEdgePointBuilder(ref);
 
         for (EndPoint ep : eps) {
             ConnectionEndPointBuilder builder = new ConnectionEndPointBuilder(defaultVal);
-            ConnectivityServiceEndPoint csp = ep.getEndpoint();
             OwnedNodeEdgePointRef nepRef = ep.getNepRef();
-            ParentNodeEdgePoint parentRef = pBuilder.setOwnedNodeEdgePointId(nepRef.getOwnedNodeEdgePointId()).build();
+            ParentNodeEdgePoint parentRef = parentNodeBuilder
+                                                .setOwnedNodeEdgePointId(nepRef.getOwnedNodeEdgePointId())
+                                                .build();
             builder.setParentNodeEdgePoint(Arrays.asList(parentRef));
             cepRefBuilder.setOwnedNodeEdgePointId(nepRef.getOwnedNodeEdgePointId());
             cepRefBuilder.setConnectionEndPointId(new Uuid("cep:"
                     + nepRef.getOwnedNodeEdgePointId().getValue() + ":" + uniqueStamp));
+            ConnectivityServiceEndPoint csp = ep.getEndpoint();
             if (csp != null) {
                 populateData(builder, csp);
             }

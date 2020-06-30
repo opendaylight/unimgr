@@ -9,7 +9,6 @@ package org.opendaylight.unimgr.mef.nrp.api;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.unimgr.mef.nrp.common.ResourceActivatorException;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpConnectivityServiceAttrs;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
@@ -44,7 +43,12 @@ public interface ActivationDriver {
      * @param serviceId connectivity service id
      * @param context context
      */
-    void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context, boolean isExclusive, ServiceType serviceType);
+    void initialize(
+                List<EndPoint> endPoints,
+                String serviceId,
+                NrpConnectivityServiceAttrs context,
+                boolean isExclusive,
+                ServiceType serviceType);
 
     /**
      * Performs the activation action.

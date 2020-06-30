@@ -14,7 +14,6 @@ import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.BandwidthPr
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.MountPointService;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
@@ -39,7 +38,7 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 
-/**
+/*
  * Activator of VPLS-based L2 VPN using cross connect connection on IOS-XR devices.
  *
  * @author krzysztof.bijakowski@amartus.com
@@ -108,11 +107,11 @@ public class L2vpnP2pConnectActivator extends AbstractL2vpnActivator {
                 .addPort(port, isExclusive)
                 .build();
 
-           XconnectGroup xconnectGroup = new XConnectHelper()
+        XconnectGroup xconnectGroup = new XConnectHelper()
                 .appendXConnect(innerName, attachmentCircuits, pseudowires)
                 .build(outerName);
 
-           return XConnectHelper.createXConnectGroups(xconnectGroup);
+        return XConnectHelper.createXConnectGroups(xconnectGroup);
     }
 
     @Override
@@ -142,7 +141,15 @@ public class L2vpnP2pConnectActivator extends AbstractL2vpnActivator {
             boolean isExclusive, EndPoint endPoint, MountPointService mountService2,
             List<String> dvls, List<Uuid> inls) throws InterruptedException, ExecutionException {
 
-        new TransactionActivator().deactivate(port, xconnectId, interfaceConfigurationId, isExclusive, endPoint, mountService, dvls, inls);
+        new TransactionActivator().deactivate(
+                                            port,
+                                            xconnectId,
+                                            interfaceConfigurationId,
+                                            isExclusive,
+                                            endPoint,
+                                            mountService,
+                                            dvls,
+                                            inls);
     }
 
 }

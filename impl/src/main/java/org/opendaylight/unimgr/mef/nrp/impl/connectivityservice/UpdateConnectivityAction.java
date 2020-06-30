@@ -16,7 +16,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
@@ -177,7 +176,7 @@ public class UpdateConnectivityAction implements Callable<RpcResult<UpdateConnec
                     .findFirst().orElse(Optional.empty());
 
         } catch (InterruptedException | ExecutionException e) {
-            throw new FailureResult("Cannot read {0} topology - {1}", TapiConstants.PRESTO_SYSTEM_TOPO, e.getMessage());
+            throw new FailureResult("Cannot read {0} topology - {1}", TapiConstants.PRESTO_SYSTEM_TOPO, e);
         }
     }
 }

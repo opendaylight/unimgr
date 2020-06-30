@@ -8,7 +8,6 @@
 package org.opendaylight.unimgr.api;
 
 import java.util.Collection;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
