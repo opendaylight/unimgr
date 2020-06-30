@@ -7,8 +7,8 @@
  */
 package org.opendaylight.unimgr.api;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
@@ -26,7 +26,8 @@ public abstract class UnimgrDataTreeChangeListener<D extends DataObject>
 
     protected DataBroker dataBroker;
 
-    public UnimgrDataTreeChangeListener(final DataBroker dataBroker) {
+    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
+    public UnimgrDataTreeChangeListener(DataBroker dataBroker) {
         this.dataBroker = dataBroker;
     }
 

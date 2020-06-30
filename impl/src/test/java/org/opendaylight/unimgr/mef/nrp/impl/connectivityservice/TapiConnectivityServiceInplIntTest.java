@@ -31,7 +31,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -281,14 +280,13 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         connCtx.getConnection().forEach(this::verifyConnection);
 
         assertEquals(1, connCtx.getConnectivityService().size());
-        ConnectivityService connectivityService = connCtx.getConnectivityService().get(0);
 
         List<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.EndPoint>
-                eps = connectivityService.getEndPoint();
+                eps = connCtx.getConnectivityService().get(0).getEndPoint();
 
         assertFalse(eps.isEmpty());
 
-        assertEquals("cs:" + servId, connectivityService.getUuid().getValue());
+        assertEquals("cs:" + servId, connCtx.getConnectivityService().get(0).getUuid().getValue());
 
     }
 
@@ -325,8 +323,8 @@ public class TapiConnectivityServiceInplIntTest extends AbstractTestWithTopo {
         ReadTransaction rtx = dataBroker.newReadOnlyTransaction();
         Optional<Context> opt =
                 rtx.read(LogicalDatastoreType.OPERATIONAL, NrpDao.ctx()).get();
-        Context c = opt.get();
-        Context1 connCtx = c.augmentation(Context1.class);
+        Context context = opt.get();
+        Context1 connCtx = context.augmentation(Context1.class);
 
         // Semantics changed to augmentation being removed along with last child?
         assertNull(connCtx);

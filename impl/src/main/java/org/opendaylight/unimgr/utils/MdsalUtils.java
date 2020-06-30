@@ -9,10 +9,8 @@
 package org.opendaylight.unimgr.utils;
 
 import com.google.common.util.concurrent.FluentFuture;
-
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -21,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class MdsalUtils {
+public final class MdsalUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(MdsalUtils.class);
 

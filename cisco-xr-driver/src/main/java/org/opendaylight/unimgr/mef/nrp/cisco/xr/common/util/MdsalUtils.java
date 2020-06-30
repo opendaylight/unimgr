@@ -8,7 +8,6 @@
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util;
 
 import java.util.Optional;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
@@ -25,11 +24,15 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-/**
+/*
  * @author bartosz.michalik@amartus.com
  */
-public class MdsalUtils {
-    /**
+public final class MdsalUtils {
+
+    private MdsalUtils() {
+    }
+
+    /*
      * Read a TerminationPoint from datastore used in given FcPort.
      * @param dataBroker The dataBroker instance to create transactions
      * @param store The datastore type.
@@ -37,12 +40,26 @@ public class MdsalUtils {
      * @param ep FcPort data
      * @return An Optional TerminationPoint instance
      */
-    public static Optional<TerminationPoint> readTerminationPoint(DataBroker dataBroker, LogicalDatastoreType store, TopologyId topo, EndPoint ep) {
+    public static Optional<TerminationPoint> readTerminationPoint(
+                                                                DataBroker dataBroker,
+                                                                LogicalDatastoreType store,
+                                                                TopologyId topo,
+                                                                EndPoint ep) {
         ServicePort servicePort = ServicePort.toServicePort(ep, topo);
-        return readTerminationPoint(dataBroker, store, servicePort.getTopology(), servicePort.getNode(), servicePort.getTp());
+        return readTerminationPoint(
+                                dataBroker,
+                                store,
+                                servicePort.getTopology(),
+                                servicePort.getNode(),
+                                servicePort.getTp());
     }
 
-    public static Optional<TerminationPoint> readTerminationPoint(DataBroker dataBroker, LogicalDatastoreType store, TopologyId topologyId, NodeId nodeId, TpId tpId) {
+    public static Optional<TerminationPoint> readTerminationPoint(
+                                                                DataBroker dataBroker,
+                                                                LogicalDatastoreType store,
+                                                                TopologyId topologyId,
+                                                                NodeId nodeId,
+                                                                TpId tpId) {
         InstanceIdentifier<TerminationPoint> tpIid = InstanceIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(topologyId))
                 .child(Node.class, new NodeKey(nodeId))
@@ -51,6 +68,5 @@ public class MdsalUtils {
 
         return org.opendaylight.unimgr.utils.MdsalUtils.readOptional(dataBroker, store, tpIid);
     }
-
 
 }

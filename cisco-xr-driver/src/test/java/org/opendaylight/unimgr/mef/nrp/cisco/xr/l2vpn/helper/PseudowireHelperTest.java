@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
-
 import org.junit.Test;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.Pseudowires;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.pseudowires.Pseudowire;
@@ -19,7 +18,7 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4AddressNoZone;
 import org.opendaylight.yangtools.yang.common.Uint32;
 
-/**
+/*
  * @author krzysztof.bijakowski@amartus.com
  */
 public class PseudowireHelperTest {
@@ -27,19 +26,17 @@ public class PseudowireHelperTest {
     @Test
     public void testBuild() {
         //given
-        Uint32 pseudowireId = Uint32.valueOf(PseudowireHelper.generatePseudowireId());
+        final Uint32 pseudowireId = Uint32.valueOf(PseudowireHelper.generatePseudowireId());
         Ipv4AddressNoZone neighborAddress = new Ipv4AddressNoZone("1.2.3.4");
-
         //when
         Pseudowires actual = new PseudowireHelper().addPseudowire(neighborAddress).build();
         //then
         assertNotNull(actual);
-
         List<Pseudowire> actualPseudowireList = actual.getPseudowire();
         assertNotNull(actualPseudowireList);
         assertEquals(1, actualPseudowireList.size());
-
         Pseudowire actualPseudowire = actualPseudowireList.get(0);
+
         assertNotNull(actualPseudowire.getNeighbor());
         assertEquals(1, actualPseudowire.getNeighbor().size());
         assertEquals(pseudowireId, actualPseudowire.getPseudowireId().getValue());

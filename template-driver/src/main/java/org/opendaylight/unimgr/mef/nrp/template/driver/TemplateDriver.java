@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
@@ -42,8 +41,8 @@ public class TemplateDriver implements ActivationDriverBuilder {
 
             public List<EndPoint> endpoints;
             public String serviceId;
-            public boolean isExlusive;
-            public ServiceType serviceType;
+           // public boolean isExlusive;
+           // public ServiceType serviceType;
 
             @Override
             public void commit() {
@@ -56,12 +55,18 @@ public class TemplateDriver implements ActivationDriverBuilder {
             }
 
             @Override
-            public void initialize(List<EndPoint> endPoints, String serviceId, NrpConnectivityServiceAttrs context, boolean isExlusive, ServiceType serviceType) {
+            public void initialize(
+                                List<EndPoint> endPoints,
+                                String serviceId,
+                                NrpConnectivityServiceAttrs context,
+                                boolean isExlusive,
+                                ServiceType serviceType) {
+
                 this.serviceId = serviceId;
                 this.endpoints = new ArrayList<>(endPoints);
-                this.isExlusive = isExlusive;
-                this.serviceType = serviceType;
-                LOG.info("Driver initialized with: " + epsInfo());
+                //this.isExlusive = isExlusive;
+               // this.serviceType = serviceType;
+                LOG.info("Driver initialized with: {}", epsInfo());
             }
 
             @Override

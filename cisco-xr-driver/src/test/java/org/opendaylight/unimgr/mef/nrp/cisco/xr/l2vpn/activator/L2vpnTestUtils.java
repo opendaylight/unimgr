@@ -15,11 +15,11 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -45,14 +45,16 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import com.google.common.util.concurrent.FluentFuture;
 
-/**
+/*
  * Util class responsible for executing suitable assert operations on given objects.
  *
  * @author marek.ryznar@amartus.com
  */
-public class L2vpnTestUtils {
+public final class L2vpnTestUtils {
+
+    private L2vpnTestUtils() {
+    }
 
     public static void checkL2vpn(L2vpn l2vpn) {
         assertNotNull(l2vpn);
@@ -90,7 +92,7 @@ public class L2vpnTestUtils {
 
     public static void checkNeighbor(Neighbor neighbor) {
         assertNotNull(neighbor);
-       }
+    }
 
     public static void checkMplsStaticLabels(MplsStaticLabels mplsStaticLabels) {
         assertNotNull(mplsStaticLabels);
@@ -103,7 +105,10 @@ public class L2vpnTestUtils {
         assertNotNull(interfaceConfigurations.getInterfaceConfiguration());
     }
 
-    public static void checkInterfaceConfiguration(InterfaceConfiguration interfaceConfiguration, String portNo, boolean mtu) {
+    public static void checkInterfaceConfiguration(
+                                                InterfaceConfiguration interfaceConfiguration,
+                                                String portNo,
+                                                boolean mtu) {
         assertNotNull(interfaceConfiguration);
         assertNotNull(interfaceConfiguration.getActive());
         assertNotNull(interfaceConfiguration.getInterfaceModeNonPhysical());
@@ -124,14 +129,17 @@ public class L2vpnTestUtils {
         return new ServicePort(new TopologyId(topo), new NodeId(host), new TpId(port));
     }
 
+    @SuppressWarnings("checkstyle:illegalcatch")
     public static void checkDeactivated(DataBroker broker, String deactivatedPort)  {
         ReadTransaction transaction = broker.newReadOnlyTransaction();
 
         InstanceIdentifier<L2vpn> l2vpnIid = InstanceIdentifier.builder(L2vpn.class).build();
-        InstanceIdentifier<InterfaceConfigurations> interfaceConfigurationsIid = InstanceIdentifier.builder(InterfaceConfigurations.class).build();
+        InstanceIdentifier<InterfaceConfigurations> interfaceConfigurationsIid =
+                                        InstanceIdentifier.builder(InterfaceConfigurations.class).build();
 
         FluentFuture<Optional<L2vpn>> driverL2vpn = transaction.read(LogicalDatastoreType.CONFIGURATION, l2vpnIid);
-        FluentFuture<Optional<InterfaceConfigurations>> driverInterfaceConfigurations = transaction.read(LogicalDatastoreType.CONFIGURATION, interfaceConfigurationsIid);
+        FluentFuture<Optional<InterfaceConfigurations>> driverInterfaceConfigurations =
+                                    transaction.read(LogicalDatastoreType.CONFIGURATION, interfaceConfigurationsIid);
 
         try {
             checkL2vpnDeactivation(driverL2vpn);
@@ -142,7 +150,8 @@ public class L2vpnTestUtils {
 
     }
 
-    private static void checkL2vpnDeactivation(FluentFuture<Optional<L2vpn>> driverL2vpn) throws ExecutionException, InterruptedException {
+    private static void checkL2vpnDeactivation(FluentFuture<Optional<L2vpn>> driverL2vpn)
+                                                    throws ExecutionException, InterruptedException {
         if (driverL2vpn.get().isPresent()) {
             L2vpn l2vpn = driverL2vpn.get().get();
             L2vpnTestUtils.checkL2vpn(l2vpn);
@@ -155,13 +164,17 @@ public class L2vpnTestUtils {
         }
     }
 
-    private static void checkInterfaceConfigurationDeactivation(FluentFuture<Optional<InterfaceConfigurations>> driverInterfaceConfigurations, String deactivatedPort) throws InterruptedException, ExecutionException{
+    private static void checkInterfaceConfigurationDeactivation(
+                FluentFuture<Optional<InterfaceConfigurations>> driverInterfaceConfigurations,
+                String deactivatedPort) throws InterruptedException, ExecutionException {
         if (driverInterfaceConfigurations.get().isPresent()) {
             InterfaceConfigurations interfaceConfigurations = driverInterfaceConfigurations.get().get();
             L2vpnTestUtils.checkInterfaceConfigurations(interfaceConfigurations);
 
-            List<InterfaceConfiguration> interfaceConfigurationList = interfaceConfigurations.getInterfaceConfiguration();
-            assertTrue(interfaceConfigurationList.stream().anyMatch(x -> x.getInterfaceName().getValue().equals(deactivatedPort)));
+            List<InterfaceConfiguration> interfaceConfigurationList =
+                    interfaceConfigurations.getInterfaceConfiguration();
+            assertTrue(interfaceConfigurationList.stream()
+                    .anyMatch(x -> x.getInterfaceName().getValue().equals(deactivatedPort)));
         } else {
             // Semantics changed so interface-configurations container disappears when empty?
 //            fail("InterfaceConfigurations was not found.");
