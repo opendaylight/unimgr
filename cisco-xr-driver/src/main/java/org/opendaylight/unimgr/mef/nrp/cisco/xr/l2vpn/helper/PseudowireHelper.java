@@ -20,7 +20,7 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.pseudowires.pseudowire.NeighborBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4AddressNoZone;
 
-/**
+/*
  * Helper, supports configuration of VPLS neighbors and pseudowires
  *
  * @author krzysztof.bijakowski@amartus.com
@@ -32,12 +32,12 @@ public class PseudowireHelper {
     private List<Pseudowire> pseudowires;
 
     public static class IdGenerator {
-        private static final AtomicLong idGenerator = new AtomicLong(2000L);
+        private static final AtomicLong IDGENERATOR = new AtomicLong(2000L);
 
         public static long generate() {
 
             // TODO implement real pseudowire-id generator
-            return idGenerator.getAndIncrement();
+            return IDGENERATOR.getAndIncrement();
         }
     }
 

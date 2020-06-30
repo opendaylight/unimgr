@@ -14,7 +14,6 @@ import static org.opendaylight.unimgr.utils.ActivationDriverMocks.prepareDriver;
 
 import java.util.Collections;
 import java.util.Optional;
-
 import org.junit.Test;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverBuilder;

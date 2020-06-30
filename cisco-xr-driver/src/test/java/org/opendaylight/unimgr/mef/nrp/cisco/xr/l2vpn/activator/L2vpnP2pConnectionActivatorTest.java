@@ -9,11 +9,11 @@ package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator;
 
 import static org.junit.Assert.fail;
 
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -37,10 +37,8 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import com.google.common.util.concurrent.FluentFuture;
 
-
-/**
+/*
  * @author marek.ryznar@amartus.com
  */
 public class L2vpnP2pConnectionActivatorTest extends AbstractConcurrentDataBrokerTest {
@@ -54,6 +52,7 @@ public class L2vpnP2pConnectionActivatorTest extends AbstractConcurrentDataBroke
     private String serviceId = "serviceId";
     private List<EndPoint> endPoints;
     private List<EndPoint> endPoints1;
+
     @Before
     public void setUp() {
         //given
@@ -86,10 +85,12 @@ public class L2vpnP2pConnectionActivatorTest extends AbstractConcurrentDataBroke
         ReadTransaction transaction = getDataBroker().newReadOnlyTransaction();
 
         InstanceIdentifier<L2vpn> l2vpn = InstanceIdentifier.builder(L2vpn.class).build();
-        InstanceIdentifier<InterfaceConfigurations> interfaceConfigurations = InstanceIdentifier.builder(InterfaceConfigurations.class).build();
+        InstanceIdentifier<InterfaceConfigurations> interfaceConfigurations =
+                            InstanceIdentifier.builder(InterfaceConfigurations.class).build();
 
         FluentFuture<Optional<L2vpn>> driverL2vpn = transaction.read(LogicalDatastoreType.CONFIGURATION, l2vpn);
-        FluentFuture<Optional<InterfaceConfigurations>> driverInterfaceConfigurations = transaction.read(LogicalDatastoreType.CONFIGURATION, interfaceConfigurations);
+        FluentFuture<Optional<InterfaceConfigurations>> driverInterfaceConfigurations =
+                            transaction.read(LogicalDatastoreType.CONFIGURATION, interfaceConfigurations);
 
         try {
             checkL2vpnTree(driverL2vpn);
@@ -114,7 +115,8 @@ public class L2vpnP2pConnectionActivatorTest extends AbstractConcurrentDataBroke
         }
     }
 
-    private void checkL2vpnTree(FluentFuture<Optional<L2vpn>> driverL2vpn) throws InterruptedException, ExecutionException {
+    private void checkL2vpnTree(FluentFuture<Optional<L2vpn>> driverL2vpn)
+                                    throws InterruptedException, ExecutionException {
         if (driverL2vpn.get().isPresent()) {
             L2vpn l2vpn = driverL2vpn.get().get();
             L2vpnTestUtils.checkL2vpn(l2vpn);
@@ -141,15 +143,18 @@ public class L2vpnP2pConnectionActivatorTest extends AbstractConcurrentDataBroke
         }
     }
 
-    private void checkInterfaceConfigurationTree(FluentFuture<Optional<InterfaceConfigurations>> driverInterfaceConfigurations) throws InterruptedException, ExecutionException {
+    private void checkInterfaceConfigurationTree(
+                                      FluentFuture<Optional<InterfaceConfigurations>> driverInterfaceConfigurations)
+                                      throws InterruptedException, ExecutionException {
         if (driverInterfaceConfigurations.get().isPresent()) {
             InterfaceConfigurations interfaceConfigurations = driverInterfaceConfigurations.get().get();
             L2vpnTestUtils.checkInterfaceConfigurations(interfaceConfigurations);
 
-            List<InterfaceConfiguration> interfaceConfigurationList = interfaceConfigurations.getInterfaceConfiguration();
+            List<InterfaceConfiguration> interfaceConfigurationList =
+                                        interfaceConfigurations.getInterfaceConfiguration();
             List<InterfaceConfiguration> sorted = interfaceConfigurationList.stream()
                     .sorted(
-                    (InterfaceConfiguration ic1, InterfaceConfiguration ic2)
+                        (InterfaceConfiguration ic1, InterfaceConfiguration ic2)
                             -> ic1.getInterfaceName().getValue().compareTo(ic2.getInterfaceName().getValue()))
                     .collect(Collectors.toList());
 

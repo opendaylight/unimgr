@@ -19,7 +19,7 @@ import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ConnectivityServiceEndPoint;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.end.point.ServiceInterfacePoint;
 
-/**
+/*
  * @author Om.SAwasthi@Xoriant.Com
  *
  */
@@ -40,13 +40,13 @@ public class BridgeDomainAttachmentCircuitHelperTest {
     @Test
     public void testAddPort() {
         ConnectivityServiceEndPoint cep =
-                new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.EndPointBuilder()
-                        .setServiceInterfacePoint(
-                                TapiUtils.toSipRef(new Uuid(UUID1), ServiceInterfacePoint.class))
+                new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+                        .connectivity.service.EndPointBuilder()
+                        .setServiceInterfacePoint(TapiUtils.toSipRef(new Uuid(UUID1), ServiceInterfacePoint.class))
                         .setDirection(PortDirection.BIDIRECTIONAL).build();
         ep1 = new EndPoint(cep, null);
         port = ServicePort.toServicePort(ep1, NETCONF_TOPOLODY_NAME);
-        port.setVlanId(301l);
+        port.setVlanId(301L);
         BridgeDomainAttachmentCircuitHelper bdAttachmentCircuitHelper1 =
                 bdAttachmentCircuitHelper.addPort(port, false);
         Assert.assertNotNull(bdAttachmentCircuitHelper1);

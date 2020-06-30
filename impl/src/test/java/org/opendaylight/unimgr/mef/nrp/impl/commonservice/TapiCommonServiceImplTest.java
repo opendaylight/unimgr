@@ -9,7 +9,6 @@ package org.opendaylight.unimgr.mef.nrp.impl.commonservice;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

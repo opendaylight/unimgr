@@ -17,7 +17,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     </parent>
 
     <properties>
-      <odlparent.checkstyle.enforce>false</odlparent.checkstyle.enforce>
+      <odlparent.checkstyle.enforce>true</odlparent.checkstyle.enforce>
       <odlparent.spotbugs.enforce>false</odlparent.spotbugs.enforce>
         <powermock.version>2.0.0-beta.5</powermock.version>
         <mdsal.version>5.0.10</mdsal.version>

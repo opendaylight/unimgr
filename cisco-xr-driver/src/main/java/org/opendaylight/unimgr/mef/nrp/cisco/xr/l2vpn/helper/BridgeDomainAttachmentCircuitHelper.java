@@ -16,7 +16,7 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.bridge.domain.groups.bridge.domain.group.bridge.domains.bridge.domain.bd.attachment.circuits.BdAttachmentCircuit;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.bridge.domain.groups.bridge.domain.group.bridge.domains.bridge.domain.bd.attachment.circuits.BdAttachmentCircuitBuilder;
 
-/**
+/*
  * @author arif.hussain@xoriant.com
  */
 public class BridgeDomainAttachmentCircuitHelper {
@@ -30,8 +30,9 @@ public class BridgeDomainAttachmentCircuitHelper {
     public BridgeDomainAttachmentCircuitHelper addPort(ServicePort port, boolean isExclusive) {
         bdAttachmentCircuits.add(
             new BdAttachmentCircuitBuilder()
-                .setName((isExclusive) ? InterfaceHelper.getInterfaceName(port) : InterfaceHelper.getSubInterfaceName(port))
-                        .build());
+                .setName((isExclusive)
+                    ? InterfaceHelper.getInterfaceName(port) : InterfaceHelper.getSubInterfaceName(port))
+                .build());
 
         return this;
     }

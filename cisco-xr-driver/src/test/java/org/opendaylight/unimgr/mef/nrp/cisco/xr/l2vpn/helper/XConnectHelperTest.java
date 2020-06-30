@@ -7,6 +7,11 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.LinkedList;
+import java.util.List;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.XconnectGroups;
@@ -16,13 +21,8 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.AttachmentCircuits;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.Pseudowires;
 
-import java.util.LinkedList;
-import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-/**
+/*
  * @author krzysztof.bijakowski@amartus.com
  */
 public class XConnectHelperTest {
@@ -64,18 +64,21 @@ public class XConnectHelperTest {
     @Test
     public void testBuild() {
         //given
-        String xConnectName = "ExampleXConnectName";
-        String xConnectGroupName = "ExampleXConnectGroupName";
+        String xconnectName = "ExampleXConnectName";
+        String xconnectGroupName = "ExampleXConnectGroupName";
         AttachmentCircuits attachmentCircuits = Mockito.mock(AttachmentCircuits.class);
         Pseudowires pseudowires = Mockito.mock(Pseudowires.class);
 
         //when
-        XconnectGroup xconnectGroup = new XConnectHelper().appendXConnect(xConnectName, attachmentCircuits, pseudowires).build(xConnectGroupName);
+        XconnectGroup xconnectGroup = new XConnectHelper().appendXConnect(
+                                                                        xconnectName,
+                                                                        attachmentCircuits,
+                                                                        pseudowires).build(xconnectGroupName);
 
         //then
         assertNotNull(xconnectGroup);
-        assertEquals(xConnectGroupName, xconnectGroup.getName().getValue());
-        assertEquals(xConnectGroupName, xconnectGroup.key().getName().getValue());
+        assertEquals(xconnectGroupName, xconnectGroup.getName().getValue());
+        assertEquals(xconnectGroupName, xconnectGroup.key().getName().getValue());
 
         P2pXconnects p2pXconnects = xconnectGroup.getP2pXconnects();
         assertEquals(p2pXconnects, xconnectGroup.getP2pXconnects());
@@ -87,7 +90,7 @@ public class XConnectHelperTest {
 
         P2pXconnect p2pXconnect = p2pXconnectList.get(0);
         assertNotNull(p2pXconnect);
-        assertEquals(xConnectName, p2pXconnect.getName().getValue());
+        assertEquals(xconnectName, p2pXconnect.getName().getValue());
         assertEquals(pseudowires, p2pXconnect.getPseudowires());
         assertEquals(attachmentCircuits, p2pXconnect.getAttachmentCircuits());
     }

@@ -10,10 +10,13 @@ package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.ServiceInterfacePointRef;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 
-/**
+/*
  * @author marek.ryznar@amartus.com
  */
-public class SipHandler {
+public final class SipHandler {
+
+    private SipHandler() {
+    }
 
     public static String getDeviceName(Uuid sip) {
         String[] sipTab = sip.getValue().split(":");
@@ -26,6 +29,7 @@ public class SipHandler {
     }
 
     public static boolean isTheSameDevice(ServiceInterfacePointRef sip1, ServiceInterfacePointRef sip2) {
-        return getDeviceName(sip1.getServiceInterfacePointId()).equals(getDeviceName(sip2.getServiceInterfacePointId()));
+        return getDeviceName(
+                           sip1.getServiceInterfacePointId()).equals(getDeviceName(sip2.getServiceInterfacePointId()));
     }
 }

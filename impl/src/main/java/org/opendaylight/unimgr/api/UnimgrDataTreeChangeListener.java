@@ -8,8 +8,6 @@
 package org.opendaylight.unimgr.api;
 
 import java.util.Collection;
-
-import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
@@ -24,11 +22,11 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 public abstract class UnimgrDataTreeChangeListener<D extends DataObject>
         implements DataTreeChangeListener<D>, AutoCloseable {
 
-    protected DataBroker dataBroker;
+    //protected DataBroker dataBroker;
 
-    public UnimgrDataTreeChangeListener(final DataBroker dataBroker) {
+    /*public UnimgrDataTreeChangeListener(final DataBroker dataBroker) {
         this.dataBroker = dataBroker;
-    }
+    }*/
 
     /**
      * Basic Implementation of DataTreeChange Listener to execute add, update or remove command
