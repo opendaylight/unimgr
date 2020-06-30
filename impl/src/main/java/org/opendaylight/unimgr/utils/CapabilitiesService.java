@@ -11,7 +11,6 @@ package org.opendaylight.unimgr.utils;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 

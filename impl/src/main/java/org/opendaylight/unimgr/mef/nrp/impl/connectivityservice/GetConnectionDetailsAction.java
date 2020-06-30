@@ -9,7 +9,6 @@
 package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 
 import java.util.concurrent.Callable;
-
 import org.opendaylight.unimgr.mef.nrp.api.FailureResult;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;

@@ -11,12 +11,10 @@ package org.opendaylight.unimgr.mef.nrp.impl.connectivityservice;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-
 import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriverRepoService;
 import org.opendaylight.unimgr.mef.nrp.api.RequestDecomposer;
@@ -135,10 +133,10 @@ public class TapiConnectivityServiceImpl implements TapiConnectivityService, Aut
     }
 
     public void setExecutor(ListeningExecutorService executor) {
+        this.executor = executor;
         if (executor != null) {
             throw new IllegalStateException();
         }
-        this.executor = executor;
     }
 
     public void setServiceIdPool(ConnectivityServiceIdResourcePool serviceIdPool) {

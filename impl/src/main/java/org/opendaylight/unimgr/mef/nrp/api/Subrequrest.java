@@ -9,7 +9,6 @@
 package org.opendaylight.unimgr.mef.nrp.api;
 
 import java.util.List;
-
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 
 /**

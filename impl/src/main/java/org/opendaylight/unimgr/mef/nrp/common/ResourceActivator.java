@@ -10,7 +10,6 @@ package org.opendaylight.unimgr.mef.nrp.common;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 

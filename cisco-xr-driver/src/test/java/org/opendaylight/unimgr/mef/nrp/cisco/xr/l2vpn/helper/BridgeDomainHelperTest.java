@@ -16,7 +16,7 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.bridge.domain.groups.bridge.domain.group.bridge.domains.bridge.domain.BdPseudowires;
 import org.powermock.api.mockito.PowerMockito;
 
-/**
+/*
  * @author Om.SAwasthi@Xoriant.Com
  *
  */

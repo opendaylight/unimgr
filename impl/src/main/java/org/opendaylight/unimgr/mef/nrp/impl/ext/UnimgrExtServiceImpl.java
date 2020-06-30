@@ -11,7 +11,6 @@ package org.opendaylight.unimgr.mef.nrp.impl.ext;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
@@ -20,7 +19,6 @@ import java.util.Optional;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -150,9 +148,9 @@ public class UnimgrExtServiceImpl implements UnimgrExtService {
         return sip;
     }
 
-    private static RpcResult<Void> success() {
+    /*private static RpcResult<Void> success() {
         return RpcResultBuilder.<Void>success().build();
-    }
+    }*/
 
     private static RpcResult<AddSipOutput> withError(String error, Object ... params) {
         RpcResultBuilder<AddSipOutput> failed = RpcResultBuilder.failed();

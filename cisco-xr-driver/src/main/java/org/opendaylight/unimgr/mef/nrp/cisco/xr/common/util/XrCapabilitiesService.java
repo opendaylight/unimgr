@@ -6,16 +6,14 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util;
-
 import java.util.function.BiFunction;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.unimgr.utils.CapabilitiesService;
 import org.opendaylight.unimgr.utils.NetconfConstants;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNode;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
-/**
+/*
  * @author bartosz.michalik@amartus.com
  */
 public class XrCapabilitiesService extends CapabilitiesService {
@@ -43,7 +41,7 @@ public class XrCapabilitiesService extends CapabilitiesService {
             return condition;
         }
 
-        private static boolean checkForNetconfCapability(Node node, String netconf_capability) {
+        private static boolean checkForNetconfCapability(Node node, String netconfCapability) {
             NetconfNode netconf = node.augmentation(NetconfNode.class);
             if (netconf == null) {
                 return false;
@@ -59,7 +57,7 @@ public class XrCapabilitiesService extends CapabilitiesService {
                     .getAvailableCapabilities()
                     .getAvailableCapability()
                     .stream()
-                    .anyMatch(capability -> capability.getCapability().equals(netconf_capability));
+                    .anyMatch(capability -> capability.getCapability().equals(netconfCapability));
         }
     }
 }

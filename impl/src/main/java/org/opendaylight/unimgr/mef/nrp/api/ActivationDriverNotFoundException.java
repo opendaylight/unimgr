@@ -15,7 +15,8 @@ package org.opendaylight.unimgr.mef.nrp.api;
 public class ActivationDriverNotFoundException extends RuntimeException {
     private static final long serialVersionUID = 8093501625481543532L;
 
-    public ActivationDriverNotFoundException() {}
+    public ActivationDriverNotFoundException() {
+    }
 
     public ActivationDriverNotFoundException(String message) {
         super(message);
