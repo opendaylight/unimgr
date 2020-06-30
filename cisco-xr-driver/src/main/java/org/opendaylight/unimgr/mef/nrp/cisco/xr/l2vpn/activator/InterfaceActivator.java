@@ -23,7 +23,6 @@ public class InterfaceActivator {
 
     protected InterfaceConfigurations activate(ServicePort port, ServicePort neighbor, long mtu, boolean isExclusive) {
         String interfraceName = port.getInterfaceName();
-        new MtuUtils();
         Mtus mtus = MtuUtils.generateMtus(mtu, new CiscoIosXrString(interfraceName));
 
         // Enable L2Trasportation for port basesd service
@@ -46,13 +45,16 @@ public class InterfaceActivator {
 
     protected InterfaceConfigurations buildSubInterface(ServicePort port, ServicePort neighbor, long mtu) {
         String mtuOwnerName = "sub_vlan";
-        new MtuUtils();
         Mtus mtus = MtuUtils.generateMtus(mtu, new CiscoIosXrString(mtuOwnerName));
 
         return new InterfaceHelper().addSubInterface(port, Optional.of(mtus)).build();
     }
 
-    protected InterfaceConfigurations activateLocalInterface(ServicePort port, ServicePort neighbor, long mtu, boolean isExclusive) {
+    protected InterfaceConfigurations activateLocalInterface(
+                                                            ServicePort port,
+                                                            ServicePort neighbor,
+                                                            long mtu,
+                                                            boolean isExclusive) {
         boolean setL2Transport = (isExclusive) ? true : false;
 
         return new InterfaceHelper().addInterface(port, Optional.empty(), setL2Transport)

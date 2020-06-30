@@ -14,7 +14,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;

@@ -16,12 +16,15 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 
-/**
+/*
  * Helper, supports configuration of L2VPN
  *
  * @author krzysztof.bijakowski@amartus.com
  */
-public class L2vpnHelper {
+public final class L2vpnHelper {
+
+    private L2vpnHelper() {
+    }
 
     public static InstanceIdentifier<L2vpn> getL2vpnId() {
         return InstanceIdentifier.builder(L2vpn.class).build();

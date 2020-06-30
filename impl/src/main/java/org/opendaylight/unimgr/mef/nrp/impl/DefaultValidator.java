@@ -14,9 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.annotation.Nonnull;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.unimgr.mef.nrp.api.RequestValidator;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
@@ -119,12 +117,14 @@ public class DefaultValidator implements RequestValidator {
             if (input.getConnConstraint().getServiceType()
                     .equals(ServiceType.ROOTEDMULTIPOINTCONNECTIVITY)) {
 
-                List<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.create.connectivity.service.input.EndPoint> getRoles =
+                List<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+                                                            .create.connectivity.service.input.EndPoint> getRoles =
                         input.getEndPoint().stream().filter(e -> e.getRole() != null)
                                 .collect(Collectors.toCollection(
-                                        () -> new ArrayList<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.create.connectivity.service.input.EndPoint>()));
-                Optional<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.create.connectivity.service.input.EndPoint> isRootAvailable =
-                        null;
+                                    () -> new ArrayList<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi
+                                            .connectivity.rev180307.create.connectivity.service.input.EndPoint>()));
+                Optional<org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+                                                .create.connectivity.service.input.EndPoint> isRootAvailable = null;
 
                 if (getRoles.size() >= 2) {
 
@@ -133,13 +133,12 @@ public class DefaultValidator implements RequestValidator {
                                     && !e.getRole().equals(PortRole.ROOT))
                             .findFirst();
 
-                    long i = getRoles.stream().filter(node -> node.getRole().equals(PortRole.ROOT))
-                            .count();
+                    long rootCount = getRoles.stream().filter(node -> node.getRole().equals(PortRole.ROOT)).count();
 
                     if (isRootAvailable.isPresent()) {
                         validationResult.problem(
                                 "Invalid request: Only root and leaf nodes are allowed for E-Tree. ");
-                    } else if (i == 0) {
+                    } else if (rootCount == 0) {
                         validationResult.problem(
                                 "Invalid request: Atleast one root is required for E-Tree. ");
                     }

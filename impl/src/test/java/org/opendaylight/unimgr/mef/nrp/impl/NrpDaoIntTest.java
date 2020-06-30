@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNull;
 
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
@@ -52,13 +51,13 @@ public class NrpDaoIntTest extends AbstractTestWithTopo {
 
     private ParentNodeEdgePoint parentNep(String nodeId, String nepId) {
         ParentNodeEdgePoint parentNep = new ParentNodeEdgePointBuilder()
-        		.setTopologyId(topologyId)
-        		.setNodeId(new Uuid(nodeId))
-        		.setOwnedNodeEdgePointId(new Uuid(nepId))
-        		.build();
+                .setTopologyId(topologyId)
+                .setNodeId(new Uuid(nodeId))
+                .setOwnedNodeEdgePointId(new Uuid(nepId))
+                .build();
         return parentNep;
     }
-    
+
     @Test
     public void testAddCeps()
             throws ReadFailedException, InterruptedException, ExecutionException {
@@ -74,7 +73,7 @@ public class NrpDaoIntTest extends AbstractTestWithTopo {
                 .setLayerProtocolName(LayerProtocolName.ETH)
                 .setClientNodeEdgePoint(Collections.emptyList())
                 .setParentNodeEdgePoint(Collections.singletonList(
-                		parentNep(uuid1, uuid1 + ":1")));
+                        parentNep(uuid1, uuid1 + ":1")));
 
         ConnectionEndPoint cep1 = builder
                 .setUuid(new Uuid("c001:" + uuid1 + ":1"))

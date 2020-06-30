@@ -13,11 +13,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 import org.mockito.Mockito;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
@@ -31,13 +31,16 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import com.google.common.util.concurrent.FluentFuture;
 
-public class NodeTestUtils {
+public final class NodeTestUtils {
+
+    private NodeTestUtils() {
+    }
+
     public static final String DEVICE_ID = "device";
 
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked","checkstyle:illegalcatch"})
     public static DataBroker mockDataBroker(Optional<Node> nodeOptional) {
         DataBroker dataBroker = mock(DataBroker.class);
         final ReadTransaction transaction = mock(ReadTransaction.class);
@@ -46,9 +49,10 @@ public class NodeTestUtils {
         try {
             when(transactionResult.get()).thenReturn(nodeOptional);
         } catch (Exception e) {
-            fail("Cannot create mocks : " + e.getMessage());
+            fail(e.getMessage());
         }
-        when(transaction.read(eq(LogicalDatastoreType.OPERATIONAL), any(InstanceIdentifier.class))).thenReturn(transactionResult);
+        when(transaction.read(eq(LogicalDatastoreType.OPERATIONAL),
+                any(InstanceIdentifier.class))).thenReturn(transactionResult);
         when(dataBroker.newReadOnlyTransaction()).thenReturn(transaction);
 
         return dataBroker;
@@ -62,8 +66,6 @@ public class NodeTestUtils {
     }
 
     public static Optional<Node> mockNetconfNode(boolean withNetconfCapabilities) {
-        Optional<Node> mockedNodeOptional = mockNode();
-
         List<AvailableCapability> netconfCapabilityList = new ArrayList<>();
         if (withNetconfCapabilities) {
             netconfCapabilityList = Arrays.asList(createAvailableCapability(NetconfConstants.CAPABILITY_IOX_L2VPN),
@@ -74,6 +76,7 @@ public class NodeTestUtils {
         AvailableCapabilities availableCapabilities = Mockito.mock(AvailableCapabilities.class);
         when(availableCapabilities.getAvailableCapability()).thenReturn(netconfCapabilityList);
 
+        Optional<Node> mockedNodeOptional = mockNode();
         NetconfNode netconfNode = mock(NetconfNode.class);
         when(netconfNode.getAvailableCapabilities()).thenReturn(availableCapabilities);
 

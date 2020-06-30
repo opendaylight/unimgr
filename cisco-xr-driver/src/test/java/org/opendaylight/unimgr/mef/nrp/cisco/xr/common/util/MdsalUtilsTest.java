@@ -15,9 +15,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.mdsal.binding.api.DataBroker;
@@ -36,16 +36,13 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.google.common.util.concurrent.FluentFuture;
 
-
-/**
+/*
  * @author bartosz.michalik@amartus.com
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Optional.class})
 public class MdsalUtilsTest {
-    @SuppressWarnings("unchecked")
     @Test
     public void testReadTerminationPoint() throws InterruptedException, ExecutionException {
         //given
@@ -55,10 +52,15 @@ public class MdsalUtilsTest {
         TopologyId topologyId = new TopologyId("topology-netconf");
 
 
-        ConnectivityServiceEndPoint cep = new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.EndPointBuilder()
-                .setServiceInterfacePoint(TapiUtils.toSipRef(new Uuid("sip:r1:tp1"), ServiceInterfacePoint.class))
-                .setDirection(PortDirection.BIDIRECTIONAL)
-                .build();
+        ConnectivityServiceEndPoint cep = new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+                                                .connectivity.service.EndPointBuilder()
+                                                .setServiceInterfacePoint(
+                                                        TapiUtils.toSipRef(
+                                                            new Uuid("sip:r1:tp1"),
+                                                            ServiceInterfacePoint.class)
+                                                        )
+                                                .setDirection(PortDirection.BIDIRECTIONAL)
+                                                .build();
         EndPoint ep = new EndPoint(cep, null);
 
 
@@ -74,7 +76,8 @@ public class MdsalUtilsTest {
         when(optionalDataObject.get()).thenReturn(expectedTp);
 
         //when
-        Optional<TerminationPoint> actualTpOptional = MdsalUtils.readTerminationPoint(dataBroker, LogicalDatastoreType.CONFIGURATION, topologyId, ep);
+        Optional<TerminationPoint> actualTpOptional =
+                    MdsalUtils.readTerminationPoint(dataBroker, LogicalDatastoreType.CONFIGURATION, topologyId, ep);
 
         //then
         assertNotNull(actualTpOptional);

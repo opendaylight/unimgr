@@ -8,7 +8,6 @@
 package org.opendaylight.unimgr.api;
 
 import java.util.Collection;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
@@ -26,7 +25,7 @@ public abstract class UnimgrDataTreeChangeListener<D extends DataObject>
 
     protected DataBroker dataBroker;
 
-    public UnimgrDataTreeChangeListener(final DataBroker dataBroker) {
+    public UnimgrDataTreeChangeListener(DataBroker dataBroker) {
         this.dataBroker = dataBroker;
     }
 
