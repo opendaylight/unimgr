@@ -20,13 +20,12 @@ import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.XrCapabilitie
 import static org.opendaylight.unimgr.utils.CapabilitiesService.Capability.Mode.AND;
 
 import java.util.Optional;
-
 import org.junit.Test;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
-/**
+/*
  * @author bartosz.michalik@amartus.com
  */
 public class XrCapabilitiesServiceTest extends AbstractConcurrentDataBrokerTest {

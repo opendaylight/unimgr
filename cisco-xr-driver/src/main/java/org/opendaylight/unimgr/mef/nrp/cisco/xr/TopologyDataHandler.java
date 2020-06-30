@@ -13,6 +13,12 @@ import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.XrCapabilitie
 import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.XrCapabilitiesService.NodeCapability.NETCONF_CISCO_IOX_L2VPN;
 import static org.opendaylight.unimgr.utils.CapabilitiesService.Capability.Mode.AND;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -25,10 +31,8 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
@@ -73,15 +77,8 @@ import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.MoreExecutors;
 
-
-/**
+/*
  * @author bartosz.michalik@amartus.com
  */
 public class TopologyDataHandler implements DataTreeChangeListener<Node> {
@@ -90,7 +87,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
             InstanceIdentifier.create(NetworkTopology.class).child(Topology.class,
                     new TopologyKey(new TopologyId(TopologyNetconf.QNAME.getLocalName())));
 
-    private final int MAX_RETRIALS = 5;
+    private final int maxRetrials = 5;
 
     private final TopologyManager topologyManager;
 
@@ -122,7 +119,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
 
     public void init() {
         LOG.debug("initializing topology handler for {}", XrDriverBuilder.XR_NODE);
-        initializeWithRetrial(MAX_RETRIALS);
+        initializeWithRetrial(maxRetrials);
     }
 
     private void initializeWithRetrial(int retrialCouter) {
@@ -140,20 +137,21 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
                 registerNetconfTreeListener();
             }
 
+            @SuppressWarnings("checkstyle:emptyBlock")
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(Throwable throwable) {
                 if (retrialCouter != 0) {
                     try {
                         TimeUnit.MILLISECONDS.sleep(500);
-                    } catch (InterruptedException _e) {
+                    } catch (InterruptedException e) {
                     }
-                    if (retrialCouter != MAX_RETRIALS) {
+                    if (retrialCouter != maxRetrials) {
                         LOG.debug("Retrying initialization of {} for {} time",
-                                XrDriverBuilder.XR_NODE, MAX_RETRIALS - retrialCouter + 1);
+                                XrDriverBuilder.XR_NODE, maxRetrials - retrialCouter + 1);
                     }
                     initializeWithRetrial(retrialCouter - 1);
                 } else {
-                    LOG.error("No node created due to the error", t);
+                    LOG.error("No node created due to the error", throwable);
                 }
 
             }
@@ -179,7 +177,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
 
 
     Function<DataObjectModification<Node>, Node> addedNode =
-            mod -> (mod.getModificationType() == DataObjectModification.ModificationType.WRITE
+        mod -> (mod.getModificationType() == DataObjectModification.ModificationType.WRITE
             || mod.getModificationType() == DataObjectModification.ModificationType.SUBTREE_MODIFIED)
             ? mod.getDataAfter() : null;
 
@@ -188,22 +186,24 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
 
         List<Node> addedNodes = changes.stream().map(DataTreeModification::getRootNode)
                 .map(addedNode::apply).filter(n -> {
-                    if (n == null)
+                    if (n == null) {
                         return false;
+                    }
                     return capabilitiesService.node(n).isSupporting(AND, NETCONF,
                             NETCONF_CISCO_IOX_IFMGR, NETCONF_CISCO_IOX_L2VPN);
                 }).collect(Collectors.toList());
         try {
             onAddedNodes(addedNodes);
-        } catch (Exception e) {
+        } catch (ReadFailedException e) {
             // TODO improve error handling
             LOG.error("error while processing new Cisco nodes", e);
         }
     }
 
     private void onAddedNodes(@Nonnull Collection<Node> added) throws ReadFailedException {
-        if (added.isEmpty())
+        if (added.isEmpty()) {
             return;
+        }
         LOG.debug("found {} added XR nodes", added.size());
 
         final ReadWriteTransaction topoTx = dataBroker.newReadWriteTransaction();
@@ -231,8 +231,8 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
             }
 
             @Override
-            public void onFailure(Throwable t) {
-                LOG.warn("TAPI node upadate failed due to an error", t);
+            public void onFailure(Throwable throwable) {
+                LOG.warn("TAPI node upadate failed due to an error", throwable);
             }
         }, MoreExecutors.directExecutor());
     }
@@ -245,6 +245,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         return gbPort.matcher(name).matches();
     };
 
+    @SuppressWarnings("checkstyle:illegalcatch")
     private List<OwnedNodeEdgePoint> toTp(Collection<Node> nodes) {
         OwnedNodeEdgePointBuilder tpBuilder = new OwnedNodeEdgePointBuilder();
         return nodes.stream().flatMap(cn -> {
@@ -255,43 +256,47 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
                 if (mountPoint.isPresent()) {
                     DataBroker deviceBroker = mountPoint.get().getService(DataBroker.class).get();
                     List<OwnedNodeEdgePoint> tps;
-                    try(ReadTransaction tx = deviceBroker.newReadOnlyTransaction()) {
+                    try (ReadTransaction tx = deviceBroker.newReadOnlyTransaction()) {
                         tps = ports(tx)
                           .filter(i -> {
-                            boolean shutdown =
+                              boolean shutdown =
                                     i != null && i.getShutdown() != null;
-                            return !shutdown;
-                        }).filter(isNep::test).map(i -> {
-                            InterfaceConfigurationKey ikey = i.key();
-                            LOG.debug("found {} interface", ikey);
+                              return !shutdown;
+                          }).filter(isNep::test).map(i -> {
+                              InterfaceConfigurationKey ikey = i.key();
+                              LOG.debug("found {} interface", ikey);
 
-                            Uuid tpId = new Uuid(cn.getNodeId().getValue() + ":"
+                              Uuid tpId = new Uuid(cn.getNodeId().getValue() + ":"
                                     + ikey.getInterfaceName().getValue());
-                            return tpBuilder
+                              return tpBuilder
                                     .setUuid(tpId)
                                     .withKey(new OwnedNodeEdgePointKey(tpId))
                                     .setLinkPortDirection(PortDirection.BIDIRECTIONAL)
                                     .setLinkPortRole(PortRole.SYMMETRIC)
                                     .setLayerProtocolName(LayerProtocolName.ETH).build();
-                        }).collect(Collectors.toList());
+                          }).collect(Collectors.toList());
 
+                        return tps.stream();
+                    } catch (Exception e) {
+                        LOG.warn("erro", e);
                     }
-
-                    return tps.stream();
 
                 } else {
                     LOG.warn("no mount point for {}", key);
                 }
 
             } catch (Exception e) {
-                LOG.warn("error while processing " + key, e);
+                LOG.warn("error while processing for {} ", key, e);
             }
             return Stream.empty();
         }).collect(Collectors.toList());
     }
 
     private Stream<InterfaceConfiguration> ports(ReadTransaction tx) throws InterruptedException, ExecutionException {
-        Optional<InterfaceConfigurations> interfaces = tx.read(LogicalDatastoreType.OPERATIONAL, InterfaceHelper.getInterfaceConfigurationsId()).get();
+        Optional<InterfaceConfigurations> interfaces = tx.read(
+                                                            LogicalDatastoreType.OPERATIONAL,
+                                                            InterfaceHelper.getInterfaceConfigurationsId()
+                                                            ).get();
         if (interfaces.isPresent()) {
             return interfaces.get().getInterfaceConfiguration().stream();
         }

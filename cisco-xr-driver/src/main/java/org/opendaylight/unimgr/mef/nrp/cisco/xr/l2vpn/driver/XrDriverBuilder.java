@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.MountPointService;
 import org.opendaylight.unimgr.mef.nrp.api.ActivationDriver;
@@ -27,8 +26,8 @@ import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.SipHandler;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.AbstractL2vpnActivator;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.AbstractL2vpnBridgeDomainActivator;
-import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnBridgeDomainLocalActivator;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnBridgeDomainActivator;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnBridgeDomainLocalActivator;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnLocalConnectActivator;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnP2pConnectActivator;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.PseudowireHelper;
@@ -40,7 +39,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
+/*
  * @author marek.ryznar@amartus.com
  */
 public class XrDriverBuilder implements ActivationDriverBuilder {
@@ -162,33 +161,34 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
                 }
             }
 
-            private boolean isPairActivated(EndPoint a, EndPoint z) {
+           /* private boolean isPairActivated(EndPoint endPoint1, EndPoint endPoint2) {
                 return bridgeActivatedPairs.stream().anyMatch(entry -> {
-                    if ((entry.getKey().equals(a) && entry.getValue().equals(z))
-                            || (entry.getKey().equals(z) && entry.getValue().equals(a))) {
+                    if ((entry.getKey().equals(endPoint1) && entry.getValue().equals(endPoint2))
+                            || (entry.getKey().equals(endPoint2) && entry.getValue().equals(endPoint1))) {
                         return true;
                     }
                     return false;
                 });
             }
+            */
 
             BiConsumer<List<EndPoint>, AbstractL2vpnActivator> activate =
-                    (neighbors, activator) -> {
-                        try {
-                            activator.activate(neighbors, serviceId, isExclusive, serviceType);
-                        } catch (InterruptedException | ExecutionException e) {
-                            LOG.error("Activation error occured: {}", e.getMessage());
-                        }
-                    };
+                (neighbors, activator) -> {
+                    try {
+                        activator.activate(neighbors, serviceId, isExclusive, serviceType);
+                    } catch (InterruptedException | ExecutionException e) {
+                        LOG.error("Activation error occured: {}", e.getMessage());
+                    }
+                };
 
             BiConsumer<List<EndPoint>, AbstractL2vpnActivator> deactivate =
-                    (neighbors, activator) -> {
-                        try {
-                            activator.deactivate(neighbors, serviceId, isExclusive, serviceType);
-                        } catch (InterruptedException | ExecutionException e) {
-                            LOG.error("Deactivation error occured: {}", e.getMessage());
-                        }
-                    };
+                (neighbors, activator) -> {
+                    try {
+                        activator.deactivate(neighbors, serviceId, isExclusive, serviceType);
+                    } catch (InterruptedException | ExecutionException e) {
+                        LOG.error("Deactivation error occured: {}", e.getMessage());
+                    }
+                };
 
             // L2vpn bridge domain configuration implementation
             private void handleBdEndpoints(
@@ -206,7 +206,7 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
                             endPoint, endPoints));
                 } else {
                     endPoints.forEach(
-                            endPoint -> connectWithAllBdNeighbors(action, endPoint, endPoints));
+                        endPoint -> connectWithAllBdNeighbors(action, endPoint, endPoints));
                 }
             }
 
@@ -249,23 +249,22 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
             }
 
             BiConsumer<List<EndPoint>, AbstractL2vpnBridgeDomainActivator> activateBd =
-                    (neighbors, activator) -> {
-                        try {
-                            activator.activate(neighbors, serviceId, isExclusive, serviceType);
-                        } catch (InterruptedException | ResourceActivatorException | ExecutionException e) {
-                            LOG.error("Activation error occured: {}", e.getMessage());
-                        }
-                    };
+                (neighbors, activator) -> {
+                    try {
+                        activator.activate(neighbors, serviceId, isExclusive, serviceType);
+                    } catch (InterruptedException | ResourceActivatorException | ExecutionException e) {
+                        LOG.error("Activation error occured: {}", e.getMessage());
+                    }
+                };
 
             BiConsumer<List<EndPoint>, AbstractL2vpnBridgeDomainActivator> deactivateBd =
-                    (neighbors, activator) -> {
-                        try {
-                            activator.deactivate(neighbors, serviceId, isExclusive, serviceType);
-                        } catch (InterruptedException | ResourceActivatorException | ExecutionException e) {
-                            LOG.info("Deactivation error occured: {}", e);
-                            LOG.error("Deactivation error occured: {}", e.getMessage());
-                        }
-                    };
+                (neighbors, activator) -> {
+                    try {
+                        activator.deactivate(neighbors, serviceId, isExclusive, serviceType);
+                    } catch (InterruptedException | ResourceActivatorException | ExecutionException e) {
+                        LOG.error("Deactivation error occured: {}", e.getMessage());
+                    }
+                };
 
         };
 

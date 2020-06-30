@@ -11,11 +11,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,10 +39,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.google.common.util.concurrent.FluentFuture;
 
 
-/**
+/*
  * @author Om.SAwasthi@Xoriant.Com
  *
  */
@@ -72,7 +71,8 @@ public class AbstractL2vpnBridgeDomainActivatorTest {
         serviceType = ServiceType.POINTTOPOINTCONNECTIVITY;
 
         ConnectivityServiceEndPoint cep =
-                new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.EndPointBuilder()
+                new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+                .connectivity.service.EndPointBuilder()
                         .setServiceInterfacePoint(
                                 TapiUtils.toSipRef(new Uuid(UUID1), ServiceInterfacePoint.class))
                         .setDirection(PortDirection.BIDIRECTIONAL).setRole(PortRole.LEAF).build();
@@ -80,7 +80,8 @@ public class AbstractL2vpnBridgeDomainActivatorTest {
 
         ep1 = new EndPoint(cep, null);
         ConnectivityServiceEndPoint cep1 =
-                new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.connectivity.service.EndPointBuilder()
+                new org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307
+                .connectivity.service.EndPointBuilder()
                         .setServiceInterfacePoint(
                                 TapiUtils.toSipRef(new Uuid(UUID2), ServiceInterfacePoint.class))
                         .setDirection(PortDirection.BIDIRECTIONAL).setRole(PortRole.LEAF).build();

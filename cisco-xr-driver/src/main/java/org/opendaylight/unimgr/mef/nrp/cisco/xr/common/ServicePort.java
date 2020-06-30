@@ -29,9 +29,9 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
  * @author marek.ryznar@amartus.com
  */
 public class ServicePort {
-    private static final String pattern = ".+?(?=((((\\d+)/)+)\\d+))";
-    private static final Pattern interface_name_pattern = Pattern.compile(pattern);
-    private static final String default_interface_name = "GigabitEthernet";
+    private static final String PATTERN = ".+?(?=((((\\d+)/)+)\\d+))";
+    private static final Pattern INTERFACE_NAME_PATTERN = Pattern.compile(PATTERN);
+    private static final String DEFAULT_INTERFACE_NAME = "GigabitEthernet";
 
     private IngressBwpFlow ingressBwpFlow;
     private EgressBwpFlow egressBwpFlow;
@@ -110,7 +110,7 @@ public class ServicePort {
     }
 
     public static boolean isSameDevice(EndPoint endPoint, List<String> ls) {
-        Uuid sip = endPoint.getEndpoint().getServiceInterfacePoint().getServiceInterfacePointId(); //sip:ciscoD1:GigabitEthernet0/0/0/1
+        Uuid sip = endPoint.getEndpoint().getServiceInterfacePoint().getServiceInterfacePointId();
         NodeId nodeId = new NodeId(SipHandler.getDeviceName(sip));
 
         if (ls.size() == 0) {
@@ -132,9 +132,9 @@ public class ServicePort {
     }
 
     public String getInterfaceName() {
-        TpId tpId = this.getTp();
-        Matcher matcher = interface_name_pattern.matcher(tpId.getValue());
-        return matcher.find() ? matcher.group() : default_interface_name;
+       // TpId tpId = this.getTp();
+        Matcher matcher = INTERFACE_NAME_PATTERN.matcher(this.getTp().getValue());
+        return matcher.find() ? matcher.group() : DEFAULT_INTERFACE_NAME;
     }
 
     public IngressBwpFlow getIngressBwpFlow() {
