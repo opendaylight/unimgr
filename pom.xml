@@ -47,6 +47,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <id>models</id>
       <modules>
         <module>cisco-xrmodels</module>
+        <module>cisco-xrmodels-65</module>
       </modules>
       <activation><activeByDefault>true</activeByDefault></activation>
     </profile>
