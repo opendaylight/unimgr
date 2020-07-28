@@ -10,124 +10,29 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.2 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
-        <groupId>org.opendaylight.mdsal</groupId>
-        <artifactId>binding-parent</artifactId>
-        <version>5.0.10</version>
+        <groupId>org.opendaylight.odlparent</groupId>
+        <artifactId>odlparent-lite</artifactId>
+        <version>6.0.6</version>
         <relativePath/>
     </parent>
 
-    <properties>
-      <odlparent.checkstyle.enforce>true</odlparent.checkstyle.enforce>
-      <odlparent.spotbugs.enforce>true</odlparent.spotbugs.enforce>
-        <powermock.version>2.0.0-beta.5</powermock.version>
-        <mdsal.version>5.0.10</mdsal.version>
-        <netconf.version>1.8.1</netconf.version>
-    </properties>
-
-    <modelVersion>4.0.0</modelVersion>
     <groupId>org.opendaylight.unimgr</groupId>
     <artifactId>unimgr-cisco-xr-driver</artifactId>
     <version>0.6.0-SNAPSHOT</version>
-    <packaging>bundle</packaging>
+    <packaging>pom</packaging>
     <!-- <name> formatting is used by autorelease to parse and notify projects on
          build failure. Please do not modify this unless you have a good reason. -->
     <name>ODL :: unimgr :: ${project.artifactId}</name>
+    <modelVersion>4.0.0</modelVersion>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <maven.install.skip>true</maven.install.skip>
+    </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>unimgr-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>unimgr-impl</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- Cisco -->
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>cisco-xrmodels</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!-- dependencies to use AbstractConcurrentDataBrokerTest -->
-        <dependency>
-            <groupId>org.opendaylight.mdsal</groupId>
-            <artifactId>mdsal-binding-dom-adapter</artifactId>
-            <version>${mdsal.version}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.mdsal</groupId>
-            <artifactId>mdsal-binding-dom-adapter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.netconf</groupId>
-            <artifactId>netconf-topology</artifactId>
-            <version>${netconf.version}</version>
-        </dependency>
-
-        <!-- Testing Dependencies -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito2</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-support</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-reflect</artifactId>
-            <scope>test</scope>
-        </dependency>
-    <dependency>
-        <groupId>org.opendaylight.mdsal.binding.model.ietf</groupId>
-        <artifactId>rfc6991</artifactId>
-    </dependency>
-    </dependencies>
+    <modules>
+        <module>cisco-xr-driver-common</module>
+        <module>cisco-xr-driver-6.1</module>
+    </modules>
+    
 </project>
