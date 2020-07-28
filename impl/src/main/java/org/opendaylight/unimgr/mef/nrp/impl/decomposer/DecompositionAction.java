@@ -211,7 +211,9 @@ class DecompositionAction {
     private Stream<Vertex> nodeToGraph(Node node) {
         Uuid nodeUuid = node.getUuid();
         String activationDriverId = node.augmentation(NodeAdiAugmentation.class).getActivationDriverId();
-
+       
+        System.out.println("nodeUuid = " + nodeUuid.toString());
+        System.out.println("\n activationDriverId = " + activationDriverId);
 
         return node.getOwnedNodeEdgePoint().stream()
             .filter(ep -> ep.getLinkPortDirection() != null
@@ -224,6 +226,7 @@ class DecompositionAction {
                         .collect(Collectors.toList());
                 }
 
+                System.out.println("\n sips = " + sips.toString());
                 if (sips.isEmpty()) {
                     return  new Vertex(nodeUuid, nep.getUuid(), null, nep.getLinkPortDirection(),activationDriverId);
                 }
