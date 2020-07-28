@@ -1,4 +1,4 @@
-module Cisco-IOS-XR-l2vpn-cfg {
+module Cisco-IOS-XR-l2vpn-cfg-2015 {
 
   /*** NAMESPACE / PREFIX DEFINITION ***/
 
@@ -15,7 +15,7 @@ module Cisco-IOS-XR-l2vpn-cfg {
 
   import Cisco-IOS-XR-types { prefix "xr"; }
 
-  import Cisco-IOS-XR-ifmgr-cfg { prefix "a1"; }
+  import Cisco-IOS-XR-ifmgr-cfg-2015 { prefix "a1"; }
 
   import Cisco-IOS-XR-snmp-agent-cfg { prefix "a2"; }
 
