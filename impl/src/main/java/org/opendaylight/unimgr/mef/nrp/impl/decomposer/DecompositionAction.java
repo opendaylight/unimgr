@@ -211,8 +211,7 @@ class DecompositionAction {
     private Stream<Vertex> nodeToGraph(Node node) {
         Uuid nodeUuid = node.getUuid();
         String activationDriverId = node.augmentation(NodeAdiAugmentation.class).getActivationDriverId();
-
-
+               
         return node.getOwnedNodeEdgePoint().stream()
             .filter(ep -> ep.getLinkPortDirection() != null
                     && ep.getLinkPortDirection() != PortDirection.UNIDENTIFIEDORUNKNOWN)
