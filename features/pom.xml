@@ -22,7 +22,7 @@
     <module>features4-unimgr</module>
     <module>odl-unimgr</module>
     <module>odl-unimgr-rest</module>
-    <module>odl-unimgr-cisco-xr-driver</module>
+    <module>odl-unimgr-cisco-xr-driver-6.5</module>
     <module>odl-unimgr-template-driver</module>
     <module>odl-unimgr-legato-api</module>
   </modules>
