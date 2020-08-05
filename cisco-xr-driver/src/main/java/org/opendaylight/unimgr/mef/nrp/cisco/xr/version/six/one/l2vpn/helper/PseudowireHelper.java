@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper;
+package org.opendaylight.unimgr.mef.nrp.cisco.xr.version.six.one.l2vpn.helper;
 
 import java.util.Collections;
 import java.util.LinkedList;

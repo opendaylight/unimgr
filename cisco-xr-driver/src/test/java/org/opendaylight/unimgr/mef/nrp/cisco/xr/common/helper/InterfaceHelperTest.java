@@ -16,7 +16,7 @@ import java.util.Optional;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
-import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.MtuUtils;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.MtuUtils2;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.Mtus;
@@ -83,7 +83,7 @@ public class InterfaceHelperTest {
         InterfaceHelper interfaceHelper = new InterfaceHelper();
 
         //when
-        interfaceHelper.addInterface(interfaceName, mtus, setL2Transport);
+        //interfaceHelper.addInterface(interfaceName, mtus, setL2Transport);
         InterfaceConfigurations actual = interfaceHelper.build();
 
         //then
@@ -108,13 +108,13 @@ public class InterfaceHelperTest {
         CiscoIosXrString owner = new CiscoIosXrString("testAddCeps");
         long mtuValue = 1522L;
         InterfaceName interfaceName = new InterfaceName(interfaceNameValue);
-        Optional<Mtus> mtus = Optional.of(MtuUtils.generateMtus(mtuValue, owner));
+        Optional<Mtus> mtus = Optional.of(MtuUtils2.generateMtus(mtuValue, owner));
         boolean setL2Transport = true;
 
         InterfaceHelper interfaceHelper = new InterfaceHelper();
 
         //when
-        interfaceHelper.addInterface(interfaceName, mtus, setL2Transport);
+        //interfaceHelper.addInterface(interfaceName, mtus, setL2Transport);
         InterfaceConfigurations actual = interfaceHelper.build();
 
         //then
@@ -159,8 +159,8 @@ public class InterfaceHelperTest {
         InterfaceHelper interfaceHelper = new InterfaceHelper();
 
         //when
-        interfaceHelper.addInterface(interfaceName1, mtus, setL2Transport);
-        interfaceHelper.addInterface(interfaceName2, mtus, setL2Transport);
+        //interfaceHelper.addInterface(interfaceName1, mtus, setL2Transport);
+        //interfaceHelper.addInterface(interfaceName2, mtus, setL2Transport);
         InterfaceConfigurations actual = interfaceHelper.build();
 
         //then

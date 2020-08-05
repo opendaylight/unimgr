@@ -21,19 +21,19 @@ import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.FixedServiceNaming;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.BandwidthProfileHelper;
-import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.AttachmentCircuitHelper;
+/*import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.AttachmentCircuitHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.L2vpnHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.PseudowireHelper;
-import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.XConnectHelper;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.XConnectHelper;*/
+//import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.PolicyManager;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.L2vpn;
+/*import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.L2vpn;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.XconnectGroups;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.XconnectGroup;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.XconnectGroup;*/
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.P2pXconnect;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.AttachmentCircuits;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.Pseudowires;
+//import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.AttachmentCircuits;
+//import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.xconnect.groups.xconnect.group.p2p.xconnects.p2p.xconnect.Pseudowires;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -59,14 +59,14 @@ public class L2vpnLocalConnectActivator extends AbstractL2vpnActivator {
                 .build();
     }
 
-    @Override
+   /* @Override
     protected InterfaceConfigurations activateInterface(ServicePort port, ServicePort neighbor,
             long mtu, boolean isExclusive) {
 
         return new InterfaceActivator().activateLocalInterface(port, neighbor, mtu, isExclusive);
-    }
+    }*/
 
-
+/*
     @Override
     public InterfaceConfigurations createSubInterface(ServicePort port, ServicePort neighbor,
             long mtu) {
@@ -82,7 +82,15 @@ public class L2vpnLocalConnectActivator extends AbstractL2vpnActivator {
 
         new TransactionActivator().activateSubInterface(nodeName, subInterfaceConfigurations, mountService2);
     }
+*/
 
+    @Override
+    protected void createSubInterface(ServicePort port, MountPointService mountService2, long mtu)
+            throws InterruptedException, ExecutionException {
+
+        new TransactionActivator().activateSubInterface(port, mountService2, mtu);
+    }
+/*
     @Override
     protected Pseudowires activatePseudowire(ServicePort neighbor) {
         return new PseudowireHelper().build();
@@ -112,7 +120,7 @@ public class L2vpnLocalConnectActivator extends AbstractL2vpnActivator {
     protected L2vpn activateL2Vpn(XconnectGroups xconnectGroups) {
         return L2vpnHelper.build(xconnectGroups);
     }
-
+*/
     @Override
     protected String getInnerName(String serviceId) {
         return namingProvider.replaceForbidenCharacters(serviceId);
@@ -123,17 +131,26 @@ public class L2vpnLocalConnectActivator extends AbstractL2vpnActivator {
         return namingProvider.replaceForbidenCharacters(serviceId);
     }
 
+	/*
+	 * @Override protected void doActivate( String node, InterfaceConfigurations
+	 * interfaceConfigurations, L2vpn l2vpn, MountPointService mountService2,
+	 * Optional<PolicyManager> qosConfig) throws InterruptedException,
+	 * ExecutionException {
+	 * 
+	 * new TransactionActivator().activate(node, interfaceConfigurations, l2vpn,
+	 * mountService2, qosConfig); }
+	 */
+
     @Override
-    protected void doActivate(
-                           String node,
-                           InterfaceConfigurations interfaceConfigurations,
-                           L2vpn l2vpn,
-                           MountPointService mountService2,
-                           Optional<PolicyManager> qosConfig) throws InterruptedException, ExecutionException {
+    protected void doActivate(ServicePort port, MountPointService mountService2,
+            Optional<PolicyManager> qosConfig, long mtu, boolean isExclusive, String outerName,
+            String innerName, ServicePort neighbor)
+            throws InterruptedException, ExecutionException {
 
-        new TransactionActivator().activate(node, interfaceConfigurations, l2vpn, mountService2, qosConfig);
+        new TransactionActivator().activate(port, mountService2, qosConfig, mtu, isExclusive,
+                outerName, innerName, neighbor, dataBroker);
     }
-
+    
     @Override
     protected InstanceIdentifier<InterfaceConfiguration> deactivateInterface(ServicePort port, boolean isExclusive) {
         return new InterfaceActivator().deactivate(port, isExclusive);
