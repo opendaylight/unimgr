@@ -97,23 +97,23 @@ public class L2vpnBridgeDomainActivatorTest {
         assertEquals("GigabitEthernet0/0/0/1", bdAttachmentCircuit.getName().getValue());
     }
 
-    @Test
-    public void activateInterfaceTest() {
+	/*
+	 * @Test public void activateInterfaceTest() {
+	 * 
+	 * InterfaceConfigurations interfaceConfigruaton =
+	 * l2vpnBridgeDomainActivator.activateInterface(port, neighbor, 2000, false);
+	 * interfaceConfigruaton.implementedInterface(); List<InterfaceConfiguration>
+	 * list = interfaceConfigruaton.getInterfaceConfiguration();
+	 * InterfaceConfiguration interfaceConfiguration = list.get(0);
+	 * assertEquals("act", interfaceConfiguration.getActive().getValue()); }
+	 */
 
-        InterfaceConfigurations interfaceConfigruaton =
-                l2vpnBridgeDomainActivator.activateInterface(port, neighbor, 2000, false);
-        interfaceConfigruaton.implementedInterface();
-        List<InterfaceConfiguration> list = interfaceConfigruaton.getInterfaceConfiguration();
-        InterfaceConfiguration interfaceConfiguration = list.get(0);
-        assertEquals("act", interfaceConfiguration.getActive().getValue());
-    }
-
-    @Test
+    /*@Test
     public void createSubInterfaceTest() {
         port.setVlanId(301L);
         InterfaceConfigurations interfaceConfiguration =
                 l2vpnBridgeDomainActivator.createSubInterface(port, neighbor, 2000);
         Assert.assertNotNull(interfaceConfiguration);
-    }
+    }*/
 
 }

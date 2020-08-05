@@ -11,6 +11,7 @@ import static org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort.toServ
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import org.opendaylight.mdsal.binding.api.DataBroker;
@@ -89,7 +90,7 @@ public abstract class AbstractL2vpnBridgeDomainActivator implements ResourceActi
         }
 
         java.util.Optional<PolicyManager> qosConfig = activateQos(innerOuterName, port);
-        InterfaceConfigurations interfaceConfigurations = activateInterface(port, neighbor, MTU, isExclusive);
+        //InterfaceConfigurations interfaceConfigurations = activateInterface(port, neighbor, MTU, isExclusive);
         BdPseudowires bdPseudowires = activateBdPseudowire(neighbor);
         BridgeDomainGroups bridgeDomainGroups = activateBridgeDomain(innerOuterName,
                                                                     innerOuterName,
@@ -101,17 +102,20 @@ public abstract class AbstractL2vpnBridgeDomainActivator implements ResourceActi
 
         // create sub interface for tag based service
         if (!isExclusive) {
-            InterfaceConfigurations subInterfaceConfigurations = createSubInterface(port, neighbor, MTU);
-            createSubInterface(port.getNode().getValue(), subInterfaceConfigurations, mountService);
+            //InterfaceConfigurations subInterfaceConfigurations = createSubInterface(port, neighbor, MTU);
+            //createSubInterface(port.getNode().getValue(), subInterfaceConfigurations, mountService);
+        	createSubInterface(port, mountService, MTU);
         }
 
         if (serviceType != null && serviceType.getName().equals(ServiceType.ROOTEDMULTIPOINTCONNECTIVITY.getName())) {
             if (!(portRole != null && portRole.equals(PortRole.LEAF.getName())
                     && neighborRole != null && neighborRole.equals(PortRole.LEAF.getName()))) {
-                doActivate(port.getNode().getValue(), interfaceConfigurations, l2vpn, mountService, qosConfig);
+                //doActivate(port.getNode().getValue(), interfaceConfigurations, l2vpn, mountService, qosConfig);
+            	doActivate(port, l2vpn, mountService, qosConfig, MTU, isExclusive);
             }
         } else {
-            doActivate(port.getNode().getValue(), interfaceConfigurations, l2vpn, mountService, qosConfig);
+           //doActivate(port.getNode().getValue(), interfaceConfigurations, l2vpn, mountService, qosConfig);
+        	doActivate(port, l2vpn, mountService, qosConfig, MTU, isExclusive);
         }
     }
 
@@ -164,19 +168,23 @@ public abstract class AbstractL2vpnBridgeDomainActivator implements ResourceActi
 
     protected abstract String getOuterName(String serviceId);
 
-    protected abstract InterfaceConfigurations activateInterface(
-                                                             ServicePort portA,
-                                                             ServicePort portZ,
-                                                             long mtu,
-                                                             boolean isExclusive);
+//    protected abstract InterfaceConfigurations activateInterface(
+//                                                             ServicePort portA,
+//                                                             ServicePort portZ,
+//                                                             long mtu,
+//                                                             boolean isExclusive);
 
-    protected abstract void createSubInterface(
+    /*protected abstract void createSubInterface(
                                              String value,
                                              InterfaceConfigurations subInterfaceConfigurations,
                                              MountPointService mountService2)
             throws ResourceActivatorException, InterruptedException, ExecutionException;
 
     protected abstract InterfaceConfigurations createSubInterface(ServicePort portA, ServicePort portZ, long mtu);
+*/
+
+    protected abstract void createSubInterface(ServicePort port, MountPointService mountService2, long mtu)
+			throws InterruptedException, ExecutionException;
 
     protected abstract BdPseudowires activateBdPseudowire(ServicePort neighbor);
 
@@ -190,14 +198,20 @@ public abstract class AbstractL2vpnBridgeDomainActivator implements ResourceActi
 
     protected abstract L2vpn activateL2Vpn(BridgeDomainGroups bridgeDomainGroups);
 
-    protected abstract void doActivate(
+    /*protected abstract void doActivate(
                                     String node,
                                     InterfaceConfigurations interfaceConfigurations,
                                     L2vpn l2vpn,
                                     MountPointService mountService2,
                                     java.util.Optional<PolicyManager> qosConfig)
                                     throws ResourceActivatorException, InterruptedException, ExecutionException;
-
+    */
+    
+    protected abstract void doActivate(
+    		ServicePort port, L2vpn l2vpn, MountPointService mountService2,
+			Optional<PolicyManager> qosConfig, long mtu, boolean isExclusive)
+            throws ResourceActivatorException, InterruptedException, ExecutionException;
+    
     protected abstract InstanceIdentifier<InterfaceConfiguration> deactivateInterface(
                                                                                   ServicePort port,
                                                                                   boolean isExclusive);
