@@ -10,7 +10,7 @@ package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator;
 import java.util.Optional;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.InterfaceHelper;
-import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.MtuUtils;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.MtuUtils2;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceActive;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
@@ -21,15 +21,15 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class InterfaceActivator {
 
-    protected InterfaceConfigurations activate(ServicePort port, ServicePort neighbor, long mtu, boolean isExclusive) {
-        String interfraceName = port.getInterfaceName();
-        Mtus mtus = MtuUtils.generateMtus(mtu, new CiscoIosXrString(interfraceName));
-
-        // Enable L2Trasportation for port basesd service
-        boolean setL2Transport = (isExclusive) ? true : false;
-
-        return new InterfaceHelper().addInterface(port, Optional.of(mtus), setL2Transport).build();
-    }
+//    protected InterfaceConfigurations activate(ServicePort port, ServicePort neighbor, long mtu, boolean isExclusive) {
+//        String interfraceName = port.getInterfaceName();
+//        Mtus mtus = MtuUtils.generateMtus(mtu, new CiscoIosXrString(interfraceName));
+//
+//        // Enable L2Trasportation for port basesd service
+//        boolean setL2Transport = (isExclusive) ? true : false;
+//
+//        return new InterfaceHelper().addInterface(port, Optional.of(mtus), setL2Transport).build();
+//    }
 
     protected InstanceIdentifier<InterfaceConfiguration> deactivate(ServicePort port, boolean isExclusive) {
 
@@ -42,14 +42,15 @@ public class InterfaceActivator {
                                         : InterfaceHelper.getSubInterfaceName(port)))
                 .build();
     }
+//
+//    protected InterfaceConfigurations buildSubInterface(ServicePort port, ServicePort neighbor, long mtu) {
+//        String mtuOwnerName = "sub_vlan";
+//        Mtus mtus = MtuUtils.generateMtus(mtu, new CiscoIosXrString(mtuOwnerName));
+//
+//        return new InterfaceHelper().addSubInterface(port, Optional.of(mtus)).build();
+//    }
 
-    protected InterfaceConfigurations buildSubInterface(ServicePort port, ServicePort neighbor, long mtu) {
-        String mtuOwnerName = "sub_vlan";
-        Mtus mtus = MtuUtils.generateMtus(mtu, new CiscoIosXrString(mtuOwnerName));
-
-        return new InterfaceHelper().addSubInterface(port, Optional.of(mtus)).build();
-    }
-
+    /*
     protected InterfaceConfigurations activateLocalInterface(
                                                             ServicePort port,
                                                             ServicePort neighbor,
@@ -60,4 +61,5 @@ public class InterfaceActivator {
         return new InterfaceHelper().addInterface(port, Optional.empty(), setL2Transport)
                 .addInterface(neighbor, Optional.empty(), setL2Transport).build();
     }
+    */
 }
