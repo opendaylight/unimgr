@@ -5,30 +5,28 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util;
+package org.opendaylight.unimgr.mef.nrp.cisco.xr.version.six.five;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.Mtus;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.MtusBuilder;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.mtus.Mtu;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.mtus.MtuBuilder;
+
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907._interface.configurations._interface.configuration.Mtus;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907._interface.configurations._interface.configuration.MtusBuilder;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907._interface.configurations._interface.configuration.mtus.Mtu;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907._interface.configurations._interface.configuration.mtus.MtuBuilder;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.CiscoIosXrString;
 import org.opendaylight.yangtools.yang.common.Uint32;
 
+public class MtuHelper {
 
 /*
  * Tools designated to support MTU-related configuration objects processing
  *
  * @author krzysztof.bijakowski@amartus.com
  */
-public final class MtuUtils {
 
-    private MtuUtils() {
-    }
-
-    public static Mtus generateMtus(List<Long> mtuValues, CiscoIosXrString owner) {
+    private static Mtus generateMtus(List<Long> mtuValues, CiscoIosXrString owner) {
         List<Mtu> mtus = new LinkedList<>();
 
         for (Long mtuValue : mtuValues) {
