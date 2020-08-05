@@ -32,11 +32,6 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.unimgr</groupId>
-      <artifactId>cisco-xrmodels</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.unimgr</groupId>
       <artifactId>unimgr-cisco-xr-driver</artifactId>
       <version>${project.version}</version>
     </dependency>

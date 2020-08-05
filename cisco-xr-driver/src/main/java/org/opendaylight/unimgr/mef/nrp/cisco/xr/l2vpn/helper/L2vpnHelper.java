@@ -7,6 +7,17 @@
  */
 package org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper;
 
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.InterfaceHelper;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.version.six.five.InterfaceRev170907Helper;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.version.six.five.L2vpnRev170626Helper;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.version.six.one.InterfaceRev150730Helper;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.version.six.one.L2vpnRev151109Helper;
+/*
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.PolicyManager;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.L2vpn;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.L2vpnBuilder;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.Database;
@@ -14,6 +25,8 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.BridgeDomainGroups;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.XconnectGroups;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+*/
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 
 
 /*
@@ -26,27 +39,51 @@ public final class L2vpnHelper {
     private L2vpnHelper() {
     }
 
-    public static InstanceIdentifier<L2vpn> getL2vpnId() {
-        return InstanceIdentifier.builder(L2vpn.class).build();
+	/*
+	 * public static InstanceIdentifier<L2vpn> getL2vpnId() { return
+	 * InstanceIdentifier.builder(L2vpn.class).build(); }
+	 */
+
+//    public static L2vpn build(XconnectGroups xconnectGroups) {
+//        Database database = new DatabaseBuilder()
+//            .setXconnectGroups(xconnectGroups)
+//            .build();
+//
+//        return new L2vpnBuilder()
+//            .setDatabase(database)
+//            .build();
+//    }
+//
+//    public static L2vpn build(BridgeDomainGroups bridgeDomainGroups) {
+//        Database database = new DatabaseBuilder()
+//            .setBridgeDomainGroups(bridgeDomainGroups)
+//            .build();
+//
+//        return new L2vpnBuilder()
+//            .setDatabase(database)
+//            .build();
+//    }
+
+    
+    public static void setL2vpnConfiguration(ServicePort port, String outerName, String innerName,
+            ServicePort neighbor, boolean isExclusive, DataBroker dataBroker,
+            ServiceType serviceType, WriteTransaction transaction) {
+        if (InterfaceHelper.getNodeInterfaceIdentifierList().containsKey(port.getNode().getValue())) {
+             String identifierPath = InterfaceHelper.getNodeInterfaceIdentifierList().get(port.getNode().getValue());
+           //  System.out.println(port.getNode().getValue()  + " >>" + identifierPath);
+
+     		if(identifierPath.contains(InterfaceRev150730Helper.getInterfaceConfigurationsId().getTargetType().getPackageName())) { 
+     		//	System.out.println("here" );
+     			transaction.merge(LogicalDatastoreType.CONFIGURATION, L2vpnRev151109Helper.getL2vpnId(),
+ 	    				L2vpnRev151109Helper.addL2vpn(port, outerName, innerName, neighbor, isExclusive, dataBroker, serviceType));
+            }
+
+     		if(identifierPath.contains(InterfaceRev170907Helper.getInterfaceConfigurationsId().getTargetType().getPackageName())) { 
+     		//	System.out.println("here 2" );
+     			transaction.merge(LogicalDatastoreType.CONFIGURATION, L2vpnRev170626Helper.getL2vpnId(),
+ 	    				L2vpnRev170626Helper.addL2vpn(port, outerName, innerName, neighbor, isExclusive, dataBroker, serviceType));
+            }
+        }
     }
 
-    public static L2vpn build(XconnectGroups xconnectGroups) {
-        Database database = new DatabaseBuilder()
-            .setXconnectGroups(xconnectGroups)
-            .build();
-
-        return new L2vpnBuilder()
-            .setDatabase(database)
-            .build();
-    }
-
-    public static L2vpn build(BridgeDomainGroups bridgeDomainGroups) {
-        Database database = new DatabaseBuilder()
-            .setBridgeDomainGroups(bridgeDomainGroups)
-            .build();
-
-        return new L2vpnBuilder()
-            .setDatabase(database)
-            .build();
-    }
 }
