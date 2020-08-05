@@ -51,9 +51,9 @@ import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.XrCapabilitiesServic
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.driver.XrDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
+/*import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfigurationKey;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfigurationKey;*/
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.LayerProtocolName;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.PortDirection;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.PortRole;
@@ -209,7 +209,10 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
 
         final ReadWriteTransaction topoTx = dataBroker.newReadWriteTransaction();
         NrpDao dao = new NrpDao(topoTx);
-        toTp(added).forEach(nep -> {
+        
+        
+        //List<OwnedNodeEdgePoint> ownedNodeEdgePointList = InterfaceHelper.toTp(added, mountService, mountIds);
+        InterfaceHelper.toTp(added, mountService, mountIds).forEach(nep -> {
 
             ServiceInterfacePoint sip = new ServiceInterfacePointBuilder()
                     .setUuid(new Uuid("sip:" + nep.getUuid().getValue()))
@@ -237,7 +240,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
             }
         }, MoreExecutors.directExecutor());
     }
-
+ /*
     // simplyfied version of selecting
     private Pattern gbPort = Pattern.compile(".*(GigabitEthernet|TenGigE)[^-]+$");
 
@@ -292,7 +295,8 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
             return Stream.empty();
         }).collect(Collectors.toList());
     }
-
+    
+    
     private Stream<InterfaceConfiguration> ports(ReadTransaction tx) throws InterruptedException, ExecutionException {
         Optional<InterfaceConfigurations> interfaces = tx.read(
                                                             LogicalDatastoreType.OPERATIONAL,
@@ -303,6 +307,7 @@ public class TopologyDataHandler implements DataTreeChangeListener<Node> {
         }
 
         return Stream.empty();
-    }
+    }*/
+
 
 }
