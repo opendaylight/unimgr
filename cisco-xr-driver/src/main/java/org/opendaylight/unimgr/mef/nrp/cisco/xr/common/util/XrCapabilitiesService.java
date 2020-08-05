@@ -57,7 +57,7 @@ public class XrCapabilitiesService extends CapabilitiesService {
                     .getAvailableCapabilities()
                     .getAvailableCapability()
                     .stream()
-                    .anyMatch(capability -> capability.getCapability().equals(netconfCapability));
+                    .anyMatch(capability -> capability.getCapability().startsWith(netconfCapability));
         }
     }
 }
