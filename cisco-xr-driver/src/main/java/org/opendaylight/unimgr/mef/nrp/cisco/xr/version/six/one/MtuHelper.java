@@ -1,15 +1,16 @@
 /*
- * Copyright (c) 2016 Cisco Systems Inc and others.  All rights reserved.
+ * Copyright (c) 2020 Xoriant Corporation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util;
+package org.opendaylight.unimgr.mef.nrp.cisco.xr.version.six.one;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.Mtus;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.MtusBuilder;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.mtus.Mtu;
@@ -17,18 +18,8 @@ import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cf
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.CiscoIosXrString;
 import org.opendaylight.yangtools.yang.common.Uint32;
 
-
-/*
- * Tools designated to support MTU-related configuration objects processing
- *
- * @author krzysztof.bijakowski@amartus.com
- */
-public final class MtuUtils {
-
-    private MtuUtils() {
-    }
-
-    public static Mtus generateMtus(List<Long> mtuValues, CiscoIosXrString owner) {
+public class MtuHelper {
+	private static Mtus generateMtus(List<Long> mtuValues, CiscoIosXrString owner) {
         List<Mtu> mtus = new LinkedList<>();
 
         for (Long mtuValue : mtuValues) {

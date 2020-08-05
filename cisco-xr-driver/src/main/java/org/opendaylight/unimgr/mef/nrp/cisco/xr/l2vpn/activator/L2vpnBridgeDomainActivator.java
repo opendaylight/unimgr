@@ -65,14 +65,14 @@ public class L2vpnBridgeDomainActivator extends AbstractL2vpnBridgeDomainActivat
         return namingProvider.replaceForbidenCharacters(serviceId);
     }
 
-    @Override
-    protected InterfaceConfigurations activateInterface(ServicePort portA, ServicePort portZ,
-            long mtu, boolean isExclusive) {
+//    @Override
+//    protected InterfaceConfigurations activateInterface(ServicePort portA, ServicePort portZ,
+//            long mtu, boolean isExclusive) {
+//
+//        return new InterfaceActivator().activate(portA, portZ, mtu, isExclusive);
+//    }
 
-        return new InterfaceActivator().activate(portA, portZ, mtu, isExclusive);
-    }
-
-    @Override
+    /*@Override
     protected void createSubInterface(String nodeName, InterfaceConfigurations subInterfaceConfigurations,
              MountPointService mountService2) throws InterruptedException, ExecutionException {
         new TransactionActivator().activateSubInterface(nodeName, subInterfaceConfigurations, mountService2);
@@ -83,6 +83,14 @@ public class L2vpnBridgeDomainActivator extends AbstractL2vpnBridgeDomainActivat
             long mtu) {
 
         return new InterfaceActivator().buildSubInterface(portA, portZ, mtu);
+    }
+    */
+
+    @Override
+    protected void createSubInterface(ServicePort port, MountPointService mountService2, long mtu)
+            throws InterruptedException, ExecutionException {
+
+        new TransactionActivator().activateSubInterface(port, mountService2, mtu);
     }
 
     @Override
@@ -112,12 +120,21 @@ public class L2vpnBridgeDomainActivator extends AbstractL2vpnBridgeDomainActivat
         return L2vpnHelper.build(bridgeDomainGroups);
     }
 
+	/*
+	 * @Override protected void doActivate(String node, InterfaceConfigurations
+	 * interfaceConfigurations, L2vpn l2vpn, MountPointService mountService2,
+	 * Optional<PolicyManager> qosConfig) throws InterruptedException,
+	 * ExecutionException {
+	 * 
+	 * new TransactionActivator().activate(node, interfaceConfigurations, l2vpn,
+	 * mountService2, qosConfig); }
+	 */
+    
     @Override
-    protected void doActivate(String node, InterfaceConfigurations interfaceConfigurations,
-            L2vpn l2vpn, MountPointService mountService2, Optional<PolicyManager> qosConfig)
+    protected void doActivate(ServicePort port, L2vpn l2vpn, MountPointService mountService2, Optional<PolicyManager> qosConfig, long mtu, boolean isExclusive)
                     throws InterruptedException, ExecutionException {
 
-        new TransactionActivator().activate(node, interfaceConfigurations, l2vpn, mountService2, qosConfig);
+        new TransactionActivator().activate(port, l2vpn, mountService2, qosConfig, mtu, isExclusive);
     }
 
     @Override
