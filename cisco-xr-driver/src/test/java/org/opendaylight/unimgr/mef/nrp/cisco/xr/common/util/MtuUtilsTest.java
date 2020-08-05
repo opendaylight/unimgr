@@ -32,7 +32,7 @@ public class MtuUtilsTest {
         CiscoIosXrString owner = new CiscoIosXrString("testAddCeps");
 
         //when
-        Mtus actual = MtuUtils.generateMtus(mtuValue, owner);
+        Mtus actual = MtuUtils2.generateMtus(mtuValue, owner);
 
         //then
         assertNotNull(actual);
@@ -55,7 +55,7 @@ public class MtuUtilsTest {
         CiscoIosXrString owner = new CiscoIosXrString("testAddCeps");
 
         //when
-        Mtus actual = MtuUtils.generateMtus(mtuValues, owner);
+        Mtus actual = MtuUtils2.generateMtus(mtuValues, owner);
 
         //then
         assertNotNull(actual);
