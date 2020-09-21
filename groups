@@ -2,4 +2,3 @@
 #
 5e1fdd182a9cf606ab0abcc68616bb63677ee6e5                              	saml/odl-gerrit-unimgr-committers
 c9025ab9ddc1e3171919e085449f22c54f8f7b54                              	GitHub Replication
-ldap:cn=odl-gerrit-unimgr-committers,ou=Groups,dc=freestandards,dc=org	ldap/odl-gerrit-unimgr-committers
