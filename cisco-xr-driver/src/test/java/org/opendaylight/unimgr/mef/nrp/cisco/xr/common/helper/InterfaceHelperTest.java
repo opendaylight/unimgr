@@ -83,7 +83,7 @@ public class InterfaceHelperTest {
         InterfaceHelper interfaceHelper = new InterfaceHelper();
 
         //when
-        interfaceHelper.addInterface(interfaceName, mtus, setL2Transport);
+        //interfaceHelper.addInterface(interfaceName, mtus, setL2Transport);
         InterfaceConfigurations actual = interfaceHelper.build();
 
         //then
@@ -114,7 +114,7 @@ public class InterfaceHelperTest {
         InterfaceHelper interfaceHelper = new InterfaceHelper();
 
         //when
-        interfaceHelper.addInterface(interfaceName, mtus, setL2Transport);
+        //interfaceHelper.addInterface(interfaceName, mtus, setL2Transport);
         InterfaceConfigurations actual = interfaceHelper.build();
 
         //then
@@ -159,8 +159,8 @@ public class InterfaceHelperTest {
         InterfaceHelper interfaceHelper = new InterfaceHelper();
 
         //when
-        interfaceHelper.addInterface(interfaceName1, mtus, setL2Transport);
-        interfaceHelper.addInterface(interfaceName2, mtus, setL2Transport);
+        //interfaceHelper.addInterface(interfaceName1, mtus, setL2Transport);
+        //interfaceHelper.addInterface(interfaceName2, mtus, setL2Transport);
         InterfaceConfigurations actual = interfaceHelper.build();
 
         //then

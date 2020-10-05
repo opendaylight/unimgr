@@ -47,6 +47,16 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     </build>
 
     <dependencies>
+      <dependency>
+          <groupId>org.opendaylight.unimgr</groupId>
+           <artifactId>unimgr-cisco-xr-models-6.1</artifactId>
+           <version>0.6.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.unimgr</groupId>
+           <artifactId>unimgr-cisco-xr-models-6.5</artifactId>
+           <version>0.6.0-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>unimgr-impl</artifactId>
@@ -61,12 +71,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
             <scope>test</scope>
         </dependency>
 
-        <!-- Cisco -->
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>cisco-xrmodels</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+       
 
         <!-- dependencies to use AbstractConcurrentDataBrokerTest -->
         <dependency>
