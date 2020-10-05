@@ -20,20 +20,25 @@ import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.FixedServiceNaming;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.BandwidthProfileHelper;
-import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.BridgeDomainAttachmentCircuitHelper;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.PolicyManager;
+/*import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.BridgeDomainAttachmentCircuitHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.BridgeDomainHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.BridgeDomainPseudowireHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.L2vpnHelper;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.PolicyManager;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.L2vpn;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;*/
+//import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
+//import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev161215.PolicyManager;
+/*import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.L2vpn;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.BridgeDomainGroups;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.bridge.domain.groups.BridgeDomainGroup;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.bridge.domain.groups.bridge.domain.group.bridge.domains.BridgeDomain;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.bridge.domain.groups.BridgeDomainGroup;*/
+//import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.bridge.domain.groups.bridge.domain.group.bridge.domains.BridgeDomain;
+/*
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.bridge.domain.groups.bridge.domain.group.bridge.domains.bridge.domain.BdAttachmentCircuits;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.bridge.domain.groups.bridge.domain.group.bridge.domains.bridge.domain.BdPseudowires;
+*/
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;
+import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.connectivity.rev180307.ServiceType;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /*
@@ -68,14 +73,15 @@ public class L2vpnBridgeDomainLocalActivator extends AbstractL2vpnBridgeDomainAc
         return namingProvider.replaceForbidenCharacters(serviceId);
     }
 
+    /*
     @Override
     protected InterfaceConfigurations activateInterface(ServicePort portA, ServicePort portZ,
             long mtu, boolean isExclusive) {
 
         return new InterfaceActivator().activateLocalInterface(portA, portZ, mtu, isExclusive);
-    }
+    }*/
 
-    @Override
+/*    @Override
     protected void createSubInterface(String nodeName,
             InterfaceConfigurations subInterfaceConfigurations, MountPointService mountService2)
                     throws InterruptedException, ExecutionException {
@@ -90,7 +96,15 @@ public class L2vpnBridgeDomainLocalActivator extends AbstractL2vpnBridgeDomainAc
 
         return new InterfaceActivator().buildSubInterface(portA, portZ, mtu);
     }
+*/
 
+    @Override
+    protected void createSubInterface(ServicePort port, MountPointService mountService2, long mtu)
+            throws InterruptedException, ExecutionException {
+
+        new TransactionActivator().activateSubInterface(port, mountService2, mtu);
+    }
+/*
     @Override
     protected BdPseudowires activateBdPseudowire(ServicePort neighbor) {
 
@@ -117,16 +131,27 @@ public class L2vpnBridgeDomainLocalActivator extends AbstractL2vpnBridgeDomainAc
 
         return L2vpnHelper.build(bridgeDomainGroups);
     }
+*/
 
-    @Override
+    /*@Override
     protected void doActivate(String node, InterfaceConfigurations interfaceConfigurations,
             L2vpn l2vpn, MountPointService mountService2, Optional<PolicyManager> qosConfig)
                     throws InterruptedException, ExecutionException {
 
         new TransactionActivator().activate(node, interfaceConfigurations, l2vpn, mountService,
                 qosConfig);
-    }
+    }*/
 
+    @Override
+    protected void doActivate(ServicePort port, MountPointService mountService2,
+            Optional<PolicyManager> qosConfig, long mtu, boolean isExclusive,
+            String outerName, String innerName, ServicePort neighbor, ServiceType serviceType)
+                    throws InterruptedException, ExecutionException {
+
+        new TransactionActivator().activate(port, mountService, qosConfig, mtu, isExclusive,
+                outerName, innerName, neighbor, dataBroker, serviceType);
+    }
+    
     @Override
     protected InstanceIdentifier<InterfaceConfiguration> deactivateInterface(ServicePort port,
             boolean isExclusive) {
@@ -135,21 +160,28 @@ public class L2vpnBridgeDomainLocalActivator extends AbstractL2vpnBridgeDomainAc
     }
 
     @Override
-    protected void doDeactivate(ServicePort port, InstanceIdentifier<BridgeDomain> bridgeDomainId,
-            InstanceIdentifier<InterfaceConfiguration> interfaceConfigurationId,
-            boolean isExclusive, EndPoint endPoint, List<String> dvls2, List<Uuid> inls2)
+    protected void doDeactivate(ServicePort port, String serviceId,
+           boolean isExclusive, EndPoint endPoint, List<String> dvls2, List<Uuid> inls2)
                     throws InterruptedException, ExecutionException {
 
-        new TransactionActivator().deactivate(
+        new TransactionActivator().deactivateBridgeDomain(
                                             port,
-                                            bridgeDomainId,
-                                            interfaceConfigurationId,
+                                            serviceId,
                                             isExclusive,
                                             endPoint,
                                             mountService,
                                             dvls2,
                                             inls2);
     }
-
-
+/*
+ * 
+ * eactivateBridgeDomain(ServicePort port, String serviceId, boolean isExclusive,
+            EndPoint endpoint, MountPointService mountService, List<String> dvls, List<Uuid> inls)
+ * ServicePort port,
+            String serviceId,
+            boolean isExclusive,
+            EndPoint endPoint,
+            List<String> dvls2,
+            List<Uuid> inls2)
+ */
 }

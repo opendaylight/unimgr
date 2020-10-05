@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (c) 2015 Cisco Systems, Inc. All rights reserved.
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.2 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <groupId>org.opendaylight.odlparent</groupId>
+        <artifactId>odlparent-lite</artifactId>
+        <version>6.0.6</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>org.opendaylight.unimgr</groupId>
+    <artifactId>unimgr-cisco-xr-models</artifactId>
+    <version>0.6.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <!-- <name> formatting is used by autorelease to parse and notify projects on
+         build failure. Please do not modify this unless you have a good reason. -->
+    <name>ODL :: unimgr :: ${project.artifactId}</name>
+    <modelVersion>4.0.0</modelVersion>
+
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <maven.install.skip>true</maven.install.skip>
+    </properties>
+
+    <modules>
+        <module>cisco-xr-models-common</module>
+		<!--	<module>cisco-xr-models-6.1</module>-->
+	<module>cisco-xr-models-6.3</module>
+        <!--<module>cisco-xr-models-6.5</module>-->
+        <module>cisco-xr-models-6.6</module>
+    </modules>
+    
+</project>

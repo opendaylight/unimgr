@@ -11,13 +11,19 @@ package org.opendaylight.unimgr.utils;
 public interface NetconfConstants {
 
     String CAPABILITY_IOX_L2VPN =
-        "(http://cisco.com/ns/yang/Cisco-IOS-XR-l2vpn-cfg?revision=2015-11-09)Cisco-IOS-XR-l2vpn-cfg";
+        "(http://cisco.com/ns/yang/Cisco-IOS-XR-l2vpn-cfg?revision=";
 
     String CAPABILITY_IOX_IFMGR =
-        "(http://cisco.com/ns/yang/Cisco-IOS-XR-ifmgr-cfg?revision=2015-07-30)Cisco-IOS-XR-ifmgr-cfg";
+        "(http://cisco.com/ns/yang/Cisco-IOS-XR-ifmgr-cfg?revision=";
 
     String CAPABILITY_IOX_INFRA_POLICYMGR =
-        "(http://cisco.com/ns/yang/Cisco-IOS-XR-infra-policymgr-cfg?revision=2016-12-15)Cisco-IOS-XR-infra-policymgr-cfg";
+        "(http://cisco.com/ns/yang/Cisco-IOS-XR-infra-policymgr-cfg?revision=";
 
     String NETCONF_TOPOLODY_NAME = "topology-netconf";
+
+    String XR_VERSION_SIX_ONE = "6.1";
+    String XR_VERSION_SIX_THREE = "6.3";
+    String XR_VERSION_SIX_FIVE = "6.5";
+    String XR_VERSION_SIX_SIX = "6.6";
+    
 }
