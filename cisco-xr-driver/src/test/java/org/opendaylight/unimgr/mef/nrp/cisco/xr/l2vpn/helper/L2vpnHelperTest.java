@@ -12,10 +12,14 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.L2vpn;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.version.six.one.L2vpnXrVersionSixDotOneHelper;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr._6._1.l2vpn.cfg.rev151109.L2vpn;
+/*import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.L2vpn;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.Database;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.l2vpn.database.XconnectGroups;
-
+*/
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr._6._1.l2vpn.cfg.rev151109.l2vpn.Database;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr._6._1.l2vpn.cfg.rev151109.l2vpn.database.XconnectGroups;
 
 /*
  * @author krzysztof.bijakowski@amartus.com
@@ -28,7 +32,7 @@ public class L2vpnHelperTest {
         XconnectGroups xconnectGroups =  Mockito.mock(XconnectGroups.class);
 
         //when
-        L2vpn actual = L2vpnHelper.build(xconnectGroups);
+        L2vpn actual = L2vpnXrVersionSixDotOneHelper.build(xconnectGroups);
 
         //then
         Database actualDatabase = actual.getDatabase();

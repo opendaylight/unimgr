@@ -30,7 +30,7 @@ import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnBridgeDomai
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnBridgeDomainLocalActivator;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnLocalConnectActivator;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.activator.L2vpnP2pConnectActivator;
-import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.PseudowireHelper;
+import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.helper.PseudowireGenerator;
 import org.opendaylight.unimgr.mef.nrp.common.ResourceActivatorException;
 import org.opendaylight.unimgr.utils.NetconfConstants;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrp._interface.rev180321.NrpConnectivityServiceAttrs;
@@ -100,7 +100,7 @@ public class XrDriverBuilder implements ActivationDriverBuilder {
 
             @Override
             public void activate()  {
-                PseudowireHelper.generatePseudowireId();
+                PseudowireGenerator.generatePseudowireId();
                 if (serviceType != null
                         && (serviceType.getName().equals(ServiceType.MULTIPOINTCONNECTIVITY.getName())
                                 || serviceType.getName().equals(
