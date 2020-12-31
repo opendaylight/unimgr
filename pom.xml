@@ -46,7 +46,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <profile>
       <id>models</id>
       <modules>
-        <module>cisco-xrmodels</module>
+        <module>cisco-xr-models-6.1</module>
+	<module>cisco-xr-models-6.3</module>		
+        <module>cisco-xr-models-6.5</module>
       </modules>
       <activation><activeByDefault>true</activeByDefault></activation>
     </profile>
@@ -56,7 +58,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <module>legato-api</module>
         <module>nrp-api</module>
         <module>impl</module>
-        <module>cisco-xr-driver</module>
+        <module>cisco-xr-driver-6.1</module>
+	<module>cisco-xr-driver-6.3</module>
+	<module>cisco-xr-driver-6.5</module>
         <module>template-driver</module>
         <module>karaf</module>
         <module>features</module>
