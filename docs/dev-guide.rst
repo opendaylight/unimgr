@@ -1,6 +1,6 @@
 .. _dev-guide:
 
-User Network Interface Manager Plug-in (Unimgr) Developer Guide
+User Network Interface Manager Plug-in (UniMgr) Developer Guide
 ===============================================================
 
 Overview
