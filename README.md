@@ -5,9 +5,7 @@ The unimgr project is an OpenDaylight component that implements the MEF Legato a
 reference points to provide management of connectivity services across multi-vendor
 devices. Currently supported devices are:
 
-* Cisco IOS-XR devices managed via Netconf
-* Cisco IOS-XE devices managed via CLI
-* Openflow switches managed via OVSDB
+* Cisco IOS-XR devices managed via NETCONF
 
 Building unimgr
 ----
@@ -72,11 +70,11 @@ You can use the karaf console to verify that the unimgr is running:
 
 ```
 opendaylight-user@root>bundle:list | grep unimgr | grep -v wrap
-340 | Active   |  80 | 0.4.0.SNAPSHOT                      | ODL :: unimgr :: unimgr-api
-341 | Active   |  80 | 0.4.0.SNAPSHOT                      | ODL :: unimgr :: unimgr-cli
-342 | Active   |  80 | 0.4.0.SNAPSHOT                      | ODL :: unimgr :: unimgr-impl
-343 | Active   |  80 | 0.4.0.SNAPSHOT                      | unimgr-nrp-tapi-api
-344 | Active   |  80 | 0.4.0.SNAPSHOT                      | ODL :: unimgr :: unimgr-presto-api
+289 (0x Active   │  80 │ 0.6.0.SNAPSHOT   │ ODL :: unimgr :: unimgr-impl
+290 (0x Active   │  80 │ 0.6.0.SNAPSHOT   │ ODL :: unimgr :: unimgr-nrp-tapi-api
+377 (0x Active   │  80 │ 0.6.0.SNAPSHOT   │ ODL :: unimgr :: unimgr-cisco-xr-driver
+378 (0x Active   │  80 │ 0.6.0.SNAPSHOT   │ ODL :: unimgr :: cisco-xrmodels
+379 (0x Active   │  80 │ 0.6.0.SNAPSHOT   │ ODL :: unimgr :: unimgr-legato-api
 ```
 
 You can use the karaf console to monitor the OpenDaylight log messages:
