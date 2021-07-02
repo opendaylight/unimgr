@@ -5,9 +5,7 @@ The unimgr project is an OpenDaylight component that implements the MEF Legato a
 reference points to provide management of connectivity services across multi-vendor
 devices. Currently supported devices are:
 
-* Cisco IOS-XR devices managed via Netconf
-* Cisco IOS-XE devices managed via CLI
-* Openflow switches managed via OVSDB
+* Cisco IOS-XR devices managed via NETCONF
 
 Building unimgr
 ----
@@ -72,18 +70,36 @@ You can use the karaf console to verify that the unimgr is running:
 
 ```
 opendaylight-user@root>bundle:list | grep unimgr | grep -v wrap
-340 | Active   |  80 | 0.4.0.SNAPSHOT                      | ODL :: unimgr :: unimgr-api
-341 | Active   |  80 | 0.4.0.SNAPSHOT                      | ODL :: unimgr :: unimgr-cli
-342 | Active   |  80 | 0.4.0.SNAPSHOT                      | ODL :: unimgr :: unimgr-impl
-343 | Active   |  80 | 0.4.0.SNAPSHOT                      | unimgr-nrp-tapi-api
-344 | Active   |  80 | 0.4.0.SNAPSHOT                      | ODL :: unimgr :: unimgr-presto-api
+289 (0x Active   │  80 │ 0.6.0.SNAPSHOT  │ ODL :: unimgr :: unimgr-impl
+290 (0x Active   │  80 │ 0.6.0.SNAPSHOT  │ ODL :: unimgr :: unimgr-nrp-tapi-api
+```
+
+To enable support for Ethernet Virtual Connection (EVC) services, install the following features via the OpenDaylight console:
+
+```
+opendaylight-user@root>feature:install odl-unimgr-legato-api
+opendaylight-user@root>feature:install odl-unimgr-cisco-xr-driver 
+opendaylight-user@root>bundle:list | grep unimgr | grep -v wrap
+289 (0x Active   │  80 │ 0.6.0.SNAPSHOT  │ ODL :: unimgr :: unimgr-impl
+290 (0x Active   │  80 │ 0.6.0.SNAPSHOT  │ ODL :: unimgr :: unimgr-nrp-tapi-api
+364 (0x Active   │  80 │ 0.6.0.SNAPSHOT  │ ODL :: unimgr :: unimgr-legato-api
+378 (0x Active   │  80 │ 0.6.0.SNAPSHOT  │ ODL :: unimgr :: unimgr-cisco-xr-driver
+379 (0x Active   │  80 │ 0.6.0.SNAPSHOT  │ ODL :: unimgr :: cisco-xrmodels
 ```
 
 You can use the karaf console to monitor the OpenDaylight log messages:
 
 ```
-opendaylight-user@root>log:tail
-2017-11-22 17:03:09,366 | INFO  | on-dispatcher-91 | OvsdbConnectionManager           | 337 - org.opendaylight.ovsdb.southbound-impl - 1.6.0.SNAPSHOT | Connecting to 127.0.0.1:6640
-2017-11-22 17:03:09,426 | INFO  | entLoopGroup-8-1 | LoggingHandler                   | 16 - io.netty.common - 4.1.8.Final | [id: 0xa15f3fde, L:/0:0:0:0:0:0:0:0:6640] RECEIVED: [id: 0x101a849a, L:/127.0.0.1:6640 - R:/127.0.0.1:51291]
-2017-11-22 17:03:09,433 | INFO  | on-dispatcher-91 | OvsdbConnectionManager           | 337 - org.opendaylight.ovsdb.southbound-impl - 1.6.0.SNAPSHOT | OVSDB Connection from /127.0.0.1:6640
+09:42:11.565 INFO [CommitFutures-1] Node xr-node created
+09:42:11.567 INFO [features-3-thread-1] Blueprint bundle org.opendaylight.unimgr.cisco-xr-driver/0.6.0.SNAPSHOT has been started
+09:42:11.567 INFO [Blueprint Event Dispatcher: 1] Blueprint container for bundle org.opendaylight.unimgr.cisco-xr-driver_0.6.0.SNAPSHOT [378] was successfully created
+09:42:11.568 INFO [features-3-thread-1]   netconf-topology-config/1.8.1
+09:42:11.571 INFO [opendaylight-cluster-data-notification-dispatcher-64] Abstract TAPI node updated successful
+09:42:11.589 INFO [CommitFutures-1] netconf tree listener registered
+09:42:11.597 INFO [features-3-thread-1] Starting NETCONF keystore service.
+09:42:11.679 INFO [features-3-thread-1] Blueprint bundle netconf-topology-config/1.8.1 has been started
+09:42:11.680 INFO [Blueprint Event Dispatcher: 1] Blueprint container for bundle netconf-topology-config_1.8.1 [366] was successfully created
+09:42:11.681 INFO [features-3-thread-1]   org.opendaylight.netconf.aaa-authn-odl-plugin/1.8.1
+09:42:11.689 INFO [features-3-thread-1] Blueprint bundle org.opendaylight.netconf.aaa-authn-odl-plugin/1.8.1 has been started
+09:42:11.689 INFO [Blueprint Event Dispatcher: 1] Blueprint container for bundle org.opendaylight.netconf.aaa-authn-odl-plugin_1.8.1 [369] was successfully created
 ```
