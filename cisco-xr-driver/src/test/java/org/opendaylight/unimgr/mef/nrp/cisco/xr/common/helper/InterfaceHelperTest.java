@@ -17,13 +17,25 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.MtuUtils;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730.InterfaceConfigurations;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations.InterfaceConfiguration;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.Mtus;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev150730._interface.configurations._interface.configuration.mtus.Mtu;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev151109.InterfaceConfiguration3;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.CiscoIosXrString;
-import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev150629.InterfaceName;
+/*
+ * Cisco IOS XR 6.4.1, rev170907
+ * Cisco IOS XR 6.2.1, rev150730
+ */
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907.InterfaceConfigurations;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907._interface.configurations.InterfaceConfiguration;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907._interface.configurations._interface.configuration.Mtus;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907._interface.configurations._interface.configuration.mtus.Mtu;
+/*
+ * Cisco IOS XR 6.4.1, rev170626.InterfaceConfiguration3
+ * Cisco IOS XR 6.2.1, rev151109.InterfaceConfiguration4
+ */
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev170626.InterfaceConfiguration4;
+/*
+ * Cisco IOS XR 6.4.1, rev171201
+ * Cisco IOS XR 6.2.1, rev150629
+ */
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev171201.CiscoIosXrString;
+import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev171201.InterfaceName;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 
 
@@ -98,7 +110,7 @@ public class InterfaceHelperTest {
         assertNotNull(actualInterfaceConfiguration);
         assertEquals(interfaceName, actualInterfaceConfiguration.getInterfaceName());
         assertNull(actualInterfaceConfiguration.getMtus());
-        assertNull(actualInterfaceConfiguration.augmentation(InterfaceConfiguration3.class));
+        assertNull(actualInterfaceConfiguration.augmentation(InterfaceConfiguration4.class));
     }
 
     @Test
@@ -139,8 +151,8 @@ public class InterfaceHelperTest {
         assertEquals(mtuValue, actualMtu.getMtu().longValue());
         assertEquals(owner, actualMtu.getOwner());
 
-        InterfaceConfiguration3 l2Configuration =
-                actualInterfaceConfiguration.augmentation(InterfaceConfiguration3.class);
+        InterfaceConfiguration4 l2Configuration =
+                actualInterfaceConfiguration.augmentation(InterfaceConfiguration4.class);
         assertNotNull(l2Configuration);
         assertNotNull(l2Configuration.getL2Transport());
         assertNotNull(l2Configuration.getL2Transport().getEnabled());
@@ -175,13 +187,13 @@ public class InterfaceHelperTest {
         assertNotNull(actualInterfaceConfiguration);
         assertEquals(interfaceName1, actualInterfaceConfiguration.getInterfaceName());
         assertNull(actualInterfaceConfiguration.getMtus());
-        assertNull(actualInterfaceConfiguration.augmentation(InterfaceConfiguration3.class));
+        assertNull(actualInterfaceConfiguration.augmentation(InterfaceConfiguration4.class));
 
         actualInterfaceConfiguration = actualInterfaceConfigurationList.get(1);
 
         assertNotNull(actualInterfaceConfiguration);
         assertEquals(interfaceName2, actualInterfaceConfiguration.getInterfaceName());
         assertNull(actualInterfaceConfiguration.getMtus());
-        assertNull(actualInterfaceConfiguration.augmentation(InterfaceConfiguration3.class));
+        assertNull(actualInterfaceConfiguration.augmentation(InterfaceConfiguration4.class));
     }
 }
