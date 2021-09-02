@@ -12,10 +12,6 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 import org.mockito.Mockito;
-/*
- * Cisco IOS XR 6.4.1, rev170626
- * Cisco IOS XR 6.2.1, rev151109
- */
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev170626.L2vpn;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev170626.l2vpn.Database;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev170626.l2vpn.database.XconnectGroups;

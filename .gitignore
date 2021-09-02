@@ -16,10 +16,12 @@ MANIFEST.MF
 *.ipr
 *.iml
 *.iws
+*.factorypath
 .idea
 xtend-gen
 yang-gen-config
 yang-gen-sal
+cisco-xrmodels/src/main/java/org/opendaylight/yang/gen/*
 classes
 out/
 .externalToolBuilders

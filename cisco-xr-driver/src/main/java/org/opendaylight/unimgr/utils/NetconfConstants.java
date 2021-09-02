@@ -13,13 +13,23 @@ public interface NetconfConstants {
     /*
      * The YANG models identified by these constants must match those
      * supported by the XR devices to which unimgr connects.
+     *
+     * The YANG models for various XR software versions are listed here,
+     * with all but one version commented out.
+     *
+     * When switching between XR versions, in addition to defining the
+     * appropriate contants in this file, one must update the corresponding
+     * import statements and the names of the generated methods in all
+     * source files in which they are used.
+     *
+     * The matching YANG models must be present in cisco-xrmodels as well.
      */
 
     String NETCONF_TOPOLODY_NAME = "topology-netconf";
 
     /*
      * Cisco IOS XR 6.2.1
-
+     *
     String CAPABILITY_IOX_L2VPN =
         "(http://cisco.com/ns/yang/Cisco-IOS-XR-l2vpn-cfg?revision=2015-11-09)Cisco-IOS-XR-l2vpn-cfg";
 
@@ -28,7 +38,7 @@ public interface NetconfConstants {
 
     String CAPABILITY_IOX_INFRA_POLICYMGR =
         "(http://cisco.com/ns/yang/Cisco-IOS-XR-infra-policymgr-cfg?revision=2016-12-15)Cisco-IOS-XR-infra-policymgr-cfg";
-    */
+     */
 
     /*
      * Cisco IOS XR 6.4.1
@@ -44,7 +54,7 @@ public interface NetconfConstants {
 
     /*
      * Cisco IOS XR 6.5.3
-
+     *
     String CAPABILITY_IOX_L2VPN =
         "(http://cisco.com/ns/yang/Cisco-IOS-XR-l2vpn-cfg?revision=2017-06-26)Cisco-IOS-XR-l2vpn-cfg";
 
@@ -53,5 +63,5 @@ public interface NetconfConstants {
 
     String CAPABILITY_IOX_INFRA_POLICYMGR =
         "(http://cisco.com/ns/yang/Cisco-IOS-XR-infra-policymgr-cfg?revision=2018-09-30)Cisco-IOS-XR-infra-policymgr-cfg";
-    */
+     */
 }

@@ -13,10 +13,6 @@ import org.junit.Test;
 import org.opendaylight.unimgr.mef.nrp.api.EndPoint;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
-/*
- * Cisco IOS XR 6.4.1, rev170626
- * Cisco IOS XR 6.2.1, rev151109
- */
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev170626.l2vpn.database.bridge.domain.groups.bridge.domain.group.bridge.domains.bridge.domain.BdAttachmentCircuits;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.PortDirection;
 import org.opendaylight.yang.gen.v1.urn.onf.otcc.yang.tapi.common.rev180307.Uuid;

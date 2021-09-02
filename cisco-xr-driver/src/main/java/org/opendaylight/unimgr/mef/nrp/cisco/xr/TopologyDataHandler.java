@@ -51,10 +51,6 @@ import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.XrCapabilitiesServic
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.l2vpn.driver.XrDriverBuilder;
 import org.opendaylight.unimgr.mef.nrp.common.NrpDao;
 import org.opendaylight.unimgr.mef.nrp.common.TapiUtils;
- /*
-  * Cisco IOS XR 6.4.1, rev170907
-  * Cisco IOS XR 6.2.1, rev150730
-  */
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907._interface.configurations.InterfaceConfiguration;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907._interface.configurations.InterfaceConfigurationKey;

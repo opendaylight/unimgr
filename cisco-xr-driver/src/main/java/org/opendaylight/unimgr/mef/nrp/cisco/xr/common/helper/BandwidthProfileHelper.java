@@ -13,10 +13,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
-/*
- * Cisco IOS XR 6.4.1, rev171212
- * Cisco IOS XR 6.2.1, rev161215
- */
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev171212.PolicyManager;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev171212.PolicyManagerBuilder;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.infra.policymgr.cfg.rev171212.RateUnits;

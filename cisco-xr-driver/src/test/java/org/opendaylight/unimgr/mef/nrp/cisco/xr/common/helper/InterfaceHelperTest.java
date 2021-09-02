@@ -17,23 +17,11 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.MtuUtils;
-/*
- * Cisco IOS XR 6.4.1, rev170907
- * Cisco IOS XR 6.2.1, rev150730
- */
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907._interface.configurations.InterfaceConfiguration;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907._interface.configurations._interface.configuration.Mtus;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907._interface.configurations._interface.configuration.mtus.Mtu;
-/*
- * Cisco IOS XR 6.4.1, rev170626.InterfaceConfiguration3
- * Cisco IOS XR 6.2.1, rev151109.InterfaceConfiguration4
- */
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.l2vpn.cfg.rev170626.InterfaceConfiguration4;
-/*
- * Cisco IOS XR 6.4.1, rev171201
- * Cisco IOS XR 6.2.1, rev150629
- */
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev171201.CiscoIosXrString;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev171201.InterfaceName;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;

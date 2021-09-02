@@ -11,19 +11,11 @@ import java.util.Optional;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.ServicePort;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.helper.InterfaceHelper;
 import org.opendaylight.unimgr.mef.nrp.cisco.xr.common.util.MtuUtils;
-/*
- * Cisco IOS XR 6.4.1, rev170907
- * Cisco IOS XR 6.2.1, rev150730
- */
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907.InterfaceActive;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907.InterfaceConfigurations;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907._interface.configurations.InterfaceConfiguration;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907._interface.configurations.InterfaceConfigurationKey;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907._interface.configurations._interface.configuration.Mtus;
-/*
- * Cisco IOS XR 6.4.1, rev171201
- * Cisco IOS XR 6.2.1, rev150629
- */
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev171201.CiscoIosXrString;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 

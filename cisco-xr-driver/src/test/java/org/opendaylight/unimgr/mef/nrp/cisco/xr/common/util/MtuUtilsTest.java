@@ -13,16 +13,8 @@ import static org.junit.Assert.assertNotNull;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.Test;
-/*
- * Cisco IOS XR 6.4.1, rev170907
- * Cisco IOS XR 6.2.1, rev150730
- */
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907._interface.configurations._interface.configuration.Mtus;
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.ios.xr.ifmgr.cfg.rev170907._interface.configurations._interface.configuration.mtus.Mtu;
-/*
- * Cisco IOS XR 6.4.1, rev171201
- * Cisco IOS XR 6.2.1, rev150629
- */
 import org.opendaylight.yang.gen.v1.http.cisco.com.ns.yang.cisco.xr.types.rev171201.CiscoIosXrString;
 import org.opendaylight.yangtools.yang.common.Uint32;
 
