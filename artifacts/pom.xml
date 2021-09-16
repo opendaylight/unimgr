@@ -32,9 +32,19 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <artifactId>unimgr-impl</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <!--<dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>unimgr-cisco-xr-driver-6.1</artifactId>
+        <version>${project.version}</version>
+      </dependency>-->
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>unimgr-cisco-xr-driver</artifactId>
+        <artifactId>unimgr-cisco-xr-driver-6.3</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>unimgr-cisco-xr-driver-6.6</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
