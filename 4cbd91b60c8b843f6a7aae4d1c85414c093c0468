@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "33e44bc9_f003bc57",
+        "filename": "cisco-xr-driver/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 8211
+      },
+      "writtenOn": "2021-09-16T16:29:10Z",
+      "side": 1,
+      "message": "Any reason to downgrading the version?",
+      "range": {
+        "startLine": 9,
+        "startChar": 44,
+        "endLine": 9,
+        "endChar": 49
+      },
+      "revId": "4cbd91b60c8b843f6a7aae4d1c85414c093c0468",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}
