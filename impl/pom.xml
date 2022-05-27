@@ -6,18 +6,16 @@ This program and the accompanying materials are made available under the
 terms of the Eclipse Public License v1.0 which accompanies this distribution,
 and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
         <groupId>org.opendaylight.mdsal</groupId>
         <artifactId>binding-parent</artifactId>
-        <version>5.0.10</version>
+        <version>8.0.5</version>
         <relativePath/>
     </parent>
 
     <properties>
-      <mdsal.version>5.0.10</mdsal.version>
       <odlparent.checkstyle.enforce>true</odlparent.checkstyle.enforce>
       <odlparent.spotbugs.enforce>true</odlparent.spotbugs.enforce>
     </properties>
@@ -36,7 +34,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
-                <version>1.11.1</version>
+                <version>1.9.3</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -104,7 +102,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>mdsal-binding-dom-adapter</artifactId>
-            <version>${mdsal.version}</version>
+            <version>8.0.5</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>

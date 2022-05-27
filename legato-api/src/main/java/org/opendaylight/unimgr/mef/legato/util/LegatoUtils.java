@@ -29,6 +29,7 @@ import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.m
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.carrier.ethernet.subscriber.services.Evc;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.carrier.ethernet.subscriber.services.EvcKey;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.carrier.ethernet.subscriber.services.evc.end.points.EndPoint;
+import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.legato.services.rev171215.mef.services.carrier.ethernet.subscriber.services.evc.end.points.EndPointKey;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.types.rev171215.EvcIdType;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.mef.types.rev171215.VlanIdType;
 import org.opendaylight.yang.gen.v1.urn.mef.yang.nrm.connectivity.rev180321.carrier.eth.connectivity.end.point.resource.CeVlanIdListAndUntagBuilder;
@@ -88,7 +89,7 @@ public final class LegatoUtils {
         Map<String, List<String>> uniVlanList = new HashMap<String, List<String>>();
         String vlanId;
 
-        for (EndPoint endPoint : evc.getEndPoints().getEndPoint()) {
+        for (EndPoint endPoint : evc.getEndPoints().getEndPoint().values()) {
             vlanId = "0";
             vlanIdList = new ArrayList<String>();
             assert endPoint.getCeVlans().getCeVlan() != null;
@@ -169,10 +170,15 @@ public final class LegatoUtils {
     }
 
     public static CreateConnectivityServiceInput buildCreateConnectivityServiceInput(EVCDao evcDao,
-            String vlanId, List<EndPoint> endpoints) {
+            String vlanId, Map<EndPointKey, EndPoint> endpointsMap) {
 
         boolean isExclusive = false;
 
+        List<EndPoint> endpoints = new ArrayList<EndPoint>(); 
+        for (EndPoint endPoint : endpointsMap.values()) {
+        	endpoints.add(endPoint);
+        }
+        
         // if svc-type = epl, eplan or eptree then set is_exclusive flag as true
         if (evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EPL)
                 || evcDao.getSvcType().equalsIgnoreCase(LegatoConstants.EPLAN)
@@ -456,17 +462,17 @@ public final class LegatoUtils {
                                 .child(SubscriberServices.class)
                                 .child(Evc.class, new EvcKey(new EvcIdType(evc.getEvcId()))));
 
-        List<Evc> evcList = new ArrayList<Evc>();
-        evcList.add(evc);
+        Map<EvcKey, Evc> evcMap = new HashMap<EvcKey, Evc>();
+        evcMap.put(evc.key(), evc);
 
         final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
         // if EVC Id present in operational DB
         if (optionalEvc.isPresent()) {
-            transaction.put(LogicalDatastoreType.OPERATIONAL, nodeIdentifier,
-                    new SubscriberServicesBuilder().setEvc(evcList).build());
+        	 transaction.put(LogicalDatastoreType.OPERATIONAL, nodeIdentifier,
+        			 new SubscriberServicesBuilder().setEvc(evcMap).build());
         } else {
             transaction.merge(LogicalDatastoreType.OPERATIONAL, nodeIdentifier,
-                    new SubscriberServicesBuilder().setEvc(evcList).build());
+                    new SubscriberServicesBuilder().setEvc(evcMap).build());
         }
 
         try {

@@ -1,0 +1,305 @@
+diff --git a/artifacts/pom.xml b/artifacts/pom.xml
+index 45cb1041..a0797c95 100644
+--- a/artifacts/pom.xml
++++ b/artifacts/pom.xml
+@@ -13,7 +13,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
+   <parent>
+     <groupId>org.opendaylight.odlparent</groupId>
+     <artifactId>odlparent-lite</artifactId>
+-    <version>6.0.6</version>
++    <version>9.0.6</version>
+     <relativePath/>
+   </parent>
+ 
+diff --git a/cisco-xr-driver/pom.xml b/cisco-xr-driver/pom.xml
+index 39a8aea5..51322702 100644
+--- a/cisco-xr-driver/pom.xml
++++ b/cisco-xr-driver/pom.xml
+@@ -6,13 +6,12 @@ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
+ -->
+-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
++<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+ 
+     <parent>
+         <groupId>org.opendaylight.mdsal</groupId>
+         <artifactId>binding-parent</artifactId>
+-        <version>5.0.10</version>
++        <version>8.0.5</version>
+         <relativePath/>
+     </parent>
+ 
+@@ -20,8 +19,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
+       <odlparent.checkstyle.enforce>true</odlparent.checkstyle.enforce>
+       <odlparent.spotbugs.enforce>true</odlparent.spotbugs.enforce>
+         <powermock.version>2.0.0-beta.5</powermock.version>
+-        <mdsal.version>5.0.10</mdsal.version>
+-        <netconf.version>1.8.1</netconf.version>
++        <mdsal.version>8.0.5</mdsal.version>
++        <netconf.version>2.0.5</netconf.version>
+     </properties>
+ 
+     <modelVersion>4.0.0</modelVersion>
+diff --git a/cisco-xrmodels/pom.xml b/cisco-xrmodels/pom.xml
+index 8137fe3f..13a52657 100644
+--- a/cisco-xrmodels/pom.xml
++++ b/cisco-xrmodels/pom.xml
+@@ -6,13 +6,12 @@ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
+ -->
+-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
++<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <parent>
+     <groupId>org.opendaylight.mdsal</groupId>
+     <artifactId>binding-parent</artifactId>
+-    <version>5.0.10</version>
+-    <relativePath />
++    <version>8.0.5</version>
++    <relativePath/>
+   </parent>
+ 
+   <modelVersion>4.0.0</modelVersion>
+diff --git a/features/features4-unimgr/pom.xml b/features/features4-unimgr/pom.xml
+index 62f8108a..5d9dcacf 100644
+--- a/features/features4-unimgr/pom.xml
++++ b/features/features4-unimgr/pom.xml
+@@ -12,7 +12,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
+   <parent>
+     <groupId>org.opendaylight.odlparent</groupId>
+     <artifactId>feature-repo-parent</artifactId>
+-    <version>6.0.6</version>
++    <version>9.0.6</version>
+     <relativePath/>
+   </parent>
+ 
+diff --git a/features/odl-unimgr-cisco-xr-driver/pom.xml b/features/odl-unimgr-cisco-xr-driver/pom.xml
+index cb4a1387..183389b2 100644
+--- a/features/odl-unimgr-cisco-xr-driver/pom.xml
++++ b/features/odl-unimgr-cisco-xr-driver/pom.xml
+@@ -7,7 +7,7 @@
+   <parent>
+     <groupId>org.opendaylight.odlparent</groupId>
+     <artifactId>single-feature-parent</artifactId>
+-    <version>6.0.6</version>
++    <version>9.0.6</version>
+     <relativePath/>
+   </parent>
+   <groupId>org.opendaylight.unimgr</groupId>
+diff --git a/features/odl-unimgr-legato-api/pom.xml b/features/odl-unimgr-legato-api/pom.xml
+index d437d19a..5ec63ae5 100755
+--- a/features/odl-unimgr-legato-api/pom.xml
++++ b/features/odl-unimgr-legato-api/pom.xml
+@@ -6,14 +6,12 @@
+  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+  * and is available at http://www.eclipse.org/legal/epl-v10.html
+ -->
+-  
+-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
++<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+     <parent>
+         <groupId>org.opendaylight.odlparent</groupId>
+         <artifactId>single-feature-parent</artifactId>
+-        <version>6.0.6</version>
+-        <relativePath />
++        <version>9.0.6</version>
++        <relativePath/>
+     </parent>
+     <groupId>org.opendaylight.unimgr</groupId>
+     <artifactId>odl-unimgr-legato-api</artifactId>
+diff --git a/features/odl-unimgr-rest/pom.xml b/features/odl-unimgr-rest/pom.xml
+index b234e7df..88e87bbe 100644
+--- a/features/odl-unimgr-rest/pom.xml
++++ b/features/odl-unimgr-rest/pom.xml
+@@ -7,7 +7,7 @@
+   <parent>
+     <groupId>org.opendaylight.odlparent</groupId>
+     <artifactId>single-feature-parent</artifactId>
+-    <version>6.0.6</version>
++    <version>9.0.6</version>
+     <relativePath/>
+   </parent>
+   <groupId>org.opendaylight.unimgr</groupId>
+diff --git a/features/odl-unimgr-template-driver/pom.xml b/features/odl-unimgr-template-driver/pom.xml
+index 116b1cfd..7148f07c 100644
+--- a/features/odl-unimgr-template-driver/pom.xml
++++ b/features/odl-unimgr-template-driver/pom.xml
+@@ -7,7 +7,7 @@
+   <parent>
+     <groupId>org.opendaylight.odlparent</groupId>
+     <artifactId>single-feature-parent</artifactId>
+-    <version>6.0.6</version>
++    <version>9.0.6</version>
+     <relativePath/>
+   </parent>
+   <groupId>org.opendaylight.unimgr</groupId>
+diff --git a/features/odl-unimgr/pom.xml b/features/odl-unimgr/pom.xml
+index f99f4318..05afae1c 100644
+--- a/features/odl-unimgr/pom.xml
++++ b/features/odl-unimgr/pom.xml
+@@ -7,7 +7,7 @@
+   <parent>
+     <groupId>org.opendaylight.odlparent</groupId>
+     <artifactId>single-feature-parent</artifactId>
+-    <version>6.0.6</version>
++    <version>9.0.6</version>
+     <relativePath/>
+   </parent>
+   <groupId>org.opendaylight.unimgr</groupId>
+@@ -19,7 +19,7 @@
+   <modelVersion>4.0.0</modelVersion>
+ 
+   <properties>
+-    <controller.mdsal.version>1.11.1</controller.mdsal.version>
++    <controller.mdsal.version>1.9.3</controller.mdsal.version>
+   </properties>
+ 
+   <build>
+diff --git a/features/pom.xml b/features/pom.xml
+index 39668956..938eed44 100644
+--- a/features/pom.xml
++++ b/features/pom.xml
+@@ -7,7 +7,7 @@
+   <parent>
+     <groupId>org.opendaylight.odlparent</groupId>
+     <artifactId>odlparent-lite</artifactId>
+-    <version>6.0.6</version>
++    <version>9.0.6</version>
+     <relativePath/>
+   </parent>
+   <groupId>org.opendaylight.unimgr</groupId>
+diff --git a/impl/pom.xml b/impl/pom.xml
+index 59919b35..3bd5c7d8 100644
+--- a/impl/pom.xml
++++ b/impl/pom.xml
+@@ -6,18 +6,16 @@ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
+ -->
+-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
++<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+ 
+     <parent>
+         <groupId>org.opendaylight.mdsal</groupId>
+         <artifactId>binding-parent</artifactId>
+-        <version>5.0.10</version>
++        <version>8.0.5</version>
+         <relativePath/>
+     </parent>
+ 
+     <properties>
+-      <mdsal.version>5.0.10</mdsal.version>
+       <odlparent.checkstyle.enforce>true</odlparent.checkstyle.enforce>
+       <odlparent.spotbugs.enforce>true</odlparent.spotbugs.enforce>
+     </properties>
+@@ -36,7 +34,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
+             <dependency>
+                 <groupId>org.opendaylight.controller</groupId>
+                 <artifactId>mdsal-artifacts</artifactId>
+-                <version>1.11.1</version>
++                <version>1.9.3</version>
+                 <type>pom</type>
+                 <scope>import</scope>
+             </dependency>
+@@ -104,7 +102,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
+         <dependency>
+             <groupId>org.opendaylight.mdsal</groupId>
+             <artifactId>mdsal-binding-dom-adapter</artifactId>
+-            <version>${mdsal.version}</version>
++            <version>8.0.5</version>
+             <classifier>tests</classifier>
+             <scope>test</scope>
+         </dependency>
+diff --git a/karaf/pom.xml b/karaf/pom.xml
+index 92cb8b71..8b95aeb6 100644
+--- a/karaf/pom.xml
++++ b/karaf/pom.xml
+@@ -10,7 +10,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
+   <parent>
+     <groupId>org.opendaylight.odlparent</groupId>
+     <artifactId>karaf4-parent</artifactId>
+-    <version>6.0.6</version>
++    <version>9.0.6</version>
+     <relativePath/>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+diff --git a/legato-api/pom.xml b/legato-api/pom.xml
+index 10c638e7..a17ece66 100644
+--- a/legato-api/pom.xml
++++ b/legato-api/pom.xml
+@@ -6,12 +6,11 @@
+  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+  * and is available at http://www.eclipse.org/legal/epl-v10.html
+ -->
+-
+ <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+     <parent>
+         <groupId>org.opendaylight.mdsal</groupId>
+         <artifactId>binding-parent</artifactId>
+-        <version>5.0.10</version>
++        <version>8.0.5</version>
+         <relativePath/>
+     </parent>
+ 
+diff --git a/nrp-api/pom.xml b/nrp-api/pom.xml
+index f25d4a08..a62b2e0a 100644
+--- a/nrp-api/pom.xml
++++ b/nrp-api/pom.xml
+@@ -10,7 +10,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
+   <parent>
+     <groupId>org.opendaylight.mdsal</groupId>
+     <artifactId>binding-parent</artifactId>
+-    <version>5.0.10</version>
++    <version>8.0.5</version>
+     <relativePath/>
+   </parent>
+ 
+diff --git a/pom.xml b/pom.xml
+index a1a6f043..c5e83ea9 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -11,7 +11,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
+   <parent>
+     <groupId>org.opendaylight.odlparent</groupId>
+     <artifactId>odlparent-lite</artifactId>
+-    <version>6.0.6</version>
++    <version>9.0.6</version>
+     <relativePath/>
+   </parent>
+ 
+diff --git a/template-driver/pom.xml b/template-driver/pom.xml
+index 8495f280..607e0641 100644
+--- a/template-driver/pom.xml
++++ b/template-driver/pom.xml
+@@ -6,15 +6,12 @@
+   ~ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+   ~ and is available at http://www.eclipse.org/legal/epl-v10.html
+   -->
+-
+-<project xmlns="http://maven.apache.org/POM/4.0.0"
+-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
++<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+ 
+     <parent>
+         <groupId>org.opendaylight.mdsal</groupId>
+         <artifactId>binding-parent</artifactId>
+-        <version>5.0.10</version>
++        <version>8.0.5</version>
+         <relativePath/>
+     </parent>
+ 
+@@ -68,7 +65,7 @@
+         <dependency>
+             <groupId>org.opendaylight.mdsal</groupId>
+             <artifactId>mdsal-binding-dom-adapter</artifactId>
+-            <version>${mdsal.version}</version>
++            <version>8.0.5</version>
+             <classifier>tests</classifier>
+             <scope>test</scope>
+         </dependency>
