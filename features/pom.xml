@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent-lite</artifactId>
-    <version>9.0.6</version>
+    <version>9.0.15</version>
     <relativePath/>
   </parent>
   <groupId>org.opendaylight.unimgr</groupId>
@@ -22,8 +22,8 @@
     <module>features4-unimgr</module>
     <module>odl-unimgr</module>
     <module>odl-unimgr-rest</module>
-    <module>odl-unimgr-cisco-xr-driver</module>
-    <module>odl-unimgr-template-driver</module>
+    <!--<module>odl-unimgr-cisco-xr-driver</module>
+    <module>odl-unimgr-template-driver</module>-->
     <module>odl-unimgr-legato-api</module>
   </modules>
 </project>
