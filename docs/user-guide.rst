@@ -77,7 +77,7 @@ Explore and exercise the Unimgr REST API
 ----------------------------------------
 
 To see the Unimgr API, browse to this URL:
-http://localhost:8181/apidoc/explorer/index.html
+http://localhost:8181/openapi/explorer/index.html
 
 Replace localhost with the IP address or hostname where OpenDaylight is
 running if you are not running OpenDaylight locally on your machine.
